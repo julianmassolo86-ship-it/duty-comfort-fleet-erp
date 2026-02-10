@@ -1,4 +1,4 @@
-import { Car, Truck, Bus, Bike } from "lucide-react";
+import { Car, Truck, Bus, Bike, MapPin, Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import StatusBadge from "../common/StatusBadge";
 
@@ -17,7 +17,7 @@ const fuelLabels = {
   hybrid: "Híbrido",
 };
 
-export default function VehicleCard({ vehicle, onClick }) {
+export default function VehicleCard({ vehicle, location, company, onClick }) {
   const Icon = vehicleIcons[vehicle.type] || Car;
 
   return (
@@ -36,10 +36,27 @@ export default function VehicleCard({ vehicle, onClick }) {
         <StatusBadge status={vehicle.status} />
       </div>
       
-      <div className="space-y-1 mb-4">
+      <div className="space-y-1 mb-3">
         <h3 className="text-lg font-semibold text-white">{vehicle.plate}</h3>
         <p className="text-slate-400">{vehicle.brand} {vehicle.model}</p>
       </div>
+
+      {(location || company) && (
+        <div className="flex flex-col gap-1 mb-3 text-xs">
+          {location && (
+            <div className="flex items-center gap-1 text-slate-500">
+              <MapPin className="w-3 h-3" />
+              <span>{location.name}</span>
+            </div>
+          )}
+          {company && (
+            <div className="flex items-center gap-1 text-slate-500">
+              <Building2 className="w-3 h-3" />
+              <span>{company.name}</span>
+            </div>
+          )}
+        </div>
+      )}
       
       <div className="flex items-center gap-4 text-sm text-slate-500">
         <span>{vehicle.year}</span>

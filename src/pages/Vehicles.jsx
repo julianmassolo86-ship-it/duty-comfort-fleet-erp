@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Search, Car, Filter } from "lucide-react";
+import { Plus, Search, Car, Building2, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -14,11 +14,19 @@ import VehicleDialog from "../components/vehicles/VehicleDialog";
 export default function Vehicles() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [typeFilter, setTypeFilter] = useState("all");
+  const [locationFilter, setLocationFilter] = useState("all");
+  const [companyFilter, setCompanyFilter] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
 
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    base44.auth.me().then(setCurrentUser).catch(() => {});
+  }, []);
+
+  const isSuperAdmin = currentUser?.role === 'admin' && currentUser?.user_role === 'super_admin';
 
   const { data: vehicles = [], isLoading } = useQuery({
     queryKey: ['vehicles'],
@@ -29,6 +37,19 @@ export default function Vehicles() {
     queryKey: ['drivers'],
     queryFn: () => base44.entities.Driver.list(),
   });
+
+  const { data: locations = [] } = useQuery({
+    queryKey: ['locations'],
+    queryFn: () => base44.entities.Location.list(),
+  });
+
+  const { data: companies = [] } = useQuery({
+    queryKey: ['companies'],
+    queryFn: () => base44.entities.Company.list(),
+  });
+
+  const locationsMap = locations.reduce((acc, l) => ({ ...acc, [l.id]: l }), {});
+  const companiesMap = companies.reduce((acc, c) => ({ ...acc, [c.id]: c }), {});
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Vehicle.create(data),
@@ -69,14 +90,25 @@ export default function Vehicles() {
     setDialogOpen(true);
   };
 
-  const filteredVehicles = vehicles.filter(v => {
+  // Filtrar por empresa del usuario si no es super admin
+  const accessibleVehicles = isSuperAdmin 
+    ? vehicles 
+    : vehicles.filter(v => v.company_id === currentUser?.company_id);
+
+  // Locaciones accesibles
+  const accessibleLocations = isSuperAdmin 
+    ? locations 
+    : locations.filter(l => l.company_id === currentUser?.company_id);
+
+  const filteredVehicles = accessibleVehicles.filter(v => {
     const matchesSearch = 
       v.plate?.toLowerCase().includes(search.toLowerCase()) ||
       v.brand?.toLowerCase().includes(search.toLowerCase()) ||
       v.model?.toLowerCase().includes(search.toLowerCase());
     const matchesStatus = statusFilter === "all" || v.status === statusFilter;
-    const matchesType = typeFilter === "all" || v.type === typeFilter;
-    return matchesSearch && matchesStatus && matchesType;
+    const matchesLocation = locationFilter === "all" || v.location_id === locationFilter;
+    const matchesCompany = companyFilter === "all" || v.company_id === companyFilter;
+    return matchesSearch && matchesStatus && matchesLocation && matchesCompany;
   });
 
   return (
@@ -86,19 +118,29 @@ export default function Vehicles() {
           title="Vehículos" 
           description="Gestiona tu flota de vehículos"
           actions={
-            <Button 
-              onClick={() => { setSelectedVehicle(null); setDialogOpen(true); }}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Nuevo Vehículo
-            </Button>
+            accessibleLocations.length > 0 && (
+              <Button 
+                onClick={() => { setSelectedVehicle(null); setDialogOpen(true); }}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Nuevo Vehículo
+              </Button>
+            )
           }
         />
 
+        {accessibleLocations.length === 0 && !isLoading && (
+          <div className="mb-6 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30">
+            <p className="text-amber-200">
+              Debes crear al menos una locación antes de agregar vehículos.
+            </p>
+          </div>
+        )}
+
         {/* Filters */}
-        <div className="flex flex-col sm:flex-row gap-3 mb-6">
-          <div className="relative flex-1">
+        <div className="flex flex-col sm:flex-row gap-3 mb-6 flex-wrap">
+          <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <Input
               placeholder="Buscar por matrícula, marca o modelo..."
@@ -107,6 +149,30 @@ export default function Vehicles() {
               className="pl-10 bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500"
             />
           </div>
+          {isSuperAdmin && (
+            <Select value={companyFilter} onValueChange={setCompanyFilter}>
+              <SelectTrigger className="w-full sm:w-44 bg-slate-800/50 border-slate-700 text-white">
+                <SelectValue placeholder="Empresa" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas</SelectItem>
+                {companies.map(c => (
+                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+          <Select value={locationFilter} onValueChange={setLocationFilter}>
+            <SelectTrigger className="w-full sm:w-44 bg-slate-800/50 border-slate-700 text-white">
+              <SelectValue placeholder="Locación" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas</SelectItem>
+              {accessibleLocations.map(l => (
+                <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-full sm:w-40 bg-slate-800/50 border-slate-700 text-white">
               <SelectValue placeholder="Estado" />
@@ -116,19 +182,6 @@ export default function Vehicles() {
               <SelectItem value="active">Activo</SelectItem>
               <SelectItem value="maintenance">En mantenimiento</SelectItem>
               <SelectItem value="inactive">Inactivo</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={typeFilter} onValueChange={setTypeFilter}>
-            <SelectTrigger className="w-full sm:w-40 bg-slate-800/50 border-slate-700 text-white">
-              <SelectValue placeholder="Tipo" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos</SelectItem>
-              <SelectItem value="car">Auto</SelectItem>
-              <SelectItem value="truck">Camión</SelectItem>
-              <SelectItem value="van">Van</SelectItem>
-              <SelectItem value="bus">Bus</SelectItem>
-              <SelectItem value="motorcycle">Moto</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -145,7 +198,9 @@ export default function Vehicles() {
             {filteredVehicles.map(vehicle => (
               <VehicleCard 
                 key={vehicle.id} 
-                vehicle={vehicle} 
+                vehicle={vehicle}
+                location={locationsMap[vehicle.location_id]}
+                company={isSuperAdmin ? companiesMap[vehicle.company_id] : null}
                 onClick={() => handleEdit(vehicle)}
               />
             ))}
@@ -156,7 +211,7 @@ export default function Vehicles() {
             title="Sin vehículos"
             description={search ? "No se encontraron vehículos con esos criterios" : "Agrega tu primer vehículo para comenzar"}
             action={
-              !search && (
+              !search && accessibleLocations.length > 0 && (
                 <Button 
                   onClick={() => { setSelectedVehicle(null); setDialogOpen(true); }}
                   className="bg-blue-600 hover:bg-blue-700"
@@ -173,7 +228,11 @@ export default function Vehicles() {
           open={dialogOpen}
           onOpenChange={setDialogOpen}
           vehicle={selectedVehicle}
-          drivers={drivers}
+          drivers={drivers.filter(d => isSuperAdmin || d.company_id === currentUser?.company_id)}
+          locations={accessibleLocations}
+          companies={companies}
+          isSuperAdmin={isSuperAdmin}
+          currentUser={currentUser}
           onSave={handleSave}
           onDelete={selectedVehicle ? () => deleteMutation.mutate(selectedVehicle.id) : undefined}
           isLoading={createMutation.isPending || updateMutation.isPending}
