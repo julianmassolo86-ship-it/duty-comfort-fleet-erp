@@ -62,7 +62,15 @@ export default function LocationDialog({
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
     const finalData = isSuperAdmin ? form : { ...form, company_id: currentUser?.company_id };
+    
+    // Validar que haya company_id
+    if (!finalData.company_id) {
+      alert("Debes seleccionar una empresa");
+      return;
+    }
+    
     onSave(finalData);
   };
 
@@ -127,22 +135,27 @@ export default function LocationDialog({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            {isSuperAdmin && (
-              <div className="space-y-2">
-                <Label>Empresa *</Label>
-                <Select value={form.company_id} onValueChange={(v) => handleChange("company_id", v)} required>
-                  <SelectTrigger className="bg-slate-800 border-slate-700">
-                    <SelectValue placeholder="Seleccionar empresa" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {companies.map(company => (
+          {isSuperAdmin && (
+            <div className="space-y-2">
+              <Label>Empresa *</Label>
+              <Select value={form.company_id} onValueChange={(v) => handleChange("company_id", v)} required>
+                <SelectTrigger className="bg-slate-800 border-slate-700">
+                  <SelectValue placeholder="Seleccionar empresa" />
+                </SelectTrigger>
+                <SelectContent>
+                  {companies.length === 0 ? (
+                    <div className="px-2 py-1.5 text-sm text-slate-400">No hay empresas disponibles</div>
+                  ) : (
+                    companies.map(company => (
                       <SelectItem key={company.id} value={company.id}>{company.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Tipo *</Label>
               <Select value={form.type} onValueChange={(v) => handleChange("type", v)}>
@@ -161,23 +174,6 @@ export default function LocationDialog({
                 </SelectContent>
               </Select>
             </div>
-            {!isSuperAdmin && (
-              <div className="space-y-2">
-                <Label>Estado</Label>
-                <Select value={form.status} onValueChange={(v) => handleChange("status", v)}>
-                  <SelectTrigger className="bg-slate-800 border-slate-700">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="active">Activo</SelectItem>
-                    <SelectItem value="inactive">Inactivo</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-          </div>
-
-          {isSuperAdmin && (
             <div className="space-y-2">
               <Label>Estado</Label>
               <Select value={form.status} onValueChange={(v) => handleChange("status", v)}>
@@ -190,7 +186,7 @@ export default function LocationDialog({
                 </SelectContent>
               </Select>
             </div>
-          )}
+          </div>
 
           <div className="space-y-2">
             <Label>Dirección</Label>
