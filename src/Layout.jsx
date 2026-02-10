@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import { 
   LayoutDashboard, Car, Users, Wrench, FileText, 
-  BarChart3, Menu, X, LogOut, ChevronRight, Settings
+  BarChart3, Menu, X, LogOut, ChevronRight, Building2, MapPin, UserCog
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -13,23 +13,12 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-const navItems = [
-  { name: "Dashboard", icon: LayoutDashboard, page: "Dashboard" },
-  { name: "Vehículos", icon: Car, page: "Vehicles" },
-  { name: "Conductores", icon: Users, page: "Drivers" },
-  { name: "Mantenimiento", icon: Wrench, page: "Maintenance" },
-  { name: "Documentos", icon: FileText, page: "Documents" },
-  { name: "Reportes", icon: BarChart3, page: "Reports" },
-];
 
 export default function Layout({ children, currentPageName }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [user, setUser] = useState(null);
-  const location = useLocation();
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -38,6 +27,34 @@ export default function Layout({ children, currentPageName }) {
   const handleLogout = () => {
     base44.auth.logout();
   };
+
+  const isSuperAdmin = user?.role === 'admin' && user?.user_role === 'super_admin';
+
+  // Menú para Super Admin
+  const superAdminItems = [
+    { name: "Dashboard", icon: LayoutDashboard, page: "Dashboard" },
+    { name: "Empresas", icon: Building2, page: "Companies" },
+    { name: "Administradores", icon: UserCog, page: "CompanyAdmins" },
+    { name: "Locaciones", icon: MapPin, page: "Locations" },
+    { name: "Vehículos", icon: Car, page: "Vehicles" },
+    { name: "Conductores", icon: Users, page: "Drivers" },
+    { name: "Mantenimiento", icon: Wrench, page: "Maintenance" },
+    { name: "Documentos", icon: FileText, page: "Documents" },
+    { name: "Reportes", icon: BarChart3, page: "Reports" },
+  ];
+
+  // Menú para Admin de Empresa
+  const companyAdminItems = [
+    { name: "Dashboard", icon: LayoutDashboard, page: "Dashboard" },
+    { name: "Locaciones", icon: MapPin, page: "Locations" },
+    { name: "Vehículos", icon: Car, page: "Vehicles" },
+    { name: "Conductores", icon: Users, page: "Drivers" },
+    { name: "Mantenimiento", icon: Wrench, page: "Maintenance" },
+    { name: "Documentos", icon: FileText, page: "Documents" },
+    { name: "Reportes", icon: BarChart3, page: "Reports" },
+  ];
+
+  const navItems = isSuperAdmin ? superAdminItems : companyAdminItems;
 
   return (
     <div className="min-h-screen bg-slate-900">
@@ -75,7 +92,9 @@ export default function Layout({ children, currentPageName }) {
             </div>
             <div>
               <span className="text-lg font-bold text-white">Mass Effect</span>
-              <p className="text-xs text-slate-500">Gestión de Flotas</p>
+              <p className="text-xs text-slate-500">
+                {isSuperAdmin ? "Super Admin" : "Gestión de Flotas"}
+              </p>
             </div>
           </div>
 

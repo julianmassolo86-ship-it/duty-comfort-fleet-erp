@@ -17,13 +17,15 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 
 const initialState = {
   plate: "",
+  company_id: "",
+  location_id: "",
   brand: "",
   model: "",
   year: new Date().getFullYear(),
   vin: "",
   type: "car",
   status: "active",
-  fuel_type: "gasoline",
+  fuel_type: "diesel",
   mileage: 0,
   assigned_driver_id: "",
   purchase_date: "",
@@ -38,29 +40,55 @@ export default function VehicleDialog({
   onOpenChange, 
   vehicle, 
   drivers = [],
+  locations = [],
+  companies = [],
+  isSuperAdmin,
+  currentUser,
   onSave, 
   onDelete,
   isLoading,
   isDeleting 
 }) {
   const [form, setForm] = useState(initialState);
+  const [selectedCompanyId, setSelectedCompanyId] = useState("");
 
   useEffect(() => {
     if (vehicle) {
       setForm({ ...initialState, ...vehicle });
+      setSelectedCompanyId(vehicle.company_id || "");
     } else {
-      setForm(initialState);
+      const defaultCompanyId = isSuperAdmin ? "" : (currentUser?.company_id || "");
+      setForm({ ...initialState, company_id: defaultCompanyId });
+      setSelectedCompanyId(defaultCompanyId);
     }
-  }, [vehicle, open]);
+  }, [vehicle, open, isSuperAdmin, currentUser]);
 
   const handleChange = (field, value) => {
     setForm(prev => ({ ...prev, [field]: value }));
+    if (field === "company_id") {
+      setSelectedCompanyId(value);
+      setForm(prev => ({ ...prev, location_id: "" })); // Reset location when company changes
+    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave(form);
+    const finalData = {
+      ...form,
+      company_id: isSuperAdmin ? form.company_id : currentUser?.company_id
+    };
+    onSave(finalData);
   };
+
+  // Filtrar locaciones por empresa seleccionada
+  const filteredLocations = isSuperAdmin 
+    ? locations.filter(l => l.company_id === selectedCompanyId)
+    : locations;
+
+  // Filtrar conductores por empresa
+  const filteredDrivers = isSuperAdmin
+    ? drivers.filter(d => d.company_id === selectedCompanyId)
+    : drivers;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -78,6 +106,53 @@ export default function VehicleDialog({
             </TabsList>
 
             <TabsContent value="general" className="space-y-4">
+              {isSuperAdmin && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Empresa *</Label>
+                    <Select value={form.company_id} onValueChange={(v) => handleChange("company_id", v)} required>
+                      <SelectTrigger className="bg-slate-800 border-slate-700">
+                        <SelectValue placeholder="Seleccionar empresa" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {companies.map(c => (
+                          <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Locación *</Label>
+                    <Select value={form.location_id} onValueChange={(v) => handleChange("location_id", v)} required disabled={!selectedCompanyId}>
+                      <SelectTrigger className="bg-slate-800 border-slate-700">
+                        <SelectValue placeholder={selectedCompanyId ? "Seleccionar locación" : "Primero seleccione empresa"} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {filteredLocations.map(l => (
+                          <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              )}
+
+              {!isSuperAdmin && (
+                <div className="space-y-2">
+                  <Label>Locación *</Label>
+                  <Select value={form.location_id} onValueChange={(v) => handleChange("location_id", v)} required>
+                    <SelectTrigger className="bg-slate-800 border-slate-700">
+                      <SelectValue placeholder="Seleccionar locación" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {filteredLocations.map(l => (
+                        <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Matrícula *</Label>
@@ -100,6 +175,8 @@ export default function VehicleDialog({
                       <SelectItem value="van">Van</SelectItem>
                       <SelectItem value="bus">Bus</SelectItem>
                       <SelectItem value="motorcycle">Moto</SelectItem>
+                      <SelectItem value="machinery">Maquinaria</SelectItem>
+                      <SelectItem value="trailer">Trailer</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -147,6 +224,7 @@ export default function VehicleDialog({
                       <SelectItem value="diesel">Diésel</SelectItem>
                       <SelectItem value="electric">Eléctrico</SelectItem>
                       <SelectItem value="hybrid">Híbrido</SelectItem>
+                      <SelectItem value="gnc">GNC</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -196,7 +274,7 @@ export default function VehicleDialog({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">Sin asignar</SelectItem>
-                    {drivers.filter(d => d.status === 'active').map(driver => (
+                    {filteredDrivers.filter(d => d.status === 'active').map(driver => (
                       <SelectItem key={driver.id} value={driver.id}>
                         {driver.full_name}
                       </SelectItem>
@@ -229,7 +307,7 @@ export default function VehicleDialog({
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Vencimiento ITV</Label>
+                  <Label>Vencimiento VTV</Label>
                   <Input
                     type="date"
                     value={form.technical_inspection_expiry}
