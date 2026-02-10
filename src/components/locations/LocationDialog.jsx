@@ -11,7 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Trash2, AlertCircle } from "lucide-react";
+import { Loader2, Trash2, AlertCircle, Upload, X } from "lucide-react";
+import { base44 } from "@/api/base44Client";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
@@ -26,6 +27,7 @@ const initialState = {
   contact_name: "",
   contact_phone: "",
   status: "active",
+  image_url: "",
   notes: "",
 };
 
@@ -35,6 +37,7 @@ export default function LocationDialog({
   location, 
   companies = [],
   isSuperAdmin,
+  currentUser,
   onSave, 
   onDelete,
   isLoading,
@@ -42,14 +45,16 @@ export default function LocationDialog({
   hasVehicles
 }) {
   const [form, setForm] = useState(initialState);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (location) {
       setForm({ ...initialState, ...location });
     } else {
-      setForm(initialState);
+      const defaultCompanyId = isSuperAdmin ? "" : (currentUser?.company_id || "");
+      setForm({ ...initialState, company_id: defaultCompanyId });
     }
-  }, [location, open]);
+  }, [location, open, isSuperAdmin, currentUser]);
 
   const handleChange = (field, value) => {
     setForm(prev => ({ ...prev, [field]: value }));
@@ -57,7 +62,23 @@ export default function LocationDialog({
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave(form);
+    const finalData = isSuperAdmin ? form : { ...form, company_id: currentUser?.company_id };
+    onSave(finalData);
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const result = await base44.integrations.Core.UploadFile({ file });
+      handleChange("image_url", result.file_url);
+    } catch (error) {
+      console.error("Error uploading image:", error);
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
@@ -68,6 +89,34 @@ export default function LocationDialog({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label>Imagen</Label>
+            <div className="flex items-center gap-4">
+              {form.image_url && (
+                <div className="relative w-20 h-20 rounded-lg overflow-hidden border-2 border-slate-700">
+                  <img src={form.image_url} alt="Preview" className="w-full h-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => handleChange("image_url", "")}
+                    className="absolute top-1 right-1 p-1 bg-slate-900/80 rounded-full hover:bg-slate-800"
+                  >
+                    <X className="w-3 h-3 text-white" />
+                  </button>
+                </div>
+              )}
+              <div className="flex-1">
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  disabled={uploading}
+                  className="bg-slate-800 border-slate-700"
+                />
+                {uploading && <p className="text-xs text-slate-400 mt-1">Subiendo imagen...</p>}
+              </div>
+            </div>
+          </div>
+
           <div className="space-y-2">
             <Label>Nombre de la locación *</Label>
             <Input

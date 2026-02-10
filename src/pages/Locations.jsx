@@ -184,9 +184,15 @@ export default function Locations() {
                   className="group relative overflow-hidden rounded-2xl bg-slate-800/50 border border-slate-700/50 p-5 cursor-pointer transition-all duration-300 hover:bg-slate-800/70 hover:border-slate-600/50"
                 >
                   <div className="flex items-start justify-between mb-4">
-                    <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-400">
-                      <MapPin className="w-6 h-6" />
-                    </div>
+                    {location.image_url ? (
+                      <div className="w-12 h-12 rounded-xl overflow-hidden border-2 border-emerald-500/20">
+                        <img src={location.image_url} alt={location.name} className="w-full h-full object-cover" />
+                      </div>
+                    ) : (
+                      <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-400">
+                        <MapPin className="w-6 h-6" />
+                      </div>
+                    )}
                     <StatusBadge status={location.status} />
                   </div>
                   
@@ -239,6 +245,7 @@ export default function Locations() {
           location={selectedLocation}
           companies={accessibleCompanies}
           isSuperAdmin={isSuperAdmin}
+          currentUser={currentUser}
           onSave={handleSave}
           onDelete={selectedLocation && canDeleteLocation(selectedLocation.id) ? () => deleteMutation.mutate(selectedLocation.id) : undefined}
           isLoading={createMutation.isPending || updateMutation.isPending}
