@@ -50,12 +50,18 @@
 import Dashboard from './pages/Dashboard';
 import Vehicles from './pages/Vehicles';
 import Drivers from './pages/Drivers';
+import Maintenance from './pages/Maintenance';
+import Documents from './pages/Documents';
+import Reports from './pages/Reports';
 
 
 export const PAGES = {
     "Dashboard": Dashboard,
     "Vehicles": Vehicles,
     "Drivers": Drivers,
+    "Maintenance": Maintenance,
+    "Documents": Documents,
+    "Reports": Reports,
 }
 
 export const pagesConfig = {

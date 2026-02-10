@@ -1,0 +1,188 @@
+import React, { useState } from "react";
+import { base44 } from "@/api/base44Client";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Plus, Search, Wrench } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import PageHeader from "../components/common/PageHeader";
+import EmptyState from "../components/common/EmptyState";
+import MaintenanceCard from "../components/maintenance/MaintenanceCard";
+import MaintenanceDialog from "../components/maintenance/MaintenanceDialog";
+
+export default function Maintenance() {
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedMaintenance, setSelectedMaintenance] = useState(null);
+
+  const queryClient = useQueryClient();
+
+  const { data: maintenances = [], isLoading } = useQuery({
+    queryKey: ['maintenances'],
+    queryFn: () => base44.entities.Maintenance.list('-scheduled_date'),
+  });
+
+  const { data: vehicles = [] } = useQuery({
+    queryKey: ['vehicles'],
+    queryFn: () => base44.entities.Vehicle.list(),
+  });
+
+  const vehiclesMap = vehicles.reduce((acc, v) => ({ ...acc, [v.id]: v }), {});
+
+  const createMutation = useMutation({
+    mutationFn: (data) => base44.entities.Maintenance.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['maintenances'] });
+      setDialogOpen(false);
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }) => base44.entities.Maintenance.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['maintenances'] });
+      setDialogOpen(false);
+      setSelectedMaintenance(null);
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id) => base44.entities.Maintenance.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['maintenances'] });
+      setDialogOpen(false);
+      setSelectedMaintenance(null);
+    },
+  });
+
+  const handleSave = (data) => {
+    if (selectedMaintenance) {
+      updateMutation.mutate({ id: selectedMaintenance.id, data });
+    } else {
+      createMutation.mutate(data);
+    }
+  };
+
+  const handleEdit = (maintenance) => {
+    setSelectedMaintenance(maintenance);
+    setDialogOpen(true);
+  };
+
+  const filteredMaintenances = maintenances.filter(m => {
+    const vehicle = vehiclesMap[m.vehicle_id];
+    const matchesSearch = 
+      m.description?.toLowerCase().includes(search.toLowerCase()) ||
+      vehicle?.plate?.toLowerCase().includes(search.toLowerCase()) ||
+      m.provider?.toLowerCase().includes(search.toLowerCase());
+    const matchesStatus = statusFilter === "all" || m.status === statusFilter;
+    const matchesType = typeFilter === "all" || m.type === typeFilter;
+    return matchesSearch && matchesStatus && matchesType;
+  });
+
+  return (
+    <div className="min-h-screen bg-slate-900 p-4 sm:p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto">
+        <PageHeader 
+          title="Mantenimiento" 
+          description="Gestiona el mantenimiento de tu flota"
+          actions={
+            <Button 
+              onClick={() => { setSelectedMaintenance(null); setDialogOpen(true); }}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Nuevo Mantenimiento
+            </Button>
+          }
+        />
+
+        {/* Filters */}
+        <div className="flex flex-col sm:flex-row gap-3 mb-6">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Input
+              placeholder="Buscar por vehículo, descripción o proveedor..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-10 bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500"
+            />
+          </div>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-full sm:w-40 bg-slate-800/50 border-slate-700 text-white">
+              <SelectValue placeholder="Estado" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos</SelectItem>
+              <SelectItem value="scheduled">Programado</SelectItem>
+              <SelectItem value="in_progress">En progreso</SelectItem>
+              <SelectItem value="completed">Completado</SelectItem>
+              <SelectItem value="cancelled">Cancelado</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={typeFilter} onValueChange={setTypeFilter}>
+            <SelectTrigger className="w-full sm:w-40 bg-slate-800/50 border-slate-700 text-white">
+              <SelectValue placeholder="Tipo" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos</SelectItem>
+              <SelectItem value="preventive">Preventivo</SelectItem>
+              <SelectItem value="corrective">Correctivo</SelectItem>
+              <SelectItem value="inspection">Inspección</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Maintenance Grid */}
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {Array(6).fill(0).map((_, i) => (
+              <Skeleton key={i} className="h-52 rounded-2xl bg-slate-800/50" />
+            ))}
+          </div>
+        ) : filteredMaintenances.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredMaintenances.map(maintenance => (
+              <MaintenanceCard 
+                key={maintenance.id} 
+                maintenance={maintenance}
+                vehiclePlate={vehiclesMap[maintenance.vehicle_id]?.plate}
+                onClick={() => handleEdit(maintenance)}
+              />
+            ))}
+          </div>
+        ) : (
+          <EmptyState
+            icon={Wrench}
+            title="Sin mantenimientos"
+            description={search ? "No se encontraron mantenimientos con esos criterios" : "Agrega tu primer registro de mantenimiento"}
+            action={
+              !search && (
+                <Button 
+                  onClick={() => { setSelectedMaintenance(null); setDialogOpen(true); }}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Agregar Mantenimiento
+                </Button>
+              )
+            }
+          />
+        )}
+
+        <MaintenanceDialog
+          open={dialogOpen}
+          onOpenChange={setDialogOpen}
+          maintenance={selectedMaintenance}
+          vehicles={vehicles}
+          onSave={handleSave}
+          onDelete={selectedMaintenance ? () => deleteMutation.mutate(selectedMaintenance.id) : undefined}
+          isLoading={createMutation.isPending || updateMutation.isPending}
+          isDeleting={deleteMutation.isPending}
+        />
+      </div>
+    </div>
+  );
+}
