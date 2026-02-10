@@ -12,7 +12,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Trash2 } from "lucide-react";
+import { Loader2, Trash2, X } from "lucide-react";
+import { base44 } from "@/api/base44Client";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 const initialState = {
@@ -51,6 +52,7 @@ export default function VehicleDialog({
 }) {
   const [form, setForm] = useState(initialState);
   const [selectedCompanyId, setSelectedCompanyId] = useState("");
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (vehicle) {
@@ -80,6 +82,21 @@ export default function VehicleDialog({
     onSave(finalData);
   };
 
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const result = await base44.integrations.Core.UploadFile({ file });
+      handleChange("image_url", result.file_url);
+    } catch (error) {
+      console.error("Error uploading image:", error);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   // Filtrar locaciones por empresa seleccionada
   const filteredLocations = isSuperAdmin 
     ? locations.filter(l => l.company_id === selectedCompanyId)
@@ -106,6 +123,34 @@ export default function VehicleDialog({
             </TabsList>
 
             <TabsContent value="general" className="space-y-4">
+              <div className="space-y-2">
+                <Label>Imagen del vehículo</Label>
+                <div className="flex items-center gap-4">
+                  {form.image_url && (
+                    <div className="relative w-20 h-20 rounded-lg overflow-hidden border-2 border-slate-700">
+                      <img src={form.image_url} alt="Vehículo" className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => handleChange("image_url", "")}
+                        className="absolute top-1 right-1 p-1 bg-slate-900/80 rounded-full hover:bg-slate-800"
+                      >
+                        <X className="w-3 h-3 text-white" />
+                      </button>
+                    </div>
+                  )}
+                  <div className="flex-1">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      disabled={uploading}
+                      className="bg-slate-800 border-slate-700"
+                    />
+                    {uploading && <p className="text-xs text-slate-400 mt-1">Subiendo imagen...</p>}
+                  </div>
+                </div>
+              </div>
+
               {isSuperAdmin && (
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">

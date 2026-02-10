@@ -30,9 +30,15 @@ export default function VehicleCard({ vehicle, location, company, onClick }) {
       )}
     >
       <div className="flex items-start justify-between mb-4">
-        <div className="p-3 rounded-xl bg-blue-500/10 text-blue-400">
-          <Icon className="w-6 h-6" />
-        </div>
+        {vehicle.image_url ? (
+          <div className="w-12 h-12 rounded-xl overflow-hidden border-2 border-blue-500/20">
+            <img src={vehicle.image_url} alt={vehicle.plate} className="w-full h-full object-cover" />
+          </div>
+        ) : (
+          <div className="p-3 rounded-xl bg-blue-500/10 text-blue-400">
+            <Icon className="w-6 h-6" />
+          </div>
+        )}
         <StatusBadge status={vehicle.status} />
       </div>
       

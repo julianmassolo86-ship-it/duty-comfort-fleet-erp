@@ -134,9 +134,15 @@ export default function Companies() {
                   className="group relative overflow-hidden rounded-2xl bg-slate-800/50 border border-slate-700/50 p-5 cursor-pointer transition-all duration-300 hover:bg-slate-800/70 hover:border-slate-600/50"
                 >
                   <div className="flex items-start justify-between mb-4">
-                    <div className="p-3 rounded-xl bg-purple-500/10 text-purple-400">
-                      <Building2 className="w-6 h-6" />
-                    </div>
+                    {company.logo_url ? (
+                      <div className="w-12 h-12 rounded-xl overflow-hidden border-2 border-purple-500/20">
+                        <img src={company.logo_url} alt={company.name} className="w-full h-full object-cover" />
+                      </div>
+                    ) : (
+                      <div className="p-3 rounded-xl bg-purple-500/10 text-purple-400">
+                        <Building2 className="w-6 h-6" />
+                      </div>
+                    )}
                     <StatusBadge status={company.status} />
                   </div>
                   
