@@ -1,11 +1,11 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { 
   Car, Users, Wrench, FileText, AlertTriangle, 
-  TrendingUp, Calendar, ArrowRight 
+  TrendingUp, Calendar, ArrowRight, Building2, MapPin
 } from "lucide-react";
 import { differenceInDays } from "date-fns";
 import StatCard from "../components/dashboard/StatCard";
@@ -15,6 +15,14 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Dashboard() {
+  const [currentUser, setCurrentUser] = useState(null);
+
+  useEffect(() => {
+    base44.auth.me().then(setCurrentUser).catch(() => {});
+  }, []);
+
+  const isSuperAdmin = currentUser?.role === 'admin' && currentUser?.user_role === 'super_admin';
+
   const { data: vehicles = [], isLoading: loadingVehicles } = useQuery({
     queryKey: ['vehicles'],
     queryFn: () => base44.entities.Vehicle.list(),
@@ -35,7 +43,35 @@ export default function Dashboard() {
     queryFn: () => base44.entities.Document.list(),
   });
 
+  const { data: companies = [] } = useQuery({
+    queryKey: ['companies'],
+    queryFn: () => base44.entities.Company.list(),
+    enabled: isSuperAdmin,
+  });
+
+  const { data: locations = [] } = useQuery({
+    queryKey: ['locations'],
+    queryFn: () => base44.entities.Location.list(),
+  });
+
   const isLoading = loadingVehicles || loadingDrivers || loadingMaintenance || loadingDocuments;
+
+  // Filtrar datos según rol
+  const accessibleVehicles = isSuperAdmin 
+    ? vehicles 
+    : vehicles.filter(v => v.company_id === currentUser?.company_id);
+  
+  const accessibleDrivers = isSuperAdmin 
+    ? drivers 
+    : drivers.filter(d => d.company_id === currentUser?.company_id);
+
+  const accessibleMaintenances = isSuperAdmin 
+    ? maintenances 
+    : maintenances.filter(m => m.company_id === currentUser?.company_id);
+
+  const accessibleLocations = isSuperAdmin 
+    ? locations 
+    : locations.filter(l => l.company_id === currentUser?.company_id);
 
   // Calculate alerts
   const getAlerts = () => {
@@ -44,14 +80,14 @@ export default function Dashboard() {
     const warningDays = 30;
 
     // Vehicle document alerts
-    vehicles.forEach(v => {
+    accessibleVehicles.forEach(v => {
       ['insurance_expiry', 'technical_inspection_expiry', 'circulation_permit_expiry'].forEach(field => {
         if (v[field]) {
           const days = differenceInDays(new Date(v[field]), today);
           if (days <= warningDays) {
             const labels = {
               insurance_expiry: 'Seguro',
-              technical_inspection_expiry: 'ITV',
+              technical_inspection_expiry: 'VTV',
               circulation_permit_expiry: 'Permiso de circulación'
             };
             alerts.push({
@@ -68,7 +104,7 @@ export default function Dashboard() {
     });
 
     // Driver license/medical alerts
-    drivers.forEach(d => {
+    accessibleDrivers.forEach(d => {
       if (d.license_expiry) {
         const days = differenceInDays(new Date(d.license_expiry), today);
         if (days <= warningDays) {
@@ -101,16 +137,16 @@ export default function Dashboard() {
   };
 
   const alerts = isLoading ? [] : getAlerts();
-  const activeVehicles = vehicles.filter(v => v.status === 'active').length;
-  const activeDrivers = drivers.filter(d => d.status === 'active').length;
-  const pendingMaintenance = maintenances.filter(m => m.status === 'scheduled' || m.status === 'in_progress').length;
+  const activeVehicles = accessibleVehicles.filter(v => v.status === 'active').length;
+  const activeDrivers = accessibleDrivers.filter(d => d.status === 'active').length;
+  const pendingMaintenance = accessibleMaintenances.filter(m => m.status === 'scheduled' || m.status === 'in_progress').length;
 
   return (
     <div className="min-h-screen bg-slate-900 p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
         <PageHeader 
           title="Dashboard" 
-          description="Vista general de tu flota"
+          description={isSuperAdmin ? "Vista general del sistema" : "Vista general de tu flota"}
         />
 
         {/* Stats Grid */}
@@ -121,18 +157,44 @@ export default function Dashboard() {
             ))
           ) : (
             <>
+              {isSuperAdmin && (
+                <StatCard 
+                  title="Empresas" 
+                  value={companies.length}
+                  subtitle={`${companies.filter(c => c.status === 'active').length} activas`}
+                  icon={Building2}
+                />
+              )}
+              {isSuperAdmin && (
+                <StatCard 
+                  title="Locaciones" 
+                  value={locations.length}
+                  subtitle={`${locations.filter(l => l.status === 'active').length} activas`}
+                  icon={MapPin}
+                />
+              )}
+              {!isSuperAdmin && (
+                <StatCard 
+                  title="Locaciones" 
+                  value={accessibleLocations.length}
+                  subtitle={`${accessibleLocations.filter(l => l.status === 'active').length} activas`}
+                  icon={MapPin}
+                />
+              )}
               <StatCard 
                 title="Vehículos Activos" 
                 value={activeVehicles}
-                subtitle={`de ${vehicles.length} totales`}
+                subtitle={`de ${accessibleVehicles.length} totales`}
                 icon={Car}
               />
-              <StatCard 
-                title="Conductores Activos" 
-                value={activeDrivers}
-                subtitle={`de ${drivers.length} totales`}
-                icon={Users}
-              />
+              {!isSuperAdmin && (
+                <StatCard 
+                  title="Conductores Activos" 
+                  value={activeDrivers}
+                  subtitle={`de ${accessibleDrivers.length} totales`}
+                  icon={Users}
+                />
+              )}
               <StatCard 
                 title="Mantenimientos Pendientes" 
                 value={pendingMaintenance}
@@ -195,6 +257,30 @@ export default function Dashboard() {
           <div className="bg-slate-800/30 rounded-2xl border border-slate-700/50 p-6">
             <h2 className="text-lg font-semibold text-white mb-6">Accesos Rápidos</h2>
             <div className="space-y-3">
+              {isSuperAdmin && (
+                <Link to={createPageUrl("Companies")} className="block">
+                  <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-800/50 border border-slate-700/50 hover:bg-slate-700/50 transition-colors">
+                    <div className="p-2.5 rounded-lg bg-purple-500/10">
+                      <Building2 className="w-5 h-5 text-purple-400" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-white">Empresas</p>
+                      <p className="text-sm text-slate-400">{companies.length} registradas</p>
+                    </div>
+                  </div>
+                </Link>
+              )}
+              <Link to={createPageUrl("Locations")} className="block">
+                <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-800/50 border border-slate-700/50 hover:bg-slate-700/50 transition-colors">
+                  <div className="p-2.5 rounded-lg bg-emerald-500/10">
+                    <MapPin className="w-5 h-5 text-emerald-400" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-white">Locaciones</p>
+                    <p className="text-sm text-slate-400">{accessibleLocations.length} registradas</p>
+                  </div>
+                </div>
+              </Link>
               <Link to={createPageUrl("Vehicles")} className="block">
                 <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-800/50 border border-slate-700/50 hover:bg-slate-700/50 transition-colors">
                   <div className="p-2.5 rounded-lg bg-blue-500/10">
@@ -202,18 +288,18 @@ export default function Dashboard() {
                   </div>
                   <div>
                     <p className="font-medium text-white">Vehículos</p>
-                    <p className="text-sm text-slate-400">{vehicles.length} registrados</p>
+                    <p className="text-sm text-slate-400">{accessibleVehicles.length} registrados</p>
                   </div>
                 </div>
               </Link>
               <Link to={createPageUrl("Drivers")} className="block">
                 <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-800/50 border border-slate-700/50 hover:bg-slate-700/50 transition-colors">
-                  <div className="p-2.5 rounded-lg bg-emerald-500/10">
-                    <Users className="w-5 h-5 text-emerald-400" />
+                  <div className="p-2.5 rounded-lg bg-cyan-500/10">
+                    <Users className="w-5 h-5 text-cyan-400" />
                   </div>
                   <div>
                     <p className="font-medium text-white">Conductores</p>
-                    <p className="text-sm text-slate-400">{drivers.length} registrados</p>
+                    <p className="text-sm text-slate-400">{accessibleDrivers.length} registrados</p>
                   </div>
                 </div>
               </Link>
@@ -224,29 +310,7 @@ export default function Dashboard() {
                   </div>
                   <div>
                     <p className="font-medium text-white">Mantenimiento</p>
-                    <p className="text-sm text-slate-400">{maintenances.length} registros</p>
-                  </div>
-                </div>
-              </Link>
-              <Link to={createPageUrl("Documents")} className="block">
-                <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-800/50 border border-slate-700/50 hover:bg-slate-700/50 transition-colors">
-                  <div className="p-2.5 rounded-lg bg-purple-500/10">
-                    <FileText className="w-5 h-5 text-purple-400" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-white">Documentos</p>
-                    <p className="text-sm text-slate-400">{documents.length} archivados</p>
-                  </div>
-                </div>
-              </Link>
-              <Link to={createPageUrl("Reports")} className="block">
-                <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-800/50 border border-slate-700/50 hover:bg-slate-700/50 transition-colors">
-                  <div className="p-2.5 rounded-lg bg-cyan-500/10">
-                    <Calendar className="w-5 h-5 text-cyan-400" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-white">Reportes</p>
-                    <p className="text-sm text-slate-400">Informes detallados</p>
+                    <p className="text-sm text-slate-400">{accessibleMaintenances.length} registros</p>
                   </div>
                 </div>
               </Link>
