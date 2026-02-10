@@ -11,7 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Trash2, AlertCircle } from "lucide-react";
+import { Loader2, Trash2, AlertCircle, X } from "lucide-react";
+import { base44 } from "@/api/base44Client";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
@@ -22,6 +23,7 @@ const initialState = {
   phone: "",
   email: "",
   status: "active",
+  logo_url: "",
   notes: "",
 };
 
@@ -36,6 +38,7 @@ export default function CompanyDialog({
   hasLocations
 }) {
   const [form, setForm] = useState(initialState);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (company) {
@@ -54,6 +57,21 @@ export default function CompanyDialog({
     onSave(form);
   };
 
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const result = await base44.integrations.Core.UploadFile({ file });
+      handleChange("logo_url", result.file_url);
+    } catch (error) {
+      console.error("Error uploading image:", error);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg bg-slate-900 border-slate-700 text-white">
@@ -62,6 +80,34 @@ export default function CompanyDialog({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label>Logo</Label>
+            <div className="flex items-center gap-4">
+              {form.logo_url && (
+                <div className="relative w-20 h-20 rounded-lg overflow-hidden border-2 border-slate-700">
+                  <img src={form.logo_url} alt="Logo" className="w-full h-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => handleChange("logo_url", "")}
+                    className="absolute top-1 right-1 p-1 bg-slate-900/80 rounded-full hover:bg-slate-800"
+                  >
+                    <X className="w-3 h-3 text-white" />
+                  </button>
+                </div>
+              )}
+              <div className="flex-1">
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  disabled={uploading}
+                  className="bg-slate-800 border-slate-700"
+                />
+                {uploading && <p className="text-xs text-slate-400 mt-1">Subiendo logo...</p>}
+              </div>
+            </div>
+          </div>
+
           <div className="space-y-2">
             <Label>Nombre de la empresa *</Label>
             <Input
