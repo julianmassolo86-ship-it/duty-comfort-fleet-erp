@@ -66,20 +66,20 @@ export default function VehicleCardDocument({
                   size="sm"
                   variant="outline"
                   onClick={() => window.open(document_front_url, '_blank')}
-                  className="border-zinc-700 hover:bg-yellow-500/10 hover:border-yellow-500/50 transition-all flex-1 text-white"
+                  className="border-zinc-700 hover:bg-yellow-500/10 hover:border-yellow-500/50 transition-all flex-1 text-black bg-white"
                 >
                   <Eye className="w-3 h-3 mr-1" />
-                  <span className="text-xs">Ver</span>
+                  <span className="text-xs font-medium">Ver</span>
                 </Button>
                 <Button
                   type="button"
                   size="sm"
                   variant="outline"
                   onClick={() => handleDownload(document_front_url, `${title.toLowerCase().replace(/\s+/g, '_')}_frente.jpg`)}
-                  className="border-zinc-700 hover:bg-blue-500/10 hover:border-blue-500/50 transition-all flex-1 text-white"
+                  className="border-zinc-700 hover:bg-blue-500/10 hover:border-blue-500/50 transition-all flex-1 text-black bg-white"
                 >
                   <DownloadIcon className="w-3 h-3 mr-1" />
-                  <span className="text-xs">Descargar</span>
+                  <span className="text-xs font-medium">Descargar</span>
                 </Button>
               </div>
               <Button
@@ -140,20 +140,20 @@ export default function VehicleCardDocument({
                   size="sm"
                   variant="outline"
                   onClick={() => window.open(document_back_url, '_blank')}
-                  className="border-zinc-700 hover:bg-yellow-500/10 hover:border-yellow-500/50 transition-all flex-1 text-white"
+                  className="border-zinc-700 hover:bg-yellow-500/10 hover:border-yellow-500/50 transition-all flex-1 text-black bg-white"
                 >
                   <Eye className="w-3 h-3 mr-1" />
-                  <span className="text-xs">Ver</span>
+                  <span className="text-xs font-medium">Ver</span>
                 </Button>
                 <Button
                   type="button"
                   size="sm"
                   variant="outline"
                   onClick={() => handleDownload(document_back_url, `${title.toLowerCase().replace(/\s+/g, '_')}_dorso.jpg`)}
-                  className="border-zinc-700 hover:bg-blue-500/10 hover:border-blue-500/50 transition-all flex-1 text-white"
+                  className="border-zinc-700 hover:bg-blue-500/10 hover:border-blue-500/50 transition-all flex-1 text-black bg-white"
                 >
                   <DownloadIcon className="w-3 h-3 mr-1" />
-                  <span className="text-xs">Descargar</span>
+                  <span className="text-xs font-medium">Descargar</span>
                 </Button>
               </div>
               <Button

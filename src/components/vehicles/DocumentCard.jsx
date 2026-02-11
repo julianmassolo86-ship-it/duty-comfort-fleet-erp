@@ -58,7 +58,7 @@ export default function DocumentCard({
               size="sm"
               variant="outline"
               onClick={() => window.open(document_url, '_blank')}
-              className="border-zinc-700 hover:bg-yellow-500/10 hover:border-yellow-500/50 transition-all flex-1 text-white"
+              className="border-zinc-700 hover:bg-yellow-500/10 hover:border-yellow-500/50 transition-all flex-1 text-black bg-white"
             >
               <ZoomIn className="w-3 h-3 mr-1" />
               <span className="text-xs font-medium">Ver</span>
@@ -68,7 +68,7 @@ export default function DocumentCard({
               size="sm"
               variant="outline"
               onClick={handleDownload}
-              className="border-zinc-700 hover:bg-blue-500/10 hover:border-blue-500/50 transition-all flex-1 text-white"
+              className="border-zinc-700 hover:bg-blue-500/10 hover:border-blue-500/50 transition-all flex-1 text-black bg-white"
             >
               <Download className="w-3 h-3 mr-1" />
               <span className="text-xs font-medium">Descargar</span>
