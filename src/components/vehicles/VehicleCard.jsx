@@ -1,4 +1,4 @@
-import { Car, Truck, Bus, Bike, MapPin, Building2 } from "lucide-react";
+import { Car, Truck, Bus, Bike, MapPin, Building2, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import StatusBadge from "../common/StatusBadge";
 
@@ -17,8 +17,12 @@ const fuelLabels = {
   hybrid: "Híbrido",
 };
 
-export default function VehicleCard({ vehicle, location, company, onClick }) {
+export default function VehicleCard({ vehicle, location, company, drivers = [], onClick }) {
   const Icon = vehicleIcons[vehicle.type] || Car;
+  
+  // Obtener conductores asignados
+  const driverIds = vehicle.assigned_driver_ids || (vehicle.assigned_driver_id ? [vehicle.assigned_driver_id] : []);
+  const assignedDrivers = drivers.filter(d => driverIds.includes(d.id));
 
   return (
     <div 
@@ -64,6 +68,24 @@ export default function VehicleCard({ vehicle, location, company, onClick }) {
                 <span className="text-sm font-medium text-white truncate">{company.name}</span>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Conductores Asignados */}
+        {assignedDrivers.length > 0 && (
+          <div className="relative mb-4">
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-zinc-800/50 border border-zinc-700/50">
+              <User className="w-4 h-4 text-blue-500" />
+              <div className="flex-1 min-w-0">
+                {assignedDrivers.length === 1 ? (
+                  <span className="text-sm font-medium text-white truncate block">{assignedDrivers[0].full_name}</span>
+                ) : (
+                  <span className="text-sm font-medium text-white truncate block">
+                    {assignedDrivers.map(d => d.full_name).join(", ")}
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
         )}
         

@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Trash2, X, Upload, Image as ImageIcon } from "lucide-react";
+import { Loader2, Trash2, X, Upload, Image as ImageIcon, UserPlus, UserMinus } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
@@ -34,7 +34,7 @@ const initialState = {
   fuel_type: "diesel",
   mileage: 0,
   hours: 0,
-  assigned_driver_id: "",
+  assigned_driver_ids: [],
   purchase_date: "",
   last_service_date: "",
   last_service_mileage: 0,
@@ -68,7 +68,12 @@ export default function VehicleDialog({
 
   useEffect(() => {
     if (vehicle) {
-      setForm({ ...initialState, ...vehicle });
+      const driverIds = vehicle.assigned_driver_ids || (vehicle.assigned_driver_id ? [vehicle.assigned_driver_id] : []);
+      setForm({ 
+        ...initialState, 
+        ...vehicle,
+        assigned_driver_ids: driverIds
+      });
       setSelectedCompanyId(vehicle.company_id || "");
     } else {
       const defaultCompanyId = isSuperAdmin ? "" : (currentUser?.company_id || "");
@@ -81,7 +86,7 @@ export default function VehicleDialog({
     setForm(prev => ({ ...prev, [field]: value }));
     if (field === "company_id") {
       setSelectedCompanyId(value);
-      setForm(prev => ({ ...prev, location_id: "" }));
+      setForm(prev => ({ ...prev, location_id: "", assigned_driver_ids: [] }));
     }
   };
 
@@ -89,7 +94,8 @@ export default function VehicleDialog({
     e.preventDefault();
     const finalData = {
       ...form,
-      company_id: isSuperAdmin ? form.company_id : currentUser?.company_id
+      company_id: isSuperAdmin ? form.company_id : currentUser?.company_id,
+      assigned_driver_id: undefined
     };
     onSave(finalData);
   };
@@ -116,6 +122,23 @@ export default function VehicleDialog({
   const filteredDrivers = isSuperAdmin
     ? drivers.filter(d => d.company_id === selectedCompanyId)
     : drivers;
+
+  const addDriver = () => {
+    if (form.assigned_driver_ids.length < 3) {
+      handleChange("assigned_driver_ids", [...form.assigned_driver_ids, ""]);
+    }
+  };
+
+  const removeDriver = (index) => {
+    const newDrivers = form.assigned_driver_ids.filter((_, i) => i !== index);
+    handleChange("assigned_driver_ids", newDrivers);
+  };
+
+  const updateDriver = (index, driverId) => {
+    const newDrivers = [...form.assigned_driver_ids];
+    newDrivers[index] = driverId;
+    handleChange("assigned_driver_ids", newDrivers);
+  };
 
   const fileInputRef = React.useRef(null);
 
@@ -193,7 +216,7 @@ export default function VehicleDialog({
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Empresa *</Label>
-                    <Select value={form.company_id || ""} onValueChange={(v) => handleChange("company_id", v)} required>
+                    <Select value={form.company_id} onValueChange={(v) => handleChange("company_id", v)} required>
                       <SelectTrigger className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50">
                         <SelectValue placeholder="Seleccionar empresa" />
                       </SelectTrigger>
@@ -206,7 +229,7 @@ export default function VehicleDialog({
                   </div>
                   <div className="space-y-2">
                     <Label>Locación *</Label>
-                    <Select value={form.location_id || ""} onValueChange={(v) => handleChange("location_id", v)} required disabled={!selectedCompanyId}>
+                    <Select value={form.location_id} onValueChange={(v) => handleChange("location_id", v)} required disabled={!selectedCompanyId}>
                       <SelectTrigger className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50">
                         <SelectValue placeholder={selectedCompanyId ? "Seleccionar locación" : "Primero seleccione empresa"} />
                       </SelectTrigger>
@@ -223,7 +246,7 @@ export default function VehicleDialog({
               {!isSuperAdmin && (
                 <div className="space-y-2">
                   <Label>Locación *</Label>
-                  <Select value={form.location_id || ""} onValueChange={(v) => handleChange("location_id", v)} required>
+                  <Select value={form.location_id} onValueChange={(v) => handleChange("location_id", v)} required>
                     <SelectTrigger className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50">
                       <SelectValue placeholder="Seleccionar locación" />
                     </SelectTrigger>
@@ -414,23 +437,58 @@ export default function VehicleDialog({
               </div>
 
               <div className="space-y-2">
-                <Label>Conductor Asignado</Label>
-                <Select 
-                  value={form.assigned_driver_id || ""} 
-                  onValueChange={(v) => handleChange("assigned_driver_id", v)}
-                >
-                  <SelectTrigger className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50">
-                    <SelectValue placeholder="Sin asignar" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={null}>Sin asignar</SelectItem>
-                    {filteredDrivers.filter(d => d.status === 'active').map(driver => (
-                      <SelectItem key={driver.id} value={driver.id}>
-                        {driver.full_name}
-                      </SelectItem>
+                <div className="flex items-center justify-between">
+                  <Label>Conductores Asignados</Label>
+                  {form.assigned_driver_ids.length < 3 && (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={addDriver}
+                      className="border-yellow-500/30 text-yellow-400 hover:bg-yellow-500/10"
+                    >
+                      <UserPlus className="w-4 h-4 mr-1" />
+                      Agregar
+                    </Button>
+                  )}
+                </div>
+                {form.assigned_driver_ids.length === 0 ? (
+                  <div className="p-4 rounded-lg border-2 border-dashed border-zinc-800 text-center">
+                    <p className="text-sm text-zinc-500">Sin conductores asignados</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {form.assigned_driver_ids.map((driverId, index) => (
+                      <div key={index} className="flex gap-2">
+                        <Select 
+                          value={driverId} 
+                          onValueChange={(v) => updateDriver(index, v)}
+                        >
+                          <SelectTrigger className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 flex-1">
+                            <SelectValue placeholder={`Conductor ${index + 1}`} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value={null}>Sin asignar</SelectItem>
+                            {filteredDrivers.filter(d => d.status === 'active').map(driver => (
+                              <SelectItem key={driver.id} value={driver.id}>
+                                {driver.full_name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Button
+                          type="button"
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => removeDriver(index)}
+                          className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                        >
+                          <UserMinus className="w-4 h-4" />
+                        </Button>
+                      </div>
                     ))}
-                  </SelectContent>
-                </Select>
+                  </div>
+                )}
               </div>
             </TabsContent>
 
