@@ -1,13 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "../common/ThemeWrapper";
 import StatusBadge from "../common/StatusBadge";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 export default function VehicleTable({ vehicles, locations, companies, drivers, vehicleStatuses, isSuperAdmin, onEdit, onDelete }) {
   const { theme } = useTheme();
+  const [deleteVehicle, setDeleteVehicle] = useState(null);
 
   const getDriverName = (driverId) => {
     const driver = drivers.find(d => d.id === driverId);
@@ -112,7 +114,7 @@ export default function VehicleTable({ vehicles, locations, companies, drivers, 
                     size="icon"
                     onClick={(e) => {
                       e.stopPropagation();
-                      onDelete(vehicle.id);
+                      setDeleteVehicle(vehicle);
                     }}
                     className="h-8 w-8 text-red-400 hover:text-red-500 hover:bg-red-500/10"
                   >
@@ -124,6 +126,29 @@ export default function VehicleTable({ vehicles, locations, companies, drivers, 
           ))}
         </TableBody>
       </Table>
+
+      <AlertDialog open={!!deleteVehicle} onOpenChange={(open) => !open && setDeleteVehicle(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar vehículo?</AlertDialogTitle>
+            <AlertDialogDescription>
+              ¿Estás seguro de que deseas eliminar el vehículo <strong>{deleteVehicle?.plate}</strong> ({deleteVehicle?.manufacturer} {deleteVehicle?.model})? Esta acción no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialog.Footer>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => {
+                onDelete(deleteVehicle.id);
+                setDeleteVehicle(null);
+              }}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialog.Footer>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
