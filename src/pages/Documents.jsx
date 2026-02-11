@@ -37,23 +37,85 @@ export default function Documents() {
 
   const queryClient = useQueryClient();
 
-  const { data: documents = [], isLoading } = useQuery({
+  const { data: documents = [], isLoading: loadingDocs } = useQuery({
     queryKey: ['documents'],
     queryFn: () => base44.entities.Document.list('-expiry_date'),
   });
 
-  const { data: vehicles = [] } = useQuery({
+  const { data: vehicles = [], isLoading: loadingVehicles } = useQuery({
     queryKey: ['vehicles'],
     queryFn: () => base44.entities.Vehicle.list(),
   });
 
-  const { data: drivers = [] } = useQuery({
+  const { data: drivers = [], isLoading: loadingDrivers } = useQuery({
     queryKey: ['drivers'],
     queryFn: () => base44.entities.Driver.list(),
   });
 
+  const isLoading = loadingDocs || loadingVehicles || loadingDrivers;
+
   const vehiclesMap = vehicles.reduce((acc, v) => ({ ...acc, [v.id]: v }), {});
   const driversMap = drivers.reduce((acc, d) => ({ ...acc, [d.id]: d }), {});
+
+  // Generar documentos virtuales desde vehículos y conductores
+  const getVirtualDocuments = () => {
+    const virtualDocs = [];
+
+    // Documentos de vehículos
+    const vehicleDocFields = [
+      { key: 'insurance_expiry', url: 'insurance_url', type: 'insurance', label: 'Seguro' },
+      { key: 'technical_inspection_expiry', url: 'technical_inspection_url', type: 'technical_inspection', label: 'VTV' },
+      { key: 'circulation_permit_expiry', url: 'circulation_permit_url', type: 'circulation_permit', label: 'Permiso de circulación' },
+      { key: 'vehicle_card_front_expiry', url: 'vehicle_card_front_url', type: 'vehicle_registration', label: 'Cédula del vehículo (A)' },
+      { key: 'title_expiry', url: 'title_url', type: 'other', label: 'Título automotor' },
+      { key: 'license_plate_expiry', url: 'license_plate_url', type: 'other', label: 'Patente' },
+      { key: 'parts_engraving_expiry', url: 'parts_engraving_url', type: 'other', label: 'Grabado de autopartes' },
+      { key: 'fire_extinguisher_expiry', url: 'fire_extinguisher_url', type: 'other', label: 'Extintor' }
+    ];
+
+    vehicles.forEach(v => {
+      vehicleDocFields.forEach(({ key, url, type, label }) => {
+        if (v[key] || v[url]) {
+          virtualDocs.push({
+            id: `virtual-v-${v.id}-${key}`,
+            name: `${label} - ${v.plate}`,
+            type,
+            entity_type: 'vehicle',
+            entity_id: v.id,
+            expiry_date: v[key] || null,
+            file_url: v[url] || null,
+            company_id: v.company_id,
+            status: v[key] ? (differenceInDays(new Date(v[key]), new Date()) <= 0 ? 'expired' : differenceInDays(new Date(v[key]), new Date()) <= 30 ? 'expiring_soon' : 'valid') : 'valid',
+            isVirtual: true
+          });
+        }
+      });
+    });
+
+    // Documentos de conductores
+    drivers.forEach(d => {
+      if (d.license_expiry || d.license_front_url || d.license_back_url) {
+        virtualDocs.push({
+          id: `virtual-d-${d.id}-license`,
+          name: `Licencia de conducir - ${d.full_name}`,
+          type: 'driver_license',
+          entity_type: 'driver',
+          entity_id: d.id,
+          expiry_date: d.license_expiry || null,
+          file_url: d.license_front_url || d.license_back_url || null,
+          document_number: d.license_number || null,
+          company_id: d.company_id,
+          status: d.license_expiry ? (differenceInDays(new Date(d.license_expiry), new Date()) <= 0 ? 'expired' : differenceInDays(new Date(d.license_expiry), new Date()) <= 30 ? 'expiring_soon' : 'valid') : 'valid',
+          isVirtual: true
+        });
+      }
+    });
+
+    return virtualDocs;
+  };
+
+  const virtualDocuments = getVirtualDocuments();
+  const allDocuments = [...documents, ...virtualDocuments];
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Document.create(data),
@@ -112,7 +174,7 @@ export default function Documents() {
     }
   };
 
-  const filteredDocuments = documents.filter(d => {
+  const filteredDocuments = allDocuments.filter(d => {
     const matchesSearch = 
       d.name?.toLowerCase().includes(search.toLowerCase()) ||
       d.document_number?.toLowerCase().includes(search.toLowerCase()) ||
@@ -120,6 +182,12 @@ export default function Documents() {
     const matchesType = typeFilter === "all" || d.type === typeFilter;
     const matchesEntity = entityFilter === "all" || d.entity_type === entityFilter;
     return matchesSearch && matchesType && matchesEntity;
+  }).sort((a, b) => {
+    // Ordenar por fecha de vencimiento, los más próximos primero
+    if (!a.expiry_date && !b.expiry_date) return 0;
+    if (!a.expiry_date) return 1;
+    if (!b.expiry_date) return -1;
+    return new Date(a.expiry_date) - new Date(b.expiry_date);
   });
 
   return (
@@ -198,7 +266,7 @@ export default function Documents() {
                   <TableRow 
                     key={doc.id} 
                     className="border-slate-700/50 hover:bg-slate-800/30 cursor-pointer"
-                    onClick={() => handleEdit(doc)}
+                    onClick={() => !doc.isVirtual && handleEdit(doc)}
                   >
                     <TableCell>
                       <div className="flex items-center gap-3">
@@ -249,6 +317,9 @@ export default function Documents() {
                               <Eye className="w-4 h-4" />
                             </Button>
                           </a>
+                        )}
+                        {doc.isVirtual && (
+                          <span className="text-xs text-slate-500 italic">Auto-generado</span>
                         )}
                       </div>
                     </TableCell>
