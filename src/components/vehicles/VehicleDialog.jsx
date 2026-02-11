@@ -67,19 +67,25 @@ export default function VehicleDialog({
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
-    if (vehicle) {
-      const driverIds = vehicle.assigned_driver_ids || (vehicle.assigned_driver_id ? [vehicle.assigned_driver_id] : []);
-      setForm({ 
-        ...initialState, 
-        ...vehicle,
-        assigned_driver_ids: driverIds,
-        location_id: vehicle.location_id || ""
-      });
-      setSelectedCompanyId(vehicle.company_id || "");
-    } else {
-      const defaultCompanyId = isSuperAdmin ? "" : (currentUser?.company_id || "");
-      setForm({ ...initialState, company_id: defaultCompanyId, location_id: "" });
-      setSelectedCompanyId(defaultCompanyId);
+    if (open) {
+      if (vehicle) {
+        const driverIds = vehicle.assigned_driver_ids || (vehicle.assigned_driver_id ? [vehicle.assigned_driver_id] : []);
+        const companyId = vehicle.company_id || "";
+        const locationId = vehicle.location_id || "";
+        
+        setSelectedCompanyId(companyId);
+        setForm({ 
+          ...initialState, 
+          ...vehicle,
+          assigned_driver_ids: driverIds,
+          company_id: companyId,
+          location_id: locationId
+        });
+      } else {
+        const defaultCompanyId = isSuperAdmin ? "" : (currentUser?.company_id || "");
+        setSelectedCompanyId(defaultCompanyId);
+        setForm({ ...initialState, company_id: defaultCompanyId, location_id: "" });
+      }
     }
   }, [vehicle, open, isSuperAdmin, currentUser]);
 
