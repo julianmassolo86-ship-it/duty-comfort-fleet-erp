@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Search, Car, Building2, MapPin } from "lucide-react";
+import { Plus, Search, Car, Building2, MapPin, Grid3x3, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import PageHeader from "../components/common/PageHeader";
 import EmptyState from "../components/common/EmptyState";
 import VehicleCard from "../components/vehicles/VehicleCard";
+import VehicleTable from "../components/vehicles/VehicleTable";
 import VehicleDialog from "../components/vehicles/VehicleDialog";
 import { useTheme } from "../components/common/ThemeWrapper";
 
@@ -21,6 +22,7 @@ export default function Vehicles() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
+  const [viewMode, setViewMode] = useState("grid"); // "grid" o "table"
   const { theme } = useTheme();
 
   const queryClient = useQueryClient();
@@ -157,6 +159,32 @@ export default function Vehicles() {
           </div>
         )}
 
+        {/* View Toggle */}
+        <div className="flex justify-end gap-2 mb-6">
+          <Button
+            variant={viewMode === "grid" ? "default" : "outline"}
+            size="icon"
+            onClick={() => setViewMode("grid")}
+            className={cn(
+              "h-9 w-9",
+              viewMode === "grid" && "bg-yellow-500 hover:bg-yellow-600 text-black"
+            )}
+          >
+            <Grid3x3 className="w-4 h-4" />
+          </Button>
+          <Button
+            variant={viewMode === "table" ? "default" : "outline"}
+            size="icon"
+            onClick={() => setViewMode("table")}
+            className={cn(
+              "h-9 w-9",
+              viewMode === "table" && "bg-yellow-500 hover:bg-yellow-600 text-black"
+            )}
+          >
+            <List className="w-4 h-4" />
+          </Button>
+        </div>
+
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-3 mb-6 flex-wrap">
           <div className="relative flex-1 min-w-[200px]">
@@ -205,27 +233,44 @@ export default function Vehicles() {
           </Select>
         </div>
 
-        {/* Vehicle Grid */}
+        {/* Vehicle Grid/Table */}
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Array(6).fill(0).map((_, i) => (
-              <Skeleton key={i} className={cn("h-48 rounded-2xl", theme === 'dark' ? 'bg-slate-800/50' : 'bg-gray-200')} />
-            ))}
-          </div>
+          viewMode === "grid" ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Array(6).fill(0).map((_, i) => (
+                <Skeleton key={i} className={cn("h-48 rounded-2xl", theme === 'dark' ? 'bg-slate-800/50' : 'bg-gray-200')} />
+              ))}
+            </div>
+          ) : (
+            <Skeleton className={cn("h-96 rounded-xl", theme === 'dark' ? 'bg-slate-800/50' : 'bg-gray-200')} />
+          )
         ) : filteredVehicles.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredVehicles.map(vehicle => (
-              <VehicleCard 
-                key={vehicle.id} 
-                vehicle={vehicle}
-                location={locationsMap[vehicle.location_id]}
-                company={isSuperAdmin ? companiesMap[vehicle.company_id] : null}
-                drivers={drivers}
-                vehicleStatuses={vehicleStatuses}
-                onClick={() => handleEdit(vehicle)}
-              />
-            ))}
-          </div>
+          viewMode === "grid" ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredVehicles.map(vehicle => (
+                <VehicleCard 
+                  key={vehicle.id} 
+                  vehicle={vehicle}
+                  location={locationsMap[vehicle.location_id]}
+                  company={isSuperAdmin ? companiesMap[vehicle.company_id] : null}
+                  drivers={drivers}
+                  vehicleStatuses={vehicleStatuses}
+                  onClick={() => handleEdit(vehicle)}
+                />
+              ))}
+            </div>
+          ) : (
+            <VehicleTable 
+              vehicles={filteredVehicles}
+              locations={accessibleLocations}
+              companies={companies}
+              drivers={drivers}
+              vehicleStatuses={vehicleStatuses}
+              isSuperAdmin={isSuperAdmin}
+              onEdit={handleEdit}
+              onDelete={(id) => deleteMutation.mutate(id)}
+            />
+          )
         ) : (
           <EmptyState
             icon={Car}
