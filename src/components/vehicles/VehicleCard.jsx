@@ -18,7 +18,7 @@ const fuelLabels = {
   hybrid: "Híbrido",
 };
 
-export default function VehicleCard({ vehicle, location, company, drivers = [], onClick }) {
+export default function VehicleCard({ vehicle, location, company, drivers = [], vehicleStatuses = [], onClick }) {
   const Icon = vehicleIcons[vehicle.type] || Car;
   const { theme } = useTheme();
   
@@ -46,7 +46,7 @@ export default function VehicleCard({ vehicle, location, company, drivers = [], 
             <Icon className="w-16 h-16" />
           </div>
         )}
-        <StatusBadge status={vehicle.status} className="absolute top-3 right-3" />
+        <StatusBadge status={vehicle.status} statusList={vehicleStatuses} className="absolute top-3 right-3" />
         
         {/* Logo de la marca superpuesto en la imagen */}
         {vehicle.manufacturer_logo_url && (
