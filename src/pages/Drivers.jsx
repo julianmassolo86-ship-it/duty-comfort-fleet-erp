@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Search, Users } from "lucide-react";
@@ -23,9 +23,12 @@ export default function Drivers() {
 
   const queryClient = useQueryClient();
 
-  React.useEffect(() => {
+  useEffect(() => {
     base44.auth.me().then(setCurrentUser).catch(() => {});
   }, []);
+
+  // Si el usuario no tiene company_id, es super admin
+  const isSuperAdmin = !currentUser?.company_id;
 
   const { data: drivers = [], isLoading } = useQuery({
     queryKey: ['drivers'],
@@ -74,10 +77,13 @@ export default function Drivers() {
   });
 
   const handleSave = (data) => {
+    // Si es admin de empresa, asignar su company_id automáticamente
+    const finalData = isSuperAdmin ? data : { ...data, company_id: currentUser?.company_id };
+    
     if (selectedDriver) {
-      updateMutation.mutate({ id: selectedDriver.id, data });
+      updateMutation.mutate({ id: selectedDriver.id, data: finalData });
     } else {
-      createMutation.mutate(data);
+      createMutation.mutate(finalData);
     }
   };
 
@@ -86,7 +92,12 @@ export default function Drivers() {
     setDialogOpen(true);
   };
 
-  const filteredDrivers = drivers.filter(d => {
+  // Filtrar drivers según rol
+  const accessibleDrivers = isSuperAdmin 
+    ? drivers 
+    : drivers.filter(d => d.company_id === currentUser?.company_id);
+
+  const filteredDrivers = accessibleDrivers.filter(d => {
     const matchesSearch = 
       d.full_name?.toLowerCase().includes(search.toLowerCase()) ||
       d.document_id?.toLowerCase().includes(search.toLowerCase()) ||
