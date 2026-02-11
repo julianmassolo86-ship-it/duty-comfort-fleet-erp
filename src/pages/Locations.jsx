@@ -182,41 +182,50 @@ export default function Locations() {
                 <div 
                   key={location.id}
                   onClick={() => handleEdit(location)}
-                  className="group relative overflow-hidden rounded-2xl bg-slate-800/50 border border-slate-700/50 p-5 cursor-pointer transition-all duration-300 hover:bg-slate-800/70 hover:border-slate-600/50"
+                  className="group relative overflow-hidden rounded-2xl bg-zinc-900/80 border border-zinc-800/50 p-6 cursor-pointer backdrop-blur-xl shadow-lg shadow-black/20 hover:bg-zinc-900 hover:border-yellow-500/30 hover:shadow-2xl hover:shadow-yellow-500/10 hover:-translate-y-1 transition-all duration-300"
                 >
-                  <div className="flex items-start justify-between mb-4">
-                    {location.image_url ? (
-                      <div className="w-12 h-12 rounded-xl overflow-hidden border-2 border-emerald-500/20">
-                        <img src={location.image_url} alt={location.name} className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  
+                  {location.image_url ? (
+                    <div className="relative w-full h-32 rounded-xl mb-4 overflow-hidden border border-zinc-700">
+                      <img src={location.image_url} alt={location.name} className="w-full h-full object-cover" />
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center mb-4">
+                      <div className="p-4 rounded-2xl bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 border border-emerald-500/10 text-emerald-400 group-hover:from-emerald-500/20 group-hover:to-emerald-600/10 group-hover:border-emerald-500/20 group-hover:scale-110 transition-all duration-500 shadow-lg shadow-emerald-500/5">
+                        <MapPin className="w-10 h-10" />
                       </div>
-                    ) : (
-                      <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-400">
-                        <MapPin className="w-6 h-6" />
-                      </div>
-                    )}
+                    </div>
+                  )}
+                  
+                  <div className="relative flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <h3 className="text-xl font-black text-white mb-1 bg-gradient-to-br from-white to-zinc-300 bg-clip-text text-transparent">{location.name}</h3>
+                      <p className="text-sm text-zinc-600 font-medium">{typeLabels[location.type] || location.type}</p>
+                    </div>
                     <StatusBadge status={location.status} />
                   </div>
                   
-                  <h3 className="text-lg font-semibold text-white mb-1">{location.name}</h3>
-                  <p className="text-sm text-slate-400 mb-2">{typeLabels[location.type] || location.type}</p>
-                  
                   {isSuperAdmin && company && (
-                    <div className="flex items-center gap-2 text-xs text-slate-500 mb-3">
-                      <Building2 className="w-3 h-3" />
-                      <span>{company.name}</span>
+                    <div className="relative mb-3 px-3 py-2 rounded-lg bg-zinc-800/50 border border-zinc-700/50 w-fit">
+                      <div className="flex items-center gap-2">
+                        <Building2 className="w-4 h-4 text-purple-500" />
+                        <span className="text-sm font-medium text-white">{company.name}</span>
+                      </div>
                     </div>
                   )}
 
                   {location.address && (
-                    <p className="text-sm text-slate-500 mb-3 truncate">{location.address}</p>
+                    <p className="text-sm text-zinc-500 mb-3 font-medium truncate">{location.address}</p>
                   )}
                   
-                  <div className="flex items-center gap-2 text-sm text-slate-500">
-                    <Car className="w-4 h-4" />
-                    <span>{vehicleCount} vehículos</span>
+                  <div className="relative flex items-center gap-2 px-3 py-2 rounded-lg bg-zinc-800/50 border border-zinc-700/50 w-fit">
+                    <Car className="w-4 h-4 text-blue-500" />
+                    <span className="text-sm font-semibold text-white">{vehicleCount}</span>
+                    <span className="text-xs text-zinc-500">vehículos</span>
                   </div>
 
-                  <div className="absolute -right-8 -bottom-8 w-24 h-24 rounded-full bg-emerald-500/5 group-hover:bg-emerald-500/10 transition-colors" />
+                  <div className="absolute -right-12 -bottom-12 w-40 h-40 rounded-full bg-gradient-to-br from-yellow-500/5 to-transparent blur-2xl group-hover:from-yellow-500/10 transition-all duration-500" />
                 </div>
               );
             })}

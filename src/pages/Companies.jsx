@@ -131,38 +131,46 @@ export default function Companies() {
                 <div 
                   key={company.id}
                   onClick={() => handleEdit(company)}
-                  className="group relative overflow-hidden rounded-2xl bg-slate-800/50 border border-slate-700/50 p-5 cursor-pointer transition-all duration-300 hover:bg-slate-800/70 hover:border-slate-600/50"
+                  className="group relative overflow-hidden rounded-2xl bg-zinc-900/80 border border-zinc-800/50 p-6 cursor-pointer backdrop-blur-xl shadow-lg shadow-black/20 hover:bg-zinc-900 hover:border-yellow-500/30 hover:shadow-2xl hover:shadow-yellow-500/10 hover:-translate-y-1 transition-all duration-300"
                 >
-                  <div className="flex items-start justify-between mb-4">
-                    {company.logo_url ? (
-                      <div className="w-12 h-12 rounded-xl overflow-hidden border-2 border-purple-500/20">
-                        <img src={company.logo_url} alt={company.name} className="w-full h-full object-cover" />
-                      </div>
-                    ) : (
-                      <div className="p-3 rounded-xl bg-purple-500/10 text-purple-400">
-                        <Building2 className="w-6 h-6" />
-                      </div>
-                    )}
+                  <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  
+                  <div className="relative flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-4">
+                      {company.logo_url ? (
+                        <div className="p-2 rounded-xl bg-zinc-800 border border-zinc-700">
+                          <img src={company.logo_url} alt={company.name} className="w-12 h-12 object-contain" />
+                        </div>
+                      ) : (
+                        <div className="p-4 rounded-2xl bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/10 text-purple-400 group-hover:from-purple-500/20 group-hover:to-purple-600/10 group-hover:border-purple-500/20 group-hover:scale-110 transition-all duration-500 shadow-lg shadow-purple-500/5">
+                          <Building2 className="w-7 h-7" />
+                        </div>
+                      )}
+                    </div>
                     <StatusBadge status={company.status} />
                   </div>
                   
-                  <h3 className="text-lg font-semibold text-white mb-1">{company.name}</h3>
-                  {company.tax_id && (
-                    <p className="text-sm text-slate-400 mb-4">{company.tax_id}</p>
-                  )}
+                  <div className="relative mb-4">
+                    <h3 className="text-xl font-black text-white mb-1 bg-gradient-to-br from-white to-zinc-300 bg-clip-text text-transparent">{company.name}</h3>
+                    {company.tax_id && (
+                      <p className="text-sm text-zinc-600 font-medium">{company.tax_id}</p>
+                    )}
+                  </div>
                   
-                  <div className="flex items-center gap-4 text-sm text-slate-500">
-                    <div className="flex items-center gap-1">
-                      <MapPin className="w-4 h-4" />
-                      <span>{stats.locations} locaciones</span>
+                  <div className="relative flex items-center gap-2">
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-zinc-800/50 border border-zinc-700/50">
+                      <MapPin className="w-4 h-4 text-emerald-500" />
+                      <span className="text-sm font-semibold text-white">{stats.locations}</span>
+                      <span className="text-xs text-zinc-500">locaciones</span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Users className="w-4 h-4" />
-                      <span>{stats.admins} admins</span>
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-zinc-800/50 border border-zinc-700/50">
+                      <Users className="w-4 h-4 text-cyan-500" />
+                      <span className="text-sm font-semibold text-white">{stats.admins}</span>
+                      <span className="text-xs text-zinc-500">admins</span>
                     </div>
                   </div>
 
-                  <div className="absolute -right-8 -bottom-8 w-24 h-24 rounded-full bg-purple-500/5 group-hover:bg-purple-500/10 transition-colors" />
+                  <div className="absolute -right-12 -bottom-12 w-40 h-40 rounded-full bg-gradient-to-br from-yellow-500/5 to-transparent blur-2xl group-hover:from-yellow-500/10 transition-all duration-500" />
                 </div>
               );
             })}
