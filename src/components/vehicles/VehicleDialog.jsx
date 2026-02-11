@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import {
   Dialog,
@@ -73,6 +72,7 @@ export default function VehicleDialog({
   locations = [],
   companies = [],
   manufacturers = [],
+  vehicleTypes = [],
   isSuperAdmin,
   currentUser,
   onSave, 
@@ -367,24 +367,18 @@ export default function VehicleDialog({
                   <Label>Tipo *</Label>
                   <Select value={form.type} onValueChange={(v) => handleChange("type", v)} required>
                     <SelectTrigger className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50">
-                      <SelectValue />
+                      <SelectValue placeholder="Seleccionar tipo" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="car">Auto</SelectItem>
-                      <SelectItem value="truck">Camión</SelectItem>
-                      <SelectItem value="van">Van</SelectItem>
-                      <SelectItem value="bus">Bus</SelectItem>
-                      <SelectItem value="motorcycle">Moto</SelectItem>
-                      <SelectItem value="machinery">Maquinaria</SelectItem>
-                      <SelectItem value="trailer">Trailer</SelectItem>
-                      <SelectItem value="pickup">Pickup</SelectItem>
-                      <SelectItem value="semi_truck">Semi Camión</SelectItem>
-                      <SelectItem value="crane">Grúa</SelectItem>
-                      <SelectItem value="excavator">Excavadora</SelectItem>
-                      <SelectItem value="loader">Cargadora</SelectItem>
-                      <SelectItem value="grader">Motoniveladora</SelectItem>
-                      <SelectItem value="roller">Rodillo</SelectItem>
-                      <SelectItem value="tractor">Tractor</SelectItem>
+                      {vehicleTypes.length > 0 ? (
+                        vehicleTypes.map(vt => (
+                          <SelectItem key={vt.id} value={vt.name}>
+                            {vt.name}
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <div className="px-2 py-1.5 text-sm text-zinc-500">No hay tipos configurados</div>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
