@@ -4,7 +4,7 @@ import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import { 
   LayoutDashboard, Car, Users, Wrench, FileText, 
-  BarChart3, Menu, X, LogOut, ChevronRight, ChevronDown, Building2, MapPin, UserCog, Sun, Moon, Upload, Settings
+  BarChart3, Menu, X, LogOut, ChevronRight, ChevronDown, Building2, MapPin, UserCog, Sun, Moon, Upload, Settings, Factory, MapPinned, Cog
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -127,15 +127,23 @@ function LayoutContent({ children, currentPageName }) {
       items: [
         { 
           name: "Empresas", 
-          icon: Building2, 
+          icon: Factory, 
           isSubmenu: true,
           subItems: [
-            { name: "Tipo de industria", page: "IndustryTypes" }
+            { name: "Tipo de industria" }
+          ]
+        },
+        { 
+          name: "Ubicación", 
+          icon: MapPinned, 
+          isSubmenu: true,
+          subItems: [
+            { name: "Tipo de ubicación" }
           ]
         },
         { 
           name: "Vehículos", 
-          icon: Car, 
+          icon: Cog, 
           isSubmenu: true,
           subItems: [
             { name: "Marcas", page: "Manufacturers" },
@@ -179,8 +187,16 @@ function LayoutContent({ children, currentPageName }) {
       section: "Configuración",
       items: [
         { 
+          name: "Ubicación", 
+          icon: MapPinned, 
+          isSubmenu: true,
+          subItems: [
+            { name: "Tipo de ubicación" }
+          ]
+        },
+        { 
           name: "Vehículos", 
-          icon: Car, 
+          icon: Cog, 
           isSubmenu: true,
           subItems: [
             { name: "Marcas", page: "Manufacturers" },
