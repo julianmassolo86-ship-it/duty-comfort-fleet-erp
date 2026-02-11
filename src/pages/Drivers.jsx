@@ -16,12 +16,32 @@ export default function Drivers() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedDriver, setSelectedDriver] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
 
   const queryClient = useQueryClient();
+
+  React.useEffect(() => {
+    base44.auth.me().then(setCurrentUser).catch(() => {});
+  }, []);
 
   const { data: drivers = [], isLoading } = useQuery({
     queryKey: ['drivers'],
     queryFn: () => base44.entities.Driver.list(),
+  });
+
+  const { data: companies = [] } = useQuery({
+    queryKey: ['companies'],
+    queryFn: () => base44.entities.Company.list(),
+  });
+
+  const { data: locations = [] } = useQuery({
+    queryKey: ['locations'],
+    queryFn: () => base44.entities.Location.list(),
+  });
+
+  const { data: vehicles = [] } = useQuery({
+    queryKey: ['vehicles'],
+    queryFn: () => base44.entities.Vehicle.list(),
   });
 
   const createMutation = useMutation({
@@ -157,6 +177,10 @@ export default function Drivers() {
           onDelete={selectedDriver ? () => deleteMutation.mutate(selectedDriver.id) : undefined}
           isLoading={createMutation.isPending || updateMutation.isPending}
           isDeleting={deleteMutation.isPending}
+          companies={companies}
+          locations={locations}
+          vehicles={vehicles}
+          currentUser={currentUser}
         />
       </div>
     </div>
