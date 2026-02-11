@@ -86,31 +86,71 @@ function LayoutContent({ children, currentPageName }) {
   // Si el usuario no tiene company_id, es super admin
   const isSuperAdmin = !user?.company_id;
 
-  // Menú para Super Admin
-  const superAdminItems = [
-    { name: "Dashboard", icon: LayoutDashboard, page: "Dashboard" },
-    { name: "Empresas", icon: Building2, page: "Companies" },
-    { name: "Administradores", icon: UserCog, page: "CompanyAdmins" },
-    { name: "Locaciones", icon: MapPin, page: "Locations" },
-    { name: "Vehículos", icon: Car, page: "Vehicles" },
-    { name: "Conductores", icon: Users, page: "Drivers" },
-    { name: "Mantenimiento", icon: Wrench, page: "Maintenance" },
-    { name: "Documentos", icon: FileText, page: "Documents" },
-    { name: "Reportes", icon: BarChart3, page: "Reports" },
+  // Menú para Super Admin - Organizado por módulos
+  const superAdminMenu = [
+    {
+      section: null,
+      items: [
+        { name: "Dashboard", icon: LayoutDashboard, page: "Dashboard" }
+      ]
+    },
+    {
+      section: "Administración",
+      items: [
+        { name: "Empresas", icon: Building2, page: "Companies" },
+        { name: "Locaciones", icon: MapPin, page: "Locations" },
+        { name: "Vehículos", icon: Car, page: "Vehicles" }
+      ]
+    },
+    {
+      section: "Personal",
+      items: [
+        { name: "Administradores", icon: UserCog, page: "CompanyAdmins" },
+        { name: "Conductores", icon: Users, page: "Drivers" }
+      ]
+    },
+    {
+      section: "Operaciones",
+      items: [
+        { name: "Mantenimiento", icon: Wrench, page: "Maintenance" },
+        { name: "Documentos", icon: FileText, page: "Documents" },
+        { name: "Reportes", icon: BarChart3, page: "Reports" }
+      ]
+    }
   ];
 
-  // Menú para Admin de Empresa
-  const companyAdminItems = [
-    { name: "Dashboard", icon: LayoutDashboard, page: "Dashboard" },
-    { name: "Locaciones", icon: MapPin, page: "Locations" },
-    { name: "Vehículos", icon: Car, page: "Vehicles" },
-    { name: "Conductores", icon: Users, page: "Drivers" },
-    { name: "Mantenimiento", icon: Wrench, page: "Maintenance" },
-    { name: "Documentos", icon: FileText, page: "Documents" },
-    { name: "Reportes", icon: BarChart3, page: "Reports" },
+  // Menú para Admin de Empresa - Organizado por módulos
+  const companyAdminMenu = [
+    {
+      section: null,
+      items: [
+        { name: "Dashboard", icon: LayoutDashboard, page: "Dashboard" }
+      ]
+    },
+    {
+      section: "Administración",
+      items: [
+        { name: "Locaciones", icon: MapPin, page: "Locations" },
+        { name: "Vehículos", icon: Car, page: "Vehicles" }
+      ]
+    },
+    {
+      section: "Personal",
+      items: [
+        { name: "Conductores", icon: Users, page: "Drivers" }
+      ]
+    },
+    {
+      section: "Operaciones",
+      items: [
+        { name: "Mantenimiento", icon: Wrench, page: "Maintenance" },
+        { name: "Documentos", icon: FileText, page: "Documents" },
+        { name: "Reportes", icon: BarChart3, page: "Reports" }
+      ]
+    }
   ];
 
-  const navItems = isSuperAdmin ? superAdminItems : companyAdminItems;
+  const menuSections = isSuperAdmin ? superAdminMenu : companyAdminMenu;
 
   return (
     <div className={cn("min-h-screen transition-colors", theme === 'dark' ? 'bg-black' : 'bg-gray-50')}>
@@ -284,37 +324,51 @@ function LayoutContent({ children, currentPageName }) {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-            {navItems.map((item) => {
-              const isActive = currentPageName === item.page;
-              return (
-                <Link
-                  key={item.page}
-                  to={createPageUrl(item.page)}
-                  onClick={() => setSidebarOpen(false)}
-                  className={cn(
-                    "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200",
-                    theme === 'dark' 
-                      ? (isActive ? "bg-yellow-500/10 text-yellow-400 shadow-sm" : "text-zinc-400 hover:text-white hover:bg-zinc-800/50")
-                      : (isActive ? "bg-yellow-500/10 text-yellow-600 shadow-sm" : "text-gray-600 hover:text-gray-900 hover:bg-gray-100")
-                  )}
-                >
-                  <item.icon className={cn(
-                    "w-5 h-5 transition-colors",
-                    theme === 'dark'
-                      ? (isActive ? "text-yellow-400" : "text-zinc-500")
-                      : (isActive ? "text-yellow-600" : "text-gray-500")
-                  )} />
-                  <span>{item.name}</span>
-                  {isActive && (
-                    <ChevronRight className={cn(
-                      "w-4 h-4 ml-auto",
-                      theme === 'dark' ? 'text-yellow-400' : 'text-yellow-600'
-                    )} />
-                  )}
-                </Link>
-              );
-            })}
+          <nav className="flex-1 px-4 py-6 overflow-y-auto">
+            {menuSections.map((section, sectionIndex) => (
+              <div key={sectionIndex} className={sectionIndex > 0 ? "mt-6" : ""}>
+                {section.section && (
+                  <h3 className={cn(
+                    "px-4 mb-2 text-xs font-bold uppercase tracking-wider",
+                    theme === 'dark' ? 'text-zinc-600' : 'text-gray-400'
+                  )}>
+                    {section.section}
+                  </h3>
+                )}
+                <div className="space-y-1">
+                  {section.items.map((item) => {
+                    const isActive = currentPageName === item.page;
+                    return (
+                      <Link
+                        key={item.page}
+                        to={createPageUrl(item.page)}
+                        onClick={() => setSidebarOpen(false)}
+                        className={cn(
+                          "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200",
+                          theme === 'dark' 
+                            ? (isActive ? "bg-yellow-500/10 text-yellow-400 shadow-sm" : "text-zinc-400 hover:text-white hover:bg-zinc-800/50")
+                            : (isActive ? "bg-yellow-500/10 text-yellow-600 shadow-sm" : "text-gray-600 hover:text-gray-900 hover:bg-gray-100")
+                        )}
+                      >
+                        <item.icon className={cn(
+                          "w-5 h-5 transition-colors",
+                          theme === 'dark'
+                            ? (isActive ? "text-yellow-400" : "text-zinc-500")
+                            : (isActive ? "text-yellow-600" : "text-gray-500")
+                        )} />
+                        <span>{item.name}</span>
+                        {isActive && (
+                          <ChevronRight className={cn(
+                            "w-4 h-4 ml-auto",
+                            theme === 'dark' ? 'text-yellow-400' : 'text-yellow-600'
+                          )} />
+                        )}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </nav>
 
           {/* User Menu - Mobile Only */}
