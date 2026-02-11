@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Trash2, X, Upload, Image as ImageIcon, UserPlus, UserMinus } from "lucide-react";
+import { Loader2, Trash2, X, Upload, Image as ImageIcon, UserPlus, UserMinus, ZoomIn, Download } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
@@ -107,14 +107,14 @@ export default function VehicleDialog({
     onSave(finalData);
   };
 
-  const handleImageUpload = async (e) => {
+  const handleImageUpload = async (e, field = "image_url") => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setUploading(true);
     try {
       const result = await base44.integrations.Core.UploadFile({ file });
-      handleChange("image_url", result.file_url);
+      handleChange(field, result.file_url);
     } catch (error) {
       console.error("Error uploading image:", error);
     } finally {
@@ -591,46 +591,680 @@ export default function VehicleDialog({
               </div>
             </TabsContent>
 
-            <TabsContent value="documents" className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Fecha de Compra</Label>
-                  <Input
-                    type="date"
-                    value={form.purchase_date}
-                    onChange={(e) => handleChange("purchase_date", e.target.value)}
-                    className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Vencimiento Seguro</Label>
-                  <Input
-                    type="date"
-                    value={form.insurance_expiry}
-                    onChange={(e) => handleChange("insurance_expiry", e.target.value)}
-                    className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
-                  />
-                </div>
+            <TabsContent value="documents" className="space-y-6">
+              {/* Fecha de Compra */}
+              <div className="space-y-2">
+                <Label>Fecha de Compra</Label>
+                <Input
+                  type="date"
+                  value={form.purchase_date}
+                  onChange={(e) => handleChange("purchase_date", e.target.value)}
+                  className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
+                />
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Vencimiento VTV</Label>
-                  <Input
-                    type="date"
-                    value={form.technical_inspection_expiry}
-                    onChange={(e) => handleChange("technical_inspection_expiry", e.target.value)}
-                    className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
-                  />
+
+              {/* Cédula Vehículo - Lado A */}
+              <div className="space-y-2 pt-4 border-t border-zinc-700">
+                <div className="flex items-center justify-between">
+                  <Label>Cédula Vehículo - Lado A (Frente)</Label>
+                  {form.vehicle_card_front_expiry && (
+                    <span className="text-xs text-zinc-500">Vence: {new Date(form.vehicle_card_front_expiry).toLocaleDateString()}</span>
+                  )}
                 </div>
-                <div className="space-y-2">
-                  <Label>Vencimiento Permiso Circulación</Label>
-                  <Input
-                    type="date"
-                    value={form.circulation_permit_expiry}
-                    onChange={(e) => handleChange("circulation_permit_expiry", e.target.value)}
-                    className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
-                  />
+                <Input
+                  type="date"
+                  value={form.vehicle_card_front_expiry || ""}
+                  onChange={(e) => handleChange("vehicle_card_front_expiry", e.target.value)}
+                  className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 mb-3"
+                  placeholder="Fecha de vencimiento"
+                />
+                {form.vehicle_card_front_url ? (
+                  <div className="flex items-center gap-3">
+                    <img 
+                      src={form.vehicle_card_front_url} 
+                      alt="Cédula frente" 
+                      className="w-32 h-20 object-cover rounded-lg border-2 border-zinc-700"
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => window.open(form.vehicle_card_front_url, '_blank')}
+                        className="border-zinc-700 hover:bg-zinc-800 hover:border-yellow-500/50 transition-all"
+                      >
+                        <ZoomIn className="w-4 h-4 mr-2" />
+                        <span className="font-medium">Ver</span>
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          const a = document.createElement('a');
+                          a.href = form.vehicle_card_front_url;
+                          a.download = 'cedula_frente.jpg';
+                          a.click();
+                        }}
+                        className="border-zinc-700 hover:bg-zinc-800 hover:border-blue-500/50 transition-all"
+                      >
+                        <Download className="w-4 h-4 mr-2" />
+                        <span className="font-medium">Descargar</span>
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleChange("vehicle_card_front_url", "")}
+                        className="hover:bg-red-700"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <input
+                      type="file"
+                      id="vehicle-card-front-upload"
+                      accept="image/*,application/pdf"
+                      className="hidden"
+                      onChange={(e) => handleImageUpload(e, "vehicle_card_front_url")}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => document.getElementById("vehicle-card-front-upload").click()}
+                      disabled={uploading}
+                      className="border-zinc-700 hover:bg-zinc-800"
+                    >
+                      {uploading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Upload className="w-4 h-4 mr-2" />}
+                      Cargar Cédula - Lado A
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              {/* Cédula Vehículo - Lado B */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label>Cédula Vehículo - Lado B (Dorso)</Label>
+                  {form.vehicle_card_back_expiry && (
+                    <span className="text-xs text-zinc-500">Vence: {new Date(form.vehicle_card_back_expiry).toLocaleDateString()}</span>
+                  )}
                 </div>
+                <Input
+                  type="date"
+                  value={form.vehicle_card_back_expiry || ""}
+                  onChange={(e) => handleChange("vehicle_card_back_expiry", e.target.value)}
+                  className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 mb-3"
+                  placeholder="Fecha de vencimiento"
+                />
+                {form.vehicle_card_back_url ? (
+                  <div className="flex items-center gap-3">
+                    <img 
+                      src={form.vehicle_card_back_url} 
+                      alt="Cédula dorso" 
+                      className="w-32 h-20 object-cover rounded-lg border-2 border-zinc-700"
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => window.open(form.vehicle_card_back_url, '_blank')}
+                        className="border-zinc-700 hover:bg-zinc-800 hover:border-yellow-500/50 transition-all"
+                      >
+                        <ZoomIn className="w-4 h-4 mr-2" />
+                        <span className="font-medium">Ver</span>
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          const a = document.createElement('a');
+                          a.href = form.vehicle_card_back_url;
+                          a.download = 'cedula_dorso.jpg';
+                          a.click();
+                        }}
+                        className="border-zinc-700 hover:bg-zinc-800 hover:border-blue-500/50 transition-all"
+                      >
+                        <Download className="w-4 h-4 mr-2" />
+                        <span className="font-medium">Descargar</span>
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleChange("vehicle_card_back_url", "")}
+                        className="hover:bg-red-700"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <input
+                      type="file"
+                      id="vehicle-card-back-upload"
+                      accept="image/*,application/pdf"
+                      className="hidden"
+                      onChange={(e) => handleImageUpload(e, "vehicle_card_back_url")}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => document.getElementById("vehicle-card-back-upload").click()}
+                      disabled={uploading}
+                      className="border-zinc-700 hover:bg-zinc-800"
+                    >
+                      {uploading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Upload className="w-4 h-4 mr-2" />}
+                      Cargar Cédula - Lado B
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              {/* Título Automotor */}
+              <div className="space-y-2 pt-4 border-t border-zinc-700">
+                <div className="flex items-center justify-between">
+                  <Label>Título Automotor</Label>
+                  {form.title_expiry && (
+                    <span className="text-xs text-zinc-500">Vence: {new Date(form.title_expiry).toLocaleDateString()}</span>
+                  )}
+                </div>
+                <Input
+                  type="date"
+                  value={form.title_expiry || ""}
+                  onChange={(e) => handleChange("title_expiry", e.target.value)}
+                  className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 mb-3"
+                  placeholder="Fecha de vencimiento"
+                />
+                {form.title_url ? (
+                  <div className="flex items-center gap-3">
+                    <img 
+                      src={form.title_url} 
+                      alt="Título automotor" 
+                      className="w-32 h-20 object-cover rounded-lg border-2 border-zinc-700"
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => window.open(form.title_url, '_blank')}
+                        className="border-zinc-700 hover:bg-zinc-800 hover:border-yellow-500/50 transition-all"
+                      >
+                        <ZoomIn className="w-4 h-4 mr-2" />
+                        <span className="font-medium">Ver</span>
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          const a = document.createElement('a');
+                          a.href = form.title_url;
+                          a.download = 'titulo_automotor.jpg';
+                          a.click();
+                        }}
+                        className="border-zinc-700 hover:bg-zinc-800 hover:border-blue-500/50 transition-all"
+                      >
+                        <Download className="w-4 h-4 mr-2" />
+                        <span className="font-medium">Descargar</span>
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleChange("title_url", "")}
+                        className="hover:bg-red-700"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <input
+                      type="file"
+                      id="title-upload"
+                      accept="image/*,application/pdf"
+                      className="hidden"
+                      onChange={(e) => handleImageUpload(e, "title_url")}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => document.getElementById("title-upload").click()}
+                      disabled={uploading}
+                      className="border-zinc-700 hover:bg-zinc-800"
+                    >
+                      {uploading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Upload className="w-4 h-4 mr-2" />}
+                      Cargar Título Automotor
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              {/* Patente */}
+              <div className="space-y-2 pt-4 border-t border-zinc-700">
+                <div className="flex items-center justify-between">
+                  <Label>Patente</Label>
+                  {form.license_plate_expiry && (
+                    <span className="text-xs text-zinc-500">Vence: {new Date(form.license_plate_expiry).toLocaleDateString()}</span>
+                  )}
+                </div>
+                <Input
+                  type="date"
+                  value={form.license_plate_expiry || ""}
+                  onChange={(e) => handleChange("license_plate_expiry", e.target.value)}
+                  className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 mb-3"
+                  placeholder="Fecha de vencimiento"
+                />
+                {form.license_plate_url ? (
+                  <div className="flex items-center gap-3">
+                    <img 
+                      src={form.license_plate_url} 
+                      alt="Patente" 
+                      className="w-32 h-20 object-cover rounded-lg border-2 border-zinc-700"
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => window.open(form.license_plate_url, '_blank')}
+                        className="border-zinc-700 hover:bg-zinc-800 hover:border-yellow-500/50 transition-all"
+                      >
+                        <ZoomIn className="w-4 h-4 mr-2" />
+                        <span className="font-medium">Ver</span>
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          const a = document.createElement('a');
+                          a.href = form.license_plate_url;
+                          a.download = 'patente.jpg';
+                          a.click();
+                        }}
+                        className="border-zinc-700 hover:bg-zinc-800 hover:border-blue-500/50 transition-all"
+                      >
+                        <Download className="w-4 h-4 mr-2" />
+                        <span className="font-medium">Descargar</span>
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleChange("license_plate_url", "")}
+                        className="hover:bg-red-700"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <input
+                      type="file"
+                      id="license-plate-upload"
+                      accept="image/*,application/pdf"
+                      className="hidden"
+                      onChange={(e) => handleImageUpload(e, "license_plate_url")}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => document.getElementById("license-plate-upload").click()}
+                      disabled={uploading}
+                      className="border-zinc-700 hover:bg-zinc-800"
+                    >
+                      {uploading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Upload className="w-4 h-4 mr-2" />}
+                      Cargar Patente
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              {/* Verificación Técnica (VTV) */}
+              <div className="space-y-2 pt-4 border-t border-zinc-700">
+                <div className="flex items-center justify-between">
+                  <Label>Verificación Técnica (VTV)</Label>
+                  {form.technical_inspection_expiry && (
+                    <span className="text-xs text-zinc-500">Vence: {new Date(form.technical_inspection_expiry).toLocaleDateString()}</span>
+                  )}
+                </div>
+                <Input
+                  type="date"
+                  value={form.technical_inspection_expiry}
+                  onChange={(e) => handleChange("technical_inspection_expiry", e.target.value)}
+                  className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 mb-3"
+                  placeholder="Fecha de vencimiento"
+                />
+                {form.technical_inspection_url ? (
+                  <div className="flex items-center gap-3">
+                    <img 
+                      src={form.technical_inspection_url} 
+                      alt="VTV" 
+                      className="w-32 h-20 object-cover rounded-lg border-2 border-zinc-700"
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => window.open(form.technical_inspection_url, '_blank')}
+                        className="border-zinc-700 hover:bg-zinc-800 hover:border-yellow-500/50 transition-all"
+                      >
+                        <ZoomIn className="w-4 h-4 mr-2" />
+                        <span className="font-medium">Ver</span>
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          const a = document.createElement('a');
+                          a.href = form.technical_inspection_url;
+                          a.download = 'vtv.jpg';
+                          a.click();
+                        }}
+                        className="border-zinc-700 hover:bg-zinc-800 hover:border-blue-500/50 transition-all"
+                      >
+                        <Download className="w-4 h-4 mr-2" />
+                        <span className="font-medium">Descargar</span>
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleChange("technical_inspection_url", "")}
+                        className="hover:bg-red-700"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <input
+                      type="file"
+                      id="technical-inspection-upload"
+                      accept="image/*,application/pdf"
+                      className="hidden"
+                      onChange={(e) => handleImageUpload(e, "technical_inspection_url")}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => document.getElementById("technical-inspection-upload").click()}
+                      disabled={uploading}
+                      className="border-zinc-700 hover:bg-zinc-800"
+                    >
+                      {uploading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Upload className="w-4 h-4 mr-2" />}
+                      Cargar VTV
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              {/* Grabado de Autopartes */}
+              <div className="space-y-2 pt-4 border-t border-zinc-700">
+                <div className="flex items-center justify-between">
+                  <Label>Grabado de Autopartes</Label>
+                  {form.parts_engraving_expiry && (
+                    <span className="text-xs text-zinc-500">Vence: {new Date(form.parts_engraving_expiry).toLocaleDateString()}</span>
+                  )}
+                </div>
+                <Input
+                  type="date"
+                  value={form.parts_engraving_expiry || ""}
+                  onChange={(e) => handleChange("parts_engraving_expiry", e.target.value)}
+                  className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 mb-3"
+                  placeholder="Fecha de vencimiento"
+                />
+                {form.parts_engraving_url ? (
+                  <div className="flex items-center gap-3">
+                    <img 
+                      src={form.parts_engraving_url} 
+                      alt="Grabado autopartes" 
+                      className="w-32 h-20 object-cover rounded-lg border-2 border-zinc-700"
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => window.open(form.parts_engraving_url, '_blank')}
+                        className="border-zinc-700 hover:bg-zinc-800 hover:border-yellow-500/50 transition-all"
+                      >
+                        <ZoomIn className="w-4 h-4 mr-2" />
+                        <span className="font-medium">Ver</span>
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          const a = document.createElement('a');
+                          a.href = form.parts_engraving_url;
+                          a.download = 'grabado_autopartes.jpg';
+                          a.click();
+                        }}
+                        className="border-zinc-700 hover:bg-zinc-800 hover:border-blue-500/50 transition-all"
+                      >
+                        <Download className="w-4 h-4 mr-2" />
+                        <span className="font-medium">Descargar</span>
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleChange("parts_engraving_url", "")}
+                        className="hover:bg-red-700"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <input
+                      type="file"
+                      id="parts-engraving-upload"
+                      accept="image/*,application/pdf"
+                      className="hidden"
+                      onChange={(e) => handleImageUpload(e, "parts_engraving_url")}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => document.getElementById("parts-engraving-upload").click()}
+                      disabled={uploading}
+                      className="border-zinc-700 hover:bg-zinc-800"
+                    >
+                      {uploading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Upload className="w-4 h-4 mr-2" />}
+                      Cargar Grabado de Autopartes
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              {/* Extintor */}
+              <div className="space-y-2 pt-4 border-t border-zinc-700">
+                <div className="flex items-center justify-between">
+                  <Label>Extintor</Label>
+                  {form.fire_extinguisher_expiry && (
+                    <span className="text-xs text-zinc-500">Vence: {new Date(form.fire_extinguisher_expiry).toLocaleDateString()}</span>
+                  )}
+                </div>
+                <Input
+                  type="date"
+                  value={form.fire_extinguisher_expiry || ""}
+                  onChange={(e) => handleChange("fire_extinguisher_expiry", e.target.value)}
+                  className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 mb-3"
+                  placeholder="Fecha de vencimiento"
+                />
+                {form.fire_extinguisher_url ? (
+                  <div className="flex items-center gap-3">
+                    <img 
+                      src={form.fire_extinguisher_url} 
+                      alt="Extintor" 
+                      className="w-32 h-20 object-cover rounded-lg border-2 border-zinc-700"
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => window.open(form.fire_extinguisher_url, '_blank')}
+                        className="border-zinc-700 hover:bg-zinc-800 hover:border-yellow-500/50 transition-all"
+                      >
+                        <ZoomIn className="w-4 h-4 mr-2" />
+                        <span className="font-medium">Ver</span>
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          const a = document.createElement('a');
+                          a.href = form.fire_extinguisher_url;
+                          a.download = 'extintor.jpg';
+                          a.click();
+                        }}
+                        className="border-zinc-700 hover:bg-zinc-800 hover:border-blue-500/50 transition-all"
+                      >
+                        <Download className="w-4 h-4 mr-2" />
+                        <span className="font-medium">Descargar</span>
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleChange("fire_extinguisher_url", "")}
+                        className="hover:bg-red-700"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <input
+                      type="file"
+                      id="fire-extinguisher-upload"
+                      accept="image/*,application/pdf"
+                      className="hidden"
+                      onChange={(e) => handleImageUpload(e, "fire_extinguisher_url")}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => document.getElementById("fire-extinguisher-upload").click()}
+                      disabled={uploading}
+                      className="border-zinc-700 hover:bg-zinc-800"
+                    >
+                      {uploading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Upload className="w-4 h-4 mr-2" />}
+                      Cargar Extintor
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              {/* Seguro */}
+              <div className="space-y-2 pt-4 border-t border-zinc-700">
+                <div className="flex items-center justify-between">
+                  <Label>Seguro</Label>
+                  {form.insurance_expiry && (
+                    <span className="text-xs text-zinc-500">Vence: {new Date(form.insurance_expiry).toLocaleDateString()}</span>
+                  )}
+                </div>
+                <Input
+                  type="date"
+                  value={form.insurance_expiry}
+                  onChange={(e) => handleChange("insurance_expiry", e.target.value)}
+                  className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 mb-3"
+                  placeholder="Fecha de vencimiento"
+                />
+                {form.insurance_url ? (
+                  <div className="flex items-center gap-3">
+                    <img 
+                      src={form.insurance_url} 
+                      alt="Seguro" 
+                      className="w-32 h-20 object-cover rounded-lg border-2 border-zinc-700"
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => window.open(form.insurance_url, '_blank')}
+                        className="border-zinc-700 hover:bg-zinc-800 hover:border-yellow-500/50 transition-all"
+                      >
+                        <ZoomIn className="w-4 h-4 mr-2" />
+                        <span className="font-medium">Ver</span>
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          const a = document.createElement('a');
+                          a.href = form.insurance_url;
+                          a.download = 'seguro.jpg';
+                          a.click();
+                        }}
+                        className="border-zinc-700 hover:bg-zinc-800 hover:border-blue-500/50 transition-all"
+                      >
+                        <Download className="w-4 h-4 mr-2" />
+                        <span className="font-medium">Descargar</span>
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleChange("insurance_url", "")}
+                        className="hover:bg-red-700"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <input
+                      type="file"
+                      id="insurance-upload"
+                      accept="image/*,application/pdf"
+                      className="hidden"
+                      onChange={(e) => handleImageUpload(e, "insurance_url")}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => document.getElementById("insurance-upload").click()}
+                      disabled={uploading}
+                      className="border-zinc-700 hover:bg-zinc-800"
+                    >
+                      {uploading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Upload className="w-4 h-4 mr-2" />}
+                      Cargar Seguro
+                    </Button>
+                  </div>
+                )}
               </div>
             </TabsContent>
 
