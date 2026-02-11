@@ -295,7 +295,7 @@ export default function DriverDialog({
                     type="date"
                     value={form.license_expiry}
                     onChange={(e) => handleChange("license_expiry", e.target.value)}
-                    className="bg-slate-800 border-slate-700"
+                    className="bg-zinc-900 border-zinc-700 hover:border-yellow-500/50 transition-colors"
                   />
                 </div>
 
@@ -457,7 +457,7 @@ export default function DriverDialog({
                   <Input
                     value={form.address}
                     onChange={(e) => handleChange("address", e.target.value)}
-                    className="bg-slate-800 border-slate-700"
+                    className="bg-zinc-900 border-zinc-700 hover:border-yellow-500/50 transition-colors"
                   />
                 </div>
 
@@ -585,7 +585,7 @@ export default function DriverDialog({
                       Eliminar
                     </Button>
                   </AlertDialogTrigger>
-                  <AlertDialogContent className="bg-slate-900 border-slate-700">
+                  <AlertDialogContent className="bg-zinc-950 border-zinc-800 shadow-2xl shadow-black/50">
                     <AlertDialogHeader>
                       <AlertDialogTitle className="text-white">¿Eliminar conductor?</AlertDialogTitle>
                       <AlertDialogDescription>
@@ -593,13 +593,13 @@ export default function DriverDialog({
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                      <AlertDialogCancel className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700">Cancelar</AlertDialogCancel>
+                      <AlertDialogCancel className="bg-zinc-900 border-zinc-800 text-white hover:bg-zinc-800">Cancelar</AlertDialogCancel>
                       <AlertDialogAction onClick={onDelete} className="bg-red-600 hover:bg-red-700">Eliminar</AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
               )}
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="border-slate-700 text-slate-300 hover:bg-slate-800">
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="border-zinc-700 text-zinc-300 hover:bg-zinc-800">
                 Cancelar
               </Button>
               <Button type="submit" disabled={isLoading} className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold">
@@ -614,7 +614,7 @@ export default function DriverDialog({
       {/* Image Preview Modal */}
       {imagePreview && (
         <Dialog open={!!imagePreview} onOpenChange={() => setImagePreview(null)}>
-          <DialogContent className="max-w-4xl bg-slate-900 border-slate-700">
+          <DialogContent className="max-w-4xl bg-zinc-950 border-zinc-800 shadow-2xl shadow-black/50 backdrop-blur-xl">
             <DialogHeader>
               <DialogTitle>Vista Ampliada</DialogTitle>
             </DialogHeader>

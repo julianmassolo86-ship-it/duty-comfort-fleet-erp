@@ -120,7 +120,7 @@ export default function Companies() {
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {Array(6).fill(0).map((_, i) => (
-              <Skeleton key={i} className="h-48 rounded-2xl bg-slate-800/50" />
+              <Skeleton key={i} className="h-48 rounded-2xl bg-zinc-900/50" />
             ))}
           </div>
         ) : filteredCompanies.length > 0 ? (
