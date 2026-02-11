@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Search, Wrench } from "lucide-react";
@@ -19,7 +19,15 @@ export default function Maintenance() {
   const [typeFilter, setTypeFilter] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedMaintenance, setSelectedMaintenance] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
   const { theme } = useTheme();
+
+  useEffect(() => {
+    base44.auth.me().then(setCurrentUser).catch(() => {});
+  }, []);
+
+  // Si el usuario no tiene company_id, es super admin
+  const isSuperAdmin = !currentUser?.company_id;
 
   const queryClient = useQueryClient();
 
@@ -33,7 +41,12 @@ export default function Maintenance() {
     queryFn: () => base44.entities.Vehicle.list(),
   });
 
-  const vehiclesMap = vehicles.reduce((acc, v) => ({ ...acc, [v.id]: v }), {});
+  // Filtrar vehículos según rol
+  const accessibleVehicles = isSuperAdmin 
+    ? vehicles 
+    : vehicles.filter(v => v.company_id === currentUser?.company_id);
+
+  const vehiclesMap = accessibleVehicles.reduce((acc, v) => ({ ...acc, [v.id]: v }), {});
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Maintenance.create(data),
@@ -62,10 +75,13 @@ export default function Maintenance() {
   });
 
   const handleSave = (data) => {
+    // Si es admin de empresa, asignar su company_id automáticamente
+    const finalData = isSuperAdmin ? data : { ...data, company_id: currentUser?.company_id };
+    
     if (selectedMaintenance) {
-      updateMutation.mutate({ id: selectedMaintenance.id, data });
+      updateMutation.mutate({ id: selectedMaintenance.id, data: finalData });
     } else {
-      createMutation.mutate(data);
+      createMutation.mutate(finalData);
     }
   };
 
@@ -74,7 +90,12 @@ export default function Maintenance() {
     setDialogOpen(true);
   };
 
-  const filteredMaintenances = maintenances.filter(m => {
+  // Filtrar mantenimientos según vehículos accesibles
+  const accessibleMaintenances = isSuperAdmin
+    ? maintenances
+    : maintenances.filter(m => accessibleVehicles.some(v => v.id === m.vehicle_id));
+
+  const filteredMaintenances = accessibleMaintenances.filter(m => {
     const vehicle = vehiclesMap[m.vehicle_id];
     const matchesSearch = 
       m.description?.toLowerCase().includes(search.toLowerCase()) ||
@@ -179,7 +200,7 @@ export default function Maintenance() {
           open={dialogOpen}
           onOpenChange={setDialogOpen}
           maintenance={selectedMaintenance}
-          vehicles={vehicles}
+          vehicles={accessibleVehicles}
           onSave={handleSave}
           onDelete={selectedMaintenance ? () => deleteMutation.mutate(selectedMaintenance.id) : undefined}
           isLoading={createMutation.isPending || updateMutation.isPending}
