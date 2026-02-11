@@ -15,9 +15,11 @@ import PageHeader from "../components/common/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTheme } from "../components/common/ThemeWrapper";
+import ExpiryListDialog from "../components/dashboard/ExpiryListDialog";
 
 export default function Dashboard() {
   const [currentUser, setCurrentUser] = useState(null);
+  const [showExpiryList, setShowExpiryList] = useState(false);
   const { theme } = useTheme();
 
   useEffect(() => {
@@ -226,11 +228,14 @@ export default function Dashboard() {
                   </div>
                   <h2 className={cn("text-xl font-bold", theme === 'dark' ? 'text-white' : 'text-gray-900')}>Alertas y Vencimientos</h2>
                 </div>
-                <Link to={createPageUrl("Documents")}>
-                  <Button variant="ghost" size="sm" className={theme === 'dark' ? 'text-slate-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'}>
-                    Ver todos <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
-                </Link>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className={theme === 'dark' ? 'text-slate-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'}
+                  onClick={() => setShowExpiryList(true)}
+                >
+                  Ver todos <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
               </div>
               
               {isLoading ? (
@@ -322,6 +327,14 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Expiry List Dialog */}
+      <ExpiryListDialog 
+        open={showExpiryList}
+        onOpenChange={setShowExpiryList}
+        vehicles={accessibleVehicles}
+        drivers={accessibleDrivers}
+      />
     </div>
   );
 }
