@@ -58,14 +58,17 @@ export default function VehicleCard({ vehicle, location, company, drivers = [], 
               <span className="text-3xl font-black bg-gradient-to-br from-white to-zinc-300 bg-clip-text text-transparent">#{vehicle.internal_number}</span>
             )}
           </div>
-          <div className="flex-shrink-0">
+          <div className="flex-shrink-0 flex items-center gap-2">
+            {vehicle.manufacturer_logo_url && (
+              <img src={vehicle.manufacturer_logo_url} alt={vehicle.manufacturer} className="h-6 object-contain" />
+            )}
             <h3 className="text-xl font-black text-white bg-gradient-to-br from-white to-zinc-300 bg-clip-text text-transparent">{vehicle.plate}</h3>
           </div>
         </div>
 
         {/* Marca y modelo */}
         <div className="relative mb-4">
-          <p className={cn("font-semibold text-lg", theme === 'dark' ? 'text-zinc-400' : 'text-gray-600')}>{vehicle.brand} {vehicle.model}</p>
+          <p className={cn("font-semibold text-lg", theme === 'dark' ? 'text-zinc-400' : 'text-gray-600')}>{vehicle.manufacturer} {vehicle.model}</p>
         </div>
 
         {(location || company) && (

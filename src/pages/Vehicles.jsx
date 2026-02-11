@@ -52,6 +52,11 @@ export default function Vehicles() {
     queryFn: () => base44.entities.Company.list(),
   });
 
+  const { data: manufacturers = [] } = useQuery({
+    queryKey: ['manufacturers'],
+    queryFn: () => base44.entities.Manufacturer.list('name'),
+  });
+
   const locationsMap = locations.reduce((acc, l) => ({ ...acc, [l.id]: l }), {});
   const companiesMap = companies.reduce((acc, c) => ({ ...acc, [c.id]: c }), {});
 
@@ -107,7 +112,7 @@ export default function Vehicles() {
   const filteredVehicles = accessibleVehicles.filter(v => {
     const matchesSearch = 
       v.plate?.toLowerCase().includes(search.toLowerCase()) ||
-      v.brand?.toLowerCase().includes(search.toLowerCase()) ||
+      v.manufacturer?.toLowerCase().includes(search.toLowerCase()) ||
       v.model?.toLowerCase().includes(search.toLowerCase());
     const matchesStatus = statusFilter === "all" || v.status === statusFilter;
     const matchesLocation = locationFilter === "all" || v.location_id === locationFilter;
@@ -236,6 +241,7 @@ export default function Vehicles() {
           drivers={drivers.filter(d => isSuperAdmin || d.company_id === currentUser?.company_id)}
           locations={accessibleLocations}
           companies={companies}
+          manufacturers={manufacturers}
           isSuperAdmin={isSuperAdmin}
           currentUser={currentUser}
           onSave={handleSave}

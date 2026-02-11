@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import {
   Dialog,
@@ -24,7 +25,7 @@ const initialState = {
   company_id: "",
   location_id: "",
   manufacturer: "",
-  brand: "",
+  manufacturer_logo_url: "",
   model: "",
   year: new Date().getFullYear(),
   chassis_number: "",
@@ -48,6 +49,20 @@ const initialState = {
   technical_inspection_expiry: "",
   circulation_permit_expiry: "",
   notes: "",
+  // Document fields added here for consistency, but managed by DocumentCard/VehicleCardDocument
+  vehicle_card_front_url: "",
+  vehicle_card_back_url: "",
+  vehicle_card_front_expiry: "",
+  title_url: "",
+  title_expiry: "",
+  license_plate_url: "",
+  license_plate_expiry: "",
+  technical_inspection_url: "",
+  parts_engraving_url: "",
+  parts_engraving_expiry: "",
+  fire_extinguisher_url: "",
+  fire_extinguisher_expiry: "",
+  insurance_url: "",
 };
 
 export default function VehicleDialog({ 
@@ -57,6 +72,7 @@ export default function VehicleDialog({
   drivers = [],
   locations = [],
   companies = [],
+  manufacturers = [],
   isSuperAdmin,
   currentUser,
   onSave, 
@@ -286,14 +302,29 @@ export default function VehicleDialog({
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label>Fabricante *</Label>
-                  <Input
-                    value={form.manufacturer}
-                    onChange={(e) => handleChange("manufacturer", e.target.value.slice(0, 30))}
-                    className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
-                    placeholder="Ej: FIAT, SCANIA, VW"
-                    maxLength={30}
+                  <Select 
+                    value={form.manufacturer || ""}
+                    onValueChange={(value) => {
+                      const selectedMan = manufacturers.find(m => m.name === value);
+                      handleChange("manufacturer", value);
+                      handleChange("manufacturer_logo_url", selectedMan ? selectedMan.logo_url : "");
+                    }}
                     required
-                  />
+                  >
+                    <SelectTrigger className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50">
+                      <SelectValue placeholder="Seleccionar fabricante" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {manufacturers.map(m => (
+                        <SelectItem key={m.id} value={m.name}>
+                          <div className="flex items-center gap-2">
+                            {m.logo_url && <img src={m.logo_url} alt={m.name} className="h-5 w-auto object-contain" />}
+                            {m.name}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label>Modelo *</Label>
@@ -729,93 +760,6 @@ export default function VehicleDialog({
                   uploadId="circulation-permit-upload"
                 />
               </div>
-            </TabsContent>
-
-            <TabsContent value="other" className="space-y-4">
-              {/* Cédula Vehículo - Lado A (ELIMINADO - moved to cards above) */}
-              <div className="space-y-2 pt-4 border-t border-zinc-700">
-                <div className="flex items-center justify-between">
-                  <Label>Cédula Vehículo - Lado A (Frente)</Label>
-                  {form.vehicle_card_front_expiry && (
-                    <span className="text-xs text-zinc-500">Vence: {new Date(form.vehicle_card_front_expiry).toLocaleDateString()}</span>
-                  )}
-                </div>
-                <Input
-                  type="date"
-                  value={form.vehicle_card_front_expiry || ""}
-                  onChange={(e) => handleChange("vehicle_card_front_expiry", e.target.value)}
-                  className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 mb-3"
-                  placeholder="Fecha de vencimiento"
-                />
-                {form.vehicle_card_front_url ? (
-                  <div className="flex items-center gap-3">
-                    <img 
-                      src={form.vehicle_card_front_url} 
-                      alt="Cédula frente" 
-                      className="w-32 h-20 object-cover rounded-lg border-2 border-zinc-700"
-                    />
-                    <div className="flex gap-2">
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        onClick={() => window.open(form.vehicle_card_front_url, '_blank')}
-                        className="border-zinc-700 hover:bg-zinc-800 hover:border-yellow-500/50 transition-all"
-                      >
-                        <ZoomIn className="w-4 h-4 mr-2" />
-                        <span className="font-medium">Ver</span>
-                      </Button>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          const a = document.createElement('a');
-                          a.href = form.vehicle_card_front_url;
-                          a.download = 'cedula_frente.jpg';
-                          a.click();
-                        }}
-                        className="border-zinc-700 hover:bg-zinc-800 hover:border-blue-500/50 transition-all"
-                      >
-                        <Download className="w-4 h-4 mr-2" />
-                        <span className="font-medium">Descargar</span>
-                      </Button>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => handleChange("vehicle_card_front_url", "")}
-                        className="hover:bg-red-700"
-                      >
-                        <X className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div>
-                    <input
-                      type="file"
-                      id="vehicle-card-front-upload"
-                      accept="image/*,application/pdf"
-                      className="hidden"
-                      onChange={(e) => handleImageUpload(e, "vehicle_card_front_url")}
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => document.getElementById("vehicle-card-front-upload").click()}
-                      disabled={uploading}
-                      className="border-zinc-700 hover:bg-zinc-800"
-                    >
-                      {uploading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Upload className="w-4 h-4 mr-2" />}
-                      Cargar Cédula - Lado A
-                    </Button>
-                  </div>
-                )}
-              </div>
-
-
             </TabsContent>
 
             <TabsContent value="other" className="space-y-4">
