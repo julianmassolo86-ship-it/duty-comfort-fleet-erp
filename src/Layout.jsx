@@ -147,7 +147,8 @@ function LayoutContent({ children, currentPageName }) {
           isSubmenu: true,
           subItems: [
             { name: "Marcas", page: "Manufacturers" },
-            { name: "Tipos", page: "VehicleTypes" }
+            { name: "Tipos", page: "VehicleTypes" },
+            { name: "Estados", page: "VehicleStatuses" }
           ]
         }
       ]
@@ -200,7 +201,8 @@ function LayoutContent({ children, currentPageName }) {
           isSubmenu: true,
           subItems: [
             { name: "Marcas", page: "Manufacturers" },
-            { name: "Tipos", page: "VehicleTypes" }
+            { name: "Tipos", page: "VehicleTypes" },
+            { name: "Estados", page: "VehicleStatuses" }
           ]
         }
       ]
