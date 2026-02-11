@@ -57,8 +57,8 @@ import Maintenance from './pages/Maintenance';
 import Manufacturers from './pages/Manufacturers';
 import Profile from './pages/Profile';
 import Reports from './pages/Reports';
-import Vehicles from './pages/Vehicles';
 import VehicleTypes from './pages/VehicleTypes';
+import Vehicles from './pages/Vehicles';
 import __Layout from './Layout.jsx';
 
 
@@ -73,8 +73,8 @@ export const PAGES = {
     "Manufacturers": Manufacturers,
     "Profile": Profile,
     "Reports": Reports,
-    "Vehicles": Vehicles,
     "VehicleTypes": VehicleTypes,
+    "Vehicles": Vehicles,
 }
 
 export const pagesConfig = {

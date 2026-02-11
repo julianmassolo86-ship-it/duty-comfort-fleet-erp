@@ -164,21 +164,36 @@ export default function Documents() {
     return 'valid';
   };
 
-  const getEntityName = (doc) => {
+  const getEntityInfo = (doc) => {
     if (doc.entity_type === 'vehicle') {
       const vehicle = vehiclesMap[doc.entity_id];
-      return vehicle ? `${vehicle.plate} - ${vehicle.brand} ${vehicle.model}` : 'Vehículo no encontrado';
+      return vehicle ? {
+        name: `${vehicle.plate}`,
+        details: `${vehicle.manufacturer} ${vehicle.model}`,
+        company_id: vehicle.company_id,
+        location_id: vehicle.location_id,
+        exists: true
+      } : null;
     } else {
       const driver = driversMap[doc.entity_id];
-      return driver ? driver.full_name : 'Conductor no encontrado';
+      return driver ? {
+        name: driver.full_name,
+        details: `Licencia ${driver.license_type || 'N/A'}`,
+        company_id: driver.company_id,
+        location_id: driver.location_id,
+        exists: true
+      } : null;
     }
   };
 
   const filteredDocuments = allDocuments.filter(d => {
+    const entityInfo = getEntityInfo(d);
+    if (!entityInfo) return false; // Filtrar documentos sin entidad válida
+    
     const matchesSearch = 
       d.name?.toLowerCase().includes(search.toLowerCase()) ||
       d.document_number?.toLowerCase().includes(search.toLowerCase()) ||
-      getEntityName(d).toLowerCase().includes(search.toLowerCase());
+      entityInfo.name.toLowerCase().includes(search.toLowerCase());
     const matchesType = typeFilter === "all" || d.type === typeFilter;
     const matchesEntity = entityFilter === "all" || d.entity_type === entityFilter;
     return matchesSearch && matchesType && matchesEntity;
@@ -255,76 +270,100 @@ export default function Documents() {
                 <TableRow className="bg-slate-800/50 border-slate-700">
                   <TableHead className="text-slate-400">Documento</TableHead>
                   <TableHead className="text-slate-400">Tipo</TableHead>
-                  <TableHead className="text-slate-400">Entidad</TableHead>
                   <TableHead className="text-slate-400">Vencimiento</TableHead>
                   <TableHead className="text-slate-400">Estado</TableHead>
                   <TableHead className="text-slate-400 text-right">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredDocuments.map(doc => (
-                  <TableRow 
-                    key={doc.id} 
-                    className="border-slate-700/50 hover:bg-slate-800/30 cursor-pointer"
-                    onClick={() => !doc.isVirtual && handleEdit(doc)}
-                  >
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-lg bg-slate-700/50">
-                          <FileText className="w-4 h-4 text-slate-400" />
+                {filteredDocuments.map(doc => {
+                  const entityInfo = getEntityInfo(doc);
+                  const daysUntil = doc.expiry_date ? differenceInDays(new Date(doc.expiry_date), new Date()) : null;
+                  
+                  return (
+                    <TableRow 
+                      key={doc.id} 
+                      className="border-slate-700/50 hover:bg-slate-800/30 cursor-pointer"
+                      onClick={() => !doc.isVirtual && handleEdit(doc)}
+                    >
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <div className={`p-2 rounded-lg ${
+                            doc.entity_type === 'vehicle' 
+                              ? 'bg-blue-500/10' 
+                              : 'bg-emerald-500/10'
+                          }`}>
+                            <FileText className={`w-4 h-4 ${
+                              doc.entity_type === 'vehicle' 
+                                ? 'text-blue-400' 
+                                : 'text-emerald-400'
+                            }`} />
+                          </div>
+                          <div>
+                            <p className="font-medium text-white">{entityInfo?.name || 'N/A'}</p>
+                            <p className="text-xs text-slate-500">{typeLabels[doc.type] || doc.type}</p>
+                            {doc.document_number && (
+                              <p className="text-xs text-slate-600">#{doc.document_number}</p>
+                            )}
+                          </div>
                         </div>
+                      </TableCell>
+                      <TableCell>
                         <div>
-                          <p className="font-medium text-white">{doc.name}</p>
-                          {doc.document_number && (
-                            <p className="text-sm text-slate-500">{doc.document_number}</p>
+                          <p className="text-slate-300 text-sm">{entityInfo?.details || '-'}</p>
+                          <span className={`px-2 py-0.5 text-xs rounded-full inline-block mt-1 ${
+                            doc.entity_type === 'vehicle' 
+                              ? 'bg-blue-500/10 text-blue-400' 
+                              : 'bg-emerald-500/10 text-emerald-400'
+                          }`}>
+                            {doc.entity_type === 'vehicle' ? 'Vehículo' : 'Conductor'}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {doc.expiry_date ? (
+                          <div>
+                            <p className={cn("text-sm font-medium", 
+                              daysUntil < 0 ? "text-rose-400" : 
+                              daysUntil <= 7 ? "text-rose-400" : 
+                              daysUntil <= 30 ? "text-amber-400" : "text-slate-300"
+                            )}>
+                              {format(new Date(doc.expiry_date), "d MMM yyyy", { locale: es })}
+                            </p>
+                            <p className="text-xs text-slate-500">
+                              {daysUntil < 0 
+                                ? `Vencido hace ${Math.abs(daysUntil)} días`
+                                : daysUntil === 0
+                                ? "Vence hoy"
+                                : `Vence en ${daysUntil} días`}
+                            </p>
+                          </div>
+                        ) : (
+                          <span className="text-slate-500 text-sm">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <StatusBadge status={getDocumentStatus(doc.expiry_date)} />
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          {doc.file_url && (
+                            <a 
+                              href={doc.file_url} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <Button variant="ghost" size="icon" className="text-slate-400 hover:text-white">
+                                <Eye className="w-4 h-4" />
+                              </Button>
+                            </a>
                           )}
                         </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-slate-300">
-                      {typeLabels[doc.type] || doc.type}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <span className={`px-2 py-0.5 text-xs rounded-full ${
-                          doc.entity_type === 'vehicle' 
-                            ? 'bg-blue-500/10 text-blue-400' 
-                            : 'bg-emerald-500/10 text-emerald-400'
-                        }`}>
-                          {doc.entity_type === 'vehicle' ? 'Vehículo' : 'Conductor'}
-                        </span>
-                        <span className="text-slate-300 truncate max-w-[200px]">{getEntityName(doc)}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-slate-300">
-                      {doc.expiry_date 
-                        ? format(new Date(doc.expiry_date), "d MMM yyyy", { locale: es })
-                        : '-'}
-                    </TableCell>
-                    <TableCell>
-                      <StatusBadge status={getDocumentStatus(doc.expiry_date)} />
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        {doc.file_url && (
-                          <a 
-                            href={doc.file_url} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <Button variant="ghost" size="icon" className="text-slate-400 hover:text-white">
-                              <Eye className="w-4 h-4" />
-                            </Button>
-                          </a>
-                        )}
-                        {doc.isVirtual && (
-                          <span className="text-xs text-slate-500 italic">Auto-generado</span>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </div>
