@@ -7,16 +7,19 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 import PageHeader from "../components/common/PageHeader";
 import EmptyState from "../components/common/EmptyState";
 import StatusBadge from "../components/common/StatusBadge";
 import AdminDialog from "../components/admins/AdminDialog";
+import { useTheme } from "../components/common/ThemeWrapper";
 
 export default function CompanyAdmins() {
   const [search, setSearch] = useState("");
   const [companyFilter, setCompanyFilter] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedAdmin, setSelectedAdmin] = useState(null);
+  const { theme } = useTheme();
 
   const queryClient = useQueryClient();
 
@@ -74,7 +77,7 @@ export default function CompanyAdmins() {
   });
 
   return (
-    <div className="min-h-screen bg-black p-4 sm:p-6 lg:p-8">
+    <div className={cn("min-h-screen p-4 sm:p-6 lg:p-8", theme === 'dark' ? 'bg-black' : 'bg-gray-50')}>
       <div className="max-w-7xl mx-auto">
         <PageHeader 
           title="Administradores de Empresa" 
@@ -93,16 +96,16 @@ export default function CompanyAdmins() {
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className={cn("absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4", theme === 'dark' ? 'text-slate-400' : 'text-gray-400')} />
             <Input
               placeholder="Buscar por nombre o email..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-10 bg-zinc-900/50 border-zinc-800 text-white placeholder:text-zinc-500 focus:border-yellow-500/50"
+              className={cn("pl-10", theme === 'dark' ? 'bg-zinc-900/50 border-zinc-800 text-white placeholder:text-zinc-500 focus:border-yellow-500/50' : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400')}
             />
           </div>
           <Select value={companyFilter} onValueChange={setCompanyFilter}>
-            <SelectTrigger className="w-full sm:w-52 bg-zinc-900/50 border-zinc-800 text-white">
+            <SelectTrigger className={cn("w-full sm:w-52", theme === 'dark' ? 'bg-zinc-900/50 border-zinc-800 text-white' : 'bg-white border-gray-300 text-gray-900')}>
               <SelectValue placeholder="Empresa" />
             </SelectTrigger>
             <SelectContent>
@@ -118,7 +121,7 @@ export default function CompanyAdmins() {
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {Array(6).fill(0).map((_, i) => (
-              <Skeleton key={i} className="h-44 rounded-2xl bg-zinc-900/50" />
+              <Skeleton key={i} className={cn("h-44 rounded-2xl", theme === 'dark' ? 'bg-zinc-900/50' : 'bg-gray-200')} />
             ))}
           </div>
         ) : filteredAdmins.length > 0 ? (
@@ -129,7 +132,7 @@ export default function CompanyAdmins() {
                 <div 
                   key={admin.id}
                   onClick={() => handleEdit(admin)}
-                  className="group relative overflow-hidden rounded-2xl bg-zinc-900/80 border border-zinc-800/50 p-5 cursor-pointer backdrop-blur-xl shadow-lg shadow-black/20 transition-all duration-300 hover:bg-zinc-900 hover:border-yellow-500/30 hover:shadow-2xl hover:shadow-yellow-500/10 hover:-translate-y-1"
+                  className={cn("group relative overflow-hidden rounded-2xl border p-5 cursor-pointer backdrop-blur-xl shadow-lg transition-all duration-300 hover:-translate-y-1", theme === 'dark' ? 'bg-zinc-900/80 border-zinc-800/50 shadow-black/20 hover:bg-zinc-900 hover:border-yellow-500/30 hover:shadow-2xl hover:shadow-yellow-500/10' : 'bg-white border-gray-200 shadow-gray-200/50 hover:shadow-xl hover:border-yellow-500/30')}
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div className="p-3 rounded-xl bg-cyan-500/10 text-cyan-400">
@@ -138,24 +141,24 @@ export default function CompanyAdmins() {
                     <StatusBadge status={admin.status || 'active'} />
                   </div>
                   
-                  <h3 className="text-lg font-semibold text-white mb-1">
+                  <h3 className={cn("text-lg font-semibold mb-1", theme === 'dark' ? 'text-white' : 'text-gray-900')}>
                     {admin.full_name || 'Sin nombre'}
                   </h3>
                   
-                  <div className="flex items-center gap-2 text-sm text-slate-400 mb-3">
-                    <Mail className="w-4 h-4 text-slate-500" />
+                  <div className={cn("flex items-center gap-2 text-sm mb-3", theme === 'dark' ? 'text-slate-400' : 'text-gray-600')}>
+                    <Mail className={cn("w-4 h-4", theme === 'dark' ? 'text-slate-500' : 'text-gray-400')} />
                     <span className="truncate">{admin.email}</span>
                   </div>
 
                   {company && (
-                    <div className="flex items-center gap-2 text-sm text-slate-500">
+                    <div className={cn("flex items-center gap-2 text-sm", theme === 'dark' ? 'text-slate-500' : 'text-gray-500')}>
                       <Building2 className="w-4 h-4" />
                       <span>{company.name}</span>
                     </div>
                   )}
 
                   {!admin.company_id && (
-                    <p className="text-xs text-amber-400 mt-2">Sin empresa asignada</p>
+                    <p className={cn("text-xs mt-2", theme === 'dark' ? 'text-amber-400' : 'text-amber-600')}>Sin empresa asignada</p>
                   )}
 
                   <div className="absolute -right-8 -bottom-8 w-24 h-24 rounded-full bg-cyan-500/5 group-hover:bg-cyan-500/10 transition-colors" />
