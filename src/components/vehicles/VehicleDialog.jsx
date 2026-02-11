@@ -72,12 +72,13 @@ export default function VehicleDialog({
       setForm({ 
         ...initialState, 
         ...vehicle,
-        assigned_driver_ids: driverIds
+        assigned_driver_ids: driverIds,
+        location_id: vehicle.location_id || ""
       });
       setSelectedCompanyId(vehicle.company_id || "");
     } else {
       const defaultCompanyId = isSuperAdmin ? "" : (currentUser?.company_id || "");
-      setForm({ ...initialState, company_id: defaultCompanyId });
+      setForm({ ...initialState, company_id: defaultCompanyId, location_id: "" });
       setSelectedCompanyId(defaultCompanyId);
     }
   }, [vehicle, open, isSuperAdmin, currentUser]);
@@ -216,7 +217,7 @@ export default function VehicleDialog({
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Empresa *</Label>
-                    <Select value={form.company_id} onValueChange={(v) => handleChange("company_id", v)} required>
+                    <Select value={form.company_id || ""} onValueChange={(v) => handleChange("company_id", v)} required>
                       <SelectTrigger className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50">
                         <SelectValue placeholder="Seleccionar empresa" />
                       </SelectTrigger>
@@ -229,7 +230,7 @@ export default function VehicleDialog({
                   </div>
                   <div className="space-y-2">
                     <Label>Locación *</Label>
-                    <Select value={form.location_id} onValueChange={(v) => handleChange("location_id", v)} required disabled={!selectedCompanyId}>
+                    <Select value={form.location_id || ""} onValueChange={(v) => handleChange("location_id", v)} required disabled={!selectedCompanyId}>
                       <SelectTrigger className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50">
                         <SelectValue placeholder={selectedCompanyId ? "Seleccionar locación" : "Primero seleccione empresa"} />
                       </SelectTrigger>
@@ -246,7 +247,7 @@ export default function VehicleDialog({
               {!isSuperAdmin && (
                 <div className="space-y-2">
                   <Label>Locación *</Label>
-                  <Select value={form.location_id} onValueChange={(v) => handleChange("location_id", v)} required>
+                  <Select value={form.location_id || ""} onValueChange={(v) => handleChange("location_id", v)} required>
                     <SelectTrigger className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50">
                       <SelectValue placeholder="Seleccionar locación" />
                     </SelectTrigger>
@@ -461,7 +462,7 @@ export default function VehicleDialog({
                     {form.assigned_driver_ids.map((driverId, index) => (
                       <div key={index} className="flex gap-2">
                         <Select 
-                          value={driverId} 
+                          value={driverId || ""} 
                           onValueChange={(v) => updateDriver(index, v)}
                         >
                           <SelectTrigger className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 flex-1">
