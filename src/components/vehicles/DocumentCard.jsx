@@ -32,13 +32,15 @@ export default function DocumentCard({
         )}
       </div>
 
-      <Input
-        type="date"
-        value={document_expiry || ""}
-        onChange={(e) => onExpiryChange(expiry_field, e.target.value)}
-        className="bg-zinc-800 border-zinc-700 focus:border-yellow-500/50 mb-3 text-sm"
-        placeholder="Fecha de vencimiento"
-      />
+      {expiry_field && (
+        <Input
+          type="date"
+          value={document_expiry || ""}
+          onChange={(e) => onExpiryChange(expiry_field, e.target.value)}
+          className="bg-zinc-800 border-zinc-700 focus:border-yellow-500/50 mb-3 text-sm"
+          placeholder="Fecha de vencimiento"
+        />
+      )}
 
       {document_url ? (
         <div className="space-y-3">
