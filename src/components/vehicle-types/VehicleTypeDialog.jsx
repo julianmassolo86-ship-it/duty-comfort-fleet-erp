@@ -158,10 +158,10 @@ export default function VehicleTypeDialog({ open, onOpenChange, vehicleType, onS
               </Button>
             )}
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => onOpenChange(false)}>
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancelar
               </Button>
-              <Button onClick={handleSave}>
+              <Button type="button" onClick={handleSave}>
                 {vehicleType ? "Guardar Cambios" : "Crear Tipo"}
               </Button>
             </div>
