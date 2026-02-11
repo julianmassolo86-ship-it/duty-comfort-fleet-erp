@@ -91,7 +91,7 @@ export default function LocationDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg bg-slate-900 border-slate-700 text-white max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-lg bg-zinc-950 border-zinc-800 text-white max-h-[90vh] overflow-y-auto shadow-2xl shadow-black/50 backdrop-blur-xl">
         <DialogHeader>
           <DialogTitle>{location ? "Editar Locación" : "Nueva Locación"}</DialogTitle>
         </DialogHeader>
@@ -118,7 +118,7 @@ export default function LocationDialog({
                   accept="image/*"
                   onChange={handleImageUpload}
                   disabled={uploading}
-                  className="bg-slate-800 border-slate-700"
+                  className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 transition-colors"
                 />
                 {uploading && <p className="text-xs text-slate-400 mt-1">Subiendo imagen...</p>}
               </div>

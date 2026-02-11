@@ -109,17 +109,17 @@ export default function VehicleDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl bg-slate-900 border-slate-700 text-white max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl bg-zinc-950 border-zinc-800 text-white max-h-[90vh] overflow-y-auto shadow-2xl shadow-black/50 backdrop-blur-xl">
         <DialogHeader>
           <DialogTitle>{vehicle ? "Editar Vehículo" : "Nuevo Vehículo"}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit}>
           <Tabs defaultValue="general" className="w-full">
-            <TabsList className="bg-slate-800 border-slate-700 mb-4">
-              <TabsTrigger value="general" className="data-[state=active]:bg-slate-700">General</TabsTrigger>
-              <TabsTrigger value="documents" className="data-[state=active]:bg-slate-700">Documentos</TabsTrigger>
-              <TabsTrigger value="other" className="data-[state=active]:bg-slate-700">Otros</TabsTrigger>
+            <TabsList className="bg-zinc-900 border-zinc-800 mb-4">
+              <TabsTrigger value="general" className="data-[state=active]:bg-yellow-500/10 data-[state=active]:text-yellow-400 data-[state=active]:border-yellow-500/30">General</TabsTrigger>
+              <TabsTrigger value="documents" className="data-[state=active]:bg-yellow-500/10 data-[state=active]:text-yellow-400 data-[state=active]:border-yellow-500/30">Documentos</TabsTrigger>
+              <TabsTrigger value="other" className="data-[state=active]:bg-yellow-500/10 data-[state=active]:text-yellow-400 data-[state=active]:border-yellow-500/30">Otros</TabsTrigger>
             </TabsList>
 
             <TabsContent value="general" className="space-y-4">
@@ -144,7 +144,7 @@ export default function VehicleDialog({
                       accept="image/*"
                       onChange={handleImageUpload}
                       disabled={uploading}
-                      className="bg-slate-800 border-slate-700"
+                      className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 transition-colors"
                     />
                     {uploading && <p className="text-xs text-slate-400 mt-1">Subiendo imagen...</p>}
                   </div>

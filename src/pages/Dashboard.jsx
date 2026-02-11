@@ -154,7 +154,7 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {isLoading ? (
             Array(4).fill(0).map((_, i) => (
-              <Skeleton key={i} className="h-36 rounded-2xl bg-slate-800/50" />
+              <Skeleton key={i} className="h-36 rounded-2xl bg-zinc-900/50" />
             ))
           ) : (
             <>
@@ -215,13 +215,13 @@ export default function Dashboard() {
         {/* Alerts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <div className="bg-slate-800/30 rounded-2xl border border-slate-700/50 p-6">
+            <div className="bg-zinc-900/80 rounded-2xl border border-zinc-800/50 p-6 backdrop-blur-xl shadow-2xl shadow-black/20">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-rose-500/10">
-                    <AlertTriangle className="w-5 h-5 text-rose-400" />
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-rose-500/20 to-rose-600/10 border border-rose-500/20 shadow-lg shadow-rose-500/10">
+                    <AlertTriangle className="w-6 h-6 text-rose-400" />
                   </div>
-                  <h2 className="text-lg font-semibold text-white">Alertas y Vencimientos</h2>
+                  <h2 className="text-xl font-bold text-white">Alertas y Vencimientos</h2>
                 </div>
                 <Link to={createPageUrl("Documents")}>
                   <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
@@ -233,7 +233,7 @@ export default function Dashboard() {
               {isLoading ? (
                 <div className="space-y-3">
                   {Array(3).fill(0).map((_, i) => (
-                    <Skeleton key={i} className="h-20 rounded-xl bg-slate-700/30" />
+                    <Skeleton key={i} className="h-20 rounded-xl bg-zinc-800/30" />
                   ))}
                 </div>
               ) : alerts.length > 0 ? (
@@ -255,63 +255,63 @@ export default function Dashboard() {
           </div>
 
           {/* Quick Actions */}
-          <div className="bg-slate-800/30 rounded-2xl border border-slate-700/50 p-6">
-            <h2 className="text-lg font-semibold text-white mb-6">Accesos Rápidos</h2>
+          <div className="bg-zinc-900/80 rounded-2xl border border-zinc-800/50 p-6 backdrop-blur-xl shadow-2xl shadow-black/20">
+            <h2 className="text-xl font-bold text-white mb-6">Accesos Rápidos</h2>
             <div className="space-y-3">
               {isSuperAdmin && (
-                <Link to={createPageUrl("Companies")} className="block">
-                  <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-800/50 border border-slate-700/50 hover:bg-slate-700/50 transition-colors">
-                    <div className="p-2.5 rounded-lg bg-purple-500/10">
+                <Link to={createPageUrl("Companies")} className="block group">
+                  <div className="flex items-center gap-4 p-4 rounded-xl bg-zinc-800/50 border border-zinc-700/50 hover:bg-zinc-800 hover:border-yellow-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-yellow-500/5">
+                    <div className="p-3 rounded-xl bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/10 group-hover:from-purple-500/20 group-hover:to-purple-600/10 transition-all duration-300">
                       <Building2 className="w-5 h-5 text-purple-400" />
                     </div>
                     <div>
-                      <p className="font-medium text-white">Empresas</p>
-                      <p className="text-sm text-slate-400">{companies.length} registradas</p>
+                      <p className="font-semibold text-white">Empresas</p>
+                      <p className="text-sm text-zinc-500">{companies.length} registradas</p>
                     </div>
                   </div>
                 </Link>
               )}
-              <Link to={createPageUrl("Locations")} className="block">
-                <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-800/50 border border-slate-700/50 hover:bg-slate-700/50 transition-colors">
-                  <div className="p-2.5 rounded-lg bg-emerald-500/10">
+              <Link to={createPageUrl("Locations")} className="block group">
+                <div className="flex items-center gap-4 p-4 rounded-xl bg-zinc-800/50 border border-zinc-700/50 hover:bg-zinc-800 hover:border-yellow-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-yellow-500/5">
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 border border-emerald-500/10 group-hover:from-emerald-500/20 group-hover:to-emerald-600/10 transition-all duration-300">
                     <MapPin className="w-5 h-5 text-emerald-400" />
                   </div>
                   <div>
-                    <p className="font-medium text-white">Locaciones</p>
-                    <p className="text-sm text-slate-400">{accessibleLocations.length} registradas</p>
+                    <p className="font-semibold text-white">Locaciones</p>
+                    <p className="text-sm text-zinc-500">{accessibleLocations.length} registradas</p>
                   </div>
                 </div>
               </Link>
-              <Link to={createPageUrl("Vehicles")} className="block">
-                <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-800/50 border border-slate-700/50 hover:bg-slate-700/50 transition-colors">
-                  <div className="p-2.5 rounded-lg bg-blue-500/10">
-                    <Car className="w-5 h-5 text-blue-400" />
+              <Link to={createPageUrl("Vehicles")} className="block group">
+                <div className="flex items-center gap-4 p-4 rounded-xl bg-zinc-800/50 border border-zinc-700/50 hover:bg-zinc-800 hover:border-yellow-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-yellow-500/5">
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-yellow-500/10 to-yellow-600/5 border border-yellow-500/10 group-hover:from-yellow-500/20 group-hover:to-yellow-600/10 transition-all duration-300">
+                    <Car className="w-5 h-5 text-yellow-400" />
                   </div>
                   <div>
-                    <p className="font-medium text-white">Vehículos</p>
-                    <p className="text-sm text-slate-400">{accessibleVehicles.length} registrados</p>
+                    <p className="font-semibold text-white">Vehículos</p>
+                    <p className="text-sm text-zinc-500">{accessibleVehicles.length} registrados</p>
                   </div>
                 </div>
               </Link>
-              <Link to={createPageUrl("Drivers")} className="block">
-                <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-800/50 border border-slate-700/50 hover:bg-slate-700/50 transition-colors">
-                  <div className="p-2.5 rounded-lg bg-cyan-500/10">
+              <Link to={createPageUrl("Drivers")} className="block group">
+                <div className="flex items-center gap-4 p-4 rounded-xl bg-zinc-800/50 border border-zinc-700/50 hover:bg-zinc-800 hover:border-yellow-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-yellow-500/5">
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-cyan-500/10 to-cyan-600/5 border border-cyan-500/10 group-hover:from-cyan-500/20 group-hover:to-cyan-600/10 transition-all duration-300">
                     <Users className="w-5 h-5 text-cyan-400" />
                   </div>
                   <div>
-                    <p className="font-medium text-white">Conductores</p>
-                    <p className="text-sm text-slate-400">{accessibleDrivers.length} registrados</p>
+                    <p className="font-semibold text-white">Conductores</p>
+                    <p className="text-sm text-zinc-500">{accessibleDrivers.length} registrados</p>
                   </div>
                 </div>
               </Link>
-              <Link to={createPageUrl("Maintenance")} className="block">
-                <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-800/50 border border-slate-700/50 hover:bg-slate-700/50 transition-colors">
-                  <div className="p-2.5 rounded-lg bg-amber-500/10">
+              <Link to={createPageUrl("Maintenance")} className="block group">
+                <div className="flex items-center gap-4 p-4 rounded-xl bg-zinc-800/50 border border-zinc-700/50 hover:bg-zinc-800 hover:border-yellow-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-yellow-500/5">
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-amber-500/10 to-amber-600/5 border border-amber-500/10 group-hover:from-amber-500/20 group-hover:to-amber-600/10 transition-all duration-300">
                     <Wrench className="w-5 h-5 text-amber-400" />
                   </div>
                   <div>
-                    <p className="font-medium text-white">Mantenimiento</p>
-                    <p className="text-sm text-slate-400">{accessibleMaintenances.length} registros</p>
+                    <p className="font-semibold text-white">Mantenimiento</p>
+                    <p className="text-sm text-zinc-500">{accessibleMaintenances.length} registros</p>
                   </div>
                 </div>
               </Link>

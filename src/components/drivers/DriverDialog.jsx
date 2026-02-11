@@ -123,18 +123,18 @@ export default function DriverDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-3xl bg-slate-900 border-slate-700 text-white max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-3xl bg-zinc-950 border-zinc-800 text-white max-h-[90vh] overflow-y-auto shadow-2xl shadow-black/50 backdrop-blur-xl">
           <DialogHeader>
             <DialogTitle>{driver ? "Editar Conductor" : "Nuevo Conductor"}</DialogTitle>
           </DialogHeader>
 
           <form onSubmit={handleSubmit}>
             <Tabs defaultValue="personal" className="w-full">
-              <TabsList className="bg-slate-800 border-slate-700 mb-4">
-                <TabsTrigger value="personal" className="data-[state=active]:bg-slate-700">Personal</TabsTrigger>
-                <TabsTrigger value="documents" className="data-[state=active]:bg-slate-700">Documentos</TabsTrigger>
-                <TabsTrigger value="contact" className="data-[state=active]:bg-slate-700">Contacto</TabsTrigger>
-                <TabsTrigger value="assignment" className="data-[state=active]:bg-slate-700">Asignación</TabsTrigger>
+              <TabsList className="bg-zinc-900 border-zinc-800 mb-4">
+                <TabsTrigger value="personal" className="data-[state=active]:bg-yellow-500/10 data-[state=active]:text-yellow-400 data-[state=active]:border-yellow-500/30">Personal</TabsTrigger>
+                <TabsTrigger value="documents" className="data-[state=active]:bg-yellow-500/10 data-[state=active]:text-yellow-400 data-[state=active]:border-yellow-500/30">Documentos</TabsTrigger>
+                <TabsTrigger value="contact" className="data-[state=active]:bg-yellow-500/10 data-[state=active]:text-yellow-400 data-[state=active]:border-yellow-500/30">Contacto</TabsTrigger>
+                <TabsTrigger value="assignment" className="data-[state=active]:bg-yellow-500/10 data-[state=active]:text-yellow-400 data-[state=active]:border-yellow-500/30">Asignación</TabsTrigger>
               </TabsList>
 
               {/* Pestaña Personal */}
@@ -199,7 +199,7 @@ export default function DriverDialog({
                     <Input
                       value={form.full_name}
                       onChange={(e) => handleChange("full_name", e.target.value)}
-                      className="bg-slate-800 border-slate-700"
+                      className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 transition-colors"
                       required
                     />
                   </div>
@@ -208,7 +208,7 @@ export default function DriverDialog({
                     <Input
                       value={form.employee_id}
                       onChange={(e) => handleChange("employee_id", e.target.value)}
-                      className="bg-slate-800 border-slate-700"
+                      className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 transition-colors"
                     />
                   </div>
                 </div>
@@ -219,7 +219,7 @@ export default function DriverDialog({
                     <Input
                       value={form.document_id}
                       onChange={(e) => handleChange("document_id", e.target.value)}
-                      className="bg-slate-800 border-slate-700"
+                      className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 transition-colors"
                       required
                     />
                   </div>
@@ -245,7 +245,7 @@ export default function DriverDialog({
                       type="date"
                       value={form.birth_date}
                       onChange={(e) => handleChange("birth_date", e.target.value)}
-                      className="bg-slate-800 border-slate-700"
+                      className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 transition-colors"
                     />
                   </div>
                   <div className="space-y-2">
@@ -254,7 +254,7 @@ export default function DriverDialog({
                       type="date"
                       value={form.hire_date}
                       onChange={(e) => handleChange("hire_date", e.target.value)}
-                      className="bg-slate-800 border-slate-700"
+                      className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 transition-colors"
                     />
                   </div>
                 </div>
@@ -268,7 +268,7 @@ export default function DriverDialog({
                     <Input
                       value={form.license_number}
                       onChange={(e) => handleChange("license_number", e.target.value)}
-                      className="bg-slate-800 border-slate-700"
+                      className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 transition-colors"
                       required
                     />
                   </div>
@@ -438,7 +438,7 @@ export default function DriverDialog({
                     <Input
                       value={form.phone}
                       onChange={(e) => handleChange("phone", e.target.value)}
-                      className="bg-slate-800 border-slate-700"
+                      className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 transition-colors"
                     />
                   </div>
                   <div className="space-y-2">
@@ -447,7 +447,7 @@ export default function DriverDialog({
                       type="email"
                       value={form.email}
                       onChange={(e) => handleChange("email", e.target.value)}
-                      className="bg-slate-800 border-slate-700"
+                      className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 transition-colors"
                     />
                   </div>
                 </div>
@@ -469,7 +469,7 @@ export default function DriverDialog({
                       <Input
                         value={form.emergency_contact_name}
                         onChange={(e) => handleChange("emergency_contact_name", e.target.value)}
-                        className="bg-slate-800 border-slate-700"
+                        className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 transition-colors"
                       />
                     </div>
                     <div className="space-y-2">
@@ -477,7 +477,7 @@ export default function DriverDialog({
                       <Input
                         value={form.emergency_contact_phone}
                         onChange={(e) => handleChange("emergency_contact_phone", e.target.value)}
-                        className="bg-slate-800 border-slate-700"
+                        className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 transition-colors"
                       />
                     </div>
                   </div>
