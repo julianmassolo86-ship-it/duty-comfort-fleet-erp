@@ -5,8 +5,9 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { 
   Car, Users, Wrench, FileText, AlertTriangle, 
-  TrendingUp, Calendar, ArrowRight, Building2, MapPin
+  TrendingUp, Calendar, ArrowRight, Building2, MapPin, BarChart3
 } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from "recharts";
 import { differenceInDays } from "date-fns";
 import { cn } from "@/lib/utils";
 import StatCard from "../components/dashboard/StatCard";
@@ -144,6 +145,45 @@ export default function Dashboard() {
   const activeDrivers = accessibleDrivers.filter(d => d.status === 'active').length;
   const pendingMaintenance = accessibleMaintenances.filter(m => m.status === 'scheduled' || m.status === 'in_progress').length;
 
+  // Preparar datos para gráficos - Solo para Super Admin
+  const getCompaniesData = () => {
+    const active = companies.filter(c => c.status === 'active').length;
+    const inactive = companies.filter(c => c.status === 'inactive').length;
+    return [
+      { name: 'Activas', value: active, color: '#10b981' },
+      { name: 'Inactivas', value: inactive, color: '#6b7280' }
+    ];
+  };
+
+  const getLocationsData = () => {
+    const active = locations.filter(l => l.status === 'active').length;
+    const inactive = locations.filter(l => l.status === 'inactive').length;
+    return [
+      { name: 'Activas', value: active, color: '#10b981' },
+      { name: 'Inactivas', value: inactive, color: '#6b7280' }
+    ];
+  };
+
+  const getVehiclesData = () => {
+    const active = accessibleVehicles.filter(v => v.status === 'active').length;
+    const maintenance = accessibleVehicles.filter(v => v.status === 'maintenance').length;
+    const repair = accessibleVehicles.filter(v => v.status === 'repair').length;
+    const inactive = accessibleVehicles.filter(v => v.status === 'inactive').length;
+    const available = accessibleVehicles.filter(v => v.status === 'available').length;
+    const inUse = accessibleVehicles.filter(v => v.status === 'in_use').length;
+    const reserved = accessibleVehicles.filter(v => v.status === 'reserved').length;
+    
+    return [
+      { name: 'Activos', value: active, color: '#10b981' },
+      { name: 'Disponibles', value: available, color: '#3b82f6' },
+      { name: 'En Uso', value: inUse, color: '#8b5cf6' },
+      { name: 'Reservados', value: reserved, color: '#f59e0b' },
+      { name: 'Mantenimiento', value: maintenance, color: '#eab308' },
+      { name: 'Reparación', value: repair, color: '#ef4444' },
+      { name: 'Inactivos', value: inactive, color: '#6b7280' }
+    ].filter(item => item.value > 0);
+  };
+
   return (
     <div className={cn("min-h-screen p-4 sm:p-6 lg:p-8", theme === 'dark' ? 'bg-black' : 'bg-gray-50')}>
       <div className="max-w-7xl mx-auto">
@@ -213,6 +253,101 @@ export default function Dashboard() {
             </>
           )}
         </div>
+
+        {/* Charts Section - Solo para Super Admin */}
+        {isSuperAdmin && !isLoading && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            {/* Empresas Chart */}
+            <div className={cn("rounded-2xl border p-6 backdrop-blur-xl shadow-2xl", theme === 'dark' ? 'bg-zinc-900/80 border-zinc-800/50 shadow-black/20' : 'bg-white border-gray-200 shadow-gray-200/50')}>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-3 rounded-xl bg-gradient-to-br from-purple-500/20 to-purple-600/10 border border-purple-500/20">
+                  <Building2 className="w-5 h-5 text-purple-400" />
+                </div>
+                <h3 className={cn("text-lg font-bold", theme === 'dark' ? 'text-white' : 'text-gray-900')}>Empresas por Estado</h3>
+              </div>
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart data={getCompaniesData()}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? '#27272a' : '#e5e7eb'} />
+                  <XAxis dataKey="name" tick={{ fill: theme === 'dark' ? '#a1a1aa' : '#6b7280', fontSize: 12 }} />
+                  <YAxis tick={{ fill: theme === 'dark' ? '#a1a1aa' : '#6b7280', fontSize: 12 }} />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: theme === 'dark' ? '#18181b' : '#ffffff',
+                      border: `1px solid ${theme === 'dark' ? '#3f3f46' : '#e5e7eb'}`,
+                      borderRadius: '8px',
+                      color: theme === 'dark' ? '#ffffff' : '#000000'
+                    }}
+                  />
+                  <Bar dataKey="value" radius={[8, 8, 0, 0]}>
+                    {getCompaniesData().map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Ubicaciones Chart */}
+            <div className={cn("rounded-2xl border p-6 backdrop-blur-xl shadow-2xl", theme === 'dark' ? 'bg-zinc-900/80 border-zinc-800/50 shadow-black/20' : 'bg-white border-gray-200 shadow-gray-200/50')}>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-3 rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 border border-emerald-500/20">
+                  <MapPin className="w-5 h-5 text-emerald-400" />
+                </div>
+                <h3 className={cn("text-lg font-bold", theme === 'dark' ? 'text-white' : 'text-gray-900')}>Ubicaciones por Estado</h3>
+              </div>
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart data={getLocationsData()}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? '#27272a' : '#e5e7eb'} />
+                  <XAxis dataKey="name" tick={{ fill: theme === 'dark' ? '#a1a1aa' : '#6b7280', fontSize: 12 }} />
+                  <YAxis tick={{ fill: theme === 'dark' ? '#a1a1aa' : '#6b7280', fontSize: 12 }} />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: theme === 'dark' ? '#18181b' : '#ffffff',
+                      border: `1px solid ${theme === 'dark' ? '#3f3f46' : '#e5e7eb'}`,
+                      borderRadius: '8px',
+                      color: theme === 'dark' ? '#ffffff' : '#000000'
+                    }}
+                  />
+                  <Bar dataKey="value" radius={[8, 8, 0, 0]}>
+                    {getLocationsData().map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Vehículos Chart */}
+            <div className={cn("rounded-2xl border p-6 backdrop-blur-xl shadow-2xl", theme === 'dark' ? 'bg-zinc-900/80 border-zinc-800/50 shadow-black/20' : 'bg-white border-gray-200 shadow-gray-200/50')}>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-3 rounded-xl bg-gradient-to-br from-yellow-500/20 to-yellow-600/10 border border-yellow-500/20">
+                  <Car className="w-5 h-5 text-yellow-400" />
+                </div>
+                <h3 className={cn("text-lg font-bold", theme === 'dark' ? 'text-white' : 'text-gray-900')}>Vehículos por Estado</h3>
+              </div>
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart data={getVehiclesData()}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? '#27272a' : '#e5e7eb'} />
+                  <XAxis dataKey="name" tick={{ fill: theme === 'dark' ? '#a1a1aa' : '#6b7280', fontSize: 10 }} angle={-45} textAnchor="end" height={80} />
+                  <YAxis tick={{ fill: theme === 'dark' ? '#a1a1aa' : '#6b7280', fontSize: 12 }} />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: theme === 'dark' ? '#18181b' : '#ffffff',
+                      border: `1px solid ${theme === 'dark' ? '#3f3f46' : '#e5e7eb'}`,
+                      borderRadius: '8px',
+                      color: theme === 'dark' ? '#ffffff' : '#000000'
+                    }}
+                  />
+                  <Bar dataKey="value" radius={[8, 8, 0, 0]}>
+                    {getVehiclesData().map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        )}
 
         {/* Alerts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
