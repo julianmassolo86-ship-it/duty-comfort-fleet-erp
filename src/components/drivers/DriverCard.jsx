@@ -19,7 +19,7 @@ export default function DriverCard({ driver, onClick }) {
       className={cn(
         "group relative overflow-hidden rounded-2xl bg-slate-800/50 border border-slate-700/50",
         "p-5 cursor-pointer transition-all duration-300",
-        "hover:bg-slate-800/70 hover:border-slate-600/50 hover:shadow-xl hover:shadow-blue-500/5"
+        "hover:bg-slate-800/70 hover:border-slate-600/50 hover:shadow-xl hover:shadow-yellow-500/5"
       )}
     >
       <div className="flex items-start gap-4 mb-4">
@@ -31,8 +31,8 @@ export default function DriverCard({ driver, onClick }) {
               className="w-14 h-14 rounded-xl object-cover"
             />
           ) : (
-            <div className="w-14 h-14 rounded-xl bg-blue-500/10 flex items-center justify-center">
-              <User className="w-7 h-7 text-blue-400" />
+            <div className="w-14 h-14 rounded-xl bg-yellow-500/10 flex items-center justify-center">
+              <User className="w-7 h-7 text-yellow-400" />
             </div>
           )}
         </div>

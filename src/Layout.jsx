@@ -34,6 +34,7 @@ export default function Layout({ children, currentPageName }) {
   // Menú para Super Admin
   const superAdminItems = [
     { name: "Dashboard", icon: LayoutDashboard, page: "Dashboard" },
+    { name: "Mi Perfil", icon: UserCog, page: "Profile" },
     { name: "Empresas", icon: Building2, page: "Companies" },
     { name: "Administradores", icon: UserCog, page: "CompanyAdmins" },
     { name: "Locaciones", icon: MapPin, page: "Locations" },
@@ -63,9 +64,17 @@ export default function Layout({ children, currentPageName }) {
       <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-slate-900/95 backdrop-blur border-b border-slate-800">
         <div className="flex items-center justify-between h-16 px-4">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
-              <Car className="w-5 h-5 text-white" />
-            </div>
+            {user?.logo_url ? (
+              <img 
+                src={user.logo_url} 
+                alt="Logo" 
+                className="w-8 h-8 rounded-lg object-contain"
+              />
+            ) : (
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-yellow-500 to-yellow-600 flex items-center justify-center">
+                <Car className="w-5 h-5 text-black" />
+              </div>
+            )}
             <span className="text-lg font-bold text-white">Mass Effect ERP</span>
           </div>
           <Button
@@ -88,9 +97,17 @@ export default function Layout({ children, currentPageName }) {
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="h-16 flex items-center gap-3 px-6 border-b border-slate-800">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
-              <Car className="w-6 h-6 text-white" />
-            </div>
+            {user?.logo_url ? (
+              <img 
+                src={user.logo_url} 
+                alt="Logo" 
+                className="w-10 h-10 rounded-xl object-contain"
+              />
+            ) : (
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-500 to-yellow-600 flex items-center justify-center shadow-lg shadow-yellow-500/20">
+                <Car className="w-6 h-6 text-black" />
+              </div>
+            )}
             <div>
               <span className="text-lg font-bold text-white">Mass Effect</span>
               <p className="text-xs text-slate-500">
@@ -111,17 +128,17 @@ export default function Layout({ children, currentPageName }) {
                   className={cn(
                     "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200",
                     isActive 
-                      ? "bg-blue-500/10 text-blue-400 shadow-sm" 
+                      ? "bg-yellow-500/10 text-yellow-400 shadow-sm" 
                       : "text-slate-400 hover:text-white hover:bg-slate-800/50"
                   )}
                 >
                   <item.icon className={cn(
                     "w-5 h-5 transition-colors",
-                    isActive ? "text-blue-400" : "text-slate-500"
+                    isActive ? "text-yellow-400" : "text-slate-500"
                   )} />
                   <span>{item.name}</span>
                   {isActive && (
-                    <ChevronRight className="w-4 h-4 ml-auto text-blue-400" />
+                    <ChevronRight className="w-4 h-4 ml-auto text-yellow-400" />
                   )}
                 </Link>
               );
@@ -135,7 +152,7 @@ export default function Layout({ children, currentPageName }) {
                 <DropdownMenuTrigger asChild>
                   <button className="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-slate-800/50 transition-colors">
                     <Avatar className="w-10 h-10 border-2 border-slate-700">
-                      <AvatarFallback className="bg-blue-500/10 text-blue-400 font-medium">
+                      <AvatarFallback className="bg-yellow-500/10 text-yellow-400 font-medium">
                         {user.full_name?.charAt(0) || user.email?.charAt(0) || 'U'}
                       </AvatarFallback>
                     </Avatar>
