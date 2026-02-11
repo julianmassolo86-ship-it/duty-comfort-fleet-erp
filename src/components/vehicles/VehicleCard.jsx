@@ -47,6 +47,17 @@ export default function VehicleCard({ vehicle, location, company, drivers = [], 
           </div>
         )}
         <StatusBadge status={vehicle.status} className="absolute top-3 right-3" />
+        
+        {/* Logo de la marca superpuesto en la imagen */}
+        {vehicle.manufacturer_logo_url && (
+          <div className="absolute bottom-3 left-3 bg-white/95 backdrop-blur-sm rounded-lg p-2 shadow-lg">
+            <img 
+              src={vehicle.manufacturer_logo_url} 
+              alt={vehicle.manufacturer} 
+              className="h-8 w-auto object-contain"
+            />
+          </div>
+        )}
       </div>
 
       {/* Contenido de la tarjeta */}
@@ -58,10 +69,7 @@ export default function VehicleCard({ vehicle, location, company, drivers = [], 
               <span className="text-3xl font-black bg-gradient-to-br from-white to-zinc-300 bg-clip-text text-transparent">#{vehicle.internal_number}</span>
             )}
           </div>
-          <div className="flex-shrink-0 flex items-center gap-2">
-            {vehicle.manufacturer_logo_url && (
-              <img src={vehicle.manufacturer_logo_url} alt={vehicle.manufacturer} className="h-6 object-contain" />
-            )}
+          <div className="flex-shrink-0">
             <h3 className="text-xl font-black text-white bg-gradient-to-br from-white to-zinc-300 bg-clip-text text-transparent">{vehicle.plate}</h3>
           </div>
         </div>
