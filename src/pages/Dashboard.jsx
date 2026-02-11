@@ -85,31 +85,40 @@ export default function Dashboard() {
     const today = new Date();
     const warningDays = 30;
 
-    // Vehicle document alerts
+    // Vehicle document alerts - incluir TODOS los campos de vencimiento
+    const vehicleFields = [
+      { key: 'insurance_expiry', label: 'Seguro' },
+      { key: 'technical_inspection_expiry', label: 'VTV' },
+      { key: 'circulation_permit_expiry', label: 'Permiso de circulación' },
+      { key: 'vehicle_card_front_expiry', label: 'Cédula del vehículo' },
+      { key: 'title_expiry', label: 'Título automotor' },
+      { key: 'license_plate_expiry', label: 'Patente' },
+      { key: 'parts_engraving_expiry', label: 'Grabado de autopartes' },
+      { key: 'fire_extinguisher_expiry', label: 'Extintor' },
+      { key: 'next_service_date', label: 'Próximo service' }
+    ];
+
     accessibleVehicles.forEach(v => {
-      ['insurance_expiry', 'technical_inspection_expiry', 'circulation_permit_expiry'].forEach(field => {
-        if (v[field]) {
-          const days = differenceInDays(new Date(v[field]), today);
+      vehicleFields.forEach(({ key, label }) => {
+        if (v[key]) {
+          const days = differenceInDays(new Date(v[key]), today);
+          // Incluir vencidos (días negativos) y próximos a vencer
           if (days <= warningDays) {
-            const labels = {
-              insurance_expiry: 'Seguro',
-              technical_inspection_expiry: 'VTV',
-              circulation_permit_expiry: 'Permiso de circulación'
-            };
             alerts.push({
-              id: `${v.id}-${field}`,
-              title: `${labels[field]} - ${v.plate}`,
-              description: `${v.brand} ${v.model}`,
-              date: v[field],
-              severity: days <= 0 ? 'critical' : days <= 7 ? 'critical' : 'warning',
-              entityType: 'vehicle'
+              id: `${v.id}-${key}`,
+              title: `${label} - ${v.plate}`,
+              description: `${v.manufacturer} ${v.model}`,
+              date: v[key],
+              severity: days < 0 ? 'critical' : days <= 7 ? 'critical' : 'warning',
+              entityType: 'vehicle',
+              daysRemaining: days
             });
           }
         }
       });
     });
 
-    // Driver license/medical alerts
+    // Driver license alerts
     accessibleDrivers.forEach(d => {
       if (d.license_expiry) {
         const days = differenceInDays(new Date(d.license_expiry), today);
@@ -117,29 +126,17 @@ export default function Dashboard() {
           alerts.push({
             id: `${d.id}-license`,
             title: `Licencia de conducir - ${d.full_name}`,
-            description: `Licencia tipo ${d.license_type}`,
+            description: `Licencia tipo ${d.license_type || 'N/A'}`,
             date: d.license_expiry,
-            severity: days <= 0 ? 'critical' : days <= 7 ? 'critical' : 'warning',
-            entityType: 'driver'
-          });
-        }
-      }
-      if (d.medical_certificate_expiry) {
-        const days = differenceInDays(new Date(d.medical_certificate_expiry), today);
-        if (days <= warningDays) {
-          alerts.push({
-            id: `${d.id}-medical`,
-            title: `Certificado médico - ${d.full_name}`,
-            description: 'Certificado médico por vencer',
-            date: d.medical_certificate_expiry,
-            severity: days <= 0 ? 'critical' : days <= 7 ? 'critical' : 'warning',
-            entityType: 'driver'
+            severity: days < 0 ? 'critical' : days <= 7 ? 'critical' : 'warning',
+            entityType: 'driver',
+            daysRemaining: days
           });
         }
       }
     });
 
-    return alerts.sort((a, b) => new Date(a.date) - new Date(b.date)).slice(0, 5);
+    return alerts.sort((a, b) => new Date(a.date) - new Date(b.date)).slice(0, 10);
   };
 
   const alerts = isLoading ? [] : getAlerts();
