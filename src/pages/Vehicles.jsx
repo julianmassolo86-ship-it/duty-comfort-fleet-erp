@@ -62,6 +62,11 @@ export default function Vehicles() {
     queryFn: () => base44.entities.VehicleType.list('name'),
   });
 
+  const { data: vehicleStatuses = [] } = useQuery({
+    queryKey: ['vehicleStatuses'],
+    queryFn: () => base44.entities.VehicleStatus.list(),
+  });
+
   const locationsMap = locations.reduce((acc, l) => ({ ...acc, [l.id]: l }), {});
   const companiesMap = companies.reduce((acc, c) => ({ ...acc, [c.id]: c }), {});
 
@@ -216,6 +221,7 @@ export default function Vehicles() {
                 location={locationsMap[vehicle.location_id]}
                 company={isSuperAdmin ? companiesMap[vehicle.company_id] : null}
                 drivers={drivers}
+                vehicleStatuses={vehicleStatuses}
                 onClick={() => handleEdit(vehicle)}
               />
             ))}
