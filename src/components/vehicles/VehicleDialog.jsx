@@ -91,10 +91,13 @@ export default function VehicleDialog({
   }, [vehicle, open, isSuperAdmin, currentUser]);
 
   const handleChange = (field, value) => {
-    setForm(prev => ({ ...prev, [field]: value }));
     if (field === "company_id") {
       setSelectedCompanyId(value);
-      setForm(prev => ({ ...prev, location_id: "", assigned_driver_ids: [] }));
+      setForm(prev => ({ ...prev, [field]: value, location_id: "", assigned_driver_ids: [] }));
+    } else if (field === "location_id") {
+      setForm(prev => ({ ...prev, [field]: value, assigned_driver_ids: [] }));
+    } else {
+      setForm(prev => ({ ...prev, [field]: value }));
     }
   };
 
@@ -242,9 +245,13 @@ export default function VehicleDialog({
                         <SelectValue placeholder={selectedCompanyId ? "Seleccionar locación" : "Primero seleccione empresa"} />
                       </SelectTrigger>
                       <SelectContent>
-                        {filteredLocations.map(l => (
-                          <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>
-                        ))}
+                        {filteredLocations.length > 0 ? (
+                          filteredLocations.map(l => (
+                            <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>
+                          ))
+                        ) : (
+                          <div className="px-2 py-1.5 text-sm text-zinc-500">No hay locaciones disponibles</div>
+                        )}
                       </SelectContent>
                     </Select>
                   </div>
@@ -259,9 +266,13 @@ export default function VehicleDialog({
                       <SelectValue placeholder="Seleccionar locación" />
                     </SelectTrigger>
                     <SelectContent>
-                      {filteredLocations.map(l => (
-                        <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>
-                      ))}
+                      {filteredLocations.length > 0 ? (
+                        filteredLocations.map(l => (
+                          <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>
+                        ))
+                      ) : (
+                        <div className="px-2 py-1.5 text-sm text-zinc-500">No hay locaciones disponibles</div>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
@@ -477,7 +488,7 @@ export default function VehicleDialog({
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value={null}>Sin asignar</SelectItem>
-                            {filteredDrivers.filter(d => d.status === 'active').map(driver => (
+                            {filteredDrivers.filter(d => d.status === 'active' && d.location_id === form.location_id).map(driver => (
                               <SelectItem key={driver.id} value={driver.id}>
                                 {driver.full_name}
                               </SelectItem>

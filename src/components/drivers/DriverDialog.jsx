@@ -551,7 +551,7 @@ export default function DriverDialog({
                   <Label>Vehículo Asignado</Label>
                   <Select 
                     value={form.vehicle_id || ""} 
-                    onValueChange={(v) => handleChange("vehicle_id", v)}
+                    onValueChange={(v) => handleChange("vehicle_id", v === "" ? "" : v)}
                     disabled={!form.location_id}
                   >
                     <SelectTrigger className="bg-slate-800 border-slate-700">
@@ -566,7 +566,7 @@ export default function DriverDialog({
                       ) : (
                         filteredVehicles.map(vehicle => (
                           <SelectItem key={vehicle.id} value={vehicle.id}>
-                            {vehicle.plate} - {vehicle.brand} {vehicle.model}
+                            {vehicle.internal_number ? `#${vehicle.internal_number} - ` : ""}{vehicle.plate} - {vehicle.manufacturer} {vehicle.model}
                           </SelectItem>
                         ))
                       )}
