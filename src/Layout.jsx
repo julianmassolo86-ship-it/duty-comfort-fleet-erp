@@ -116,6 +116,12 @@ function LayoutContent({ children, currentPageName }) {
         { name: "Documentos", icon: FileText, page: "Documents" },
         { name: "Reportes", icon: BarChart3, page: "Reports" }
       ]
+    },
+    {
+      section: "Configuración",
+      items: [
+        { name: "Marcas de Vehículos", icon: Building2, page: "Manufacturers" }
+      ]
     }
   ];
 
