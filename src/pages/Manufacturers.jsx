@@ -111,7 +111,7 @@ export default function ManufacturersPage() {
       <PageHeader
         title="Marcas de Vehículos"
         description="Gestiona las marcas y sus logos"
-        action={
+        actions={
           <Button
             onClick={handleAddNew}
             className="bg-yellow-500 hover:bg-yellow-600 text-black"
