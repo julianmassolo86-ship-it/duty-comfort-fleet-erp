@@ -74,7 +74,7 @@ export default function CompanyAdmins() {
   });
 
   return (
-    <div className="min-h-screen bg-slate-900 p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-black p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
         <PageHeader 
           title="Administradores de Empresa" 
@@ -82,7 +82,7 @@ export default function CompanyAdmins() {
           actions={
             <Button 
               onClick={() => { setSelectedAdmin(null); setDialogOpen(true); }}
-              className="bg-blue-600 hover:bg-blue-700"
+              className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
             >
               <Plus className="w-4 h-4 mr-2" />
               Invitar Administrador
@@ -98,11 +98,11 @@ export default function CompanyAdmins() {
               placeholder="Buscar por nombre o email..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-10 bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500"
+              className="pl-10 bg-zinc-900/50 border-zinc-800 text-white placeholder:text-zinc-500 focus:border-yellow-500/50"
             />
           </div>
           <Select value={companyFilter} onValueChange={setCompanyFilter}>
-            <SelectTrigger className="w-full sm:w-52 bg-slate-800/50 border-slate-700 text-white">
+            <SelectTrigger className="w-full sm:w-52 bg-zinc-900/50 border-zinc-800 text-white">
               <SelectValue placeholder="Empresa" />
             </SelectTrigger>
             <SelectContent>
@@ -118,7 +118,7 @@ export default function CompanyAdmins() {
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {Array(6).fill(0).map((_, i) => (
-              <Skeleton key={i} className="h-44 rounded-2xl bg-slate-800/50" />
+              <Skeleton key={i} className="h-44 rounded-2xl bg-zinc-900/50" />
             ))}
           </div>
         ) : filteredAdmins.length > 0 ? (
@@ -129,7 +129,7 @@ export default function CompanyAdmins() {
                 <div 
                   key={admin.id}
                   onClick={() => handleEdit(admin)}
-                  className="group relative overflow-hidden rounded-2xl bg-slate-800/50 border border-slate-700/50 p-5 cursor-pointer transition-all duration-300 hover:bg-slate-800/70 hover:border-slate-600/50"
+                  className="group relative overflow-hidden rounded-2xl bg-zinc-900/80 border border-zinc-800/50 p-5 cursor-pointer backdrop-blur-xl shadow-lg shadow-black/20 transition-all duration-300 hover:bg-zinc-900 hover:border-yellow-500/30 hover:shadow-2xl hover:shadow-yellow-500/10 hover:-translate-y-1"
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div className="p-3 rounded-xl bg-cyan-500/10 text-cyan-400">
@@ -172,7 +172,7 @@ export default function CompanyAdmins() {
               !search && (
                 <Button 
                   onClick={() => { setSelectedAdmin(null); setDialogOpen(true); }}
-                  className="bg-blue-600 hover:bg-blue-700"
+                  className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Invitar Administrador

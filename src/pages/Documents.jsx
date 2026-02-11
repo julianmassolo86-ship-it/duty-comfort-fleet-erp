@@ -120,7 +120,7 @@ export default function Documents() {
   });
 
   return (
-    <div className="min-h-screen bg-slate-900 p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-black p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
         <PageHeader 
           title="Documentos" 
@@ -128,7 +128,7 @@ export default function Documents() {
           actions={
             <Button 
               onClick={() => { setSelectedDocument(null); setDialogOpen(true); }}
-              className="bg-blue-600 hover:bg-blue-700"
+              className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
             >
               <Plus className="w-4 h-4 mr-2" />
               Nuevo Documento
@@ -144,11 +144,11 @@ export default function Documents() {
               placeholder="Buscar documentos..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-10 bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500"
+              className="pl-10 bg-zinc-900/50 border-zinc-800 text-white placeholder:text-zinc-500 focus:border-yellow-500/50"
             />
           </div>
           <Select value={entityFilter} onValueChange={setEntityFilter}>
-            <SelectTrigger className="w-full sm:w-40 bg-slate-800/50 border-slate-700 text-white">
+            <SelectTrigger className="w-full sm:w-40 bg-zinc-900/50 border-zinc-800 text-white">
               <SelectValue placeholder="Entidad" />
             </SelectTrigger>
             <SelectContent>
@@ -158,7 +158,7 @@ export default function Documents() {
             </SelectContent>
           </Select>
           <Select value={typeFilter} onValueChange={setTypeFilter}>
-            <SelectTrigger className="w-full sm:w-48 bg-slate-800/50 border-slate-700 text-white">
+            <SelectTrigger className="w-full sm:w-48 bg-zinc-900/50 border-zinc-800 text-white">
               <SelectValue placeholder="Tipo" />
             </SelectTrigger>
             <SelectContent>
@@ -174,11 +174,11 @@ export default function Documents() {
         {isLoading ? (
           <div className="space-y-2">
             {Array(5).fill(0).map((_, i) => (
-              <Skeleton key={i} className="h-16 rounded-xl bg-slate-800/50" />
+              <Skeleton key={i} className="h-16 rounded-xl bg-zinc-900/50" />
             ))}
           </div>
         ) : filteredDocuments.length > 0 ? (
-          <div className="rounded-2xl border border-slate-700/50 overflow-hidden">
+          <div className="rounded-2xl border border-zinc-800/50 overflow-hidden bg-zinc-900/50 backdrop-blur-xl shadow-2xl shadow-black/20">
             <Table>
               <TableHeader>
                 <TableRow className="bg-slate-800/50 border-slate-700">
@@ -263,7 +263,7 @@ export default function Documents() {
               !search && (
                 <Button 
                   onClick={() => { setSelectedDocument(null); setDialogOpen(true); }}
-                  className="bg-blue-600 hover:bg-blue-700"
+                  className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Agregar Documento
