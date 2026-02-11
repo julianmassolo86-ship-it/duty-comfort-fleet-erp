@@ -74,7 +74,7 @@ export default function CompanyDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg bg-slate-900 border-slate-700 text-white">
+      <DialogContent className="max-w-lg bg-zinc-950 border-zinc-800 text-white shadow-2xl shadow-black/50 backdrop-blur-xl">
         <DialogHeader>
           <DialogTitle>{company ? "Editar Empresa" : "Nueva Empresa"}</DialogTitle>
         </DialogHeader>
@@ -101,7 +101,7 @@ export default function CompanyDialog({
                   accept="image/*"
                   onChange={handleImageUpload}
                   disabled={uploading}
-                  className="bg-slate-800 border-slate-700"
+                  className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 transition-colors"
                 />
                 {uploading && <p className="text-xs text-slate-400 mt-1">Subiendo logo...</p>}
               </div>
@@ -215,7 +215,7 @@ export default function CompanyDialog({
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="border-slate-700 text-slate-300 hover:bg-slate-800">
               Cancelar
             </Button>
-            <Button type="submit" disabled={isLoading} className="bg-blue-600 hover:bg-blue-700">
+            <Button type="submit" disabled={isLoading} className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold">
               {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               {company ? "Guardar" : "Crear"}
             </Button>

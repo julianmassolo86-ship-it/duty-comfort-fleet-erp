@@ -76,7 +76,7 @@ export default function Profile() {
           description="Administra tu información personal"
         />
 
-        <Card className="bg-slate-800/50 border-slate-700">
+        <Card className="bg-zinc-900/80 border-zinc-800/50 backdrop-blur-xl shadow-2xl shadow-black/20">
           <CardHeader>
             <CardTitle className="text-white">Información Personal</CardTitle>
           </CardHeader>
@@ -86,9 +86,9 @@ export default function Profile() {
               <Input
                 value={user.email}
                 disabled
-                className="bg-slate-700/50 border-slate-600 text-slate-400"
+                className="bg-zinc-800/50 border-zinc-700 text-zinc-500"
               />
-              <p className="text-xs text-slate-500">El email no se puede modificar</p>
+              <p className="text-xs text-zinc-500">El email no se puede modificar</p>
             </div>
 
             <div className="space-y-2">
@@ -96,7 +96,7 @@ export default function Profile() {
               <Input
                 value={form.full_name}
                 onChange={(e) => setForm(prev => ({ ...prev, full_name: e.target.value }))}
-                className="bg-slate-800 border-slate-700"
+                className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 transition-colors"
               />
             </div>
 
@@ -105,14 +105,14 @@ export default function Profile() {
               <Input
                 value={form.phone}
                 onChange={(e) => setForm(prev => ({ ...prev, phone: e.target.value }))}
-                className="bg-slate-800 border-slate-700"
+                className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 transition-colors"
               />
             </div>
 
             {isSuperAdmin && (
               <div className="space-y-2 pt-4 border-t border-slate-700">
                 <Label>Logo Personalizado (Super Admin)</Label>
-                <p className="text-xs text-slate-500 mb-2">
+                <p className="text-xs text-zinc-500 mb-2">
                   Este logo aparecerá en el menú lateral
                 </p>
                 {form.logo_url ? (
@@ -120,7 +120,7 @@ export default function Profile() {
                     <img 
                       src={form.logo_url} 
                       alt="Logo" 
-                      className="w-24 h-24 object-contain bg-slate-700 rounded-lg p-2"
+                      className="w-24 h-24 object-contain bg-zinc-800 rounded-lg p-2 border border-zinc-700"
                     />
                     <Button
                       type="button"
@@ -147,7 +147,7 @@ export default function Profile() {
                       size="sm"
                       onClick={() => document.getElementById("logo-upload").click()}
                       disabled={uploadingLogo}
-                      className="border-slate-700"
+                      className="border-zinc-700"
                     >
                       {uploadingLogo ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Upload className="w-4 h-4 mr-2" />}
                       Cargar Logo
