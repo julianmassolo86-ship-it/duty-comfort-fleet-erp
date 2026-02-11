@@ -97,7 +97,7 @@ export default function Companies() {
           actions={
             <Button 
               onClick={() => { setSelectedCompany(null); setDialogOpen(true); }}
-              className="bg-blue-600 hover:bg-blue-700"
+              className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
             >
               <Plus className="w-4 h-4 mr-2" />
               Nueva Empresa
