@@ -24,10 +24,10 @@ const severityConfig = {
   },
 };
 
-export default function AlertCard({ title, description, date, severity = "warning", entityType }) {
+export default function AlertCard({ title, description, date, severity = "warning", entityType, daysRemaining }) {
   const config = severityConfig[severity];
   const Icon = config.icon;
-  const daysUntil = date ? differenceInDays(new Date(date), new Date()) : null;
+  const daysUntil = daysRemaining !== undefined ? daysRemaining : (date ? differenceInDays(new Date(date), new Date()) : null);
 
   return (
     <div className={cn(
@@ -65,8 +65,10 @@ export default function AlertCard({ title, description, date, severity = "warnin
               severity === 'critical' ? 'bg-rose-400' : 'bg-amber-400',
               "animate-pulse"
             )} />
-            {daysUntil !== null && daysUntil <= 0 
-              ? "Vencido" 
+            {daysUntil !== null && daysUntil < 0 
+              ? `Vencido hace ${Math.abs(daysUntil)} días`
+              : daysUntil === 0
+              ? "Vence hoy"
               : `Vence en ${daysUntil} días`} 
             {' · '}{format(new Date(date), "d MMM yyyy", { locale: es })}
           </p>
