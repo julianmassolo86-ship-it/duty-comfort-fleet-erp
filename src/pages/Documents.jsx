@@ -335,6 +335,16 @@ export default function Documents() {
                         </div>
                       </TableCell>
                       <TableCell>
+                        <span className="text-slate-300 text-sm">
+                          {companiesMap[entityInfo?.company_id]?.name || '-'}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-slate-300 text-sm">
+                          {locationsMap[entityInfo?.location_id]?.name || '-'}
+                        </span>
+                      </TableCell>
+                      <TableCell>
                         {doc.expiry_date ? (
                           <div>
                             <p className={cn("text-sm font-medium", 
@@ -354,10 +364,10 @@ export default function Documents() {
                           </div>
                         ) : (
                           <span className="text-slate-500 text-sm">-</span>
-                          )}
-                          </TableCell>
-                          <TableCell>
-                          <StatusBadge status={getDocumentStatus(doc.expiry_date)} />
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <StatusBadge status={getDocumentStatus(doc.expiry_date)} />
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
