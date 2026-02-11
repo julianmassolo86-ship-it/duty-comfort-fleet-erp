@@ -166,21 +166,21 @@ export default function Dashboard() {
 
   const getVehiclesData = () => {
     const active = accessibleVehicles.filter(v => v.status === 'active').length;
-    const maintenance = accessibleVehicles.filter(v => v.status === 'maintenance').length;
-    const repair = accessibleVehicles.filter(v => v.status === 'repair').length;
-    const inactive = accessibleVehicles.filter(v => v.status === 'inactive').length;
     const available = accessibleVehicles.filter(v => v.status === 'available').length;
     const inUse = accessibleVehicles.filter(v => v.status === 'in_use').length;
+    const maintenance = accessibleVehicles.filter(v => v.status === 'maintenance').length;
     const reserved = accessibleVehicles.filter(v => v.status === 'reserved').length;
+    const inTransit = accessibleVehicles.filter(v => v.status === 'in_transit').length;
+    const retired = accessibleVehicles.filter(v => v.status === 'retired').length;
     
     return [
-      { name: 'Activos', value: active, color: '#10b981' },
-      { name: 'Disponibles', value: available, color: '#3b82f6' },
+      { name: 'Activo', value: active, color: '#10b981' },
+      { name: 'Disponible', value: available, color: '#3b82f6' },
       { name: 'En Uso', value: inUse, color: '#8b5cf6' },
-      { name: 'Reservados', value: reserved, color: '#f59e0b' },
-      { name: 'Mantenimiento', value: maintenance, color: '#eab308' },
-      { name: 'Reparación', value: repair, color: '#ef4444' },
-      { name: 'Inactivos', value: inactive, color: '#6b7280' }
+      { name: 'En Mantenimiento', value: maintenance, color: '#eab308' },
+      { name: 'Reservado', value: reserved, color: '#f59e0b' },
+      { name: 'En Tránsito', value: inTransit, color: '#06b6d4' },
+      { name: 'Retirado', value: retired, color: '#6b7280' }
     ].filter(item => item.value > 0);
   };
 
