@@ -424,7 +424,20 @@ function LayoutContent({ children, currentPageName }) {
                             </button>
                           </CollapsibleTrigger>
                           <CollapsibleContent className="mt-1 space-y-1">
-                            {item.subItems?.map((subItem) => {
+                            {item.subItems?.map((subItem, subIdx) => {
+                              if (!subItem.page) {
+                                return (
+                                  <div
+                                    key={subIdx}
+                                    className={cn(
+                                      "flex items-center gap-3 pl-12 pr-4 py-2 rounded-xl text-sm font-medium",
+                                      theme === 'dark' ? "text-zinc-500" : "text-gray-400"
+                                    )}
+                                  >
+                                    <span>{subItem.name}</span>
+                                  </div>
+                                );
+                              }
                               const isSubActive = currentPageName === subItem.page;
                               return (
                                 <Link
