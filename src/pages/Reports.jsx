@@ -12,17 +12,20 @@ import {
   PieChart as RechartsPie, Pie, Cell, Legend,
   LineChart, Line
 } from "recharts";
+import { cn } from "@/lib/utils";
 import PageHeader from "../components/common/PageHeader";
 import StatCard from "../components/dashboard/StatCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTheme } from "../components/common/ThemeWrapper";
 
 const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
 
 export default function Reports() {
   const [period, setPeriod] = useState("6");
+  const { theme } = useTheme();
 
   const { data: vehicles = [], isLoading: loadingVehicles } = useQuery({
     queryKey: ['vehicles'],
@@ -104,7 +107,7 @@ export default function Reports() {
   ].filter(item => item.value > 0);
 
   return (
-    <div className="min-h-screen bg-black p-4 sm:p-6 lg:p-8">
+    <div className={cn("min-h-screen p-4 sm:p-6 lg:p-8", theme === 'dark' ? 'bg-black' : 'bg-gray-50')}>
       <div className="max-w-7xl mx-auto">
         <PageHeader 
           title="Reportes" 

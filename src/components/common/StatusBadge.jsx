@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { useTheme } from "./ThemeWrapper";
 
 const statusConfig = {
   active: { bg: "bg-emerald-500/90", text: "text-white", border: "border-emerald-400/50", label: "Activo" },

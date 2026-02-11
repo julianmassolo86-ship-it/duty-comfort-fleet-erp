@@ -1,25 +1,27 @@
 import { cn } from "@/lib/utils";
+import { useTheme } from "../common/ThemeWrapper";
 
 export default function StatCard({ title, value, subtitle, icon: Icon, trend, trendUp, className }) {
+  const { theme } = useTheme();
+  
   return (
     <div className={cn(
-      "relative overflow-hidden rounded-2xl bg-zinc-900/80 border border-zinc-800/50 p-6",
-      "backdrop-blur-xl shadow-2xl shadow-black/20",
-      "transition-all duration-500 hover:bg-zinc-900 hover:border-yellow-500/30",
-      "hover:shadow-yellow-500/10 hover:shadow-2xl hover:-translate-y-1",
-      "group",
+      "relative overflow-hidden rounded-2xl border p-6",
+      "backdrop-blur-xl shadow-2xl hover:-translate-y-1",
+      "transition-all duration-500 group",
+      theme === 'dark' ? 'bg-zinc-900/80 border-zinc-800/50 shadow-black/20 hover:bg-zinc-900 hover:border-yellow-500/30 hover:shadow-yellow-500/10 hover:shadow-2xl' : 'bg-white border-gray-200 shadow-gray-200/50 hover:shadow-xl hover:border-yellow-500/30',
       className
     )}>
       <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       
       <div className="relative flex items-start justify-between">
         <div className="space-y-3">
-          <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">{title}</p>
-          <p className="text-4xl font-black text-white tracking-tight bg-gradient-to-br from-white to-zinc-300 bg-clip-text text-transparent">
+          <p className={cn("text-xs font-semibold uppercase tracking-wider", theme === 'dark' ? 'text-zinc-500' : 'text-gray-500')}>{title}</p>
+          <p className={cn("text-4xl font-black tracking-tight", theme === 'dark' ? 'text-white bg-gradient-to-br from-white to-zinc-300 bg-clip-text text-transparent' : 'text-gray-900')}>
             {value}
           </p>
           {subtitle && (
-            <p className="text-sm text-zinc-600 font-medium">{subtitle}</p>
+            <p className={cn("text-sm font-medium", theme === 'dark' ? 'text-zinc-600' : 'text-gray-500')}>{subtitle}</p>
           )}
           {trend && (
             <div className={cn(

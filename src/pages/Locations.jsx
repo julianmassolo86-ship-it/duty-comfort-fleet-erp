@@ -6,10 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 import PageHeader from "../components/common/PageHeader";
 import EmptyState from "../components/common/EmptyState";
 import StatusBadge from "../components/common/StatusBadge";
 import LocationDialog from "../components/locations/LocationDialog";
+import { useTheme } from "../components/common/ThemeWrapper";
 
 const typeLabels = {
   hangar: "Hangar",
@@ -28,6 +30,7 @@ export default function Locations() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
+  const { theme } = useTheme();
 
   const queryClient = useQueryClient();
 
@@ -124,7 +127,7 @@ export default function Locations() {
     : companies.filter(c => c.id === currentUser?.company_id);
 
   return (
-    <div className="min-h-screen bg-black p-4 sm:p-6 lg:p-8">
+    <div className={cn("min-h-screen p-4 sm:p-6 lg:p-8", theme === 'dark' ? 'bg-black' : 'bg-gray-50')}>
       <div className="max-w-7xl mx-auto">
         <PageHeader 
           title="Locaciones" 
@@ -143,17 +146,17 @@ export default function Locations() {
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className={cn("absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4", theme === 'dark' ? 'text-slate-400' : 'text-gray-400')} />
             <Input
               placeholder="Buscar por nombre o dirección..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-10 bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500"
+              className={cn("pl-10", theme === 'dark' ? 'bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500' : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400')}
             />
           </div>
           {isSuperAdmin && (
             <Select value={companyFilter} onValueChange={setCompanyFilter}>
-              <SelectTrigger className="w-full sm:w-52 bg-slate-800/50 border-slate-700 text-white">
+              <SelectTrigger className={cn("w-full sm:w-52", theme === 'dark' ? 'bg-slate-800/50 border-slate-700 text-white' : 'bg-white border-gray-300 text-gray-900')}>
                 <SelectValue placeholder="Empresa" />
               </SelectTrigger>
               <SelectContent>
@@ -170,7 +173,7 @@ export default function Locations() {
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {Array(6).fill(0).map((_, i) => (
-              <Skeleton key={i} className="h-48 rounded-2xl bg-slate-800/50" />
+              <Skeleton key={i} className={cn("h-48 rounded-2xl", theme === 'dark' ? 'bg-slate-800/50' : 'bg-gray-200')} />
             ))}
           </div>
         ) : filteredLocations.length > 0 ? (
@@ -182,7 +185,7 @@ export default function Locations() {
                 <div 
                   key={location.id}
                   onClick={() => handleEdit(location)}
-                  className="group relative overflow-hidden rounded-2xl bg-zinc-900/80 border border-zinc-800/50 p-6 cursor-pointer backdrop-blur-xl shadow-lg shadow-black/20 hover:bg-zinc-900 hover:border-yellow-500/30 hover:shadow-2xl hover:shadow-yellow-500/10 hover:-translate-y-1 transition-all duration-300"
+                  className={cn("group relative overflow-hidden rounded-2xl border p-6 cursor-pointer backdrop-blur-xl shadow-lg hover:-translate-y-1 transition-all duration-300", theme === 'dark' ? 'bg-zinc-900/80 border-zinc-800/50 shadow-black/20 hover:bg-zinc-900 hover:border-yellow-500/30 hover:shadow-2xl hover:shadow-yellow-500/10' : 'bg-white border-gray-200 shadow-gray-200/50 hover:shadow-xl hover:border-yellow-500/30')}
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   
@@ -200,8 +203,8 @@ export default function Locations() {
                   
                   <div className="relative flex items-start justify-between mb-4">
                     <div className="flex-1">
-                      <h3 className="text-xl font-black text-white mb-1 bg-gradient-to-br from-white to-zinc-300 bg-clip-text text-transparent">{location.name}</h3>
-                      <p className="text-sm text-zinc-600 font-medium">{typeLabels[location.type] || location.type}</p>
+                      <h3 className={cn("text-xl font-black mb-1", theme === 'dark' ? 'text-white bg-gradient-to-br from-white to-zinc-300 bg-clip-text text-transparent' : 'text-gray-900')}>{location.name}</h3>
+                      <p className={cn("text-sm font-medium", theme === 'dark' ? 'text-zinc-600' : 'text-gray-500')}>{typeLabels[location.type] || location.type}</p>
                     </div>
                     <StatusBadge status={location.status} />
                   </div>
@@ -216,7 +219,7 @@ export default function Locations() {
                   )}
 
                   {location.address && (
-                    <p className="text-sm text-zinc-500 mb-3 font-medium truncate">{location.address}</p>
+                    <p className={cn("text-sm mb-3 font-medium truncate", theme === 'dark' ? 'text-zinc-500' : 'text-gray-500')}>{location.address}</p>
                   )}
                   
                   <div className="relative flex items-center gap-2 px-3 py-2 rounded-lg bg-zinc-800/50 border border-zinc-700/50 w-fit">

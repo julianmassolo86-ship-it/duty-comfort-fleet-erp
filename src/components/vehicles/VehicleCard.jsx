@@ -1,6 +1,7 @@
 import { Car, Truck, Bus, Bike, MapPin, Building2, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import StatusBadge from "../common/StatusBadge";
+import { useTheme } from "../common/ThemeWrapper";
 
 const vehicleIcons = {
   car: Car,
@@ -19,6 +20,7 @@ const fuelLabels = {
 
 export default function VehicleCard({ vehicle, location, company, drivers = [], onClick }) {
   const Icon = vehicleIcons[vehicle.type] || Car;
+  const { theme } = useTheme();
   
   // Obtener conductores asignados
   const driverIds = vehicle.assigned_driver_ids || (vehicle.assigned_driver_id ? [vehicle.assigned_driver_id] : []);
@@ -28,9 +30,9 @@ export default function VehicleCard({ vehicle, location, company, drivers = [], 
     <div 
       onClick={onClick}
       className={cn(
-        "group relative overflow-hidden rounded-2xl bg-zinc-900/80 border border-zinc-800/50",
-        "p-0 cursor-pointer backdrop-blur-xl shadow-lg shadow-black/20",
-        "hover:bg-zinc-900 hover:border-yellow-500/30 hover:shadow-2xl hover:shadow-yellow-500/10 hover:-translate-y-1 transition-all duration-300"
+        "group relative overflow-hidden rounded-2xl border",
+        "p-0 cursor-pointer backdrop-blur-xl shadow-lg hover:-translate-y-1 transition-all duration-300",
+        theme === 'dark' ? 'bg-zinc-900/80 border-zinc-800/50 shadow-black/20 hover:bg-zinc-900 hover:border-yellow-500/30 hover:shadow-2xl hover:shadow-yellow-500/10' : 'bg-white border-gray-200 shadow-gray-200/50 hover:shadow-xl hover:border-yellow-500/30'
       )}
     >
       <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -63,7 +65,7 @@ export default function VehicleCard({ vehicle, location, company, drivers = [], 
 
         {/* Marca y modelo */}
         <div className="relative mb-4">
-          <p className="text-zinc-400 font-semibold text-lg">{vehicle.brand} {vehicle.model}</p>
+          <p className={cn("font-semibold text-lg", theme === 'dark' ? 'text-zinc-400' : 'text-gray-600')}>{vehicle.brand} {vehicle.model}</p>
         </div>
 
         {(location || company) && (

@@ -6,10 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 import PageHeader from "../components/common/PageHeader";
 import EmptyState from "../components/common/EmptyState";
 import DriverCard from "../components/drivers/DriverCard";
 import DriverDialog from "../components/drivers/DriverDialog";
+import { useTheme } from "../components/common/ThemeWrapper";
 
 export default function Drivers() {
   const [search, setSearch] = useState("");
@@ -17,6 +19,7 @@ export default function Drivers() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedDriver, setSelectedDriver] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
+  const { theme } = useTheme();
 
   const queryClient = useQueryClient();
 
@@ -93,7 +96,7 @@ export default function Drivers() {
   });
 
   return (
-    <div className="min-h-screen bg-black p-4 sm:p-6 lg:p-8">
+    <div className={cn("min-h-screen p-4 sm:p-6 lg:p-8", theme === 'dark' ? 'bg-black' : 'bg-gray-50')}>
       <div className="max-w-7xl mx-auto">
         <PageHeader 
           title="Conductores" 
@@ -112,16 +115,16 @@ export default function Drivers() {
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className={cn("absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4", theme === 'dark' ? 'text-slate-400' : 'text-gray-400')} />
             <Input
               placeholder="Buscar por nombre, documento o ID..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-10 bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500"
+              className={cn("pl-10", theme === 'dark' ? 'bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500' : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400')}
             />
           </div>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-full sm:w-40 bg-slate-800/50 border-slate-700 text-white">
+            <SelectTrigger className={cn("w-full sm:w-40", theme === 'dark' ? 'bg-slate-800/50 border-slate-700 text-white' : 'bg-white border-gray-300 text-gray-900')}>
               <SelectValue placeholder="Estado" />
             </SelectTrigger>
             <SelectContent>
@@ -137,7 +140,7 @@ export default function Drivers() {
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {Array(6).fill(0).map((_, i) => (
-              <Skeleton key={i} className="h-56 rounded-2xl bg-slate-800/50" />
+              <Skeleton key={i} className={cn("h-56 rounded-2xl", theme === 'dark' ? 'bg-slate-800/50' : 'bg-gray-200')} />
             ))}
           </div>
         ) : filteredDrivers.length > 0 ? (

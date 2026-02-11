@@ -5,7 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, Upload, X } from "lucide-react";
+import { cn } from "@/lib/utils";
 import PageHeader from "../components/common/PageHeader";
+import { useTheme } from "../components/common/ThemeWrapper";
 
 export default function Profile() {
   const [user, setUser] = useState(null);
@@ -16,6 +18,7 @@ export default function Profile() {
   });
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [saving, setSaving] = useState(false);
+  const { theme } = useTheme();
 
   useEffect(() => {
     base44.auth.me().then(userData => {
@@ -62,23 +65,23 @@ export default function Profile() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-black p-4 sm:p-6 lg:p-8 flex items-center justify-center">
+      <div className={cn("min-h-screen p-4 sm:p-6 lg:p-8 flex items-center justify-center", theme === 'dark' ? 'bg-black' : 'bg-gray-50')}>
         <Loader2 className="w-8 h-8 animate-spin text-yellow-500" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black p-4 sm:p-6 lg:p-8">
+    <div className={cn("min-h-screen p-4 sm:p-6 lg:p-8", theme === 'dark' ? 'bg-black' : 'bg-gray-50')}>
       <div className="max-w-3xl mx-auto">
         <PageHeader 
           title="Mi Perfil" 
           description="Administra tu información personal"
         />
 
-        <Card className="bg-zinc-900/80 border-zinc-800 backdrop-blur-xl shadow-2xl shadow-black/20">
+        <Card className={cn("backdrop-blur-xl shadow-2xl", theme === 'dark' ? 'bg-zinc-900/80 border-zinc-800 shadow-black/20' : 'bg-white border-gray-200 shadow-gray-200/50')}>
           <CardHeader>
-            <CardTitle className="text-white">Información Personal</CardTitle>
+            <CardTitle className={theme === 'dark' ? 'text-white' : 'text-gray-900'}>Información Personal</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-2">
@@ -86,9 +89,9 @@ export default function Profile() {
               <Input
                 value={user.email}
                 disabled
-                className="bg-zinc-800/50 border-zinc-700 text-zinc-400"
+                className={theme === 'dark' ? 'bg-zinc-800/50 border-zinc-700 text-zinc-400' : 'bg-gray-100 border-gray-300 text-gray-500'}
               />
-              <p className="text-xs text-slate-500">El email no se puede modificar</p>
+              <p className={cn("text-xs", theme === 'dark' ? 'text-slate-500' : 'text-gray-500')}>El email no se puede modificar</p>
             </div>
 
             <div className="space-y-2">
@@ -96,7 +99,7 @@ export default function Profile() {
               <Input
                 value={form.full_name}
                 onChange={(e) => setForm(prev => ({ ...prev, full_name: e.target.value }))}
-                className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 transition-colors"
+                className={theme === 'dark' ? 'bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 transition-colors' : 'bg-white border-gray-300 focus:border-yellow-500 transition-colors'}
               />
             </div>
 
@@ -105,7 +108,7 @@ export default function Profile() {
               <Input
                 value={form.phone}
                 onChange={(e) => setForm(prev => ({ ...prev, phone: e.target.value }))}
-                className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 transition-colors"
+                className={theme === 'dark' ? 'bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 transition-colors' : 'bg-white border-gray-300 focus:border-yellow-500 transition-colors'}
               />
             </div>
 

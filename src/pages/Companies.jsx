@@ -7,15 +7,18 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import { cn } from "@/lib/utils";
 import PageHeader from "../components/common/PageHeader";
 import EmptyState from "../components/common/EmptyState";
 import StatusBadge from "../components/common/StatusBadge";
 import CompanyDialog from "../components/companies/CompanyDialog";
+import { useTheme } from "../components/common/ThemeWrapper";
 
 export default function Companies() {
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState(null);
+  const { theme } = useTheme();
 
   const queryClient = useQueryClient();
 
@@ -89,7 +92,7 @@ export default function Companies() {
   );
 
   return (
-    <div className="min-h-screen bg-black p-4 sm:p-6 lg:p-8">
+    <div className={cn("min-h-screen p-4 sm:p-6 lg:p-8", theme === 'dark' ? 'bg-black' : 'bg-gray-50')}>
       <div className="max-w-7xl mx-auto">
         <PageHeader 
           title="Empresas" 
@@ -107,12 +110,12 @@ export default function Companies() {
 
         {/* Search */}
         <div className="relative mb-6">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Search className={cn("absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4", theme === 'dark' ? 'text-slate-400' : 'text-gray-400')} />
           <Input
             placeholder="Buscar por nombre o CUIT..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-10 bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500 max-w-md"
+            className={cn("pl-10 max-w-md", theme === 'dark' ? 'bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500' : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400')}
           />
         </div>
 
@@ -120,7 +123,7 @@ export default function Companies() {
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {Array(6).fill(0).map((_, i) => (
-              <Skeleton key={i} className="h-48 rounded-2xl bg-zinc-900/50" />
+              <Skeleton key={i} className={cn("h-48 rounded-2xl", theme === 'dark' ? 'bg-zinc-900/50' : 'bg-gray-200')} />
             ))}
           </div>
         ) : filteredCompanies.length > 0 ? (
@@ -131,7 +134,7 @@ export default function Companies() {
                 <div 
                   key={company.id}
                   onClick={() => handleEdit(company)}
-                  className="group relative overflow-hidden rounded-2xl bg-zinc-900/80 border border-zinc-800/50 p-6 cursor-pointer backdrop-blur-xl shadow-lg shadow-black/20 hover:bg-zinc-900 hover:border-yellow-500/30 hover:shadow-2xl hover:shadow-yellow-500/10 hover:-translate-y-1 transition-all duration-300"
+                  className={cn("group relative overflow-hidden rounded-2xl border p-6 cursor-pointer backdrop-blur-xl shadow-lg hover:-translate-y-1 transition-all duration-300", theme === 'dark' ? 'bg-zinc-900/80 border-zinc-800/50 shadow-black/20 hover:bg-zinc-900 hover:border-yellow-500/30 hover:shadow-2xl hover:shadow-yellow-500/10' : 'bg-white border-gray-200 shadow-gray-200/50 hover:shadow-xl hover:border-yellow-500/30')}
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   
@@ -151,9 +154,9 @@ export default function Companies() {
                   </div>
                   
                   <div className="relative mb-4">
-                    <h3 className="text-xl font-black text-white mb-1 bg-gradient-to-br from-white to-zinc-300 bg-clip-text text-transparent">{company.name}</h3>
+                    <h3 className={cn("text-xl font-black mb-1", theme === 'dark' ? 'text-white bg-gradient-to-br from-white to-zinc-300 bg-clip-text text-transparent' : 'text-gray-900')}>{company.name}</h3>
                     {company.tax_id && (
-                      <p className="text-sm text-zinc-600 font-medium">{company.tax_id}</p>
+                      <p className={cn("text-sm font-medium", theme === 'dark' ? 'text-zinc-600' : 'text-gray-500')}>{company.tax_id}</p>
                     )}
                   </div>
                   

@@ -9,10 +9,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format, differenceInDays } from "date-fns";
 import { es } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 import PageHeader from "../components/common/PageHeader";
 import EmptyState from "../components/common/EmptyState";
 import StatusBadge from "../components/common/StatusBadge";
 import DocumentDialog from "../components/documents/DocumentDialog";
+import { useTheme } from "../components/common/ThemeWrapper";
 
 const typeLabels = {
   vehicle_registration: "Registro de vehículo",
@@ -31,6 +33,7 @@ export default function Documents() {
   const [entityFilter, setEntityFilter] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState(null);
+  const { theme } = useTheme();
 
   const queryClient = useQueryClient();
 
@@ -120,7 +123,7 @@ export default function Documents() {
   });
 
   return (
-    <div className="min-h-screen bg-black p-4 sm:p-6 lg:p-8">
+    <div className={cn("min-h-screen p-4 sm:p-6 lg:p-8", theme === 'dark' ? 'bg-black' : 'bg-gray-50')}>
       <div className="max-w-7xl mx-auto">
         <PageHeader 
           title="Documentos" 

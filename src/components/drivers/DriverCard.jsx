@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import StatusBadge from "../common/StatusBadge";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { useTheme } from "../common/ThemeWrapper";
 
 const licenseLabels = {
   A: "Tipo A - Motos",
@@ -13,13 +14,15 @@ const licenseLabels = {
 };
 
 export default function DriverCard({ driver, onClick }) {
+  const { theme } = useTheme();
+  
   return (
     <div 
       onClick={onClick}
       className={cn(
-        "group relative overflow-hidden rounded-2xl bg-zinc-900/80 border border-zinc-800/50",
-        "p-6 cursor-pointer backdrop-blur-xl shadow-lg shadow-black/20",
-        "hover:bg-zinc-900 hover:border-yellow-500/30 hover:shadow-2xl hover:shadow-yellow-500/10 hover:-translate-y-1 transition-all duration-300"
+        "group relative overflow-hidden rounded-2xl border",
+        "p-6 cursor-pointer backdrop-blur-xl shadow-lg hover:-translate-y-1 transition-all duration-300",
+        theme === 'dark' ? 'bg-zinc-900/80 border-zinc-800/50 shadow-black/20 hover:bg-zinc-900 hover:border-yellow-500/30 hover:shadow-2xl hover:shadow-yellow-500/10' : 'bg-white border-gray-200 shadow-gray-200/50 hover:shadow-xl hover:border-yellow-500/30'
       )}
     >
       <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />

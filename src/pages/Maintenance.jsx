@@ -6,10 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 import PageHeader from "../components/common/PageHeader";
 import EmptyState from "../components/common/EmptyState";
 import MaintenanceCard from "../components/maintenance/MaintenanceCard";
 import MaintenanceDialog from "../components/maintenance/MaintenanceDialog";
+import { useTheme } from "../components/common/ThemeWrapper";
 
 export default function Maintenance() {
   const [search, setSearch] = useState("");
@@ -17,6 +19,7 @@ export default function Maintenance() {
   const [typeFilter, setTypeFilter] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedMaintenance, setSelectedMaintenance] = useState(null);
+  const { theme } = useTheme();
 
   const queryClient = useQueryClient();
 
@@ -83,7 +86,7 @@ export default function Maintenance() {
   });
 
   return (
-    <div className="min-h-screen bg-black p-4 sm:p-6 lg:p-8">
+    <div className={cn("min-h-screen p-4 sm:p-6 lg:p-8", theme === 'dark' ? 'bg-black' : 'bg-gray-50')}>
       <div className="max-w-7xl mx-auto">
         <PageHeader 
           title="Mantenimiento" 
