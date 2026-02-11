@@ -52,26 +52,26 @@ export default function DocumentCard({
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
           </div>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="flex gap-2">
             <Button
               type="button"
               size="sm"
               variant="outline"
               onClick={() => window.open(document_url, '_blank')}
-              className="border-zinc-700 hover:bg-yellow-500/10 hover:border-yellow-500/50 transition-all w-full"
+              className="border-zinc-700 hover:bg-yellow-500/10 hover:border-yellow-500/50 transition-all flex-1 text-white"
             >
-              <ZoomIn className="w-4 h-4 mr-2" />
-              Ver
+              <ZoomIn className="w-3 h-3 mr-1" />
+              <span className="text-xs font-medium">Ver</span>
             </Button>
             <Button
               type="button"
               size="sm"
               variant="outline"
               onClick={handleDownload}
-              className="border-zinc-700 hover:bg-blue-500/10 hover:border-blue-500/50 transition-all w-full"
+              className="border-zinc-700 hover:bg-blue-500/10 hover:border-blue-500/50 transition-all flex-1 text-white"
             >
-              <Download className="w-4 h-4 mr-2" />
-              Descargar
+              <Download className="w-3 h-3 mr-1" />
+              <span className="text-xs font-medium">Descargar</span>
             </Button>
           </div>
           <Button
@@ -79,10 +79,10 @@ export default function DocumentCard({
             size="sm"
             variant="destructive"
             onClick={() => onDelete(url_field, "")}
-            className="w-full hover:bg-red-700"
+            className="w-full hover:bg-red-700 text-xs"
           >
-            <X className="w-4 h-4 mr-2" />
-            Eliminar
+            <X className="w-3 h-3 mr-1" />
+            <span className="font-medium">Eliminar</span>
           </Button>
         </div>
       ) : (
@@ -104,10 +104,10 @@ export default function DocumentCard({
             size="sm"
             onClick={() => document.getElementById(uploadId).click()}
             disabled={uploading}
-            className="border-zinc-700 hover:bg-zinc-800 w-full"
+            className="border-zinc-700 hover:bg-zinc-800 w-full text-white text-xs"
           >
-            {uploading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Upload className="w-4 h-4 mr-2" />}
-            Cargar Documento
+            {uploading ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <Upload className="w-3 h-3 mr-1" />}
+            <span className="font-medium">Cargar Documento</span>
           </Button>
         </div>
       )}

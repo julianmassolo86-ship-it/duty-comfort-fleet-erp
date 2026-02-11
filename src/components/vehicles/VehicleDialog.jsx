@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, Trash2, X, Upload, Image as ImageIcon, UserPlus, UserMinus, ZoomIn, Download } from "lucide-react";
 import DocumentCard from "./DocumentCard";
+import VehicleCardDocument from "./VehicleCardDocument";
 import { base44 } from "@/api/base44Client";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
@@ -75,13 +76,17 @@ export default function VehicleDialog({
         const locationId = vehicle.location_id || "";
         
         setSelectedCompanyId(companyId);
-        setForm({ 
-          ...initialState, 
-          ...vehicle,
-          assigned_driver_ids: driverIds,
-          company_id: companyId,
-          location_id: locationId
-        });
+        
+        // Usar setTimeout para asegurar que el estado se actualice después del render
+        setTimeout(() => {
+          setForm({ 
+            ...initialState, 
+            ...vehicle,
+            assigned_driver_ids: driverIds,
+            company_id: companyId,
+            location_id: locationId
+          });
+        }, 0);
       } else {
         const defaultCompanyId = isSuperAdmin ? "" : (currentUser?.company_id || "");
         setSelectedCompanyId(defaultCompanyId);
@@ -604,34 +609,27 @@ export default function VehicleDialog({
             </TabsContent>
 
             <TabsContent value="documents" className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Cédula Vehículo - Lado A */}
-                <DocumentCard
-                  title="Cédula Vehículo - Lado A"
-                  document_url={form.vehicle_card_front_url}
+              <div className="grid grid-cols-1 gap-4">
+                {/* Cédula Vehículo */}
+                <VehicleCardDocument
+                  title="Cédula Vehículo"
+                  document_front_url={form.vehicle_card_front_url}
+                  document_back_url={form.vehicle_card_back_url}
                   document_expiry={form.vehicle_card_front_expiry}
                   expiry_field="vehicle_card_front_expiry"
-                  url_field="vehicle_card_front_url"
+                  front_url_field="vehicle_card_front_url"
+                  back_url_field="vehicle_card_back_url"
                   uploading={uploading}
                   onExpiryChange={handleChange}
-                  onFileChange={(e) => handleImageUpload(e, "vehicle_card_front_url")}
+                  onFrontFileChange={(e) => handleImageUpload(e, "vehicle_card_front_url")}
+                  onBackFileChange={(e) => handleImageUpload(e, "vehicle_card_back_url")}
                   onDelete={handleChange}
-                  uploadId="vehicle-card-front-upload"
+                  uploadFrontId="vehicle-card-front-upload"
+                  uploadBackId="vehicle-card-back-upload"
                 />
+              </div>
 
-                {/* Cédula Vehículo - Lado B */}
-                <DocumentCard
-                  title="Cédula Vehículo - Lado B"
-                  document_url={form.vehicle_card_back_url}
-                  document_expiry={null}
-                  expiry_field={null}
-                  url_field="vehicle_card_back_url"
-                  uploading={uploading}
-                  onExpiryChange={handleChange}
-                  onFileChange={(e) => handleImageUpload(e, "vehicle_card_back_url")}
-                  onDelete={handleChange}
-                  uploadId="vehicle-card-back-upload"
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                 {/* Título Automotor */}
                 <DocumentCard
