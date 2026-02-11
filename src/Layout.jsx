@@ -28,7 +28,8 @@ export default function Layout({ children, currentPageName }) {
     base44.auth.logout();
   };
 
-  const isSuperAdmin = user?.role === 'admin' && user?.user_role === 'super_admin';
+  // Si el usuario no tiene company_id, es super admin
+  const isSuperAdmin = !user?.company_id;
 
   // Menú para Super Admin
   const superAdminItems = [

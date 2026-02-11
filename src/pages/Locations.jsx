@@ -35,7 +35,8 @@ export default function Locations() {
     base44.auth.me().then(setCurrentUser).catch(() => {});
   }, []);
 
-  const isSuperAdmin = currentUser?.role === 'admin' && currentUser?.user_role === 'super_admin';
+  // Si el usuario no tiene company_id, es super admin
+  const isSuperAdmin = !currentUser?.company_id;
 
   const { data: locations = [], isLoading } = useQuery({
     queryKey: ['locations'],
