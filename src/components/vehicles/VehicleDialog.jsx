@@ -81,7 +81,7 @@ export default function VehicleDialog({
     setForm(prev => ({ ...prev, [field]: value }));
     if (field === "company_id") {
       setSelectedCompanyId(value);
-      setForm(prev => ({ ...prev, location_id: "" })); // Reset location when company changes
+      setForm(prev => ({ ...prev, location_id: "" }));
     }
   };
 
@@ -109,12 +109,10 @@ export default function VehicleDialog({
     }
   };
 
-  // Filtrar locaciones por empresa seleccionada
   const filteredLocations = isSuperAdmin 
     ? locations.filter(l => l.company_id === selectedCompanyId)
     : locations;
 
-  // Filtrar conductores por empresa
   const filteredDrivers = isSuperAdmin
     ? drivers.filter(d => d.company_id === selectedCompanyId)
     : drivers;
@@ -418,14 +416,14 @@ export default function VehicleDialog({
               <div className="space-y-2">
                 <Label>Conductor Asignado</Label>
                 <Select 
-                  value={form.assigned_driver_id || "none"} 
-                  onValueChange={(v) => handleChange("assigned_driver_id", v === "none" ? "" : v)}
+                  value={form.assigned_driver_id || ""} 
+                  onValueChange={(v) => handleChange("assigned_driver_id", v)}
                 >
                   <SelectTrigger className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50">
                     <SelectValue placeholder="Sin asignar" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">Sin asignar</SelectItem>
+                    <SelectItem value={null}>Sin asignar</SelectItem>
                     {filteredDrivers.filter(d => d.status === 'active').map(driver => (
                       <SelectItem key={driver.id} value={driver.id}>
                         {driver.full_name}
