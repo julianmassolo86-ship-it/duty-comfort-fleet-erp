@@ -17,19 +17,27 @@ import { base44 } from "@/api/base44Client";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 const initialState = {
+  internal_number: "",
   plate: "",
   company_id: "",
   location_id: "",
+  manufacturer: "",
   brand: "",
   model: "",
   year: new Date().getFullYear(),
+  chassis_number: "",
+  engine_number: "",
   vin: "",
   type: "car",
+  technical_description: "",
   status: "active",
   fuel_type: "diesel",
   mileage: 0,
+  hours: 0,
   assigned_driver_id: "",
   purchase_date: "",
+  last_service_date: "",
+  next_service_date: "",
   insurance_expiry: "",
   technical_inspection_expiry: "",
   circulation_permit_expiry: "",
@@ -123,30 +131,39 @@ export default function VehicleDialog({
             </TabsList>
 
             <TabsContent value="general" className="space-y-4">
-              <div className="space-y-2">
-                <Label>Imagen del vehículo</Label>
-                <div className="flex items-center gap-4">
-                  {form.image_url && (
-                    <div className="relative w-20 h-20 rounded-lg overflow-hidden border-2 border-slate-700">
-                      <img src={form.image_url} alt="Vehículo" className="w-full h-full object-cover" />
-                      <button
-                        type="button"
-                        onClick={() => handleChange("image_url", "")}
-                        className="absolute top-1 right-1 p-1 bg-slate-900/80 rounded-full hover:bg-slate-800"
-                      >
-                        <X className="w-3 h-3 text-white" />
-                      </button>
-                    </div>
-                  )}
-                  <div className="flex-1">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Interno (Calco ID)</Label>
+                  <Input
+                    value={form.internal_number}
+                    onChange={(e) => handleChange("internal_number", e.target.value.slice(0, 10))}
+                    className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
+                    placeholder="Ej: MTU736"
+                    maxLength={10}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Imagen del vehículo</Label>
+                  <div className="flex items-center gap-2">
+                    {form.image_url && (
+                      <div className="relative w-12 h-12 rounded-lg overflow-hidden border-2 border-zinc-700">
+                        <img src={form.image_url} alt="Vehículo" className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => handleChange("image_url", "")}
+                          className="absolute top-0 right-0 p-0.5 bg-zinc-900/80 rounded-full hover:bg-zinc-800"
+                        >
+                          <X className="w-3 h-3 text-white" />
+                        </button>
+                      </div>
+                    )}
                     <Input
                       type="file"
                       accept="image/*"
                       onChange={handleImageUpload}
                       disabled={uploading}
-                      className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 transition-colors"
+                      className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 text-xs"
                     />
-                    {uploading && <p className="text-xs text-slate-400 mt-1">Subiendo imagen...</p>}
                   </div>
                 </div>
               </div>
@@ -198,20 +215,59 @@ export default function VehicleDialog({
                 </div>
               )}
 
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label>Fabricante *</Label>
+                  <Input
+                    value={form.manufacturer}
+                    onChange={(e) => handleChange("manufacturer", e.target.value.slice(0, 30))}
+                    className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
+                    placeholder="Ej: FIAT, SCANIA, VW"
+                    maxLength={30}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Modelo *</Label>
+                  <Input
+                    value={form.model}
+                    onChange={(e) => handleChange("model", e.target.value)}
+                    className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
+                    placeholder="Ej: Hilux 2.8 TDI"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Año</Label>
+                  <Select value={form.year?.toString()} onValueChange={(v) => handleChange("year", parseInt(v))}>
+                    <SelectTrigger className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-64">
+                      {Array.from({ length: 151 }, (_, i) => 2050 - i).map(year => (
+                        <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Matrícula *</Label>
+                  <Label>Patente *</Label>
                   <Input
                     value={form.plate}
-                    onChange={(e) => handleChange("plate", e.target.value)}
-                    className="bg-slate-800 border-slate-700"
+                    onChange={(e) => handleChange("plate", e.target.value.slice(0, 10).toUpperCase())}
+                    className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
+                    placeholder="ABC123"
+                    maxLength={10}
                     required
                   />
                 </div>
                 <div className="space-y-2">
                   <Label>Tipo *</Label>
-                  <Select value={form.type} onValueChange={(v) => handleChange("type", v)}>
-                    <SelectTrigger className="bg-slate-800 border-slate-700">
+                  <Select value={form.type} onValueChange={(v) => handleChange("type", v)} required>
+                    <SelectTrigger className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -222,6 +278,14 @@ export default function VehicleDialog({
                       <SelectItem value="motorcycle">Moto</SelectItem>
                       <SelectItem value="machinery">Maquinaria</SelectItem>
                       <SelectItem value="trailer">Trailer</SelectItem>
+                      <SelectItem value="pickup">Pickup</SelectItem>
+                      <SelectItem value="semi_truck">Semi Camión</SelectItem>
+                      <SelectItem value="crane">Grúa</SelectItem>
+                      <SelectItem value="excavator">Excavadora</SelectItem>
+                      <SelectItem value="loader">Cargadora</SelectItem>
+                      <SelectItem value="grader">Motoniveladora</SelectItem>
+                      <SelectItem value="roller">Rodillo</SelectItem>
+                      <SelectItem value="tractor">Tractor</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -229,39 +293,43 @@ export default function VehicleDialog({
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Marca *</Label>
+                  <Label>Chasis</Label>
                   <Input
-                    value={form.brand}
-                    onChange={(e) => handleChange("brand", e.target.value)}
-                    className="bg-slate-800 border-slate-700"
-                    required
+                    value={form.chassis_number}
+                    onChange={(e) => handleChange("chassis_number", e.target.value.slice(0, 20).toUpperCase())}
+                    className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
+                    placeholder="Número de chasis"
+                    maxLength={20}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Modelo *</Label>
+                  <Label>Motor</Label>
                   <Input
-                    value={form.model}
-                    onChange={(e) => handleChange("model", e.target.value)}
-                    className="bg-slate-800 border-slate-700"
-                    required
+                    value={form.engine_number}
+                    onChange={(e) => handleChange("engine_number", e.target.value.slice(0, 20).toUpperCase())}
+                    className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
+                    placeholder="Número de motor"
+                    maxLength={20}
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label>Año</Label>
-                  <Input
-                    type="number"
-                    value={form.year}
-                    onChange={(e) => handleChange("year", parseInt(e.target.value))}
-                    className="bg-slate-800 border-slate-700"
-                  />
-                </div>
+              <div className="space-y-2">
+                <Label>Descripción Técnica</Label>
+                <Input
+                  value={form.technical_description}
+                  onChange={(e) => handleChange("technical_description", e.target.value.slice(0, 50))}
+                  className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
+                  placeholder="Funcionalidad técnica o utilidad del activo"
+                  maxLength={50}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Combustible</Label>
                   <Select value={form.fuel_type} onValueChange={(v) => handleChange("fuel_type", v)}>
-                    <SelectTrigger className="bg-slate-800 border-slate-700">
+                    <SelectTrigger className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -270,18 +338,25 @@ export default function VehicleDialog({
                       <SelectItem value="electric">Eléctrico</SelectItem>
                       <SelectItem value="hybrid">Híbrido</SelectItem>
                       <SelectItem value="gnc">GNC</SelectItem>
+                      <SelectItem value="gnv">GNV</SelectItem>
+                      <SelectItem value="biodiesel">Biodiésel</SelectItem>
+                      <SelectItem value="ethanol">Etanol</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
                   <Label>Estado</Label>
                   <Select value={form.status} onValueChange={(v) => handleChange("status", v)}>
-                    <SelectTrigger className="bg-slate-800 border-slate-700">
+                    <SelectTrigger className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="active">Activo</SelectItem>
-                      <SelectItem value="maintenance">En mantenimiento</SelectItem>
+                      <SelectItem value="available">Disponible</SelectItem>
+                      <SelectItem value="in_use">En Uso</SelectItem>
+                      <SelectItem value="reserved">Reservado</SelectItem>
+                      <SelectItem value="maintenance">Mantenimiento</SelectItem>
+                      <SelectItem value="repair">Reparación</SelectItem>
                       <SelectItem value="inactive">Inactivo</SelectItem>
                     </SelectContent>
                   </Select>
@@ -290,20 +365,29 @@ export default function VehicleDialog({
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>VIN</Label>
-                  <Input
-                    value={form.vin}
-                    onChange={(e) => handleChange("vin", e.target.value)}
-                    className="bg-slate-800 border-slate-700"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Kilometraje</Label>
+                  <Label>Kilómetros</Label>
                   <Input
                     type="number"
                     value={form.mileage}
-                    onChange={(e) => handleChange("mileage", parseInt(e.target.value) || 0)}
-                    className="bg-slate-800 border-slate-700"
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value) || 0;
+                      handleChange("mileage", Math.min(val, 999999));
+                    }}
+                    className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
+                    max={999999}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Horas</Label>
+                  <Input
+                    type="number"
+                    value={form.hours}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value) || 0;
+                      handleChange("hours", Math.min(val, 99999));
+                    }}
+                    className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
+                    max={99999}
                   />
                 </div>
               </div>
@@ -332,12 +416,32 @@ export default function VehicleDialog({
             <TabsContent value="documents" className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
+                  <Label>Último Servicio</Label>
+                  <Input
+                    type="date"
+                    value={form.last_service_date}
+                    onChange={(e) => handleChange("last_service_date", e.target.value)}
+                    className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Próximo Servicio</Label>
+                  <Input
+                    type="date"
+                    value={form.next_service_date}
+                    onChange={(e) => handleChange("next_service_date", e.target.value)}
+                    className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
                   <Label>Fecha de Compra</Label>
                   <Input
                     type="date"
                     value={form.purchase_date}
                     onChange={(e) => handleChange("purchase_date", e.target.value)}
-                    className="bg-slate-800 border-slate-700"
+                    className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
                   />
                 </div>
                 <div className="space-y-2">
@@ -346,7 +450,7 @@ export default function VehicleDialog({
                     type="date"
                     value={form.insurance_expiry}
                     onChange={(e) => handleChange("insurance_expiry", e.target.value)}
-                    className="bg-slate-800 border-slate-700"
+                    className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
                   />
                 </div>
               </div>
@@ -357,7 +461,7 @@ export default function VehicleDialog({
                     type="date"
                     value={form.technical_inspection_expiry}
                     onChange={(e) => handleChange("technical_inspection_expiry", e.target.value)}
-                    className="bg-slate-800 border-slate-700"
+                    className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
                   />
                 </div>
                 <div className="space-y-2">
@@ -366,7 +470,7 @@ export default function VehicleDialog({
                     type="date"
                     value={form.circulation_permit_expiry}
                     onChange={(e) => handleChange("circulation_permit_expiry", e.target.value)}
-                    className="bg-slate-800 border-slate-700"
+                    className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
                   />
                 </div>
               </div>
@@ -374,11 +478,20 @@ export default function VehicleDialog({
 
             <TabsContent value="other" className="space-y-4">
               <div className="space-y-2">
+                <Label>VIN (Opcional)</Label>
+                <Input
+                  value={form.vin}
+                  onChange={(e) => handleChange("vin", e.target.value)}
+                  className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
+                  placeholder="Número VIN si aplica"
+                />
+              </div>
+              <div className="space-y-2">
                 <Label>Notas</Label>
                 <Textarea
                   value={form.notes}
                   onChange={(e) => handleChange("notes", e.target.value)}
-                  className="bg-slate-800 border-slate-700 min-h-32"
+                  className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 min-h-32"
                   placeholder="Notas adicionales sobre el vehículo..."
                 />
               </div>
