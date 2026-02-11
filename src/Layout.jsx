@@ -102,9 +102,9 @@ function LayoutContent({ children, currentPageName }) {
     {
       section: "Administración",
       items: [
-        { name: "Vehículos", icon: Car, page: "Vehicles" },
         { name: "Empresas", icon: Building2, page: "Companies" },
-        { name: "Locaciones", icon: MapPin, page: "Locations" }
+        { name: "Locaciones", icon: MapPin, page: "Locations" },
+        { name: "Vehículos", icon: Car, page: "Vehicles" }
       ]
     },
     {
@@ -126,8 +126,16 @@ function LayoutContent({ children, currentPageName }) {
       section: "Configuración",
       items: [
         { 
+          name: "Empresas", 
+          icon: Building2, 
+          isSubmenu: true,
+          subItems: [
+            { name: "Tipo de industria", page: "IndustryTypes" }
+          ]
+        },
+        { 
           name: "Vehículos", 
-          icon: Settings, 
+          icon: Car, 
           isSubmenu: true,
           subItems: [
             { name: "Marcas", page: "Manufacturers" },
@@ -149,8 +157,8 @@ function LayoutContent({ children, currentPageName }) {
     {
       section: "Administración",
       items: [
-        { name: "Vehículos", icon: Car, page: "Vehicles" },
-        { name: "Locaciones", icon: MapPin, page: "Locations" }
+        { name: "Locaciones", icon: MapPin, page: "Locations" },
+        { name: "Vehículos", icon: Car, page: "Vehicles" }
       ]
     },
     {
@@ -172,7 +180,7 @@ function LayoutContent({ children, currentPageName }) {
       items: [
         { 
           name: "Vehículos", 
-          icon: Settings, 
+          icon: Car, 
           isSubmenu: true,
           subItems: [
             { name: "Marcas", page: "Manufacturers" },
