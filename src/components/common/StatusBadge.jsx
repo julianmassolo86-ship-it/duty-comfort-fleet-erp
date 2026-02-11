@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import { useTheme } from "./ThemeWrapper";
 
-const statusConfig = {
+const defaultStatusConfig = {
   active: { bg: "bg-emerald-500/90", text: "text-white", border: "border-emerald-400/50", label: "Activo" },
   inactive: { bg: "bg-slate-600/90", text: "text-white", border: "border-slate-400/50", label: "Inactivo" },
   maintenance: { bg: "bg-amber-500/90", text: "text-white", border: "border-amber-400/50", label: "En mantenimiento" },
@@ -19,9 +19,45 @@ const statusConfig = {
   repair: { bg: "bg-orange-500/90", text: "text-white", border: "border-orange-400/50", label: "Reparación" },
 };
 
-export default function StatusBadge({ status, className }) {
-  const config = statusConfig[status] || statusConfig.inactive;
+export default function StatusBadge({ status, className, statusList = [] }) {
+  // Buscar status en la lista dinámico (para VehicleStatus)
+  let config;
+  if (statusList.length > 0) {
+    const foundStatus = statusList.find(s => s.code === status);
+    if (foundStatus) {
+      config = {
+        bg: `bg-opacity-90`,
+        text: "text-white",
+        border: `border-opacity-50`,
+        label: foundStatus.name,
+        color: foundStatus.color
+      };
+    } else {
+      config = defaultStatusConfig[status] || defaultStatusConfig.inactive;
+    }
+  } else {
+    config = defaultStatusConfig[status] || defaultStatusConfig.inactive;
+  }
   
+  if (config.color) {
+    // Usar color dinámico para estados personalizados
+    return (
+      <span 
+        className={cn(
+          "inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-bold backdrop-blur-sm shadow-lg border",
+          "text-white",
+          className
+        )}
+        style={{
+          backgroundColor: `${config.color}e6`,
+          borderColor: `${config.color}80`
+        }}
+      >
+        {config.label}
+      </span>
+    );
+  }
+
   return (
     <span className={cn(
       "inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-bold border backdrop-blur-sm shadow-lg",
