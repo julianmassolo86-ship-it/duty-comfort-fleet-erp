@@ -87,10 +87,10 @@ export default function VehicleCardDocument({
                 size="sm"
                 variant="destructive"
                 onClick={() => onDelete(front_url_field, "")}
-                className="w-full hover:bg-red-700 text-xs"
+                className="w-full hover:bg-red-700 text-xs text-white"
               >
                 <X className="w-3 h-3 mr-1" />
-                Eliminar
+                <span className="font-medium">Eliminar</span>
               </Button>
             </div>
           ) : (
@@ -112,10 +112,10 @@ export default function VehicleCardDocument({
                 size="sm"
                 onClick={() => document.getElementById(uploadFrontId).click()}
                 disabled={uploading}
-                className="border-zinc-700 hover:bg-zinc-800 w-full text-white text-xs"
+                className="border-zinc-700 hover:bg-zinc-800 w-full text-black bg-white text-xs"
               >
                 {uploading ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <Upload className="w-3 h-3 mr-1" />}
-                Cargar Lado A
+                <span className="font-medium">Cargar Lado A</span>
               </Button>
             </div>
           )}
@@ -161,10 +161,10 @@ export default function VehicleCardDocument({
                 size="sm"
                 variant="destructive"
                 onClick={() => onDelete(back_url_field, "")}
-                className="w-full hover:bg-red-700 text-xs"
+                className="w-full hover:bg-red-700 text-xs text-white"
               >
                 <X className="w-3 h-3 mr-1" />
-                Eliminar
+                <span className="font-medium">Eliminar</span>
               </Button>
             </div>
           ) : (
@@ -186,10 +186,10 @@ export default function VehicleCardDocument({
                 size="sm"
                 onClick={() => document.getElementById(uploadBackId).click()}
                 disabled={uploading}
-                className="border-zinc-700 hover:bg-zinc-800 w-full text-white text-xs"
+                className="border-zinc-700 hover:bg-zinc-800 w-full text-black bg-white text-xs"
               >
                 {uploading ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <Upload className="w-3 h-3 mr-1" />}
-                Cargar Lado B
+                <span className="font-medium">Cargar Lado B</span>
               </Button>
             </div>
           )}
