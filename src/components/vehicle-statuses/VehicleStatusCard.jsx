@@ -10,16 +10,16 @@ export default function VehicleStatusCard({ status, onEdit, onDelete }) {
 
   return (
     <Card className={cn(
-      "group hover:shadow-lg transition-all duration-300 border-2",
+      "group hover:shadow-lg transition-all duration-300 border-2 overflow-hidden",
       theme === 'dark' 
         ? 'bg-zinc-900/50 border-zinc-800 hover:border-yellow-500/30' 
         : 'bg-white border-gray-200 hover:border-yellow-500/30'
     )}>
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-3 flex-1">
+      <CardHeader className="pb-3 pr-2">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
             <div 
-              className="w-12 h-12 rounded-xl flex items-center justify-center border-2"
+              className="w-12 h-12 rounded-xl flex items-center justify-center border-2 flex-shrink-0"
               style={{ 
                 backgroundColor: `${status.color}20`,
                 borderColor: status.color
@@ -39,14 +39,14 @@ export default function VehicleStatusCard({ status, onEdit, onDelete }) {
                 {status.name}
               </h3>
               <p className={cn(
-                "text-sm font-mono",
+                "text-sm font-mono truncate",
                 theme === 'dark' ? 'text-zinc-500' : 'text-gray-500'
               )}>
                 {status.code}
               </p>
             </div>
           </div>
-          <div className="flex gap-1">
+          <div className="flex gap-1 flex-shrink-0">
             <Button
               variant="ghost"
               size="icon"
