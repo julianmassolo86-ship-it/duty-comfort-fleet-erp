@@ -4,7 +4,7 @@ import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import { 
   LayoutDashboard, Car, Users, Wrench, FileText, 
-  BarChart3, Menu, X, LogOut, ChevronRight, Building2, MapPin, UserCog, Sun, Moon, Upload
+  BarChart3, Menu, X, LogOut, ChevronRight, ChevronDown, Building2, MapPin, UserCog, Sun, Moon, Upload, Settings
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 import { ThemeContextValue } from "@/components/common/ThemeWrapper";
 
@@ -58,6 +62,7 @@ function LayoutContent({ children, currentPageName }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [configOpen, setConfigOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
@@ -120,7 +125,15 @@ function LayoutContent({ children, currentPageName }) {
     {
       section: "Configuración",
       items: [
-        { name: "Marcas de Vehículos", icon: Building2, page: "Manufacturers" }
+        { 
+          name: "Vehículos", 
+          icon: Settings, 
+          isSubmenu: true,
+          subItems: [
+            { name: "Marcas", page: "Manufacturers" },
+            { name: "Tipos", page: "VehicleTypes" }
+          ]
+        }
       ]
     }
   ];
@@ -157,7 +170,15 @@ function LayoutContent({ children, currentPageName }) {
     {
       section: "Configuración",
       items: [
-        { name: "Marcas de Vehículos", icon: Car, page: "Manufacturers" }
+        { 
+          name: "Vehículos", 
+          icon: Settings, 
+          isSubmenu: true,
+          subItems: [
+            { name: "Marcas", page: "Manufacturers" },
+            { name: "Tipos", page: "VehicleTypes" }
+          ]
+        }
       ]
     }
   ];
@@ -349,6 +370,65 @@ function LayoutContent({ children, currentPageName }) {
                 )}
                 <div className="space-y-1">
                   {section.items.map((item) => {
+                    if (item.isSubmenu) {
+                      const isAnySubActive = item.subItems?.some(sub => sub.page === currentPageName);
+                      return (
+                        <Collapsible key={item.name} open={configOpen} onOpenChange={setConfigOpen}>
+                          <CollapsibleTrigger asChild>
+                            <button
+                              className={cn(
+                                "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 w-full",
+                                theme === 'dark' 
+                                  ? (isAnySubActive ? "bg-yellow-500/10 text-yellow-400 shadow-sm" : "text-zinc-400 hover:text-white hover:bg-zinc-800/50")
+                                  : (isAnySubActive ? "bg-yellow-500/10 text-yellow-600 shadow-sm" : "text-gray-600 hover:text-gray-900 hover:bg-gray-100")
+                              )}
+                            >
+                              <item.icon className={cn(
+                                "w-5 h-5 transition-colors",
+                                theme === 'dark'
+                                  ? (isAnySubActive ? "text-yellow-400" : "text-zinc-500")
+                                  : (isAnySubActive ? "text-yellow-600" : "text-gray-500")
+                              )} />
+                              <span>{item.name}</span>
+                              <ChevronDown className={cn(
+                                "w-4 h-4 ml-auto transition-transform",
+                                configOpen && "rotate-180",
+                                theme === 'dark'
+                                  ? (isAnySubActive ? "text-yellow-400" : "text-zinc-500")
+                                  : (isAnySubActive ? "text-yellow-600" : "text-gray-500")
+                              )} />
+                            </button>
+                          </CollapsibleTrigger>
+                          <CollapsibleContent className="mt-1 space-y-1">
+                            {item.subItems?.map((subItem) => {
+                              const isSubActive = currentPageName === subItem.page;
+                              return (
+                                <Link
+                                  key={subItem.page}
+                                  to={createPageUrl(subItem.page)}
+                                  onClick={() => setSidebarOpen(false)}
+                                  className={cn(
+                                    "flex items-center gap-3 pl-12 pr-4 py-2 rounded-xl text-sm font-medium transition-all duration-200",
+                                    theme === 'dark' 
+                                      ? (isSubActive ? "bg-yellow-500/10 text-yellow-400" : "text-zinc-400 hover:text-white hover:bg-zinc-800/50")
+                                      : (isSubActive ? "bg-yellow-500/10 text-yellow-600" : "text-gray-600 hover:text-gray-900 hover:bg-gray-100")
+                                  )}
+                                >
+                                  <span>{subItem.name}</span>
+                                  {isSubActive && (
+                                    <ChevronRight className={cn(
+                                      "w-4 h-4 ml-auto",
+                                      theme === 'dark' ? 'text-yellow-400' : 'text-yellow-600'
+                                    )} />
+                                  )}
+                                </Link>
+                              );
+                            })}
+                          </CollapsibleContent>
+                        </Collapsible>
+                      );
+                    }
+                    
                     const isActive = currentPageName === item.page;
                     return (
                       <Link
