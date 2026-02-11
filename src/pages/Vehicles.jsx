@@ -99,10 +99,13 @@ export default function Vehicles() {
   });
 
   const handleSave = (data) => {
+    // Si es admin de empresa, asignar su company_id automáticamente
+    const finalData = isSuperAdmin ? data : { ...data, company_id: currentUser?.company_id };
+    
     if (selectedVehicle) {
-      updateMutation.mutate({ id: selectedVehicle.id, data });
+      updateMutation.mutate({ id: selectedVehicle.id, data: finalData });
     } else {
-      createMutation.mutate(data);
+      createMutation.mutate(finalData);
     }
   };
 
