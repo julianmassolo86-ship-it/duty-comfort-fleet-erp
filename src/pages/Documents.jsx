@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Search, FileText, Download, Eye } from "lucide-react";
@@ -33,7 +33,15 @@ export default function Documents() {
   const [entityFilter, setEntityFilter] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
   const { theme } = useTheme();
+
+  useEffect(() => {
+    base44.auth.me().then(setCurrentUser).catch(() => {});
+  }, []);
+
+  // Si el usuario no tiene company_id, es super admin
+  const isSuperAdmin = !currentUser?.company_id;
 
   const queryClient = useQueryClient();
 
@@ -156,10 +164,13 @@ export default function Documents() {
   });
 
   const handleSave = (data) => {
+    // Si es admin de empresa, asignar su company_id automáticamente
+    const finalData = isSuperAdmin ? data : { ...data, company_id: currentUser?.company_id };
+    
     if (selectedDocument) {
-      updateMutation.mutate({ id: selectedDocument.id, data });
+      updateMutation.mutate({ id: selectedDocument.id, data: finalData });
     } else {
-      createMutation.mutate(data);
+      createMutation.mutate(finalData);
     }
   };
 
@@ -202,13 +213,16 @@ export default function Documents() {
     const entityInfo = getEntityInfo(d);
     if (!entityInfo) return false; // Filtrar documentos sin entidad válida
     
+    // Filtrar por empresa del usuario si no es super admin
+    const matchesCompany = isSuperAdmin || entityInfo.company_id === currentUser?.company_id;
+    
     const matchesSearch = 
       d.name?.toLowerCase().includes(search.toLowerCase()) ||
       d.document_number?.toLowerCase().includes(search.toLowerCase()) ||
       entityInfo.name.toLowerCase().includes(search.toLowerCase());
     const matchesType = typeFilter === "all" || d.type === typeFilter;
     const matchesEntity = entityFilter === "all" || d.entity_type === entityFilter;
-    return matchesSearch && matchesType && matchesEntity;
+    return matchesSearch && matchesType && matchesEntity && matchesCompany;
   }).sort((a, b) => {
     // Ordenar por fecha de vencimiento, los más próximos primero
     if (!a.expiry_date && !b.expiry_date) return 0;
@@ -414,8 +428,8 @@ export default function Documents() {
           open={dialogOpen}
           onOpenChange={setDialogOpen}
           document={selectedDocument}
-          vehicles={vehicles}
-          drivers={drivers}
+          vehicles={isSuperAdmin ? vehicles : vehicles.filter(v => v.company_id === currentUser?.company_id)}
+          drivers={isSuperAdmin ? drivers : drivers.filter(d => d.company_id === currentUser?.company_id)}
           onSave={handleSave}
           onDelete={selectedDocument ? () => deleteMutation.mutate(selectedDocument.id) : undefined}
           isLoading={createMutation.isPending || updateMutation.isPending}
