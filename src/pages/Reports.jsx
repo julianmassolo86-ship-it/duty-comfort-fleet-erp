@@ -104,14 +104,14 @@ export default function Reports() {
   ].filter(item => item.value > 0);
 
   return (
-    <div className="min-h-screen bg-black p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-slate-900 p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
         <PageHeader 
           title="Reportes" 
           description="Análisis y estadísticas de tu flota"
           actions={
             <Select value={period} onValueChange={setPeriod}>
-              <SelectTrigger className="w-40 bg-zinc-900/50 border-zinc-700 text-white focus:border-yellow-500/50 transition-colors">
+              <SelectTrigger className="w-40 bg-slate-800/50 border-slate-700 text-white">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -126,7 +126,7 @@ export default function Reports() {
         {isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             {Array(4).fill(0).map((_, i) => (
-              <Skeleton key={i} className="h-36 rounded-2xl bg-zinc-900/50" />
+              <Skeleton key={i} className="h-36 rounded-2xl bg-slate-800/50" />
             ))}
           </div>
         ) : (
@@ -160,16 +160,16 @@ export default function Reports() {
             </div>
 
             <Tabs defaultValue="fleet" className="space-y-6">
-              <TabsList className="bg-zinc-900 border-zinc-800">
-                <TabsTrigger value="fleet" className="data-[state=active]:bg-yellow-500/10 data-[state=active]:text-yellow-400 data-[state=active]:border-yellow-500/30">Flota</TabsTrigger>
-                <TabsTrigger value="maintenance" className="data-[state=active]:bg-yellow-500/10 data-[state=active]:text-yellow-400 data-[state=active]:border-yellow-500/30">Mantenimiento</TabsTrigger>
-                <TabsTrigger value="drivers" className="data-[state=active]:bg-yellow-500/10 data-[state=active]:text-yellow-400 data-[state=active]:border-yellow-500/30">Conductores</TabsTrigger>
+              <TabsList className="bg-slate-800 border-slate-700">
+                <TabsTrigger value="fleet" className="data-[state=active]:bg-slate-700">Flota</TabsTrigger>
+                <TabsTrigger value="maintenance" className="data-[state=active]:bg-slate-700">Mantenimiento</TabsTrigger>
+                <TabsTrigger value="drivers" className="data-[state=active]:bg-slate-700">Conductores</TabsTrigger>
               </TabsList>
 
               <TabsContent value="fleet" className="space-y-6">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {/* Fleet Status */}
-                  <Card className="bg-zinc-900/80 border-zinc-800/50 backdrop-blur-xl shadow-2xl shadow-black/20">
+                  <Card className="bg-slate-800/30 border-slate-700/50">
                     <CardHeader>
                       <CardTitle className="text-white flex items-center gap-2">
                         <PieChart className="w-5 h-5 text-blue-400" />
@@ -208,7 +208,7 @@ export default function Reports() {
                   </Card>
 
                   {/* Vehicle Types */}
-                  <Card className="bg-zinc-900/80 border-zinc-800/50 backdrop-blur-xl shadow-2xl shadow-black/20">
+                  <Card className="bg-slate-800/30 border-slate-700/50">
                     <CardHeader>
                       <CardTitle className="text-white flex items-center gap-2">
                         <BarChart3 className="w-5 h-5 text-emerald-400" />
@@ -242,7 +242,7 @@ export default function Reports() {
               <TabsContent value="maintenance" className="space-y-6">
                 <div className="grid grid-cols-1 gap-6">
                   {/* Maintenance Trend */}
-                  <Card className="bg-zinc-900/80 border-zinc-800/50 backdrop-blur-xl shadow-2xl shadow-black/20">
+                  <Card className="bg-slate-800/30 border-slate-700/50">
                     <CardHeader>
                       <CardTitle className="text-white flex items-center gap-2">
                         <TrendingUp className="w-5 h-5 text-blue-400" />
@@ -269,7 +269,7 @@ export default function Reports() {
                   </Card>
 
                   {/* Maintenance Costs */}
-                  <Card className="bg-zinc-900/80 border-zinc-800/50 backdrop-blur-xl shadow-2xl shadow-black/20">
+                  <Card className="bg-slate-800/30 border-slate-700/50">
                     <CardHeader>
                       <CardTitle className="text-white flex items-center gap-2">
                         <DollarSign className="w-5 h-5 text-emerald-400" />
@@ -304,7 +304,7 @@ export default function Reports() {
               <TabsContent value="drivers" className="space-y-6">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {/* Driver Status */}
-                  <Card className="bg-zinc-900/80 border-zinc-800/50 backdrop-blur-xl shadow-2xl shadow-black/20">
+                  <Card className="bg-slate-800/30 border-slate-700/50">
                     <CardHeader>
                       <CardTitle className="text-white flex items-center gap-2">
                         <Users className="w-5 h-5 text-blue-400" />
@@ -343,7 +343,7 @@ export default function Reports() {
                   </Card>
 
                   {/* License Types */}
-                  <Card className="bg-zinc-900/80 border-zinc-800/50 backdrop-blur-xl shadow-2xl shadow-black/20">
+                  <Card className="bg-slate-800/30 border-slate-700/50">
                     <CardHeader>
                       <CardTitle className="text-white flex items-center gap-2">
                         <FileText className="w-5 h-5 text-purple-400" />

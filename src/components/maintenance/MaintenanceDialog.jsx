@@ -62,7 +62,7 @@ export default function MaintenanceDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl bg-zinc-950 border-zinc-800 text-white max-h-[90vh] overflow-y-auto shadow-2xl shadow-black/50 backdrop-blur-xl">
+      <DialogContent className="max-w-2xl bg-slate-900 border-slate-700 text-white max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{maintenance ? "Editar Mantenimiento" : "Nuevo Mantenimiento"}</DialogTitle>
         </DialogHeader>
@@ -72,7 +72,7 @@ export default function MaintenanceDialog({
             <div className="space-y-2">
               <Label>Vehículo *</Label>
               <Select value={form.vehicle_id} onValueChange={(v) => handleChange("vehicle_id", v)} required>
-                <SelectTrigger className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 transition-colors">
+                <SelectTrigger className="bg-slate-800 border-slate-700">
                   <SelectValue placeholder="Seleccionar vehículo" />
                 </SelectTrigger>
                 <SelectContent>
@@ -87,7 +87,7 @@ export default function MaintenanceDialog({
             <div className="space-y-2">
               <Label>Tipo *</Label>
               <Select value={form.type} onValueChange={(v) => handleChange("type", v)}>
-                <SelectTrigger className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 transition-colors">
+                <SelectTrigger className="bg-slate-800 border-slate-700">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -104,7 +104,7 @@ export default function MaintenanceDialog({
             <Textarea
               value={form.description}
               onChange={(e) => handleChange("description", e.target.value)}
-              className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 transition-colors min-h-20"
+              className="bg-slate-800 border-slate-700 min-h-20"
               placeholder="Descripción del mantenimiento..."
               required
             />
@@ -114,7 +114,7 @@ export default function MaintenanceDialog({
             <div className="space-y-2">
               <Label>Estado</Label>
               <Select value={form.status} onValueChange={(v) => handleChange("status", v)}>
-                <SelectTrigger className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 transition-colors">
+                <SelectTrigger className="bg-slate-800 border-slate-700">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -130,7 +130,7 @@ export default function MaintenanceDialog({
               <Input
                 value={form.provider}
                 onChange={(e) => handleChange("provider", e.target.value)}
-                className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 transition-colors"
+                className="bg-slate-800 border-slate-700"
               />
             </div>
           </div>
@@ -142,7 +142,7 @@ export default function MaintenanceDialog({
                 type="date"
                 value={form.scheduled_date}
                 onChange={(e) => handleChange("scheduled_date", e.target.value)}
-                className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 transition-colors"
+                className="bg-slate-800 border-slate-700"
               />
             </div>
             <div className="space-y-2">
@@ -151,7 +151,7 @@ export default function MaintenanceDialog({
                 type="date"
                 value={form.completed_date}
                 onChange={(e) => handleChange("completed_date", e.target.value)}
-                className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 transition-colors"
+                className="bg-slate-800 border-slate-700"
               />
             </div>
           </div>
@@ -163,7 +163,7 @@ export default function MaintenanceDialog({
                 type="number"
                 value={form.mileage_at_service}
                 onChange={(e) => handleChange("mileage_at_service", parseInt(e.target.value) || 0)}
-                className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 transition-colors"
+                className="bg-slate-800 border-slate-700"
               />
             </div>
             <div className="space-y-2">
@@ -172,7 +172,7 @@ export default function MaintenanceDialog({
                 type="number"
                 value={form.cost}
                 onChange={(e) => handleChange("cost", parseFloat(e.target.value) || 0)}
-                className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 transition-colors"
+                className="bg-slate-800 border-slate-700"
               />
             </div>
             <div className="space-y-2">
@@ -180,7 +180,7 @@ export default function MaintenanceDialog({
               <Input
                 value={form.invoice_number}
                 onChange={(e) => handleChange("invoice_number", e.target.value)}
-                className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 transition-colors"
+                className="bg-slate-800 border-slate-700"
               />
             </div>
           </div>
@@ -190,7 +190,7 @@ export default function MaintenanceDialog({
             <Textarea
               value={form.parts_replaced}
               onChange={(e) => handleChange("parts_replaced", e.target.value)}
-              className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 transition-colors"
+              className="bg-slate-800 border-slate-700"
               placeholder="Lista de partes reemplazadas..."
             />
           </div>
@@ -202,7 +202,7 @@ export default function MaintenanceDialog({
                 type="number"
                 value={form.next_service_mileage}
                 onChange={(e) => handleChange("next_service_mileage", parseInt(e.target.value) || 0)}
-                className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 transition-colors"
+                className="bg-slate-800 border-slate-700"
               />
             </div>
             <div className="space-y-2">
@@ -211,7 +211,7 @@ export default function MaintenanceDialog({
                 type="date"
                 value={form.next_service_date}
                 onChange={(e) => handleChange("next_service_date", e.target.value)}
-                className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 transition-colors"
+                className="bg-slate-800 border-slate-700"
               />
             </div>
           </div>
@@ -221,7 +221,7 @@ export default function MaintenanceDialog({
             <Textarea
               value={form.notes}
               onChange={(e) => handleChange("notes", e.target.value)}
-              className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 transition-colors"
+              className="bg-slate-800 border-slate-700"
               placeholder="Notas adicionales..."
             />
           </div>
@@ -252,7 +252,7 @@ export default function MaintenanceDialog({
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="border-slate-700 text-slate-300 hover:bg-slate-800">
               Cancelar
             </Button>
-            <Button type="submit" disabled={isLoading} className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold">
+            <Button type="submit" disabled={isLoading} className="bg-blue-600 hover:bg-blue-700">
               {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               {maintenance ? "Guardar" : "Crear"}
             </Button>

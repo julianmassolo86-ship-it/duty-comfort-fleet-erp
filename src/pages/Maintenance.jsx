@@ -83,7 +83,7 @@ export default function Maintenance() {
   });
 
   return (
-    <div className="min-h-screen bg-black p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-slate-900 p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
         <PageHeader 
           title="Mantenimiento" 
@@ -91,7 +91,7 @@ export default function Maintenance() {
           actions={
             <Button 
               onClick={() => { setSelectedMaintenance(null); setDialogOpen(true); }}
-              className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
+              className="bg-blue-600 hover:bg-blue-700"
             >
               <Plus className="w-4 h-4 mr-2" />
               Nuevo Mantenimiento
@@ -107,11 +107,11 @@ export default function Maintenance() {
               placeholder="Buscar por vehículo, descripción o proveedor..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-10 bg-zinc-900/50 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-yellow-500/50 transition-colors"
+              className="pl-10 bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500"
             />
           </div>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-full sm:w-40 bg-zinc-900/50 border-zinc-700 text-white focus:border-yellow-500/50 transition-colors">
+            <SelectTrigger className="w-full sm:w-40 bg-slate-800/50 border-slate-700 text-white">
               <SelectValue placeholder="Estado" />
             </SelectTrigger>
             <SelectContent>
@@ -123,7 +123,7 @@ export default function Maintenance() {
             </SelectContent>
           </Select>
           <Select value={typeFilter} onValueChange={setTypeFilter}>
-            <SelectTrigger className="w-full sm:w-40 bg-zinc-900/50 border-zinc-700 text-white focus:border-yellow-500/50 transition-colors">
+            <SelectTrigger className="w-full sm:w-40 bg-slate-800/50 border-slate-700 text-white">
               <SelectValue placeholder="Tipo" />
             </SelectTrigger>
             <SelectContent>
@@ -139,7 +139,7 @@ export default function Maintenance() {
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {Array(6).fill(0).map((_, i) => (
-              <Skeleton key={i} className="h-52 rounded-2xl bg-zinc-900/50" />
+              <Skeleton key={i} className="h-52 rounded-2xl bg-slate-800/50" />
             ))}
           </div>
         ) : filteredMaintenances.length > 0 ? (
@@ -162,7 +162,7 @@ export default function Maintenance() {
               !search && (
                 <Button 
                   onClick={() => { setSelectedMaintenance(null); setDialogOpen(true); }}
-                  className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
+                  className="bg-blue-600 hover:bg-blue-700"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Agregar Mantenimiento

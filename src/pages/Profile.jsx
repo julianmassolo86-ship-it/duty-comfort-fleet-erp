@@ -12,18 +12,18 @@ export default function Profile() {
   const [form, setForm] = useState({
     full_name: "",
     phone: "",
-    logo_url: ""
+    logo_url: "",
   });
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    base44.auth.me().then((userData) => {
+    base44.auth.me().then(userData => {
       setUser(userData);
       setForm({
         full_name: userData.full_name || "",
         phone: userData.phone || "",
-        logo_url: userData.logo_url || ""
+        logo_url: userData.logo_url || "",
       });
     });
   }, []);
@@ -35,7 +35,7 @@ export default function Profile() {
     setUploadingLogo(true);
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      setForm((prev) => ({ ...prev, logo_url: file_url }));
+      setForm(prev => ({ ...prev, logo_url: file_url }));
     } catch (error) {
       console.error("Error uploading logo:", error);
       alert("Error al subir el logo");
@@ -64,17 +64,17 @@ export default function Profile() {
     return (
       <div className="min-h-screen bg-black p-4 sm:p-6 lg:p-8 flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-yellow-500" />
-      </div>);
-
+      </div>
+    );
   }
 
   return (
     <div className="min-h-screen bg-black p-4 sm:p-6 lg:p-8">
       <div className="max-w-3xl mx-auto">
-        <PageHeader
-          title="Mi Perfil"
-          description="Administra tu información personal" />
-
+        <PageHeader 
+          title="Mi Perfil" 
+          description="Administra tu información personal"
+        />
 
         <Card className="bg-slate-800/50 border-slate-700">
           <CardHeader>
@@ -82,87 +82,87 @@ export default function Profile() {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-2">
-              <Label className="text-slate-50 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Email</Label>
+              <Label>Email</Label>
               <Input
                 value={user.email}
                 disabled
-                className="bg-slate-700/50 border-slate-600 text-slate-400" />
-
+                className="bg-slate-700/50 border-slate-600 text-slate-400"
+              />
               <p className="text-xs text-slate-500">El email no se puede modificar</p>
             </div>
 
             <div className="space-y-2">
-              <Label className="text-slate-50 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Nombre Completo</Label>
+              <Label>Nombre Completo</Label>
               <Input
                 value={form.full_name}
-                onChange={(e) => setForm((prev) => ({ ...prev, full_name: e.target.value }))} className="bg-slate-800 text-zinc-50 px-3 py-1 text-base rounded-md flex h-9 w-full border shadow-sm file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm border-zinc-700 focus:border-yellow-500/50 transition-colors" />
-
-
+                onChange={(e) => setForm(prev => ({ ...prev, full_name: e.target.value }))}
+                className="bg-slate-800 border-slate-700"
+              />
             </div>
 
             <div className="space-y-2">
-              <Label className="text-slate-50 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Teléfono</Label>
+              <Label>Teléfono</Label>
               <Input
                 value={form.phone}
-                onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value }))} className="bg-slate-800 text-zinc-50 px-3 py-1 text-base rounded-md flex h-9 w-full border shadow-sm file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm border-zinc-700 focus:border-yellow-500/50 transition-colors" />
-
-
+                onChange={(e) => setForm(prev => ({ ...prev, phone: e.target.value }))}
+                className="bg-slate-800 border-slate-700"
+              />
             </div>
 
-            {isSuperAdmin &&
-            <div className="space-y-2 pt-4 border-t border-slate-700">
-                <Label className="text-zinc-50 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Logo Personalizado (Super Admin)</Label>
+            {isSuperAdmin && (
+              <div className="space-y-2 pt-4 border-t border-slate-700">
+                <Label>Logo Personalizado (Super Admin)</Label>
                 <p className="text-xs text-slate-500 mb-2">
                   Este logo aparecerá en el menú lateral
                 </p>
-                {form.logo_url ?
-              <div className="flex items-center gap-4">
-                    <img
-                  src={form.logo_url}
-                  alt="Logo"
-                  className="w-24 h-24 object-contain bg-slate-700 rounded-lg p-2" />
-
+                {form.logo_url ? (
+                  <div className="flex items-center gap-4">
+                    <img 
+                      src={form.logo_url} 
+                      alt="Logo" 
+                      className="w-24 h-24 object-contain bg-slate-700 rounded-lg p-2"
+                    />
                     <Button
-                  type="button"
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => setForm((prev) => ({ ...prev, logo_url: "" }))}>
-
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => setForm(prev => ({ ...prev, logo_url: "" }))}
+                    >
                       <X className="w-4 h-4 mr-2" />
                       Eliminar
                     </Button>
-                  </div> :
-
-              <div>
+                  </div>
+                ) : (
+                  <div>
                     <input
-                  type="file"
-                  id="logo-upload"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => handleLogoUpload(e.target.files[0])} />
-
+                      type="file"
+                      id="logo-upload"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => handleLogoUpload(e.target.files[0])}
+                    />
                     <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => document.getElementById("logo-upload").click()}
-                  disabled={uploadingLogo}
-                  className="border-slate-700">
-
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => document.getElementById("logo-upload").click()}
+                      disabled={uploadingLogo}
+                      className="border-slate-700"
+                    >
                       {uploadingLogo ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Upload className="w-4 h-4 mr-2" />}
                       Cargar Logo
                     </Button>
                   </div>
-              }
+                )}
               </div>
-            }
+            )}
 
             <div className="pt-4">
               <Button
                 onClick={handleSave}
                 disabled={saving}
-                className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold">
-
+                className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
+              >
                 {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                 Guardar Cambios
               </Button>
@@ -170,6 +170,6 @@ export default function Profile() {
           </CardContent>
         </Card>
       </div>
-    </div>);
-
+    </div>
+  );
 }

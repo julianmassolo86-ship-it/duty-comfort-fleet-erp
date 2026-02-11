@@ -85,7 +85,7 @@ export default function DocumentDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg bg-zinc-950 border-zinc-800 text-white max-h-[90vh] overflow-y-auto shadow-2xl shadow-black/50 backdrop-blur-xl">
+      <DialogContent className="max-w-lg bg-slate-900 border-slate-700 text-white max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{document ? "Editar Documento" : "Nuevo Documento"}</DialogTitle>
         </DialogHeader>
@@ -96,7 +96,7 @@ export default function DocumentDialog({
             <Input
               value={form.name}
               onChange={(e) => handleChange("name", e.target.value)}
-              className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 transition-colors"
+              className="bg-slate-800 border-slate-700"
               required
             />
           </div>
@@ -160,7 +160,7 @@ export default function DocumentDialog({
               <Input
                 value={form.document_number}
                 onChange={(e) => handleChange("document_number", e.target.value)}
-                className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 transition-colors"
+                className="bg-slate-800 border-slate-700"
               />
             </div>
           </div>
@@ -172,7 +172,7 @@ export default function DocumentDialog({
                 type="date"
                 value={form.issue_date}
                 onChange={(e) => handleChange("issue_date", e.target.value)}
-                className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 transition-colors"
+                className="bg-slate-800 border-slate-700"
               />
             </div>
             <div className="space-y-2">
@@ -181,7 +181,7 @@ export default function DocumentDialog({
                 type="date"
                 value={form.expiry_date}
                 onChange={(e) => handleChange("expiry_date", e.target.value)}
-                className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 transition-colors"
+                className="bg-slate-800 border-slate-700"
               />
             </div>
           </div>
@@ -214,7 +214,7 @@ export default function DocumentDialog({
             <Textarea
               value={form.notes}
               onChange={(e) => handleChange("notes", e.target.value)}
-              className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 transition-colors"
+              className="bg-slate-800 border-slate-700"
               placeholder="Notas adicionales..."
             />
           </div>
@@ -245,7 +245,7 @@ export default function DocumentDialog({
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="border-slate-700 text-slate-300 hover:bg-slate-800">
               Cancelar
             </Button>
-            <Button type="submit" disabled={isLoading || uploading} className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold">
+            <Button type="submit" disabled={isLoading || uploading} className="bg-blue-600 hover:bg-blue-700">
               {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               {document ? "Guardar" : "Crear"}
             </Button>

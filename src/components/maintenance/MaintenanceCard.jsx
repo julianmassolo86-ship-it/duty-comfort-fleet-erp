@@ -18,8 +18,9 @@ export default function MaintenanceCard({ maintenance, vehiclePlate, onClick }) 
     <div 
       onClick={onClick}
       className={cn(
-        "group relative overflow-hidden rounded-2xl bg-zinc-900/80 border border-zinc-800/50 p-5 cursor-pointer backdrop-blur-xl shadow-lg shadow-black/20",
-        "transition-all duration-300 hover:bg-zinc-900 hover:border-yellow-500/30 hover:shadow-2xl hover:shadow-yellow-500/10 hover:-translate-y-1"
+        "group relative overflow-hidden rounded-2xl bg-slate-800/50 border border-slate-700/50",
+        "p-5 cursor-pointer transition-all duration-300",
+        "hover:bg-slate-800/70 hover:border-slate-600/50 hover:shadow-xl hover:shadow-blue-500/5"
       )}
     >
       <div className="flex items-start justify-between mb-4">
@@ -56,7 +57,7 @@ export default function MaintenanceCard({ maintenance, vehiclePlate, onClick }) 
         )}
       </div>
 
-      <div className="absolute -right-12 -bottom-12 w-40 h-40 rounded-full bg-gradient-to-br from-yellow-500/5 to-transparent blur-2xl group-hover:from-yellow-500/10 transition-all duration-500" />
+      <div className="absolute -right-8 -bottom-8 w-24 h-24 rounded-full bg-blue-500/5 group-hover:bg-blue-500/10 transition-colors" />
     </div>
   );
 }

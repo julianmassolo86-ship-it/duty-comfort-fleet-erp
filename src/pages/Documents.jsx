@@ -120,7 +120,7 @@ export default function Documents() {
   });
 
   return (
-    <div className="min-h-screen bg-black p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-slate-900 p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
         <PageHeader 
           title="Documentos" 
@@ -128,7 +128,7 @@ export default function Documents() {
           actions={
             <Button 
               onClick={() => { setSelectedDocument(null); setDialogOpen(true); }}
-              className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
+              className="bg-blue-600 hover:bg-blue-700"
             >
               <Plus className="w-4 h-4 mr-2" />
               Nuevo Documento
@@ -144,11 +144,11 @@ export default function Documents() {
               placeholder="Buscar documentos..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-10 bg-zinc-900/50 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-yellow-500/50 transition-colors"
+              className="pl-10 bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500"
             />
           </div>
           <Select value={entityFilter} onValueChange={setEntityFilter}>
-            <SelectTrigger className="w-full sm:w-40 bg-zinc-900/50 border-zinc-700 text-white focus:border-yellow-500/50 transition-colors">
+            <SelectTrigger className="w-full sm:w-40 bg-slate-800/50 border-slate-700 text-white">
               <SelectValue placeholder="Entidad" />
             </SelectTrigger>
             <SelectContent>
@@ -158,7 +158,7 @@ export default function Documents() {
             </SelectContent>
           </Select>
           <Select value={typeFilter} onValueChange={setTypeFilter}>
-            <SelectTrigger className="w-full sm:w-48 bg-zinc-900/50 border-zinc-700 text-white focus:border-yellow-500/50 transition-colors">
+            <SelectTrigger className="w-full sm:w-48 bg-slate-800/50 border-slate-700 text-white">
               <SelectValue placeholder="Tipo" />
             </SelectTrigger>
             <SelectContent>
@@ -174,19 +174,19 @@ export default function Documents() {
         {isLoading ? (
           <div className="space-y-2">
             {Array(5).fill(0).map((_, i) => (
-              <Skeleton key={i} className="h-16 rounded-xl bg-zinc-900/50" />
+              <Skeleton key={i} className="h-16 rounded-xl bg-slate-800/50" />
             ))}
           </div>
         ) : filteredDocuments.length > 0 ? (
-          <div className="rounded-2xl border border-zinc-800/50 overflow-hidden bg-zinc-900/80 backdrop-blur-xl shadow-2xl shadow-black/20">
+          <div className="rounded-2xl border border-slate-700/50 overflow-hidden">
             <Table>
               <TableHeader>
-                <TableRow className="bg-zinc-900/80 border-zinc-800">
-                  <TableHead className="text-zinc-500 font-semibold">Documento</TableHead>
-                  <TableHead className="text-zinc-500 font-semibold">Tipo</TableHead>
-                  <TableHead className="text-zinc-500 font-semibold">Entidad</TableHead>
-                  <TableHead className="text-zinc-500 font-semibold">Vencimiento</TableHead>
-                  <TableHead className="text-zinc-500 font-semibold">Estado</TableHead>
+                <TableRow className="bg-slate-800/50 border-slate-700">
+                  <TableHead className="text-slate-400">Documento</TableHead>
+                  <TableHead className="text-slate-400">Tipo</TableHead>
+                  <TableHead className="text-slate-400">Entidad</TableHead>
+                  <TableHead className="text-slate-400">Vencimiento</TableHead>
+                  <TableHead className="text-slate-400">Estado</TableHead>
                   <TableHead className="text-slate-400 text-right">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
@@ -194,7 +194,7 @@ export default function Documents() {
                 {filteredDocuments.map(doc => (
                   <TableRow 
                     key={doc.id} 
-                    className="border-zinc-800/50 hover:bg-zinc-800/50 cursor-pointer transition-colors"
+                    className="border-slate-700/50 hover:bg-slate-800/30 cursor-pointer"
                     onClick={() => handleEdit(doc)}
                   >
                     <TableCell>
@@ -263,7 +263,7 @@ export default function Documents() {
               !search && (
                 <Button 
                   onClick={() => { setSelectedDocument(null); setDialogOpen(true); }}
-                  className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
+                  className="bg-blue-600 hover:bg-blue-700"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Agregar Documento
