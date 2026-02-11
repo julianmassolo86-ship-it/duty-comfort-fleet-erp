@@ -89,7 +89,7 @@ export default function Companies() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-900 p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-black p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
         <PageHeader 
           title="Empresas" 

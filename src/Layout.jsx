@@ -59,9 +59,9 @@ export default function Layout({ children, currentPageName }) {
   const navItems = isSuperAdmin ? superAdminItems : companyAdminItems;
 
   return (
-    <div className="min-h-screen bg-slate-900">
+    <div className="min-h-screen bg-black">
       {/* Mobile Header */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-slate-900/95 backdrop-blur border-b border-slate-800">
+      <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-black/95 backdrop-blur border-b border-zinc-800">
         <div className="flex items-center justify-between h-16 px-4">
           <div className="flex items-center gap-3">
             {user?.logo_url ? (
@@ -90,13 +90,13 @@ export default function Layout({ children, currentPageName }) {
 
       {/* Sidebar */}
       <aside className={cn(
-        "fixed inset-y-0 left-0 z-40 w-72 bg-slate-900 border-r border-slate-800",
+        "fixed inset-y-0 left-0 z-40 w-72 bg-zinc-950 border-r border-zinc-800",
         "transform transition-transform duration-300 ease-in-out lg:translate-x-0",
         sidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="h-16 flex items-center gap-3 px-6 border-b border-slate-800">
+          <div className="h-16 flex items-center gap-3 px-6 border-b border-zinc-800">
             {user?.logo_url ? (
               <img 
                 src={user.logo_url} 
@@ -110,7 +110,7 @@ export default function Layout({ children, currentPageName }) {
             )}
             <div>
               <span className="text-lg font-bold text-white">Mass Effect</span>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-zinc-500">
                 {isSuperAdmin ? "Super Admin" : "Gestión de Flotas"}
               </p>
             </div>
@@ -129,12 +129,12 @@ export default function Layout({ children, currentPageName }) {
                     "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200",
                     isActive 
                       ? "bg-yellow-500/10 text-yellow-400 shadow-sm" 
-                      : "text-slate-400 hover:text-white hover:bg-slate-800/50"
+                      : "text-zinc-400 hover:text-white hover:bg-zinc-800/50"
                   )}
                 >
                   <item.icon className={cn(
                     "w-5 h-5 transition-colors",
-                    isActive ? "text-yellow-400" : "text-slate-500"
+                    isActive ? "text-yellow-400" : "text-zinc-500"
                   )} />
                   <span>{item.name}</span>
                   {isActive && (
@@ -147,11 +147,11 @@ export default function Layout({ children, currentPageName }) {
 
           {/* User Menu */}
           {user && (
-            <div className="p-4 border-t border-slate-800">
+            <div className="p-4 border-t border-zinc-800">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-slate-800/50 transition-colors">
-                    <Avatar className="w-10 h-10 border-2 border-slate-700">
+                  <button className="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-zinc-800/50 transition-colors">
+                    <Avatar className="w-10 h-10 border-2 border-zinc-700">
                       <AvatarFallback className="bg-yellow-500/10 text-yellow-400 font-medium">
                         {user.full_name?.charAt(0) || user.email?.charAt(0) || 'U'}
                       </AvatarFallback>
@@ -160,16 +160,16 @@ export default function Layout({ children, currentPageName }) {
                       <p className="text-sm font-medium text-white truncate">
                         {user.full_name || 'Usuario'}
                       </p>
-                      <p className="text-xs text-slate-500 truncate">{user.email}</p>
+                      <p className="text-xs text-zinc-500 truncate">{user.email}</p>
                     </div>
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent 
                   align="end" 
-                  className="w-56 bg-slate-800 border-slate-700"
+                  className="w-56 bg-zinc-900 border-zinc-700"
                 >
                   <DropdownMenuItem 
-                    className="text-slate-300 focus:bg-slate-700 focus:text-white cursor-pointer"
+                    className="text-zinc-300 focus:bg-zinc-700 focus:text-white cursor-pointer"
                     onClick={handleLogout}
                   >
                     <LogOut className="w-4 h-4 mr-2" />

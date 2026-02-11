@@ -62,14 +62,14 @@ export default function Profile() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-slate-900 p-4 sm:p-6 lg:p-8 flex items-center justify-center">
+      <div className="min-h-screen bg-black p-4 sm:p-6 lg:p-8 flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-yellow-500" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-black p-4 sm:p-6 lg:p-8">
       <div className="max-w-3xl mx-auto">
         <PageHeader 
           title="Mi Perfil" 
