@@ -56,6 +56,8 @@ export default function Documents() {
 
   const vehiclesMap = vehicles.reduce((acc, v) => ({ ...acc, [v.id]: v }), {});
   const driversMap = drivers.reduce((acc, d) => ({ ...acc, [d.id]: d }), {});
+  const companiesMap = companies.reduce((acc, c) => ({ ...acc, [c.id]: c }), {});
+  const locationsMap = locations.reduce((acc, l) => ({ ...acc, [l.id]: l }), {});
 
   // Generar documentos virtuales desde vehículos y conductores
   const getVirtualDocuments = () => {
@@ -270,6 +272,8 @@ export default function Documents() {
                 <TableRow className="bg-slate-800/50 border-slate-700">
                   <TableHead className="text-slate-400">Documento</TableHead>
                   <TableHead className="text-slate-400">Tipo</TableHead>
+                  <TableHead className="text-slate-400">Empresa</TableHead>
+                  <TableHead className="text-slate-400">Ubicación</TableHead>
                   <TableHead className="text-slate-400">Vencimiento</TableHead>
                   <TableHead className="text-slate-400">Estado</TableHead>
                   <TableHead className="text-slate-400 text-right">Acciones</TableHead>
@@ -341,6 +345,16 @@ export default function Documents() {
                         ) : (
                           <span className="text-slate-500 text-sm">-</span>
                         )}
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-slate-300 text-sm">
+                          {companiesMap[entityInfo?.company_id]?.name || '-'}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-slate-300 text-sm">
+                          {locationsMap[entityInfo?.location_id]?.name || '-'}
+                        </span>
                       </TableCell>
                       <TableCell>
                         <StatusBadge status={getDocumentStatus(doc.expiry_date)} />
