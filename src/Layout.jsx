@@ -17,10 +17,10 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 
-const ThemeContext = createContext();
+import { ThemeContextValue } from "@/components/common/ThemeWrapper";
 
 const useTheme = () => {
-  const context = useContext(ThemeContext);
+  const context = useContext(ThemeContextValue);
   if (!context) {
     throw new Error('useTheme must be used within a ThemeProvider');
   }
@@ -48,9 +48,9 @@ const ThemeProvider = ({ children }) => {
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+    <ThemeContextValue.Provider value={{ theme, toggleTheme }}>
       {children}
-    </ThemeContext.Provider>
+    </ThemeContextValue.Provider>
   );
 };
 

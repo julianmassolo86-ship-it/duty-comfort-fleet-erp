@@ -8,14 +8,17 @@ import {
   TrendingUp, Calendar, ArrowRight, Building2, MapPin
 } from "lucide-react";
 import { differenceInDays } from "date-fns";
+import { cn } from "@/lib/utils";
 import StatCard from "../components/dashboard/StatCard";
 import AlertCard from "../components/dashboard/AlertCard";
 import PageHeader from "../components/common/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTheme } from "../components/common/ThemeWrapper";
 
 export default function Dashboard() {
   const [currentUser, setCurrentUser] = useState(null);
+  const { theme } = useTheme();
 
   useEffect(() => {
     base44.auth.me().then(setCurrentUser).catch(() => {});
@@ -143,7 +146,7 @@ export default function Dashboard() {
   const pendingMaintenance = accessibleMaintenances.filter(m => m.status === 'scheduled' || m.status === 'in_progress').length;
 
   return (
-    <div className="min-h-screen bg-black p-4 sm:p-6 lg:p-8">
+    <div className={cn("min-h-screen p-4 sm:p-6 lg:p-8", theme === 'dark' ? 'bg-black' : 'bg-gray-50')}>
       <div className="max-w-7xl mx-auto">
         <PageHeader 
           title="Dashboard" 
@@ -154,7 +157,7 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {isLoading ? (
             Array(4).fill(0).map((_, i) => (
-              <Skeleton key={i} className="h-36 rounded-2xl bg-zinc-900/50" />
+              <Skeleton key={i} className={cn("h-36 rounded-2xl", theme === 'dark' ? 'bg-zinc-900/50' : 'bg-gray-200')} />
             ))
           ) : (
             <>
@@ -215,16 +218,16 @@ export default function Dashboard() {
         {/* Alerts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <div className="bg-zinc-900/80 rounded-2xl border border-zinc-800/50 p-6 backdrop-blur-xl shadow-2xl shadow-black/20">
+            <div className={cn("rounded-2xl border p-6 backdrop-blur-xl shadow-2xl", theme === 'dark' ? 'bg-zinc-900/80 border-zinc-800/50 shadow-black/20' : 'bg-white border-gray-200 shadow-gray-200/50')}>
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
                   <div className="p-3 rounded-xl bg-gradient-to-br from-rose-500/20 to-rose-600/10 border border-rose-500/20 shadow-lg shadow-rose-500/10">
                     <AlertTriangle className="w-6 h-6 text-rose-400" />
                   </div>
-                  <h2 className="text-xl font-bold text-white">Alertas y Vencimientos</h2>
+                  <h2 className={cn("text-xl font-bold", theme === 'dark' ? 'text-white' : 'text-gray-900')}>Alertas y Vencimientos</h2>
                 </div>
                 <Link to={createPageUrl("Documents")}>
-                  <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
+                  <Button variant="ghost" size="sm" className={theme === 'dark' ? 'text-slate-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'}>
                     Ver todos <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </Link>
@@ -233,7 +236,7 @@ export default function Dashboard() {
               {isLoading ? (
                 <div className="space-y-3">
                   {Array(3).fill(0).map((_, i) => (
-                    <Skeleton key={i} className="h-20 rounded-xl bg-zinc-800/30" />
+                    <Skeleton key={i} className={cn("h-20 rounded-xl", theme === 'dark' ? 'bg-zinc-800/30' : 'bg-gray-200')} />
                   ))}
                 </div>
               ) : alerts.length > 0 ? (
@@ -247,71 +250,71 @@ export default function Dashboard() {
                   <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 inline-block mb-4">
                     <TrendingUp className="w-8 h-8 text-emerald-400" />
                   </div>
-                  <p className="text-slate-400">No hay alertas pendientes</p>
-                  <p className="text-sm text-slate-500">Todos los documentos están al día</p>
+                  <p className={theme === 'dark' ? 'text-slate-400' : 'text-gray-600'}>No hay alertas pendientes</p>
+                  <p className={cn("text-sm", theme === 'dark' ? 'text-slate-500' : 'text-gray-500')}>Todos los documentos están al día</p>
                 </div>
               )}
             </div>
           </div>
 
           {/* Quick Actions */}
-          <div className="bg-zinc-900/80 rounded-2xl border border-zinc-800/50 p-6 backdrop-blur-xl shadow-2xl shadow-black/20">
-            <h2 className="text-xl font-bold text-white mb-6">Accesos Rápidos</h2>
+          <div className={cn("rounded-2xl border p-6 backdrop-blur-xl shadow-2xl", theme === 'dark' ? 'bg-zinc-900/80 border-zinc-800/50 shadow-black/20' : 'bg-white border-gray-200 shadow-gray-200/50')}>
+            <h2 className={cn("text-xl font-bold mb-6", theme === 'dark' ? 'text-white' : 'text-gray-900')}>Accesos Rápidos</h2>
             <div className="space-y-3">
               {isSuperAdmin && (
                 <Link to={createPageUrl("Companies")} className="block group">
-                  <div className="flex items-center gap-4 p-4 rounded-xl bg-zinc-800/50 border border-zinc-700/50 hover:bg-zinc-800 hover:border-yellow-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-yellow-500/5">
+                  <div className={cn("flex items-center gap-4 p-4 rounded-xl border transition-all duration-300", theme === 'dark' ? 'bg-zinc-800/50 border-zinc-700/50 hover:bg-zinc-800 hover:border-yellow-500/30 hover:shadow-lg hover:shadow-yellow-500/5' : 'bg-gray-50 border-gray-200 hover:bg-gray-100 hover:border-yellow-500/30')}>
                     <div className="p-3 rounded-xl bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/10 group-hover:from-purple-500/20 group-hover:to-purple-600/10 transition-all duration-300">
                       <Building2 className="w-5 h-5 text-purple-400" />
                     </div>
                     <div>
-                      <p className="font-semibold text-white">Empresas</p>
-                      <p className="text-sm text-zinc-500">{companies.length} registradas</p>
+                      <p className={cn("font-semibold", theme === 'dark' ? 'text-white' : 'text-gray-900')}>Empresas</p>
+                      <p className={cn("text-sm", theme === 'dark' ? 'text-zinc-500' : 'text-gray-500')}>{companies.length} registradas</p>
                     </div>
                   </div>
                 </Link>
               )}
               <Link to={createPageUrl("Locations")} className="block group">
-                <div className="flex items-center gap-4 p-4 rounded-xl bg-zinc-800/50 border border-zinc-700/50 hover:bg-zinc-800 hover:border-yellow-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-yellow-500/5">
+                <div className={cn("flex items-center gap-4 p-4 rounded-xl border transition-all duration-300", theme === 'dark' ? 'bg-zinc-800/50 border-zinc-700/50 hover:bg-zinc-800 hover:border-yellow-500/30 hover:shadow-lg hover:shadow-yellow-500/5' : 'bg-gray-50 border-gray-200 hover:bg-gray-100 hover:border-yellow-500/30')}>
                   <div className="p-3 rounded-xl bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 border border-emerald-500/10 group-hover:from-emerald-500/20 group-hover:to-emerald-600/10 transition-all duration-300">
                     <MapPin className="w-5 h-5 text-emerald-400" />
                   </div>
                   <div>
-                    <p className="font-semibold text-white">Locaciones</p>
-                    <p className="text-sm text-zinc-500">{accessibleLocations.length} registradas</p>
+                    <p className={cn("font-semibold", theme === 'dark' ? 'text-white' : 'text-gray-900')}>Locaciones</p>
+                    <p className={cn("text-sm", theme === 'dark' ? 'text-zinc-500' : 'text-gray-500')}>{accessibleLocations.length} registradas</p>
                   </div>
                 </div>
               </Link>
               <Link to={createPageUrl("Vehicles")} className="block group">
-                <div className="flex items-center gap-4 p-4 rounded-xl bg-zinc-800/50 border border-zinc-700/50 hover:bg-zinc-800 hover:border-yellow-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-yellow-500/5">
+                <div className={cn("flex items-center gap-4 p-4 rounded-xl border transition-all duration-300", theme === 'dark' ? 'bg-zinc-800/50 border-zinc-700/50 hover:bg-zinc-800 hover:border-yellow-500/30 hover:shadow-lg hover:shadow-yellow-500/5' : 'bg-gray-50 border-gray-200 hover:bg-gray-100 hover:border-yellow-500/30')}>
                   <div className="p-3 rounded-xl bg-gradient-to-br from-yellow-500/10 to-yellow-600/5 border border-yellow-500/10 group-hover:from-yellow-500/20 group-hover:to-yellow-600/10 transition-all duration-300">
                     <Car className="w-5 h-5 text-yellow-400" />
                   </div>
                   <div>
-                    <p className="font-semibold text-white">Vehículos</p>
-                    <p className="text-sm text-zinc-500">{accessibleVehicles.length} registrados</p>
+                    <p className={cn("font-semibold", theme === 'dark' ? 'text-white' : 'text-gray-900')}>Vehículos</p>
+                    <p className={cn("text-sm", theme === 'dark' ? 'text-zinc-500' : 'text-gray-500')}>{accessibleVehicles.length} registrados</p>
                   </div>
                 </div>
               </Link>
               <Link to={createPageUrl("Drivers")} className="block group">
-                <div className="flex items-center gap-4 p-4 rounded-xl bg-zinc-800/50 border border-zinc-700/50 hover:bg-zinc-800 hover:border-yellow-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-yellow-500/5">
+                <div className={cn("flex items-center gap-4 p-4 rounded-xl border transition-all duration-300", theme === 'dark' ? 'bg-zinc-800/50 border-zinc-700/50 hover:bg-zinc-800 hover:border-yellow-500/30 hover:shadow-lg hover:shadow-yellow-500/5' : 'bg-gray-50 border-gray-200 hover:bg-gray-100 hover:border-yellow-500/30')}>
                   <div className="p-3 rounded-xl bg-gradient-to-br from-cyan-500/10 to-cyan-600/5 border border-cyan-500/10 group-hover:from-cyan-500/20 group-hover:to-cyan-600/10 transition-all duration-300">
                     <Users className="w-5 h-5 text-cyan-400" />
                   </div>
                   <div>
-                    <p className="font-semibold text-white">Conductores</p>
-                    <p className="text-sm text-zinc-500">{accessibleDrivers.length} registrados</p>
+                    <p className={cn("font-semibold", theme === 'dark' ? 'text-white' : 'text-gray-900')}>Conductores</p>
+                    <p className={cn("text-sm", theme === 'dark' ? 'text-zinc-500' : 'text-gray-500')}>{accessibleDrivers.length} registrados</p>
                   </div>
                 </div>
               </Link>
               <Link to={createPageUrl("Maintenance")} className="block group">
-                <div className="flex items-center gap-4 p-4 rounded-xl bg-zinc-800/50 border border-zinc-700/50 hover:bg-zinc-800 hover:border-yellow-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-yellow-500/5">
+                <div className={cn("flex items-center gap-4 p-4 rounded-xl border transition-all duration-300", theme === 'dark' ? 'bg-zinc-800/50 border-zinc-700/50 hover:bg-zinc-800 hover:border-yellow-500/30 hover:shadow-lg hover:shadow-yellow-500/5' : 'bg-gray-50 border-gray-200 hover:bg-gray-100 hover:border-yellow-500/30')}>
                   <div className="p-3 rounded-xl bg-gradient-to-br from-amber-500/10 to-amber-600/5 border border-amber-500/10 group-hover:from-amber-500/20 group-hover:to-amber-600/10 transition-all duration-300">
                     <Wrench className="w-5 h-5 text-amber-400" />
                   </div>
                   <div>
-                    <p className="font-semibold text-white">Mantenimiento</p>
-                    <p className="text-sm text-zinc-500">{accessibleMaintenances.length} registros</p>
+                    <p className={cn("font-semibold", theme === 'dark' ? 'text-white' : 'text-gray-900')}>Mantenimiento</p>
+                    <p className={cn("text-sm", theme === 'dark' ? 'text-zinc-500' : 'text-gray-500')}>{accessibleMaintenances.length} registros</p>
                   </div>
                 </div>
               </Link>

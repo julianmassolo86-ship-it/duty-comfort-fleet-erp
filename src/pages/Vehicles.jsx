@@ -6,10 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 import PageHeader from "../components/common/PageHeader";
 import EmptyState from "../components/common/EmptyState";
 import VehicleCard from "../components/vehicles/VehicleCard";
 import VehicleDialog from "../components/vehicles/VehicleDialog";
+import { useTheme } from "../components/common/ThemeWrapper";
 
 export default function Vehicles() {
   const [search, setSearch] = useState("");
@@ -19,6 +21,7 @@ export default function Vehicles() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
+  const { theme } = useTheme();
 
   const queryClient = useQueryClient();
 
@@ -113,7 +116,7 @@ export default function Vehicles() {
   });
 
   return (
-    <div className="min-h-screen bg-black p-4 sm:p-6 lg:p-8">
+    <div className={cn("min-h-screen p-4 sm:p-6 lg:p-8", theme === 'dark' ? 'bg-black' : 'bg-gray-50')}>
       <div className="max-w-7xl mx-auto">
         <PageHeader 
           title="Vehículos" 
@@ -132,8 +135,8 @@ export default function Vehicles() {
         />
 
         {accessibleLocations.length === 0 && !isLoading && (
-          <div className="mb-6 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30">
-            <p className="text-amber-200">
+          <div className={cn("mb-6 p-4 rounded-xl border", theme === 'dark' ? 'bg-amber-500/10 border-amber-500/30' : 'bg-amber-50 border-amber-200')}>
+            <p className={theme === 'dark' ? 'text-amber-200' : 'text-amber-800'}>
               Debes crear al menos una locación antes de agregar vehículos.
             </p>
           </div>
@@ -142,17 +145,17 @@ export default function Vehicles() {
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-3 mb-6 flex-wrap">
           <div className="relative flex-1 min-w-[200px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className={cn("absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4", theme === 'dark' ? 'text-slate-400' : 'text-gray-400')} />
             <Input
               placeholder="Buscar por matrícula, marca o modelo..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-10 bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500"
+              className={cn("pl-10", theme === 'dark' ? 'bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500' : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400')}
             />
           </div>
           {isSuperAdmin && (
             <Select value={companyFilter} onValueChange={setCompanyFilter}>
-              <SelectTrigger className="w-full sm:w-44 bg-slate-800/50 border-slate-700 text-white">
+              <SelectTrigger className={cn("w-full sm:w-44", theme === 'dark' ? 'bg-slate-800/50 border-slate-700 text-white' : 'bg-white border-gray-300 text-gray-900')}>
                 <SelectValue placeholder="Empresa" />
               </SelectTrigger>
               <SelectContent>
@@ -164,7 +167,7 @@ export default function Vehicles() {
             </Select>
           )}
           <Select value={locationFilter} onValueChange={setLocationFilter}>
-            <SelectTrigger className="w-full sm:w-44 bg-slate-800/50 border-slate-700 text-white">
+            <SelectTrigger className={cn("w-full sm:w-44", theme === 'dark' ? 'bg-slate-800/50 border-slate-700 text-white' : 'bg-white border-gray-300 text-gray-900')}>
               <SelectValue placeholder="Locación" />
             </SelectTrigger>
             <SelectContent>
@@ -175,7 +178,7 @@ export default function Vehicles() {
             </SelectContent>
           </Select>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-full sm:w-40 bg-slate-800/50 border-slate-700 text-white">
+            <SelectTrigger className={cn("w-full sm:w-40", theme === 'dark' ? 'bg-slate-800/50 border-slate-700 text-white' : 'bg-white border-gray-300 text-gray-900')}>
               <SelectValue placeholder="Estado" />
             </SelectTrigger>
             <SelectContent>
@@ -191,7 +194,7 @@ export default function Vehicles() {
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {Array(6).fill(0).map((_, i) => (
-              <Skeleton key={i} className="h-48 rounded-2xl bg-slate-800/50" />
+              <Skeleton key={i} className={cn("h-48 rounded-2xl", theme === 'dark' ? 'bg-slate-800/50' : 'bg-gray-200')} />
             ))}
           </div>
         ) : filteredVehicles.length > 0 ? (
