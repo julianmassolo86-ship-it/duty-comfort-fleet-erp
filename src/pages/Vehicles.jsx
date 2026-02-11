@@ -202,6 +202,7 @@ export default function Vehicles() {
                 vehicle={vehicle}
                 location={locationsMap[vehicle.location_id]}
                 company={isSuperAdmin ? companiesMap[vehicle.company_id] : null}
+                drivers={drivers}
                 onClick={() => handleEdit(vehicle)}
               />
             ))}
