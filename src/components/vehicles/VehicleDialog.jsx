@@ -16,6 +16,7 @@ import { Loader2, Trash2, X, Upload, Image as ImageIcon, UserPlus, UserMinus, Zo
 import DocumentCard from "./DocumentCard";
 import VehicleCardDocument from "./VehicleCardDocument";
 import { base44 } from "@/api/base44Client";
+import { useQuery } from "@tanstack/react-query";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 const initialState = {
@@ -83,6 +84,11 @@ export default function VehicleDialog({
   const [form, setForm] = useState(initialState);
   const [selectedCompanyId, setSelectedCompanyId] = useState("");
   const [uploading, setUploading] = useState(false);
+
+  const { data: vehicleStatuses = [] } = useQuery({
+    queryKey: ['vehicleStatuses'],
+    queryFn: () => base44.entities.VehicleStatus.list(),
+  });
 
   useEffect(() => {
     if (open) {
@@ -444,13 +450,14 @@ export default function VehicleDialog({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="active">Activo</SelectItem>
-                      <SelectItem value="available">Disponible</SelectItem>
-                      <SelectItem value="in_use">En Uso</SelectItem>
-                      <SelectItem value="reserved">Reservado</SelectItem>
-                      <SelectItem value="maintenance">Mantenimiento</SelectItem>
-                      <SelectItem value="repair">Reparación</SelectItem>
-                      <SelectItem value="inactive">Inactivo</SelectItem>
+                      {vehicleStatuses
+                        .filter(s => s.is_active)
+                        .sort((a, b) => (a.order || 0) - (b.order || 0))
+                        .map(status => (
+                          <SelectItem key={status.id} value={status.code}>
+                            {status.name}
+                          </SelectItem>
+                        ))}
                     </SelectContent>
                   </Select>
                 </div>
