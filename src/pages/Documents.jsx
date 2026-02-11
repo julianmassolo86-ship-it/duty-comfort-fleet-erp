@@ -52,6 +52,16 @@ export default function Documents() {
     queryFn: () => base44.entities.Driver.list(),
   });
 
+  const { data: companies = [] } = useQuery({
+    queryKey: ['companies'],
+    queryFn: () => base44.entities.Company.list(),
+  });
+
+  const { data: locations = [] } = useQuery({
+    queryKey: ['locations'],
+    queryFn: () => base44.entities.Location.list(),
+  });
+
   const isLoading = loadingDocs || loadingVehicles || loadingDrivers;
 
   const vehiclesMap = vehicles.reduce((acc, v) => ({ ...acc, [v.id]: v }), {});
@@ -344,20 +354,10 @@ export default function Documents() {
                           </div>
                         ) : (
                           <span className="text-slate-500 text-sm">-</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-slate-300 text-sm">
-                          {companiesMap[entityInfo?.company_id]?.name || '-'}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-slate-300 text-sm">
-                          {locationsMap[entityInfo?.location_id]?.name || '-'}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <StatusBadge status={getDocumentStatus(doc.expiry_date)} />
+                          )}
+                          </TableCell>
+                          <TableCell>
+                          <StatusBadge status={getDocumentStatus(doc.expiry_date)} />
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
