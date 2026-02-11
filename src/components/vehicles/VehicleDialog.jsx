@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Trash2, X } from "lucide-react";
+import { Loader2, Trash2, X, Upload, Image as ImageIcon } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
@@ -37,7 +37,11 @@ const initialState = {
   assigned_driver_id: "",
   purchase_date: "",
   last_service_date: "",
+  last_service_mileage: 0,
+  last_service_hours: 0,
   next_service_date: "",
+  next_service_mileage: 0,
+  next_service_hours: 0,
   insurance_expiry: "",
   technical_inspection_expiry: "",
   circulation_permit_expiry: "",
@@ -115,65 +119,84 @@ export default function VehicleDialog({
     ? drivers.filter(d => d.company_id === selectedCompanyId)
     : drivers;
 
+  const fileInputRef = React.useRef(null);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl bg-zinc-950 border-zinc-800 text-white max-h-[90vh] overflow-y-auto shadow-2xl shadow-black/50 backdrop-blur-xl">
+      <DialogContent className="max-w-3xl bg-zinc-950 border-zinc-800 text-white max-h-[90vh] overflow-y-auto shadow-2xl shadow-black/50 backdrop-blur-xl">
         <DialogHeader>
           <DialogTitle>{vehicle ? "Editar Vehículo" : "Nuevo Vehículo"}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit}>
+          {/* Imagen destacada en la parte superior */}
+          <div className="mb-6 relative">
+            {form.image_url ? (
+              <div className="relative w-full h-64 rounded-xl overflow-hidden border-2 border-zinc-800 bg-zinc-900">
+                <img src={form.image_url} alt="Vehículo" className="w-full h-full object-contain" />
+                <button
+                  type="button"
+                  onClick={() => handleChange("image_url", "")}
+                  className="absolute top-3 right-3 p-2 bg-zinc-900/90 rounded-full hover:bg-zinc-800 border border-zinc-700 transition-colors"
+                >
+                  <X className="w-4 h-4 text-white" />
+                </button>
+              </div>
+            ) : (
+              <div className="relative w-full h-64 rounded-xl border-2 border-dashed border-zinc-800 bg-zinc-900/50 flex flex-col items-center justify-center gap-3">
+                <ImageIcon className="w-16 h-16 text-zinc-700" />
+                <p className="text-sm text-zinc-500">Foto del vehículo</p>
+              </div>
+            )}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              disabled={uploading}
+              className="hidden"
+            />
+            <Button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="absolute bottom-3 right-3 bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
+            >
+              {uploading ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Upload className="w-4 h-4 mr-2" />
+              )}
+              {uploading ? "Subiendo..." : "Seleccionar Archivo"}
+            </Button>
+          </div>
+
           <Tabs defaultValue="general" className="w-full">
-            <TabsList className="bg-zinc-900 border-zinc-800 mb-4">
+            <TabsList className="bg-zinc-900 border-zinc-800 mb-4 w-full justify-start">
               <TabsTrigger value="general" className="data-[state=active]:bg-yellow-500/10 data-[state=active]:text-yellow-400 data-[state=active]:border-yellow-500/30">General</TabsTrigger>
+              <TabsTrigger value="service" className="data-[state=active]:bg-yellow-500/10 data-[state=active]:text-yellow-400 data-[state=active]:border-yellow-500/30">Servicio</TabsTrigger>
               <TabsTrigger value="documents" className="data-[state=active]:bg-yellow-500/10 data-[state=active]:text-yellow-400 data-[state=active]:border-yellow-500/30">Documentos</TabsTrigger>
               <TabsTrigger value="other" className="data-[state=active]:bg-yellow-500/10 data-[state=active]:text-yellow-400 data-[state=active]:border-yellow-500/30">Otros</TabsTrigger>
             </TabsList>
 
             <TabsContent value="general" className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Interno (Calco ID)</Label>
-                  <Input
-                    value={form.internal_number}
-                    onChange={(e) => handleChange("internal_number", e.target.value.slice(0, 10))}
-                    className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
-                    placeholder="Ej: MTU736"
-                    maxLength={10}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Imagen del vehículo</Label>
-                  <div className="flex items-center gap-2">
-                    {form.image_url && (
-                      <div className="relative w-12 h-12 rounded-lg overflow-hidden border-2 border-zinc-700">
-                        <img src={form.image_url} alt="Vehículo" className="w-full h-full object-cover" />
-                        <button
-                          type="button"
-                          onClick={() => handleChange("image_url", "")}
-                          className="absolute top-0 right-0 p-0.5 bg-zinc-900/80 rounded-full hover:bg-zinc-800"
-                        >
-                          <X className="w-3 h-3 text-white" />
-                        </button>
-                      </div>
-                    )}
-                    <Input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      disabled={uploading}
-                      className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 text-xs"
-                    />
-                  </div>
-                </div>
+              <div className="space-y-2">
+                <Label>Interno (Calco ID)</Label>
+                <Input
+                  value={form.internal_number}
+                  onChange={(e) => handleChange("internal_number", e.target.value.slice(0, 10))}
+                  className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
+                  placeholder="Ej: MTU736"
+                  maxLength={10}
+                />
               </div>
 
               {isSuperAdmin && (
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Empresa *</Label>
-                    <Select value={form.company_id} onValueChange={(v) => handleChange("company_id", v)} required>
-                      <SelectTrigger className="bg-slate-800 border-slate-700">
+                    <Select value={form.company_id || ""} onValueChange={(v) => handleChange("company_id", v)} required>
+                      <SelectTrigger className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50">
                         <SelectValue placeholder="Seleccionar empresa" />
                       </SelectTrigger>
                       <SelectContent>
@@ -185,8 +208,8 @@ export default function VehicleDialog({
                   </div>
                   <div className="space-y-2">
                     <Label>Locación *</Label>
-                    <Select value={form.location_id} onValueChange={(v) => handleChange("location_id", v)} required disabled={!selectedCompanyId}>
-                      <SelectTrigger className="bg-slate-800 border-slate-700">
+                    <Select value={form.location_id || ""} onValueChange={(v) => handleChange("location_id", v)} required disabled={!selectedCompanyId}>
+                      <SelectTrigger className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50">
                         <SelectValue placeholder={selectedCompanyId ? "Seleccionar locación" : "Primero seleccione empresa"} />
                       </SelectTrigger>
                       <SelectContent>
@@ -202,8 +225,8 @@ export default function VehicleDialog({
               {!isSuperAdmin && (
                 <div className="space-y-2">
                   <Label>Locación *</Label>
-                  <Select value={form.location_id} onValueChange={(v) => handleChange("location_id", v)} required>
-                    <SelectTrigger className="bg-slate-800 border-slate-700">
+                  <Select value={form.location_id || ""} onValueChange={(v) => handleChange("location_id", v)} required>
+                    <SelectTrigger className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50">
                       <SelectValue placeholder="Seleccionar locación" />
                     </SelectTrigger>
                     <SelectContent>
@@ -398,7 +421,7 @@ export default function VehicleDialog({
                   value={form.assigned_driver_id || "none"} 
                   onValueChange={(v) => handleChange("assigned_driver_id", v === "none" ? "" : v)}
                 >
-                  <SelectTrigger className="bg-slate-800 border-slate-700">
+                  <SelectTrigger className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50">
                     <SelectValue placeholder="Sin asignar" />
                   </SelectTrigger>
                   <SelectContent>
@@ -413,27 +436,99 @@ export default function VehicleDialog({
               </div>
             </TabsContent>
 
-            <TabsContent value="documents" className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Último Servicio</Label>
-                  <Input
-                    type="date"
-                    value={form.last_service_date}
-                    onChange={(e) => handleChange("last_service_date", e.target.value)}
-                    className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Próximo Servicio</Label>
-                  <Input
-                    type="date"
-                    value={form.next_service_date}
-                    onChange={(e) => handleChange("next_service_date", e.target.value)}
-                    className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
-                  />
+            <TabsContent value="service" className="space-y-6">
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold text-yellow-400 flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-yellow-400"></div>
+                  Último Servicio
+                </h3>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label>Kilómetros</Label>
+                    <Input
+                      type="number"
+                      value={form.last_service_mileage}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value) || 0;
+                        handleChange("last_service_mileage", Math.min(val, 999999));
+                      }}
+                      className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
+                      max={999999}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Horas</Label>
+                    <Input
+                      type="number"
+                      value={form.last_service_hours}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value) || 0;
+                        handleChange("last_service_hours", Math.min(val, 99999));
+                      }}
+                      className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
+                      max={99999}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Fecha</Label>
+                    <Input
+                      type="date"
+                      value={form.last_service_date}
+                      onChange={(e) => handleChange("last_service_date", e.target.value)}
+                      className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
+                    />
+                  </div>
                 </div>
               </div>
+
+              <div className="h-px bg-zinc-800"></div>
+
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold text-cyan-400 flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-cyan-400"></div>
+                  Próximo Servicio
+                </h3>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label>Kilómetros</Label>
+                    <Input
+                      type="number"
+                      value={form.next_service_mileage}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value) || 0;
+                        handleChange("next_service_mileage", Math.min(val, 999999));
+                      }}
+                      className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
+                      max={999999}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Horas</Label>
+                    <Input
+                      type="number"
+                      value={form.next_service_hours}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value) || 0;
+                        handleChange("next_service_hours", Math.min(val, 99999));
+                      }}
+                      className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
+                      max={99999}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Fecha</Label>
+                    <Input
+                      type="date"
+                      value={form.next_service_date}
+                      onChange={(e) => handleChange("next_service_date", e.target.value)}
+                      className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
+                    />
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="documents" className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Fecha de Compra</Label>
