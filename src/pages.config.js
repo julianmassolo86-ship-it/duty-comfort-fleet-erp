@@ -57,6 +57,7 @@ import Maintenance from './pages/Maintenance';
 import Profile from './pages/Profile';
 import Reports from './pages/Reports';
 import Vehicles from './pages/Vehicles';
+import Manufacturers from './pages/Manufacturers';
 import __Layout from './Layout.jsx';
 
 
@@ -71,6 +72,7 @@ export const PAGES = {
     "Profile": Profile,
     "Reports": Reports,
     "Vehicles": Vehicles,
+    "Manufacturers": Manufacturers,
 }
 
 export const pagesConfig = {
