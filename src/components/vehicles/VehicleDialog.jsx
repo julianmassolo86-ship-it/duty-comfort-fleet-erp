@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, Trash2, X, Upload, Image as ImageIcon, UserPlus, UserMinus, ZoomIn, Download } from "lucide-react";
+import DocumentCard from "./DocumentCard";
 import { base44 } from "@/api/base44Client";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
@@ -35,7 +36,7 @@ const initialState = {
   mileage: 0,
   hours: 0,
   assigned_driver_ids: [],
-  purchase_date: "",
+  circulation_permit_url: "",
   last_service_date: "",
   last_service_mileage: 0,
   last_service_hours: 0,
@@ -591,19 +592,138 @@ export default function VehicleDialog({
               </div>
             </TabsContent>
 
-            <TabsContent value="documents" className="space-y-6">
-              {/* Fecha de Compra */}
-              <div className="space-y-2">
-                <Label>Fecha de Compra</Label>
-                <Input
-                  type="date"
-                  value={form.purchase_date}
-                  onChange={(e) => handleChange("purchase_date", e.target.value)}
-                  className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
+            <TabsContent value="documents" className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Cédula Vehículo - Lado A */}
+                <DocumentCard
+                  title="Cédula Vehículo - Lado A"
+                  document_url={form.vehicle_card_front_url}
+                  document_expiry={form.vehicle_card_front_expiry}
+                  expiry_field="vehicle_card_front_expiry"
+                  url_field="vehicle_card_front_url"
+                  uploading={uploading}
+                  onExpiryChange={handleChange}
+                  onFileChange={(e) => handleImageUpload(e, "vehicle_card_front_url")}
+                  onDelete={handleChange}
+                  uploadId="vehicle-card-front-upload"
+                />
+
+                {/* Cédula Vehículo - Lado B */}
+                <DocumentCard
+                  title="Cédula Vehículo - Lado B"
+                  document_url={form.vehicle_card_back_url}
+                  document_expiry={null}
+                  expiry_field={null}
+                  url_field="vehicle_card_back_url"
+                  uploading={uploading}
+                  onExpiryChange={handleChange}
+                  onFileChange={(e) => handleImageUpload(e, "vehicle_card_back_url")}
+                  onDelete={handleChange}
+                  uploadId="vehicle-card-back-upload"
+                />
+
+                {/* Título Automotor */}
+                <DocumentCard
+                  title="Título Automotor"
+                  document_url={form.title_url}
+                  document_expiry={form.title_expiry}
+                  expiry_field="title_expiry"
+                  url_field="title_url"
+                  uploading={uploading}
+                  onExpiryChange={handleChange}
+                  onFileChange={(e) => handleImageUpload(e, "title_url")}
+                  onDelete={handleChange}
+                  uploadId="title-upload"
+                />
+
+                {/* Patente */}
+                <DocumentCard
+                  title="Patente"
+                  document_url={form.license_plate_url}
+                  document_expiry={form.license_plate_expiry}
+                  expiry_field="license_plate_expiry"
+                  url_field="license_plate_url"
+                  uploading={uploading}
+                  onExpiryChange={handleChange}
+                  onFileChange={(e) => handleImageUpload(e, "license_plate_url")}
+                  onDelete={handleChange}
+                  uploadId="license-plate-upload"
+                />
+
+                {/* Verificación Técnica (VTV) */}
+                <DocumentCard
+                  title="Verificación Técnica (VTV)"
+                  document_url={form.technical_inspection_url}
+                  document_expiry={form.technical_inspection_expiry}
+                  expiry_field="technical_inspection_expiry"
+                  url_field="technical_inspection_url"
+                  uploading={uploading}
+                  onExpiryChange={handleChange}
+                  onFileChange={(e) => handleImageUpload(e, "technical_inspection_url")}
+                  onDelete={handleChange}
+                  uploadId="technical-inspection-upload"
+                />
+
+                {/* Grabado de Autopartes */}
+                <DocumentCard
+                  title="Grabado de Autopartes"
+                  document_url={form.parts_engraving_url}
+                  document_expiry={form.parts_engraving_expiry}
+                  expiry_field="parts_engraving_expiry"
+                  url_field="parts_engraving_url"
+                  uploading={uploading}
+                  onExpiryChange={handleChange}
+                  onFileChange={(e) => handleImageUpload(e, "parts_engraving_url")}
+                  onDelete={handleChange}
+                  uploadId="parts-engraving-upload"
+                />
+
+                {/* Extintor */}
+                <DocumentCard
+                  title="Extintor"
+                  document_url={form.fire_extinguisher_url}
+                  document_expiry={form.fire_extinguisher_expiry}
+                  expiry_field="fire_extinguisher_expiry"
+                  url_field="fire_extinguisher_url"
+                  uploading={uploading}
+                  onExpiryChange={handleChange}
+                  onFileChange={(e) => handleImageUpload(e, "fire_extinguisher_url")}
+                  onDelete={handleChange}
+                  uploadId="fire-extinguisher-upload"
+                />
+
+                {/* Póliza de Seguro */}
+                <DocumentCard
+                  title="Póliza de Seguro"
+                  document_url={form.insurance_url}
+                  document_expiry={form.insurance_expiry}
+                  expiry_field="insurance_expiry"
+                  url_field="insurance_url"
+                  uploading={uploading}
+                  onExpiryChange={handleChange}
+                  onFileChange={(e) => handleImageUpload(e, "insurance_url")}
+                  onDelete={handleChange}
+                  uploadId="insurance-upload"
+                />
+
+                {/* Credencial de Circulación */}
+                <DocumentCard
+                  title="Credencial de Circulación"
+                  document_url={form.circulation_permit_url}
+                  document_expiry={form.circulation_permit_expiry}
+                  expiry_field="circulation_permit_expiry"
+                  url_field="circulation_permit_url"
+                  uploading={uploading}
+                  onExpiryChange={handleChange}
+                  onFileChange={(e) => handleImageUpload(e, "circulation_permit_url")}
+                  onDelete={handleChange}
+                  uploadId="circulation-permit-upload"
                 />
               </div>
+            </TabsContent>
 
-              {/* Cédula Vehículo - Lado A */}
+            <TabsContent value="other" className="space-y-4">
+              {/* Cédula Vehículo - Lado A (ELIMINADO - moved to cards above) */}
               <div className="space-y-2 pt-4 border-t border-zinc-700">
                 <div className="flex items-center justify-between">
                   <Label>Cédula Vehículo - Lado A (Frente)</Label>

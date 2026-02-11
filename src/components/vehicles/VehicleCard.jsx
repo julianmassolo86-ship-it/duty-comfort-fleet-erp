@@ -53,11 +53,11 @@ export default function VehicleCard({ vehicle, location, company, drivers = [], 
         <div className="relative mb-3 flex items-baseline justify-between gap-4">
           <div className="flex-shrink-0">
             {vehicle.internal_number && (
-              <span className="text-xl font-black bg-gradient-to-br from-white to-zinc-300 bg-clip-text text-transparent">#{vehicle.internal_number}</span>
+              <span className="text-3xl font-black bg-gradient-to-br from-white to-zinc-300 bg-clip-text text-transparent">#{vehicle.internal_number}</span>
             )}
           </div>
           <div className="flex-shrink-0">
-            <h3 className="text-3xl font-black text-white bg-gradient-to-br from-white to-zinc-300 bg-clip-text text-transparent">{vehicle.plate}</h3>
+            <h3 className="text-xl font-black text-white bg-gradient-to-br from-white to-zinc-300 bg-clip-text text-transparent">{vehicle.plate}</h3>
           </div>
         </div>
 
