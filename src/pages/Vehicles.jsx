@@ -57,6 +57,11 @@ export default function Vehicles() {
     queryFn: () => base44.entities.Manufacturer.list('name'),
   });
 
+  const { data: vehicleTypes = [] } = useQuery({
+    queryKey: ['vehicleTypes'],
+    queryFn: () => base44.entities.VehicleType.list('name'),
+  });
+
   const locationsMap = locations.reduce((acc, l) => ({ ...acc, [l.id]: l }), {});
   const companiesMap = companies.reduce((acc, c) => ({ ...acc, [c.id]: c }), {});
 
@@ -242,6 +247,7 @@ export default function Vehicles() {
           locations={accessibleLocations}
           companies={companies}
           manufacturers={manufacturers}
+          vehicleTypes={vehicleTypes}
           isSuperAdmin={isSuperAdmin}
           currentUser={currentUser}
           onSave={handleSave}

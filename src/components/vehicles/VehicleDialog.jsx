@@ -30,7 +30,7 @@ const initialState = {
   chassis_number: "",
   engine_number: "",
   vin: "",
-  type: "car",
+  type: "",
   technical_description: "",
   status: "active",
   fuel_type: "diesel",
