@@ -19,7 +19,6 @@ const initialState = {
   phone: "",
   status: "active",
   user_role: "company_admin",
-  role: "user",
 };
 
 export default function AdminDialog({ 
@@ -41,7 +40,6 @@ export default function AdminDialog({
         phone: admin.phone || "",
         status: admin.status || "active",
         user_role: "company_admin",
-        role: admin.role || "user"
       });
     } else {
       setForm(initialState);
@@ -55,28 +53,20 @@ export default function AdminDialog({
   const handleSubmit = (e) => {
     e.preventDefault();
     if (admin) {
-      // Editar: enviar company_id, phone, status, role
+      // Editar: enviar company_id, phone, status
       const updateData = { 
+        company_id: form.company_id,
         phone: form.phone, 
         status: form.status,
         user_role: "company_admin",
-        role: form.role
       };
-      // Solo incluir company_id si el rol no es admin (superadmin)
-      if (form.role !== "admin") {
-        updateData.company_id = form.company_id;
-      }
       onSave(updateData);
     } else {
       // Crear: enviar datos para invitar
       const inviteData = {
         email: form.email,
-        role: form.role
+        company_id: form.company_id,
       };
-      // Solo incluir company_id si el rol no es admin (superadmin)
-      if (form.role !== "admin") {
-        inviteData.company_id = form.company_id;
-      }
       onSave(inviteData);
     }
   };
@@ -110,51 +100,19 @@ export default function AdminDialog({
             />
           </div>
 
-          {isSuperAdmin && !admin && (
-            <div className="space-y-2">
-              <Label>Tipo de Administrador *</Label>
-              <Select value={form.role} onValueChange={(v) => handleChange("role", v)} required>
-                <SelectTrigger className="bg-slate-800 border-slate-700">
-                  <SelectValue placeholder="Seleccionar tipo" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="admin">Superadministrador (Acceso Total)</SelectItem>
-                  <SelectItem value="user">Administrador de Empresa</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
-          {isSuperAdmin && admin && (
-            <div className="space-y-2">
-              <Label>Tipo de Administrador *</Label>
-              <Select value={form.role} onValueChange={(v) => handleChange("role", v)} required>
-                <SelectTrigger className="bg-slate-800 border-slate-700">
-                  <SelectValue placeholder="Seleccionar tipo" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="admin">Superadministrador (Acceso Total)</SelectItem>
-                  <SelectItem value="user">Administrador de Empresa</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
-          {form.role !== "admin" && (
-            <div className="space-y-2">
-              <Label>Empresa *</Label>
-              <Select value={form.company_id} onValueChange={(v) => handleChange("company_id", v)} required>
-                <SelectTrigger className="bg-slate-800 border-slate-700">
-                  <SelectValue placeholder="Seleccionar empresa" />
-                </SelectTrigger>
-                <SelectContent>
-                  {companies.map(company => (
-                    <SelectItem key={company.id} value={company.id}>{company.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
+          <div className="space-y-2">
+            <Label>Empresa *</Label>
+            <Select value={form.company_id} onValueChange={(v) => handleChange("company_id", v)} required>
+              <SelectTrigger className="bg-slate-800 border-slate-700">
+                <SelectValue placeholder="Seleccionar empresa" />
+              </SelectTrigger>
+              <SelectContent>
+                {companies.map(company => (
+                  <SelectItem key={company.id} value={company.id}>{company.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
           {admin && (
             <>
