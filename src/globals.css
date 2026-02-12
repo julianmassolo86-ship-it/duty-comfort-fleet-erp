@@ -22,6 +22,72 @@
     -webkit-user-select: none;
     -webkit-touch-callout: none;
   }
+
+  /* Custom Scrollbar Styles */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(161, 161, 170, 0.4) transparent;
+  }
+
+  .dark * {
+    scrollbar-color: rgba(161, 161, 170, 0.3) transparent;
+  }
+
+  /* Webkit browsers (Chrome, Safari, Edge) */
+  *::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background-color: rgba(161, 161, 170, 0.4);
+    border-radius: 6px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(161, 161, 170, 0.6);
+  }
+
+  .dark *::-webkit-scrollbar-thumb {
+    background-color: rgba(161, 161, 170, 0.3);
+  }
+
+  .dark *::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(161, 161, 170, 0.5);
+  }
+
+  /* Thicker scrollbar for modals and dialogs */
+  [role="dialog"] *::-webkit-scrollbar,
+  [data-radix-dialog-content] *::-webkit-scrollbar {
+    width: 14px;
+  }
+
+  [role="dialog"] *::-webkit-scrollbar-thumb,
+  [data-radix-dialog-content] *::-webkit-scrollbar-thumb {
+    background-color: rgba(234, 179, 8, 0.4);
+    border: 3px solid transparent;
+  }
+
+  [role="dialog"] *::-webkit-scrollbar-thumb:hover,
+  [data-radix-dialog-content] *::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(234, 179, 8, 0.6);
+  }
+
+  .dark [role="dialog"] *::-webkit-scrollbar-thumb,
+  .dark [data-radix-dialog-content] *::-webkit-scrollbar-thumb {
+    background-color: rgba(234, 179, 8, 0.3);
+  }
+
+  .dark [role="dialog"] *::-webkit-scrollbar-thumb:hover,
+  .dark [data-radix-dialog-content] *::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(234, 179, 8, 0.5);
+  }
 }
 
 @layer base {
