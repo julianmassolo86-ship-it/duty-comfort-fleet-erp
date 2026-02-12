@@ -93,6 +93,11 @@ function LayoutContent({ children, currentPageName }) {
   // Si el usuario no tiene company_id, es super admin
   const isSuperAdmin = !user?.company_id;
 
+  // Si estamos en la landing page, no mostrar el layout
+  if (currentPageName === "LandingPage") {
+    return <>{children}</>;
+  }
+
   // Menú para Super Admin - Organizado por módulos
   const superAdminMenu = [
     {
