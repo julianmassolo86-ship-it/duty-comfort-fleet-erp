@@ -17,10 +17,13 @@ import NovedadCard from "../components/novedades/NovedadCard";
 import { useTheme } from "../components/common/ThemeWrapper";
 
 export default function Maintenance() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const tabFromUrl = urlParams.get('tab');
+  
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
-  const [activeTab, setActiveTab] = useState("mantenimientos");
+  const [activeTab, setActiveTab] = useState(tabFromUrl === "novedades" ? "novedades" : "mantenimientos");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [novedadDialogOpen, setNovedadDialogOpen] = useState(false);
   const [selectedMaintenance, setSelectedMaintenance] = useState(null);

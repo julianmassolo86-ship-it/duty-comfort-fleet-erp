@@ -61,7 +61,12 @@ export default function Dashboard() {
     queryFn: () => base44.entities.Location.list(),
   });
 
-  const isLoading = loadingVehicles || loadingDrivers || loadingMaintenance || loadingDocuments;
+  const { data: novedades = [], isLoading: loadingNovedades } = useQuery({
+    queryKey: ['novedades'],
+    queryFn: () => base44.entities.Novedad.list('-fecha_reporte'),
+  });
+
+  const isLoading = loadingVehicles || loadingDrivers || loadingMaintenance || loadingDocuments || loadingNovedades;
 
   // Filtrar datos según rol
   const accessibleVehicles = isSuperAdmin 
@@ -79,6 +84,10 @@ export default function Dashboard() {
   const accessibleLocations = isSuperAdmin 
     ? locations 
     : locations.filter(l => l.company_id === currentUser?.company_id);
+
+  const accessibleNovedades = isSuperAdmin 
+    ? novedades 
+    : novedades.filter(n => n.company_id === currentUser?.company_id);
 
   // Calculate alerts
   const getAlerts = () => {
@@ -144,6 +153,7 @@ export default function Dashboard() {
   const activeVehicles = accessibleVehicles.filter(v => v.status === 'active').length;
   const activeDrivers = accessibleDrivers.filter(d => d.status === 'active').length;
   const pendingMaintenance = accessibleMaintenances.filter(m => m.status === 'scheduled' || m.status === 'in_progress').length;
+  const pendingNovedades = accessibleNovedades.filter(n => n.estado === 'pendiente' || n.estado === 'en_proceso').length;
 
   // Preparar datos para gráficos - Solo para Super Admin
   const getCompaniesData = () => {
@@ -238,12 +248,22 @@ export default function Dashboard() {
                   icon={Users}
                 />
               )}
-              <StatCard 
-                title="Mantenimientos Pendientes" 
-                value={pendingMaintenance}
-                subtitle="programados o en progreso"
-                icon={Wrench}
-              />
+              <Link to={createPageUrl("Maintenance")} className="block">
+                <StatCard 
+                  title="Mantenimientos Pendientes" 
+                  value={pendingMaintenance}
+                  subtitle="programados o en progreso"
+                  icon={Wrench}
+                />
+              </Link>
+              <Link to={`${createPageUrl("Maintenance")}?tab=novedades`} className="block">
+                <StatCard 
+                  title="Novedades Pendientes" 
+                  value={pendingNovedades}
+                  subtitle="pendientes o en proceso"
+                  icon={AlertTriangle}
+                />
+              </Link>
               <StatCard 
                 title="Alertas Activas" 
                 value={alerts.length}
