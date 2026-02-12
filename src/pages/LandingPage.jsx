@@ -6,7 +6,7 @@ import { Car, BarChart3, Shield, Clock, ArrowRight, CheckCircle2, Zap, TrendingU
 
 export default function LandingPage() {
   const handleLogin = () => {
-    base44.auth.redirectToLogin(createPageUrl('Dashboard'));
+    base44.auth.redirectToLogin(window.location.origin + createPageUrl('Dashboard'));
   };
 
   return (
