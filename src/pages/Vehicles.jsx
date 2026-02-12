@@ -12,6 +12,7 @@ import EmptyState from "../components/common/EmptyState";
 import VehicleCard from "../components/vehicles/VehicleCard";
 import VehicleTable from "../components/vehicles/VehicleTable";
 import VehicleDialog from "../components/vehicles/VehicleDialog";
+import PullToRefresh from "../components/common/PullToRefresh";
 import { useTheme } from "../components/common/ThemeWrapper";
 
 export default function Vehicles() {
@@ -28,7 +29,6 @@ export default function Vehicles() {
 
   const queryClient = useQueryClient();
 
-  // Pull to refresh handler
   const handleRefresh = async () => {
     setIsRefreshing(true);
     await queryClient.invalidateQueries({ queryKey: ['vehicles'] });
@@ -36,34 +36,6 @@ export default function Vehicles() {
     await queryClient.invalidateQueries({ queryKey: ['locations'] });
     setTimeout(() => setIsRefreshing(false), 500);
   };
-
-  // Pull to refresh gesture
-  useEffect(() => {
-    let startY = 0;
-    let scrollTop = 0;
-
-    const handleTouchStart = (e) => {
-      startY = e.touches[0].clientY;
-      scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-    };
-
-    const handleTouchMove = (e) => {
-      const currentY = e.touches[0].clientY;
-      const pullDistance = currentY - startY;
-
-      if (scrollTop === 0 && pullDistance > 100 && !isRefreshing) {
-        handleRefresh();
-      }
-    };
-
-    document.addEventListener('touchstart', handleTouchStart);
-    document.addEventListener('touchmove', handleTouchMove);
-
-    return () => {
-      document.removeEventListener('touchstart', handleTouchStart);
-      document.removeEventListener('touchmove', handleTouchMove);
-    };
-  }, [isRefreshing]);
 
   useEffect(() => {
     base44.auth.me().then(setCurrentUser).catch(() => {});
@@ -140,6 +112,18 @@ export default function Vehicles() {
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Vehicle.create(data),
+    onMutate: async (newVehicle) => {
+      await queryClient.cancelQueries({ queryKey: ['vehicles'] });
+      const previousVehicles = queryClient.getQueryData(['vehicles', currentUser?.company_id]);
+      queryClient.setQueryData(['vehicles', currentUser?.company_id], (old = []) => [
+        ...old,
+        { ...newVehicle, id: 'temp-' + Date.now() }
+      ]);
+      return { previousVehicles };
+    },
+    onError: (err, newVehicle, context) => {
+      queryClient.setQueryData(['vehicles', currentUser?.company_id], context.previousVehicles);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vehicles'] });
       setDialogOpen(false);
@@ -148,6 +132,17 @@ export default function Vehicles() {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Vehicle.update(id, data),
+    onMutate: async ({ id, data }) => {
+      await queryClient.cancelQueries({ queryKey: ['vehicles'] });
+      const previousVehicles = queryClient.getQueryData(['vehicles', currentUser?.company_id]);
+      queryClient.setQueryData(['vehicles', currentUser?.company_id], (old = []) =>
+        old.map(v => v.id === id ? { ...v, ...data } : v)
+      );
+      return { previousVehicles };
+    },
+    onError: (err, variables, context) => {
+      queryClient.setQueryData(['vehicles', currentUser?.company_id], context.previousVehicles);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vehicles'] });
       setDialogOpen(false);
@@ -157,6 +152,17 @@ export default function Vehicles() {
 
   const deleteMutation = useMutation({
     mutationFn: (id) => base44.entities.Vehicle.delete(id),
+    onMutate: async (deletedId) => {
+      await queryClient.cancelQueries({ queryKey: ['vehicles'] });
+      const previousVehicles = queryClient.getQueryData(['vehicles', currentUser?.company_id]);
+      queryClient.setQueryData(['vehicles', currentUser?.company_id], (old = []) =>
+        old.filter(v => v.id !== deletedId)
+      );
+      return { previousVehicles };
+    },
+    onError: (err, deletedId, context) => {
+      queryClient.setQueryData(['vehicles', currentUser?.company_id], context.previousVehicles);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vehicles'] });
       setDialogOpen(false);
@@ -199,19 +205,9 @@ export default function Vehicles() {
   });
 
   return (
-    <div className={cn("min-h-screen p-4 sm:p-6 lg:p-8", theme === 'dark' ? 'bg-black' : 'bg-gray-50')}>
-      <div className="max-w-7xl mx-auto">
-        {isRefreshing && (
-          <div className={cn(
-            "fixed top-16 left-0 right-0 z-50 flex items-center justify-center py-2",
-            theme === 'dark' ? 'bg-zinc-900/90' : 'bg-white/90'
-          )}>
-            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-yellow-500" />
-            <span className={cn("ml-2 text-sm", theme === 'dark' ? 'text-zinc-300' : 'text-gray-700')}>
-              Actualizando...
-            </span>
-          </div>
-        )}
+    <PullToRefresh onRefresh={handleRefresh} isRefreshing={isRefreshing}>
+      <div className={cn("min-h-screen p-4 sm:p-6 lg:p-8", theme === 'dark' ? 'bg-black' : 'bg-gray-50')}>
+        <div className="max-w-7xl mx-auto">
         <PageHeader 
           title="Vehículos" 
           description="Gestiona tu flota de vehículos"
@@ -383,7 +379,8 @@ export default function Vehicles() {
           isLoading={createMutation.isPending || updateMutation.isPending}
           isDeleting={deleteMutation.isPending}
         />
+        </div>
       </div>
-    </div>
+    </PullToRefresh>
   );
 }
