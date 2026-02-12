@@ -11,6 +11,7 @@ import PageHeader from "../components/common/PageHeader";
 import EmptyState from "../components/common/EmptyState";
 import StatusBadge from "../components/common/StatusBadge";
 import LocationDialog from "../components/locations/LocationDialog";
+import PullToRefresh from "../components/common/PullToRefresh";
 import { useTheme } from "../components/common/ThemeWrapper";
 
 const typeLabels = {
@@ -30,9 +31,18 @@ export default function Locations() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const { theme } = useTheme();
 
   const queryClient = useQueryClient();
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await queryClient.invalidateQueries({ queryKey: ['locations'] });
+    await queryClient.invalidateQueries({ queryKey: ['companies'] });
+    await queryClient.invalidateQueries({ queryKey: ['vehicles'] });
+    setTimeout(() => setIsRefreshing(false), 500);
+  };
 
   useEffect(() => {
     base44.auth.me().then(setCurrentUser).catch(() => {});
@@ -81,6 +91,18 @@ export default function Locations() {
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Location.create(data),
+    onMutate: async (newLocation) => {
+      await queryClient.cancelQueries({ queryKey: ['locations'] });
+      const previousLocations = queryClient.getQueryData(['locations', currentUser?.company_id]);
+      queryClient.setQueryData(['locations', currentUser?.company_id], (old = []) => [
+        ...old,
+        { ...newLocation, id: 'temp-' + Date.now() }
+      ]);
+      return { previousLocations };
+    },
+    onError: (err, newLocation, context) => {
+      queryClient.setQueryData(['locations', currentUser?.company_id], context.previousLocations);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['locations'] });
       setDialogOpen(false);
@@ -89,6 +111,17 @@ export default function Locations() {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Location.update(id, data),
+    onMutate: async ({ id, data }) => {
+      await queryClient.cancelQueries({ queryKey: ['locations'] });
+      const previousLocations = queryClient.getQueryData(['locations', currentUser?.company_id]);
+      queryClient.setQueryData(['locations', currentUser?.company_id], (old = []) =>
+        old.map(l => l.id === id ? { ...l, ...data } : l)
+      );
+      return { previousLocations };
+    },
+    onError: (err, variables, context) => {
+      queryClient.setQueryData(['locations', currentUser?.company_id], context.previousLocations);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['locations'] });
       setDialogOpen(false);
@@ -98,6 +131,17 @@ export default function Locations() {
 
   const deleteMutation = useMutation({
     mutationFn: (id) => base44.entities.Location.delete(id),
+    onMutate: async (deletedId) => {
+      await queryClient.cancelQueries({ queryKey: ['locations'] });
+      const previousLocations = queryClient.getQueryData(['locations', currentUser?.company_id]);
+      queryClient.setQueryData(['locations', currentUser?.company_id], (old = []) =>
+        old.filter(l => l.id !== deletedId)
+      );
+      return { previousLocations };
+    },
+    onError: (err, deletedId, context) => {
+      queryClient.setQueryData(['locations', currentUser?.company_id], context.previousLocations);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['locations'] });
       setDialogOpen(false);
@@ -148,8 +192,9 @@ export default function Locations() {
     : companies.filter(c => c.id === currentUser?.company_id);
 
   return (
-    <div className={cn("min-h-screen p-4 sm:p-6 lg:p-8", theme === 'dark' ? 'bg-black' : 'bg-gray-50')}>
-      <div className="max-w-7xl mx-auto">
+    <PullToRefresh onRefresh={handleRefresh} isRefreshing={isRefreshing}>
+      <div className={cn("min-h-screen p-4 sm:p-6 lg:p-8", theme === 'dark' ? 'bg-black' : 'bg-gray-50')}>
+        <div className="max-w-7xl mx-auto">
         <PageHeader 
           title="Locaciones" 
           description="Gestiona las locaciones de las empresas"
@@ -286,7 +331,8 @@ export default function Locations() {
           isDeleting={deleteMutation.isPending}
           hasVehicles={selectedLocation ? !canDeleteLocation(selectedLocation.id) : false}
         />
+        </div>
       </div>
-    </div>
+    </PullToRefresh>
   );
 }
