@@ -25,21 +25,49 @@ const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'
 
 export default function Reports() {
   const [period, setPeriod] = useState("6");
+  const [currentUser, setCurrentUser] = useState(null);
   const { theme } = useTheme();
 
+  React.useEffect(() => {
+    base44.auth.me().then(setCurrentUser).catch(() => {});
+  }, []);
+
+  const isSuperAdmin = !currentUser?.company_id;
+
   const { data: vehicles = [], isLoading: loadingVehicles } = useQuery({
-    queryKey: ['vehicles'],
-    queryFn: () => base44.entities.Vehicle.list(),
+    queryKey: ['vehicles', currentUser?.company_id],
+    queryFn: async () => {
+      const allVehicles = await base44.entities.Vehicle.list();
+      if (currentUser?.company_id) {
+        return allVehicles.filter(v => v.company_id === currentUser.company_id);
+      }
+      return allVehicles;
+    },
+    enabled: !!currentUser,
   });
 
   const { data: drivers = [], isLoading: loadingDrivers } = useQuery({
-    queryKey: ['drivers'],
-    queryFn: () => base44.entities.Driver.list(),
+    queryKey: ['drivers', currentUser?.company_id],
+    queryFn: async () => {
+      const allDrivers = await base44.entities.Driver.list();
+      if (currentUser?.company_id) {
+        return allDrivers.filter(d => d.company_id === currentUser.company_id);
+      }
+      return allDrivers;
+    },
+    enabled: !!currentUser,
   });
 
   const { data: maintenances = [], isLoading: loadingMaintenance } = useQuery({
-    queryKey: ['maintenances'],
-    queryFn: () => base44.entities.Maintenance.list(),
+    queryKey: ['maintenances', currentUser?.company_id],
+    queryFn: async () => {
+      const allMaintenances = await base44.entities.Maintenance.list();
+      if (currentUser?.company_id) {
+        return allMaintenances.filter(m => m.company_id === currentUser.company_id);
+      }
+      return allMaintenances;
+    },
+    enabled: !!currentUser,
   });
 
   const isLoading = loadingVehicles || loadingDrivers || loadingMaintenance;
