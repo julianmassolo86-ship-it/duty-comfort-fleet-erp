@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Search, UserCog, Mail, Building2 } from "lucide-react";
@@ -19,24 +19,33 @@ export default function CompanyAdmins() {
   const [companyFilter, setCompanyFilter] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedAdmin, setSelectedAdmin] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
   const { theme } = useTheme();
 
   const queryClient = useQueryClient();
 
+  useEffect(() => {
+    base44.auth.me().then(setCurrentUser).catch(() => {});
+  }, []);
+
+  const isSuperAdmin = !currentUser?.company_id;
+
   const { data: users = [], isLoading } = useQuery({
     queryKey: ['users'],
     queryFn: () => base44.entities.User.list(),
+    enabled: !!currentUser,
   });
 
   const { data: companies = [] } = useQuery({
     queryKey: ['companies'],
     queryFn: () => base44.entities.Company.list(),
+    enabled: !!currentUser,
   });
 
   const companiesMap = companies.reduce((acc, c) => ({ ...acc, [c.id]: c }), {});
 
-  // Solo mostrar administradores de empresa (no super admins)
-  const companyAdmins = users.filter(u => u.user_role === 'company_admin');
+  // Mostrar todos los usuarios excepto el super admin actual
+  const companyAdmins = users.filter(u => u.id !== currentUser?.id);
 
   const handleInviteAdmin = async (data) => {
     try {
@@ -195,6 +204,7 @@ export default function CompanyAdmins() {
           companies={companies}
           onSave={handleSave}
           isLoading={updateMutation.isPending}
+          isSuperAdmin={isSuperAdmin}
         />
       </div>
     </div>
