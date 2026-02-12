@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Search, Building2, Users, MapPin } from "lucide-react";
@@ -18,9 +18,14 @@ export default function Companies() {
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
   const { theme } = useTheme();
 
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    base44.auth.me().then(setCurrentUser).catch(() => {});
+  }, []);
 
   const { data: companies = [], isLoading } = useQuery({
     queryKey: ['companies'],

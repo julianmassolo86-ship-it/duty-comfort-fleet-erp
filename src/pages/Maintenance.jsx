@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Search, Wrench } from "lucide-react";
@@ -19,18 +19,39 @@ export default function Maintenance() {
   const [typeFilter, setTypeFilter] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedMaintenance, setSelectedMaintenance] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
   const { theme } = useTheme();
 
   const queryClient = useQueryClient();
 
+  useEffect(() => {
+    base44.auth.me().then(setCurrentUser).catch(() => {});
+  }, []);
+
+  const isSuperAdmin = !currentUser?.company_id;
+
   const { data: maintenances = [], isLoading } = useQuery({
-    queryKey: ['maintenances'],
-    queryFn: () => base44.entities.Maintenance.list('-scheduled_date'),
+    queryKey: ['maintenances', currentUser?.company_id],
+    queryFn: async () => {
+      const allMaintenances = await base44.entities.Maintenance.list('-scheduled_date');
+      if (currentUser?.company_id) {
+        return allMaintenances.filter(m => m.company_id === currentUser.company_id);
+      }
+      return allMaintenances;
+    },
+    enabled: !!currentUser,
   });
 
   const { data: vehicles = [] } = useQuery({
-    queryKey: ['vehicles'],
-    queryFn: () => base44.entities.Vehicle.list(),
+    queryKey: ['vehicles', currentUser?.company_id],
+    queryFn: async () => {
+      const allVehicles = await base44.entities.Vehicle.list();
+      if (currentUser?.company_id) {
+        return allVehicles.filter(v => v.company_id === currentUser.company_id);
+      }
+      return allVehicles;
+    },
+    enabled: !!currentUser,
   });
 
   const vehiclesMap = vehicles.reduce((acc, v) => ({ ...acc, [v.id]: v }), {});
@@ -62,10 +83,13 @@ export default function Maintenance() {
   });
 
   const handleSave = (data) => {
+    // Si es admin de empresa, asignar su company_id automáticamente
+    const finalData = isSuperAdmin ? data : { ...data, company_id: currentUser?.company_id };
+    
     if (selectedMaintenance) {
-      updateMutation.mutate({ id: selectedMaintenance.id, data });
+      updateMutation.mutate({ id: selectedMaintenance.id, data: finalData });
     } else {
-      createMutation.mutate(data);
+      createMutation.mutate(finalData);
     }
   };
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Search, FileText, Download, Eye } from "lucide-react";
@@ -33,33 +33,75 @@ export default function Documents() {
   const [entityFilter, setEntityFilter] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
   const { theme } = useTheme();
 
   const queryClient = useQueryClient();
 
+  useEffect(() => {
+    base44.auth.me().then(setCurrentUser).catch(() => {});
+  }, []);
+
+  const isSuperAdmin = !currentUser?.company_id;
+
   const { data: documents = [], isLoading: loadingDocs } = useQuery({
-    queryKey: ['documents'],
-    queryFn: () => base44.entities.Document.list('-expiry_date'),
+    queryKey: ['documents', currentUser?.company_id],
+    queryFn: async () => {
+      const allDocuments = await base44.entities.Document.list('-expiry_date');
+      if (currentUser?.company_id) {
+        return allDocuments.filter(d => d.company_id === currentUser.company_id);
+      }
+      return allDocuments;
+    },
+    enabled: !!currentUser,
   });
 
   const { data: vehicles = [], isLoading: loadingVehicles } = useQuery({
-    queryKey: ['vehicles'],
-    queryFn: () => base44.entities.Vehicle.list(),
+    queryKey: ['vehicles', currentUser?.company_id],
+    queryFn: async () => {
+      const allVehicles = await base44.entities.Vehicle.list();
+      if (currentUser?.company_id) {
+        return allVehicles.filter(v => v.company_id === currentUser.company_id);
+      }
+      return allVehicles;
+    },
+    enabled: !!currentUser,
   });
 
   const { data: drivers = [], isLoading: loadingDrivers } = useQuery({
-    queryKey: ['drivers'],
-    queryFn: () => base44.entities.Driver.list(),
+    queryKey: ['drivers', currentUser?.company_id],
+    queryFn: async () => {
+      const allDrivers = await base44.entities.Driver.list();
+      if (currentUser?.company_id) {
+        return allDrivers.filter(d => d.company_id === currentUser.company_id);
+      }
+      return allDrivers;
+    },
+    enabled: !!currentUser,
   });
 
   const { data: companies = [] } = useQuery({
-    queryKey: ['companies'],
-    queryFn: () => base44.entities.Company.list(),
+    queryKey: ['companies', currentUser?.company_id],
+    queryFn: async () => {
+      const allCompanies = await base44.entities.Company.list();
+      if (currentUser?.company_id) {
+        return allCompanies.filter(c => c.id === currentUser.company_id);
+      }
+      return allCompanies;
+    },
+    enabled: !!currentUser,
   });
 
   const { data: locations = [] } = useQuery({
-    queryKey: ['locations'],
-    queryFn: () => base44.entities.Location.list(),
+    queryKey: ['locations', currentUser?.company_id],
+    queryFn: async () => {
+      const allLocations = await base44.entities.Location.list();
+      if (currentUser?.company_id) {
+        return allLocations.filter(l => l.company_id === currentUser.company_id);
+      }
+      return allLocations;
+    },
+    enabled: !!currentUser,
   });
 
   const isLoading = loadingDocs || loadingVehicles || loadingDrivers;
@@ -156,10 +198,13 @@ export default function Documents() {
   });
 
   const handleSave = (data) => {
+    // Si es admin de empresa, asignar su company_id automáticamente
+    const finalData = isSuperAdmin ? data : { ...data, company_id: currentUser?.company_id };
+    
     if (selectedDocument) {
-      updateMutation.mutate({ id: selectedDocument.id, data });
+      updateMutation.mutate({ id: selectedDocument.id, data: finalData });
     } else {
-      createMutation.mutate(data);
+      createMutation.mutate(finalData);
     }
   };
 
