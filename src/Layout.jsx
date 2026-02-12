@@ -34,7 +34,13 @@ const useTheme = () => {
 const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => {
     const savedTheme = localStorage.getItem('theme');
-    return savedTheme || 'dark';
+    if (savedTheme) return savedTheme;
+    
+    // Auto-detect system preference
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      return 'dark';
+    }
+    return 'light';
   });
 
   useEffect(() => {
@@ -46,6 +52,19 @@ const ThemeProvider = ({ children }) => {
       document.documentElement.classList.remove('dark');
     }
   }, [theme]);
+
+  // Listen for system theme changes
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = (e) => {
+      if (!localStorage.getItem('theme')) {
+        setTheme(e.matches ? 'dark' : 'light');
+      }
+    };
+    
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
 
   const toggleTheme = () => {
     setTheme((prev) => prev === 'dark' ? 'light' : 'dark');
@@ -588,10 +607,68 @@ function LayoutContent({ children, currentPageName }) {
 
       {/* Main Content */}
       <main className={cn(
-        "lg:pl-72 pt-16 lg:pt-16 min-h-screen transition-all duration-300"
-      )}>
+        "lg:pl-72 pt-16 lg:pt-16 pb-20 lg:pb-0 min-h-screen transition-all duration-300"
+      )} style={{
+        paddingTop: 'max(4rem, env(safe-area-inset-top))',
+        paddingBottom: 'max(5rem, env(safe-area-inset-bottom))'
+      }}>
         {children}
       </main>
+
+      {/* Mobile Bottom Navigation */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 border-t backdrop-blur-lg"
+        style={{
+          backgroundColor: theme === 'dark' ? 'rgba(0, 0, 0, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+          borderColor: theme === 'dark' ? 'rgb(39, 39, 42)' : 'rgb(229, 231, 235)',
+          paddingBottom: 'env(safe-area-inset-bottom)'
+        }}>
+        <div className="flex items-center justify-around h-16 px-2">
+          <Link
+            to={createPageUrl("Dashboard")}
+            className={cn(
+              "flex flex-col items-center justify-center flex-1 h-full gap-1 transition-colors",
+              currentPageName === "Dashboard"
+                ? theme === 'dark' ? 'text-yellow-400' : 'text-yellow-600'
+                : theme === 'dark' ? 'text-zinc-500' : 'text-gray-500'
+            )}>
+            <LayoutDashboard className="w-5 h-5" />
+            <span className="text-xs font-medium">Inicio</span>
+          </Link>
+          <Link
+            to={createPageUrl("Vehicles")}
+            className={cn(
+              "flex flex-col items-center justify-center flex-1 h-full gap-1 transition-colors",
+              currentPageName === "Vehicles"
+                ? theme === 'dark' ? 'text-yellow-400' : 'text-yellow-600'
+                : theme === 'dark' ? 'text-zinc-500' : 'text-gray-500'
+            )}>
+            <Car className="w-5 h-5" />
+            <span className="text-xs font-medium">Vehículos</span>
+          </Link>
+          <Link
+            to={createPageUrl("Drivers")}
+            className={cn(
+              "flex flex-col items-center justify-center flex-1 h-full gap-1 transition-colors",
+              currentPageName === "Drivers"
+                ? theme === 'dark' ? 'text-yellow-400' : 'text-yellow-600'
+                : theme === 'dark' ? 'text-zinc-500' : 'text-gray-500'
+            )}>
+            <Users className="w-5 h-5" />
+            <span className="text-xs font-medium">Conductores</span>
+          </Link>
+          <Link
+            to={createPageUrl("Maintenance")}
+            className={cn(
+              "flex flex-col items-center justify-center flex-1 h-full gap-1 transition-colors",
+              currentPageName === "Maintenance"
+                ? theme === 'dark' ? 'text-yellow-400' : 'text-yellow-600'
+                : theme === 'dark' ? 'text-zinc-500' : 'text-gray-500'
+            )}>
+            <Wrench className="w-5 h-5" />
+            <span className="text-xs font-medium">Mantenimiento</span>
+          </Link>
+        </div>
+      </nav>
     </div>);
 
 }

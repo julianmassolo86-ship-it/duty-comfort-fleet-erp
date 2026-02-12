@@ -20,9 +20,46 @@ export default function Maintenance() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedMaintenance, setSelectedMaintenance] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const { theme } = useTheme();
 
   const queryClient = useQueryClient();
+
+  // Pull to refresh handler
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await queryClient.invalidateQueries({ queryKey: ['maintenances'] });
+    await queryClient.invalidateQueries({ queryKey: ['vehicles'] });
+    setTimeout(() => setIsRefreshing(false), 500);
+  };
+
+  // Pull to refresh gesture
+  useEffect(() => {
+    let startY = 0;
+    let scrollTop = 0;
+
+    const handleTouchStart = (e) => {
+      startY = e.touches[0].clientY;
+      scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    };
+
+    const handleTouchMove = (e) => {
+      const currentY = e.touches[0].clientY;
+      const pullDistance = currentY - startY;
+
+      if (scrollTop === 0 && pullDistance > 100 && !isRefreshing) {
+        handleRefresh();
+      }
+    };
+
+    document.addEventListener('touchstart', handleTouchStart);
+    document.addEventListener('touchmove', handleTouchMove);
+
+    return () => {
+      document.removeEventListener('touchstart', handleTouchStart);
+      document.removeEventListener('touchmove', handleTouchMove);
+    };
+  }, [isRefreshing]);
 
   useEffect(() => {
     base44.auth.me().then(setCurrentUser).catch(() => {});
@@ -112,6 +149,17 @@ export default function Maintenance() {
   return (
     <div className={cn("min-h-screen p-4 sm:p-6 lg:p-8", theme === 'dark' ? 'bg-black' : 'bg-gray-50')}>
       <div className="max-w-7xl mx-auto">
+        {isRefreshing && (
+          <div className={cn(
+            "fixed top-16 left-0 right-0 z-50 flex items-center justify-center py-2",
+            theme === 'dark' ? 'bg-zinc-900/90' : 'bg-white/90'
+          )}>
+            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-yellow-500" />
+            <span className={cn("ml-2 text-sm", theme === 'dark' ? 'text-zinc-300' : 'text-gray-700')}>
+              Actualizando...
+            </span>
+          </div>
+        )}
         <PageHeader 
           title="Mantenimiento" 
           description="Gestiona el mantenimiento de tu flota"
