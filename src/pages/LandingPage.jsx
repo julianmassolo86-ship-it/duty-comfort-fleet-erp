@@ -1,21 +1,10 @@
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
 import { base44 } from '@/api/base44Client';
 import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { Car, BarChart3, Shield, Clock, ArrowRight, CheckCircle2, Zap, TrendingUp } from 'lucide-react';
 
 export default function LandingPage() {
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    base44.auth.isAuthenticated().then(isAuth => {
-      if (isAuth) {
-        navigate(createPageUrl('Dashboard'));
-      }
-    });
-  }, [navigate]);
-
   const handleLogin = () => {
     base44.auth.redirectToLogin(createPageUrl('Dashboard'));
   };
