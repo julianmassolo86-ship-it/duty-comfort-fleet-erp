@@ -381,7 +381,7 @@ function LayoutContent({ children, currentPageName }) {
             )}
             <div>
               <span className={cn("text-lg font-bold", theme === 'dark' ? 'text-white' : 'text-gray-900')}>
-                Mass Effect
+                Duty Comfort
               </span>
               <p className={cn("text-xs", theme === 'dark' ? 'text-zinc-500' : 'text-gray-500')}>
                 {isSuperAdmin ? "Super Admin" : "Gestión de Flotas"}
