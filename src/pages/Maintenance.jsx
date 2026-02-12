@@ -1,23 +1,26 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Search, Wrench } from "lucide-react";
+import { Plus, Search, Wrench, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import PageHeader from "../components/common/PageHeader";
 import EmptyState from "../components/common/EmptyState";
 import MaintenanceCard from "../components/maintenance/MaintenanceCard";
 import MaintenanceDialog from "../components/maintenance/MaintenanceDialog";
 import NovedadDialog from "../components/novedades/NovedadDialog";
+import NovedadCard from "../components/novedades/NovedadCard";
 import { useTheme } from "../components/common/ThemeWrapper";
 
 export default function Maintenance() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
+  const [activeTab, setActiveTab] = useState("mantenimientos");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [novedadDialogOpen, setNovedadDialogOpen] = useState(false);
   const [selectedMaintenance, setSelectedMaintenance] = useState(null);
@@ -32,6 +35,7 @@ export default function Maintenance() {
     setIsRefreshing(true);
     await queryClient.invalidateQueries({ queryKey: ['maintenances'] });
     await queryClient.invalidateQueries({ queryKey: ['vehicles'] });
+    await queryClient.invalidateQueries({ queryKey: ['novedades'] });
     setTimeout(() => setIsRefreshing(false), 500);
   };
 
@@ -93,6 +97,18 @@ export default function Maintenance() {
     enabled: !!currentUser,
   });
 
+  const { data: novedades = [], isLoading: isLoadingNovedades } = useQuery({
+    queryKey: ['novedades', currentUser?.company_id],
+    queryFn: async () => {
+      const allNovedades = await base44.entities.Novedad.list('-fecha_reporte');
+      if (currentUser?.company_id) {
+        return allNovedades.filter(n => n.company_id === currentUser.company_id);
+      }
+      return allNovedades;
+    },
+    enabled: !!currentUser,
+  });
+
   const vehiclesMap = vehicles.reduce((acc, v) => ({ ...acc, [v.id]: v }), {});
 
   const createMutation = useMutation({
@@ -121,6 +137,13 @@ export default function Maintenance() {
     },
   });
 
+  const updateNovedadMutation = useMutation({
+    mutationFn: ({ id, data }) => base44.entities.Novedad.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['novedades'] });
+    },
+  });
+
   const handleSave = (data) => {
     // Si es admin de empresa, asignar su company_id automáticamente
     const finalData = isSuperAdmin ? data : { ...data, company_id: currentUser?.company_id };
@@ -137,6 +160,13 @@ export default function Maintenance() {
     setDialogOpen(true);
   };
 
+  const handleUpdateNovedadEstado = (novedad, nuevoEstado) => {
+    updateNovedadMutation.mutate({ 
+      id: novedad.id, 
+      data: { ...novedad, estado: nuevoEstado } 
+    });
+  };
+
   const filteredMaintenances = maintenances.filter(m => {
     const vehicle = vehiclesMap[m.vehicle_id];
     const matchesSearch = 
@@ -146,6 +176,15 @@ export default function Maintenance() {
     const matchesStatus = statusFilter === "all" || m.status === statusFilter;
     const matchesType = typeFilter === "all" || m.type === typeFilter;
     return matchesSearch && matchesStatus && matchesType;
+  });
+
+  const filteredNovedades = novedades.filter(n => {
+    const vehicle = vehiclesMap[n.vehicle_id];
+    const matchesSearch = 
+      n.descripcion?.toLowerCase().includes(search.toLowerCase()) ||
+      vehicle?.plate?.toLowerCase().includes(search.toLowerCase());
+    const matchesStatus = statusFilter === "all" || n.estado === statusFilter;
+    return matchesSearch && matchesStatus;
   });
 
   return (
@@ -164,7 +203,7 @@ export default function Maintenance() {
         )}
         <PageHeader 
           title="Mantenimiento" 
-          description="Gestiona el mantenimiento de tu flota"
+          description="Gestiona el mantenimiento y novedades de tu flota"
           actions={
             <div className="flex gap-2">
               <Button 
@@ -187,77 +226,155 @@ export default function Maintenance() {
           }
         />
 
+        {/* Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
+          <TabsList className={theme === 'dark' ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-gray-200'}>
+            <TabsTrigger value="mantenimientos">Mantenimientos</TabsTrigger>
+            <TabsTrigger value="novedades">
+              Novedades
+              {novedades.filter(n => n.estado === 'pendiente').length > 0 && (
+                <span className="ml-2 px-1.5 py-0.5 text-xs rounded-full bg-red-500 text-white">
+                  {novedades.filter(n => n.estado === 'pendiente').length}
+                </span>
+              )}
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <Input
-              placeholder="Buscar por vehículo, descripción o proveedor..."
+              placeholder={activeTab === 'mantenimientos' ? "Buscar por vehículo, descripción o proveedor..." : "Buscar por vehículo o descripción..."}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-10 bg-zinc-900/50 border-zinc-800 text-white placeholder:text-zinc-500 focus:border-yellow-500/50"
+              className={cn(
+                "pl-10",
+                theme === 'dark' 
+                  ? 'bg-zinc-900/50 border-zinc-800 text-white placeholder:text-zinc-500 focus:border-yellow-500/50'
+                  : 'bg-white border-gray-200 placeholder:text-gray-400'
+              )}
             />
           </div>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-full sm:w-40 bg-zinc-900/50 border-zinc-800 text-white">
+            <SelectTrigger className={cn(
+              "w-full sm:w-40",
+              theme === 'dark' ? 'bg-zinc-900/50 border-zinc-800 text-white' : 'bg-white border-gray-200'
+            )}>
               <SelectValue placeholder="Estado" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos</SelectItem>
-              <SelectItem value="scheduled">Programado</SelectItem>
-              <SelectItem value="in_progress">En progreso</SelectItem>
-              <SelectItem value="completed">Completado</SelectItem>
-              <SelectItem value="cancelled">Cancelado</SelectItem>
+              {activeTab === 'mantenimientos' ? (
+                <>
+                  <SelectItem value="scheduled">Programado</SelectItem>
+                  <SelectItem value="in_progress">En progreso</SelectItem>
+                  <SelectItem value="completed">Completado</SelectItem>
+                  <SelectItem value="cancelled">Cancelado</SelectItem>
+                </>
+              ) : (
+                <>
+                  <SelectItem value="pendiente">Pendiente</SelectItem>
+                  <SelectItem value="en_proceso">En Proceso</SelectItem>
+                  <SelectItem value="resuelto">Resuelto</SelectItem>
+                  <SelectItem value="cerrado">Cerrado</SelectItem>
+                </>
+              )}
             </SelectContent>
           </Select>
-          <Select value={typeFilter} onValueChange={setTypeFilter}>
-            <SelectTrigger className="w-full sm:w-40 bg-zinc-900/50 border-zinc-800 text-white">
-              <SelectValue placeholder="Tipo" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos</SelectItem>
-              <SelectItem value="preventive">Preventivo</SelectItem>
-              <SelectItem value="corrective">Correctivo</SelectItem>
-              <SelectItem value="inspection">Inspección</SelectItem>
-            </SelectContent>
-          </Select>
+          {activeTab === 'mantenimientos' && (
+            <Select value={typeFilter} onValueChange={setTypeFilter}>
+              <SelectTrigger className={cn(
+                "w-full sm:w-40",
+                theme === 'dark' ? 'bg-zinc-900/50 border-zinc-800 text-white' : 'bg-white border-gray-200'
+              )}>
+                <SelectValue placeholder="Tipo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos</SelectItem>
+                <SelectItem value="preventive">Preventivo</SelectItem>
+                <SelectItem value="corrective">Correctivo</SelectItem>
+                <SelectItem value="inspection">Inspección</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
         </div>
 
         {/* Maintenance Grid */}
-        {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Array(6).fill(0).map((_, i) => (
-              <Skeleton key={i} className="h-52 rounded-2xl bg-zinc-900/50" />
-            ))}
-          </div>
-        ) : filteredMaintenances.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredMaintenances.map(maintenance => (
-              <MaintenanceCard 
-                key={maintenance.id} 
-                maintenance={maintenance}
-                vehiclePlate={vehiclesMap[maintenance.vehicle_id]?.plate}
-                onClick={() => handleEdit(maintenance)}
-              />
-            ))}
-          </div>
+        {activeTab === 'mantenimientos' ? (
+          isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Array(6).fill(0).map((_, i) => (
+                <Skeleton key={i} className={cn("h-52 rounded-2xl", theme === 'dark' ? 'bg-zinc-900/50' : 'bg-gray-200')} />
+              ))}
+            </div>
+          ) : filteredMaintenances.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredMaintenances.map(maintenance => (
+                <MaintenanceCard 
+                  key={maintenance.id} 
+                  maintenance={maintenance}
+                  vehiclePlate={vehiclesMap[maintenance.vehicle_id]?.plate}
+                  onClick={() => handleEdit(maintenance)}
+                />
+              ))}
+            </div>
+          ) : (
+            <EmptyState
+              icon={Wrench}
+              title="Sin mantenimientos"
+              description={search ? "No se encontraron mantenimientos con esos criterios" : "Agrega tu primer registro de mantenimiento"}
+              action={
+                !search && (
+                  <Button 
+                    onClick={() => { setSelectedMaintenance(null); setDialogOpen(true); }}
+                    className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Agregar Mantenimiento
+                  </Button>
+                )
+              }
+            />
+          )
         ) : (
-          <EmptyState
-            icon={Wrench}
-            title="Sin mantenimientos"
-            description={search ? "No se encontraron mantenimientos con esos criterios" : "Agrega tu primer registro de mantenimiento"}
-            action={
-              !search && (
-                <Button 
-                  onClick={() => { setSelectedMaintenance(null); setDialogOpen(true); }}
-                  className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Agregar Mantenimiento
-                </Button>
-              )
-            }
-          />
+          isLoadingNovedades ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Array(6).fill(0).map((_, i) => (
+                <Skeleton key={i} className={cn("h-40 rounded-2xl", theme === 'dark' ? 'bg-zinc-900/50' : 'bg-gray-200')} />
+              ))}
+            </div>
+          ) : filteredNovedades.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredNovedades.map(novedad => (
+                <NovedadCard
+                  key={novedad.id}
+                  novedad={novedad}
+                  vehicle={vehiclesMap[novedad.vehicle_id]}
+                  onUpdateEstado={handleUpdateNovedadEstado}
+                  onClick={() => {}}
+                />
+              ))}
+            </div>
+          ) : (
+            <EmptyState
+              icon={AlertCircle}
+              title="Sin novedades"
+              description={search ? "No se encontraron novedades con esos criterios" : "Registra la primera novedad diaria"}
+              action={
+                !search && (
+                  <Button 
+                    onClick={() => { setNovedadDialogOpen(true); }}
+                    className="bg-blue-500 hover:bg-blue-600 text-white font-semibold"
+                  >
+                    <Wrench className="w-4 h-4 mr-2" />
+                    Registrar Novedad
+                  </Button>
+                )
+              }
+            />
+          )
         )}
 
         <MaintenanceDialog
@@ -276,7 +393,8 @@ export default function Maintenance() {
           onOpenChange={setNovedadDialogOpen}
           onSuccess={() => {
             queryClient.invalidateQueries({ queryKey: ['vehicles'] });
-            queryClient.invalidateQueries({ queryKey: ['maintenances'] });
+            queryClient.invalidateQueries({ queryKey: ['novedades'] });
+            setActiveTab('novedades');
           }}
         />
       </div>
