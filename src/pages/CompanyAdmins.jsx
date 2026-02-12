@@ -50,28 +50,12 @@ export default function CompanyAdmins() {
   const handleInviteAdmin = async (data) => {
     try {
       await base44.users.inviteUser(data.email, "user");
-      
-      // Esperar un momento para que el usuario se cree
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Obtener el usuario recién creado
-      const users = await base44.entities.User.list();
-      const newUser = users.find(u => u.email === data.email);
-      
-      if (newUser && data.company_id) {
-        // Asignar la empresa al usuario
-        await base44.entities.User.update(newUser.id, {
-          company_id: data.company_id,
-          user_role: "company_admin"
-        });
-      }
-      
-      toast.success(`Invitación enviada a ${data.email} como administrador de empresa.`);
+      toast.success(`Invitación enviada a ${data.email}. Una vez que el usuario se registre, asígnale la empresa desde esta pantalla.`);
       setDialogOpen(false);
       queryClient.invalidateQueries({ queryKey: ['users'] });
     } catch (error) {
       console.error("Error al invitar administrador:", error);
-      toast.error("Error al enviar la invitación");
+      toast.error(error.message || "Error al enviar la invitación");
     }
   };
 
