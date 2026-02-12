@@ -49,8 +49,15 @@ export default function CompanyAdmins() {
 
   const handleInviteAdmin = async (data) => {
     try {
-      await base44.users.inviteUser(data.email, "user");
-      toast.success(`Invitación enviada a ${data.email}. Una vez que acepte, asígnale la empresa desde esta pantalla.`);
+      const inviteRole = data.role || "user";
+      await base44.users.inviteUser(data.email, inviteRole);
+      
+      if (inviteRole === "admin") {
+        toast.success(`Invitación de Superadministrador enviada a ${data.email}.`);
+      } else {
+        toast.success(`Invitación enviada a ${data.email}. Una vez que acepte, asígnale la empresa desde esta pantalla.`);
+      }
+      
       setDialogOpen(false);
       queryClient.invalidateQueries({ queryKey: ['users'] });
     } catch (error) {
