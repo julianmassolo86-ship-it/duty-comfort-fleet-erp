@@ -18,7 +18,7 @@ const initialState = {
   company_id: "",
   phone: "",
   status: "active",
-  user_role: "user",
+  user_role: "company_admin",
 };
 
 export default function AdminDialog({ 
@@ -39,14 +39,12 @@ export default function AdminDialog({
         company_id: admin.company_id || "",
         phone: admin.phone || "",
         status: admin.status || "active",
-        user_role: admin.user_role || "user"
+        user_role: "company_admin"
       });
     } else {
       setForm(initialState);
     }
   }, [admin, open]);
-
-  const isCompanyAdminRoleSelected = form.user_role === 'company_admin';
 
   const handleChange = (field, value) => {
     setForm(prev => ({ ...prev, [field]: value }));
@@ -55,12 +53,12 @@ export default function AdminDialog({
   const handleSubmit = (e) => {
     e.preventDefault();
     if (admin) {
-      // Editar: enviar company_id, phone, status, user_role
+      // Editar: enviar company_id, phone, status, siempre como company_admin
       onSave({ 
         company_id: form.company_id, 
         phone: form.phone, 
         status: form.status,
-        user_role: form.user_role
+        user_role: "company_admin"
       });
     } else {
       // Crear: enviar email para invitar
@@ -97,24 +95,9 @@ export default function AdminDialog({
             />
           </div>
 
-          {admin && isSuperAdmin && (
-            <div className="space-y-2">
-              <Label>Rol del Usuario</Label>
-              <Select value={form.user_role} onValueChange={(v) => handleChange("user_role", v)}>
-                <SelectTrigger className="bg-slate-800 border-slate-700">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="user">Usuario</SelectItem>
-                  <SelectItem value="company_admin">Administrador de Empresa</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
           <div className="space-y-2">
-            <Label>Empresa {isCompanyAdminRoleSelected && '*'}</Label>
-            <Select value={form.company_id} onValueChange={(v) => handleChange("company_id", v)} required={isCompanyAdminRoleSelected}>
+            <Label>Empresa *</Label>
+            <Select value={form.company_id} onValueChange={(v) => handleChange("company_id", v)} required>
               <SelectTrigger className="bg-slate-800 border-slate-700">
                 <SelectValue placeholder="Seleccionar empresa" />
               </SelectTrigger>
