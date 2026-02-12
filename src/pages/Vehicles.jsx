@@ -41,17 +41,35 @@ export default function Vehicles() {
 
   const { data: drivers = [] } = useQuery({
     queryKey: ['drivers'],
-    queryFn: () => base44.entities.Driver.list(),
+    queryFn: async () => {
+      const allDrivers = await base44.entities.Driver.list();
+      if (user?.company_id) {
+        return allDrivers.filter(d => d.company_id === user.company_id);
+      }
+      return allDrivers;
+    },
   });
 
   const { data: locations = [] } = useQuery({
     queryKey: ['locations'],
-    queryFn: () => base44.entities.Location.list(),
+    queryFn: async () => {
+      const allLocations = await base44.entities.Location.list();
+      if (user?.company_id) {
+        return allLocations.filter(l => l.company_id === user.company_id);
+      }
+      return allLocations;
+    },
   });
 
   const { data: companies = [] } = useQuery({
     queryKey: ['companies'],
-    queryFn: () => base44.entities.Company.list(),
+    queryFn: async () => {
+      const allCompanies = await base44.entities.Company.list();
+      if (user?.company_id) {
+        return allCompanies.filter(c => c.id === user.company_id);
+      }
+      return allCompanies;
+    },
   });
 
   const { data: manufacturers = [] } = useQuery({

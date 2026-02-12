@@ -39,11 +39,14 @@ export default function CompanyAdmins() {
   const companyAdmins = users.filter(u => u.user_role === 'company_admin');
 
   const handleInviteAdmin = async (data) => {
-    await base44.users.inviteUser(data.email, "user");
-    // El usuario se creará con role "user", pero actualizamos sus datos adicionales
-    // Nota: El usuario deberá ser actualizado manualmente después de aceptar la invitación
-    toast.success(`Invitación enviada a ${data.email}`);
-    setDialogOpen(false);
+    try {
+      await base44.users.inviteUser(data.email, "user");
+      toast.success(`Invitación enviada a ${data.email}. Una vez que acepte, asígnale la empresa desde esta pantalla.`);
+      setDialogOpen(false);
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+    } catch (error) {
+      toast.error("Error al enviar la invitación");
+    }
   };
 
   const updateMutation = useMutation({
