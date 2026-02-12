@@ -158,8 +158,9 @@ export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess }
         throw new Error("Debe seleccionar un vehículo");
       }
 
-      if (!formData.descripcion.trim()) {
-        throw new Error("Debe ingresar una descripción de la novedad");
+      // Validar que al menos uno de los dos campos (kilometraje u horas) esté completado
+      if (!formData.kilometraje && !formData.horas) {
+        throw new Error("Debe ingresar al menos el kilometraje o las horas del vehículo");
       }
 
       // Validar kilometraje y horas
@@ -175,7 +176,10 @@ export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess }
         }
       }
 
-      const novedadData = {
+      // Solo crear novedad si hay descripción
+      const shouldCreateNovedad = formData.descripcion && formData.descripcion.trim() !== "";
+
+      const novedadData = shouldCreateNovedad ? {
         vehicle_id: formData.vehicle_id,
         company_id: selectedVehicle.company_id,
         location_id: selectedVehicle.location_id,
@@ -185,14 +189,19 @@ export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess }
         estado: "pendiente",
         kilometraje_reportado: formData.kilometraje ? newKm : null,
         horas_reportadas: formData.horas ? newHours : null
-      };
+      } : null;
 
       if (novedad) {
-        await base44.entities.Novedad.update(novedad.id, novedadData);
+        if (shouldCreateNovedad) {
+          await base44.entities.Novedad.update(novedad.id, novedadData);
+        }
       } else {
-        await base44.entities.Novedad.create(novedadData);
+        // Solo crear novedad si hay descripción
+        if (shouldCreateNovedad) {
+          await base44.entities.Novedad.create(novedadData);
+        }
         
-        // Actualizar kilometraje y/o horas del vehículo
+        // Siempre actualizar kilometraje y/o horas del vehículo
         const vehicleUpdate = {};
         if (formData.kilometraje) vehicleUpdate.mileage = newKm;
         if (formData.horas) vehicleUpdate.hours = newHours;
@@ -368,16 +377,32 @@ export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess }
                             : 'hover:bg-gray-50 border-gray-100'
                         )}
                       >
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className={cn("font-medium", theme === 'dark' ? 'text-white' : 'text-gray-900')}>
+                        <div className="flex items-center gap-3">
+                          {vehicle.image_url ? (
+                            <img 
+                              src={vehicle.image_url} 
+                              alt={vehicle.plate}
+                              className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
+                            />
+                          ) : (
+                            <div className={cn(
+                              "w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0",
+                              theme === 'dark' ? 'bg-zinc-800' : 'bg-gray-200'
+                            )}>
+                              <span className={cn("text-xs font-medium", theme === 'dark' ? 'text-zinc-500' : 'text-gray-400')}>
+                                {vehicle.internal_number}
+                              </span>
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className={cn("font-medium truncate", theme === 'dark' ? 'text-white' : 'text-gray-900')}>
                               {vehicle.internal_number} - {vehicle.plate}
                             </p>
-                            <p className={cn("text-sm", theme === 'dark' ? 'text-zinc-400' : 'text-gray-500')}>
+                            <p className={cn("text-sm truncate", theme === 'dark' ? 'text-zinc-400' : 'text-gray-500')}>
                               {vehicle.manufacturer} {vehicle.model}
                             </p>
                           </div>
-                          <div className="text-right">
+                          <div className="text-right flex-shrink-0">
                             <p className={cn("text-xs", theme === 'dark' ? 'text-zinc-500' : 'text-gray-400')}>
                               {companies.find(c => c.id === vehicle.company_id)?.name}
                             </p>
@@ -414,7 +439,7 @@ export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess }
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label className={theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}>Nuevo Kilometraje</Label>
+              <Label className={theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}>Nuevo Kilometraje *</Label>
               <Input
                 type="number"
                 step="0.1"
@@ -427,7 +452,7 @@ export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess }
             </div>
 
             <div className="space-y-2">
-              <Label className={theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}>Nuevas Horas</Label>
+              <Label className={theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}>Nuevas Horas *</Label>
               <Input
                 type="number"
                 step="0.1"
@@ -438,17 +463,24 @@ export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess }
                 disabled={!!novedad}
               />
             </div>
-          </div>
+            </div>
 
-          <div className="space-y-2">
-            <Label className={theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}>Descripción de la Novedad *</Label>
+            <p className={cn("text-xs", theme === 'dark' ? 'text-zinc-500' : 'text-gray-500')}>
+            * Debe completar al menos uno de estos campos
+            </p>
+
+            <div className="space-y-2">
+            <Label className={theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}>Descripción de la Novedad</Label>
             <Textarea
               value={formData.descripcion}
               onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
-              placeholder="Ej: Lámpara trasera derecha quemada"
+              placeholder="Opcional: Ej: Lámpara trasera derecha quemada"
               rows={3}
               className={theme === 'dark' ? 'bg-zinc-800 border-zinc-700 text-white' : ''}
             />
+            <p className={cn("text-xs", theme === 'dark' ? 'text-zinc-500' : 'text-gray-500')}>
+              Si no hay novedades, dejar vacío
+            </p>
           </div>
 
           <div className="space-y-2">
