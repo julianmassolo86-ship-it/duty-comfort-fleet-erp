@@ -52,6 +52,13 @@ export default function AdminDialog({
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    // Validación
+    if (!form.email || !form.company_id) {
+      alert("Por favor completa todos los campos requeridos");
+      return;
+    }
+
     if (admin) {
       // Editar: enviar company_id, phone, status
       const updateData = { 
@@ -140,11 +147,15 @@ export default function AdminDialog({
             </>
           )}
 
-          <DialogFooter className="mt-6 gap-2">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="border-slate-700 text-slate-300 hover:bg-slate-800">
+          <DialogFooter className="mt-6 flex-col sm:flex-row gap-2">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="border-slate-700 text-slate-300 hover:bg-slate-800 w-full sm:w-auto">
               Cancelar
             </Button>
-            <Button type="submit" disabled={isLoading} className="bg-blue-600 hover:bg-blue-700">
+            <Button 
+              type="submit" 
+              disabled={isLoading || !form.email || !form.company_id} 
+              className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
+            >
               {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               {admin ? "Guardar" : "Enviar Invitación"}
             </Button>
