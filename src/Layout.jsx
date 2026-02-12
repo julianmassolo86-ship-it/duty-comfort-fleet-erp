@@ -1,10 +1,10 @@
 import React, { useState, useEffect, createContext, useContext } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import {
   LayoutDashboard, Car, Users, Wrench, FileText,
-  BarChart3, Menu, X, LogOut, ChevronRight, ChevronDown, Building2, MapPin, UserCog, Sun, Moon, Upload, Settings, Factory, MapPinned, Cog } from
+  BarChart3, Menu, X, LogOut, ChevronRight, ChevronDown, Building2, MapPin, UserCog, Sun, Moon, Upload, Settings, Factory, MapPinned, Cog, ArrowLeft } from
 "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,7 @@ import {
   DropdownMenuSubTrigger } from
 "@/components/ui/dropdown-menu";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { motion, AnimatePresence } from "framer-motion";
 
 import { ThemeContextValue } from "@/components/common/ThemeWrapper";
 
@@ -82,12 +83,26 @@ function LayoutContent({ children, currentPageName }) {
   const [user, setUser] = useState(null);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [configOpen, setConfigOpen] = useState(false);
+  const [pageDirection, setPageDirection] = useState(0);
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
+
+  // Track page changes for transitions
+  const prevPageRef = React.useRef(currentPageName);
+  useEffect(() => {
+    if (prevPageRef.current !== currentPageName) {
+      const pageOrder = ['Dashboard', 'Vehicles', 'Drivers', 'Companies', 'Locations', 'Manufacturers', 'VehicleTypes', 'VehicleStatuses', 'Maintenance', 'Documents', 'Reports', 'CompanyAdmins'];
+      const prevIndex = pageOrder.indexOf(prevPageRef.current);
+      const currentIndex = pageOrder.indexOf(currentPageName);
+      setPageDirection(currentIndex > prevIndex ? 1 : -1);
+      prevPageRef.current = currentPageName;
+    }
+  }, [currentPageName]);
 
   const handleLogout = () => {
     base44.auth.logout(window.location.origin + createPageUrl("LandingPage"));
@@ -110,6 +125,14 @@ function LayoutContent({ children, currentPageName }) {
 
   // Si el usuario no tiene company_id, es super admin
   const isSuperAdmin = !user?.company_id;
+
+  // Detect if current page is a sub-page
+  const subPages = ['Manufacturers', 'VehicleTypes', 'VehicleStatuses'];
+  const isSubPage = subPages.includes(currentPageName);
+
+  const handleBackClick = () => {
+    navigate(-1);
+  };
 
   // Si estamos en la landing page, no mostrar el layout
   if (currentPageName === "LandingPage") {
@@ -336,20 +359,33 @@ function LayoutContent({ children, currentPageName }) {
       }}>
         <div className="flex items-center justify-between h-16 px-4">
           <div className="flex items-center gap-3">
-            {user?.logo_url ?
-            <img
-              src={user.logo_url}
-              alt="Logo"
-              className="w-8 h-8 rounded-lg object-contain" /> :
+            {isSubPage ? (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleBackClick}
+                className={theme === 'dark' ? 'text-slate-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'}
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+            ) : (
+              <>
+                {user?.logo_url ?
+                <img
+                  src={user.logo_url}
+                  alt="Logo"
+                  className="w-8 h-8 rounded-lg object-contain" /> :
 
 
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-yellow-500 to-yellow-600 flex items-center justify-center">
-                <Car className="w-5 h-5 text-black" />
-              </div>
-            }
-            <span className={cn("text-lg font-bold", theme === 'dark' ? 'text-white' : 'text-gray-900')}>
-              Duty Comfort
-            </span>
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-yellow-500 to-yellow-600 flex items-center justify-center">
+                    <Car className="w-5 h-5 text-black" />
+                  </div>
+                }
+                <span className={cn("text-lg font-bold", theme === 'dark' ? 'text-white' : 'text-gray-900')}>
+                  Duty Comfort
+                </span>
+              </>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <Button
@@ -360,14 +396,16 @@ function LayoutContent({ children, currentPageName }) {
 
               {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className={theme === 'dark' ? 'text-slate-400' : 'text-gray-600'}>
+            {!isSubPage && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className={theme === 'dark' ? 'text-slate-400' : 'text-gray-600'}>
 
-              {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </Button>
+                {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </Button>
+            )}
           </div>
         </div>
       </header>
@@ -607,12 +645,22 @@ function LayoutContent({ children, currentPageName }) {
 
       {/* Main Content */}
       <main className={cn(
-        "lg:pl-72 pt-16 lg:pt-16 pb-20 lg:pb-0 min-h-screen transition-all duration-300"
+        "lg:pl-72 pt-16 lg:pt-16 pb-20 lg:pb-0 min-h-screen transition-all duration-300 overflow-hidden"
       )} style={{
         paddingTop: 'max(4rem, env(safe-area-inset-top))',
         paddingBottom: 'max(5rem, env(safe-area-inset-bottom))'
       }}>
-        {children}
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={currentPageName}
+            initial={{ opacity: 0, x: pageDirection > 0 ? 300 : -300 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: pageDirection > 0 ? -300 : 300 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          >
+            {children}
+          </motion.div>
+        </AnimatePresence>
       </main>
 
       {/* Mobile Bottom Navigation */}
@@ -623,8 +671,14 @@ function LayoutContent({ children, currentPageName }) {
           paddingBottom: 'env(safe-area-inset-bottom)'
         }}>
         <div className="flex items-center justify-around h-16 px-2">
-          <Link
-            to={createPageUrl("Dashboard")}
+          <button
+            onClick={() => {
+              if (currentPageName === "Dashboard") {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              } else {
+                navigate(createPageUrl("Dashboard"));
+              }
+            }}
             className={cn(
               "flex flex-col items-center justify-center flex-1 h-full gap-1 transition-colors",
               currentPageName === "Dashboard"
@@ -633,9 +687,15 @@ function LayoutContent({ children, currentPageName }) {
             )}>
             <LayoutDashboard className="w-5 h-5" />
             <span className="text-xs font-medium">Inicio</span>
-          </Link>
-          <Link
-            to={createPageUrl("Vehicles")}
+          </button>
+          <button
+            onClick={() => {
+              if (currentPageName === "Vehicles") {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              } else {
+                navigate(createPageUrl("Vehicles"));
+              }
+            }}
             className={cn(
               "flex flex-col items-center justify-center flex-1 h-full gap-1 transition-colors",
               currentPageName === "Vehicles"
@@ -644,9 +704,15 @@ function LayoutContent({ children, currentPageName }) {
             )}>
             <Car className="w-5 h-5" />
             <span className="text-xs font-medium">Vehículos</span>
-          </Link>
-          <Link
-            to={createPageUrl("Drivers")}
+          </button>
+          <button
+            onClick={() => {
+              if (currentPageName === "Drivers") {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              } else {
+                navigate(createPageUrl("Drivers"));
+              }
+            }}
             className={cn(
               "flex flex-col items-center justify-center flex-1 h-full gap-1 transition-colors",
               currentPageName === "Drivers"
@@ -655,9 +721,15 @@ function LayoutContent({ children, currentPageName }) {
             )}>
             <Users className="w-5 h-5" />
             <span className="text-xs font-medium">Conductores</span>
-          </Link>
-          <Link
-            to={createPageUrl("Maintenance")}
+          </button>
+          <button
+            onClick={() => {
+              if (currentPageName === "Maintenance") {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              } else {
+                navigate(createPageUrl("Maintenance"));
+              }
+            }}
             className={cn(
               "flex flex-col items-center justify-center flex-1 h-full gap-1 transition-colors",
               currentPageName === "Maintenance"
@@ -666,7 +738,7 @@ function LayoutContent({ children, currentPageName }) {
             )}>
             <Wrench className="w-5 h-5" />
             <span className="text-xs font-medium">Mantenimiento</span>
-          </Link>
+          </button>
         </div>
       </nav>
     </div>);
