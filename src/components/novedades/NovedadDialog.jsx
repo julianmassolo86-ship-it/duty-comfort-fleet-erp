@@ -179,13 +179,18 @@ export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess }
       // Solo crear novedad si hay descripción
       const shouldCreateNovedad = formData.descripcion && formData.descripcion.trim() !== "";
 
+      // Obtener fecha actual en zona horaria de Buenos Aires
+      const now = new Date();
+      const buenosAiresDate = new Date(now.toLocaleString('en-US', { timeZone: 'America/Argentina/Buenos_Aires' }));
+      const fechaReporte = buenosAiresDate.toISOString().split('T')[0];
+
       const novedadData = shouldCreateNovedad ? {
         vehicle_id: formData.vehicle_id,
         company_id: selectedVehicle.company_id,
         location_id: selectedVehicle.location_id,
         descripcion: formData.descripcion,
         prioridad: formData.prioridad,
-        fecha_reporte: new Date().toISOString().split('T')[0],
+        fecha_reporte: fechaReporte,
         estado: "pendiente",
         kilometraje_reportado: formData.kilometraje ? newKm : null,
         horas_reportadas: formData.horas ? newHours : null
