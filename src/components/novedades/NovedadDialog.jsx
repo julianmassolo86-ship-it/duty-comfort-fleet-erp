@@ -179,10 +179,18 @@ export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess }
       // Solo crear novedad si hay descripción
       const shouldCreateNovedad = formData.descripcion && formData.descripcion.trim() !== "";
 
-      // Obtener fecha actual en zona horaria de Buenos Aires
+      // Obtener fecha actual en zona horaria de Buenos Aires (UTC-3)
       const now = new Date();
-      const buenosAiresDate = new Date(now.toLocaleString('en-US', { timeZone: 'America/Argentina/Buenos_Aires' }));
-      const fechaReporte = buenosAiresDate.toISOString().split('T')[0];
+      // Ajustar a hora de Buenos Aires (UTC-3)
+      const utcOffset = now.getTimezoneOffset() * 60000; // offset en milisegundos
+      const buenosAiresOffset = -3 * 60 * 60000; // -3 horas en milisegundos
+      const buenosAiresTime = new Date(now.getTime() + utcOffset + buenosAiresOffset);
+      
+      // Formatear como YYYY-MM-DD
+      const year = buenosAiresTime.getFullYear();
+      const month = String(buenosAiresTime.getMonth() + 1).padStart(2, '0');
+      const day = String(buenosAiresTime.getDate()).padStart(2, '0');
+      const fechaReporte = `${year}-${month}-${day}`;
 
       const novedadData = shouldCreateNovedad ? {
         vehicle_id: formData.vehicle_id,
