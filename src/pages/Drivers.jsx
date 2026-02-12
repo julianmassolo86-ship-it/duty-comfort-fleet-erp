@@ -11,6 +11,7 @@ import PageHeader from "../components/common/PageHeader";
 import EmptyState from "../components/common/EmptyState";
 import DriverCard from "../components/drivers/DriverCard";
 import DriverDialog from "../components/drivers/DriverDialog";
+import PullToRefresh from "../components/common/PullToRefresh";
 import { useTheme } from "../components/common/ThemeWrapper";
 
 export default function Drivers() {
@@ -19,9 +20,18 @@ export default function Drivers() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedDriver, setSelectedDriver] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const { theme } = useTheme();
 
   const queryClient = useQueryClient();
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await queryClient.invalidateQueries({ queryKey: ['drivers'] });
+    await queryClient.invalidateQueries({ queryKey: ['locations'] });
+    await queryClient.invalidateQueries({ queryKey: ['vehicles'] });
+    setTimeout(() => setIsRefreshing(false), 500);
+  };
 
   useEffect(() => {
     base44.auth.me().then(setCurrentUser).catch(() => {});
@@ -79,6 +89,18 @@ export default function Drivers() {
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Driver.create(data),
+    onMutate: async (newDriver) => {
+      await queryClient.cancelQueries({ queryKey: ['drivers'] });
+      const previousDrivers = queryClient.getQueryData(['drivers', currentUser?.company_id]);
+      queryClient.setQueryData(['drivers', currentUser?.company_id], (old = []) => [
+        ...old,
+        { ...newDriver, id: 'temp-' + Date.now() }
+      ]);
+      return { previousDrivers };
+    },
+    onError: (err, newDriver, context) => {
+      queryClient.setQueryData(['drivers', currentUser?.company_id], context.previousDrivers);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['drivers'] });
       setDialogOpen(false);
@@ -87,6 +109,17 @@ export default function Drivers() {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Driver.update(id, data),
+    onMutate: async ({ id, data }) => {
+      await queryClient.cancelQueries({ queryKey: ['drivers'] });
+      const previousDrivers = queryClient.getQueryData(['drivers', currentUser?.company_id]);
+      queryClient.setQueryData(['drivers', currentUser?.company_id], (old = []) =>
+        old.map(d => d.id === id ? { ...d, ...data } : d)
+      );
+      return { previousDrivers };
+    },
+    onError: (err, variables, context) => {
+      queryClient.setQueryData(['drivers', currentUser?.company_id], context.previousDrivers);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['drivers'] });
       setDialogOpen(false);
@@ -96,6 +129,17 @@ export default function Drivers() {
 
   const deleteMutation = useMutation({
     mutationFn: (id) => base44.entities.Driver.delete(id),
+    onMutate: async (deletedId) => {
+      await queryClient.cancelQueries({ queryKey: ['drivers'] });
+      const previousDrivers = queryClient.getQueryData(['drivers', currentUser?.company_id]);
+      queryClient.setQueryData(['drivers', currentUser?.company_id], (old = []) =>
+        old.filter(d => d.id !== deletedId)
+      );
+      return { previousDrivers };
+    },
+    onError: (err, deletedId, context) => {
+      queryClient.setQueryData(['drivers', currentUser?.company_id], context.previousDrivers);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['drivers'] });
       setDialogOpen(false);
@@ -126,8 +170,9 @@ export default function Drivers() {
   });
 
   return (
-    <div className={cn("min-h-screen p-4 sm:p-6 lg:p-8", theme === 'dark' ? 'bg-black' : 'bg-gray-50')}>
-      <div className="max-w-7xl mx-auto">
+    <PullToRefresh onRefresh={handleRefresh} isRefreshing={isRefreshing}>
+      <div className={cn("min-h-screen p-4 sm:p-6 lg:p-8", theme === 'dark' ? 'bg-black' : 'bg-gray-50')}>
+        <div className="max-w-7xl mx-auto">
         <PageHeader 
           title="Conductores" 
           description="Gestiona tu equipo de conductores"
@@ -215,7 +260,8 @@ export default function Drivers() {
           vehicles={vehicles}
           currentUser={currentUser}
         />
+        </div>
       </div>
-    </div>
+    </PullToRefresh>
   );
 }
