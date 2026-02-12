@@ -60,6 +60,7 @@ import Reports from './pages/Reports';
 import VehicleStatuses from './pages/VehicleStatuses';
 import VehicleTypes from './pages/VehicleTypes';
 import Vehicles from './pages/Vehicles';
+import Welcome from './pages/Welcome';
 import __Layout from './Layout.jsx';
 
 
@@ -77,6 +78,7 @@ export const PAGES = {
     "VehicleStatuses": VehicleStatuses,
     "VehicleTypes": VehicleTypes,
     "Vehicles": Vehicles,
+    "Welcome": Welcome,
 }
 
 export const pagesConfig = {
