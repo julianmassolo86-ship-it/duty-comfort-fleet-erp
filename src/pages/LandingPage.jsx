@@ -16,11 +16,13 @@ export default function LandingPage() {
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-500 to-yellow-600 flex items-center justify-center shadow-lg shadow-yellow-500/20">
-                <Car className="w-6 h-6 text-black" />
-              </div>
+              <img 
+                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/698ba23f75eb60d9d1b501ef/5cebf2dcf_image.png" 
+                alt="Duty Comfort Logo" 
+                className="w-10 h-10 rounded-xl object-contain"
+              />
               <div>
-                <span className="text-xl font-bold text-gray-900">Mass Effect</span>
+                <span className="text-xl font-bold text-gray-900">Duty Comfort</span>
                 <p className="text-xs text-gray-500">Gestión de Flotas</p>
               </div>
             </div>
@@ -235,16 +237,18 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-500 to-yellow-600 flex items-center justify-center shadow-lg shadow-yellow-500/20">
-                <Car className="w-6 h-6 text-black" />
-              </div>
+              <img 
+                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/698ba23f75eb60d9d1b501ef/5cebf2dcf_image.png" 
+                alt="Duty Comfort Logo" 
+                className="w-10 h-10 rounded-xl object-contain"
+              />
               <div>
-                <span className="text-lg font-bold text-gray-900">Mass Effect</span>
+                <span className="text-lg font-bold text-gray-900">Duty Comfort</span>
                 <p className="text-xs text-gray-500">Gestión de Flotas</p>
               </div>
             </div>
             <div className="text-center md:text-right text-gray-600">
-              <p>© 2026 Mass Effect ERP. Sistema de Gestión de Flotas.</p>
+              <p>© 2026 Duty Comfort. Sistema de Gestión de Flotas.</p>
               <p className="text-sm text-gray-500 mt-1">Todos los derechos reservados.</p>
             </div>
           </div>

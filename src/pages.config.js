@@ -52,6 +52,7 @@ import CompanyAdmins from './pages/CompanyAdmins';
 import Dashboard from './pages/Dashboard';
 import Documents from './pages/Documents';
 import Drivers from './pages/Drivers';
+import LandingPage from './pages/LandingPage';
 import Locations from './pages/Locations';
 import Maintenance from './pages/Maintenance';
 import Manufacturers from './pages/Manufacturers';
@@ -60,7 +61,6 @@ import Reports from './pages/Reports';
 import VehicleStatuses from './pages/VehicleStatuses';
 import VehicleTypes from './pages/VehicleTypes';
 import Vehicles from './pages/Vehicles';
-import LandingPage from './pages/LandingPage';
 import __Layout from './Layout.jsx';
 
 
@@ -70,6 +70,7 @@ export const PAGES = {
     "Dashboard": Dashboard,
     "Documents": Documents,
     "Drivers": Drivers,
+    "LandingPage": LandingPage,
     "Locations": Locations,
     "Maintenance": Maintenance,
     "Manufacturers": Manufacturers,
@@ -78,7 +79,6 @@ export const PAGES = {
     "VehicleStatuses": VehicleStatuses,
     "VehicleTypes": VehicleTypes,
     "Vehicles": Vehicles,
-    "LandingPage": LandingPage,
 }
 
 export const pagesConfig = {
