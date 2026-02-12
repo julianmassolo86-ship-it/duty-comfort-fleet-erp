@@ -68,8 +68,16 @@ export default function AdminDialog({
       }
       onSave(updateData);
     } else {
-      // Crear: enviar email para invitar
-      onSave(form);
+      // Crear: enviar datos para invitar
+      const inviteData = {
+        email: form.email,
+        role: form.role
+      };
+      // Solo incluir company_id si el rol no es admin (superadmin)
+      if (form.role !== "admin") {
+        inviteData.company_id = form.company_id;
+      }
+      onSave(inviteData);
     }
   };
 
