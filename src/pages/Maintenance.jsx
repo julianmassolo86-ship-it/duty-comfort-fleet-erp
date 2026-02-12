@@ -11,6 +11,7 @@ import PageHeader from "../components/common/PageHeader";
 import EmptyState from "../components/common/EmptyState";
 import MaintenanceCard from "../components/maintenance/MaintenanceCard";
 import MaintenanceDialog from "../components/maintenance/MaintenanceDialog";
+import NovedadDialog from "../components/novedades/NovedadDialog";
 import { useTheme } from "../components/common/ThemeWrapper";
 
 export default function Maintenance() {
@@ -18,6 +19,7 @@ export default function Maintenance() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [novedadDialogOpen, setNovedadDialogOpen] = useState(false);
   const [selectedMaintenance, setSelectedMaintenance] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -164,13 +166,24 @@ export default function Maintenance() {
           title="Mantenimiento" 
           description="Gestiona el mantenimiento de tu flota"
           actions={
-            <Button 
-              onClick={() => { setSelectedMaintenance(null); setDialogOpen(true); }}
-              className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Nuevo Mantenimiento
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                onClick={() => { setNovedadDialogOpen(true); }}
+                className="bg-blue-500 hover:bg-blue-600 text-white font-semibold"
+              >
+                <Wrench className="w-4 h-4 mr-2" />
+                <span className="hidden sm:inline">Novedad Diaria</span>
+                <span className="sm:hidden">Novedad</span>
+              </Button>
+              <Button 
+                onClick={() => { setSelectedMaintenance(null); setDialogOpen(true); }}
+                className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                <span className="hidden sm:inline">Nuevo Mantenimiento</span>
+                <span className="sm:hidden">Nuevo</span>
+              </Button>
+            </div>
           }
         />
 
@@ -256,6 +269,15 @@ export default function Maintenance() {
           onDelete={selectedMaintenance ? () => deleteMutation.mutate(selectedMaintenance.id) : undefined}
           isLoading={createMutation.isPending || updateMutation.isPending}
           isDeleting={deleteMutation.isPending}
+        />
+
+        <NovedadDialog
+          open={novedadDialogOpen}
+          onOpenChange={setNovedadDialogOpen}
+          onSuccess={() => {
+            queryClient.invalidateQueries({ queryKey: ['vehicles'] });
+            queryClient.invalidateQueries({ queryKey: ['maintenances'] });
+          }}
         />
       </div>
     </div>
