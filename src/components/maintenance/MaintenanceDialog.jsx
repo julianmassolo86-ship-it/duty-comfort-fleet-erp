@@ -254,7 +254,7 @@ export default function MaintenanceDialog({
             </Button>
             <Button type="submit" disabled={isLoading} className="bg-blue-600 hover:bg-blue-700">
               {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              {maintenance ? "Guardar" : "Crear"}
+              {isLoading ? "Guardando..." : (maintenance ? "Guardar" : "Crear")}
             </Button>
           </DialogFooter>
         </form>

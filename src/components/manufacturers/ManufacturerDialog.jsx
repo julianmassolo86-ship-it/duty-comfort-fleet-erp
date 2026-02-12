@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useTheme } from "@/components/common/ThemeWrapper";
 import { cn } from "@/lib/utils";
-import { Upload, Trash2, X } from "lucide-react";
+import { Upload, Trash2, X, Loader2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import {
   AlertDialog,
@@ -208,6 +208,7 @@ export default function ManufacturerDialog({
                   disabled={isLoading}
                   className="bg-yellow-500 hover:bg-yellow-600 text-black"
                 >
+                  {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                   {isLoading ? "Guardando..." : "Guardar"}
                 </Button>
               </div>

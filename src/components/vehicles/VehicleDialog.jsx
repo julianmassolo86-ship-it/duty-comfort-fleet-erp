@@ -813,7 +813,7 @@ export default function VehicleDialog({
             </Button>
             <Button type="submit" disabled={isLoading} className="bg-blue-600 hover:bg-blue-700">
               {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              {vehicle ? "Guardar" : "Crear"}
+              {isLoading ? "Guardando..." : (vehicle ? "Guardar" : "Crear")}
             </Button>
           </DialogFooter>
         </form>

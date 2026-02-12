@@ -604,7 +604,7 @@ export default function DriverDialog({
               </Button>
               <Button type="submit" disabled={isLoading} className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold">
                 {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                {driver ? "Guardar" : "Crear"}
+                {isLoading ? "Guardando..." : (driver ? "Guardar" : "Crear")}
               </Button>
             </DialogFooter>
           </form>

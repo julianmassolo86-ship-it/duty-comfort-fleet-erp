@@ -282,7 +282,7 @@ export default function LocationDialog({
             </Button>
             <Button type="submit" disabled={isLoading} className="bg-blue-600 hover:bg-blue-700">
               {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              {location ? "Guardar" : "Crear"}
+              {isLoading ? "Guardando..." : (location ? "Guardar" : "Crear")}
             </Button>
           </DialogFooter>
         </form>

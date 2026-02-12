@@ -217,7 +217,7 @@ export default function CompanyDialog({
             </Button>
             <Button type="submit" disabled={isLoading} className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold">
               {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              {company ? "Guardar" : "Crear"}
+              {isLoading ? "Guardando..." : (company ? "Guardar" : "Crear")}
             </Button>
           </DialogFooter>
         </form>

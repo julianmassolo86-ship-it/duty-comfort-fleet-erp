@@ -27,7 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Trash2 } from "lucide-react";
+import { Trash2, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/common/ThemeWrapper";
 
@@ -49,7 +49,7 @@ const categoryOptions = [
   { value: "tractor", label: "Tractor" }
 ];
 
-export default function VehicleTypeDialog({ open, onOpenChange, vehicleType, onSave, onDelete }) {
+export default function VehicleTypeDialog({ open, onOpenChange, vehicleType, onSave, onDelete, isLoading, isDeleting }) {
   const { theme } = useTheme();
   const [formData, setFormData] = useState({
     name: "",
@@ -151,18 +151,20 @@ export default function VehicleTypeDialog({ open, onOpenChange, vehicleType, onS
               <Button
                 variant="destructive"
                 onClick={() => setShowDeleteDialog(true)}
+                disabled={isDeleting}
                 className="mr-auto"
               >
-                <Trash2 className="w-4 h-4 mr-2" />
-                Eliminar
+                {isDeleting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Trash2 className="w-4 h-4 mr-2" />}
+                {isDeleting ? "Eliminando..." : "Eliminar"}
               </Button>
             )}
             <div className="flex gap-2">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancelar
               </Button>
-              <Button type="button" onClick={handleSave}>
-                {vehicleType ? "Guardar Cambios" : "Crear Tipo"}
+              <Button type="button" onClick={handleSave} disabled={isLoading}>
+                {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                {isLoading ? "Guardando..." : (vehicleType ? "Guardar Cambios" : "Crear Tipo")}
               </Button>
             </div>
           </DialogFooter>

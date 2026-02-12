@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Trash2, Circle } from "lucide-react";
+import { Trash2, Circle, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "../common/ThemeWrapper";
 
@@ -21,7 +21,7 @@ const predefinedColors = [
   { name: "Gris", value: "#6b7280" },
 ];
 
-export default function VehicleStatusDialog({ open, onOpenChange, status, onSave, onDelete }) {
+export default function VehicleStatusDialog({ open, onOpenChange, status, onSave, onDelete, isLoading, isDeleting }) {
   const { theme } = useTheme();
   const [formData, setFormData] = useState({
     name: "",
@@ -178,9 +178,9 @@ export default function VehicleStatusDialog({ open, onOpenChange, status, onSave
             {status && onDelete && (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button type="button" variant="outline" className="mr-auto text-red-500 hover:text-red-600 hover:bg-red-500/10">
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Eliminar
+                  <Button type="button" variant="outline" disabled={isDeleting} className="mr-auto text-red-500 hover:text-red-600 hover:bg-red-500/10">
+                    {isDeleting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Trash2 className="w-4 h-4 mr-2" />}
+                    {isDeleting ? "Eliminando..." : "Eliminar"}
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent className={theme === 'dark' ? 'bg-zinc-900 border-zinc-800' : 'bg-white'}>
@@ -206,8 +206,9 @@ export default function VehicleStatusDialog({ open, onOpenChange, status, onSave
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>
-            <Button type="submit" className="bg-yellow-500 hover:bg-yellow-600 text-black">
-              {status ? "Guardar" : "Crear"}
+            <Button type="submit" disabled={isLoading} className="bg-yellow-500 hover:bg-yellow-600 text-black">
+              {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              {isLoading ? "Guardando..." : (status ? "Guardar" : "Crear")}
             </Button>
           </DialogFooter>
         </form>
