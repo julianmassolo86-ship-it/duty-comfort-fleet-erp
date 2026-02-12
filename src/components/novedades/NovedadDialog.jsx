@@ -7,8 +7,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle, Loader2, Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTheme } from "../common/ThemeWrapper";
 
 const initialState = {
   vehicle_id: "",
@@ -18,13 +19,20 @@ const initialState = {
   horas: ""
 };
 
-export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess, theme }) {
+export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess }) {
+  const { theme } = useTheme();
   const [formData, setFormData] = useState(initialState);
   const [vehicles, setVehicles] = useState([]);
+  const [companies, setCompanies] = useState([]);
+  const [locations, setLocations] = useState([]);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [companyFilter, setCompanyFilter] = useState("all");
+  const [locationFilter, setLocationFilter] = useState("all");
+  const [showVehicleSelector, setShowVehicleSelector] = useState(false);
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -33,6 +41,8 @@ export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess, 
   useEffect(() => {
     if (open) {
       loadVehicles();
+      loadCompanies();
+      loadLocations();
       if (novedad) {
         setFormData({
           vehicle_id: novedad.vehicle_id || "",
@@ -45,6 +55,10 @@ export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess, 
         setFormData(initialState);
       }
       setError("");
+      setSearchTerm("");
+      setCompanyFilter("all");
+      setLocationFilter("all");
+      setShowVehicleSelector(false);
     }
   }, [open, novedad]);
 
@@ -69,6 +83,48 @@ export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess, 
     } catch (err) {
       console.error("Error loading vehicles:", err);
     }
+  };
+
+  const loadCompanies = async () => {
+    try {
+      const allCompanies = await base44.entities.Company.list();
+      setCompanies(allCompanies);
+    } catch (err) {
+      console.error("Error loading companies:", err);
+    }
+  };
+
+  const loadLocations = async () => {
+    try {
+      const allLocations = await base44.entities.Location.list();
+      setLocations(allLocations);
+    } catch (err) {
+      console.error("Error loading locations:", err);
+    }
+  };
+
+  const filteredVehicles = vehicles.filter(vehicle => {
+    const matchesSearch = searchTerm === "" || 
+      vehicle.plate?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      vehicle.internal_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      vehicle.manufacturer?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      vehicle.model?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      vehicle.type?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesCompany = companyFilter === "all" || vehicle.company_id === companyFilter;
+    const matchesLocation = locationFilter === "all" || vehicle.location_id === locationFilter;
+    
+    return matchesSearch && matchesCompany && matchesLocation;
+  });
+
+  const filteredLocations = locations.filter(loc => 
+    companyFilter === "all" || loc.company_id === companyFilter
+  );
+
+  const handleSelectVehicle = (vehicle) => {
+    setFormData({ ...formData, vehicle_id: vehicle.id });
+    setShowVehicleSelector(false);
+    setSearchTerm("");
   };
 
   const handleSubmit = async (e) => {
@@ -153,22 +209,169 @@ export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess, 
 
           <div className="space-y-2">
             <Label className={theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}>Vehículo *</Label>
-            <Select
-              value={formData.vehicle_id}
-              onValueChange={(value) => setFormData({ ...formData, vehicle_id: value })}
-              disabled={!!novedad}
-            >
-              <SelectTrigger className={theme === 'dark' ? 'bg-zinc-800 border-zinc-700 text-white' : ''}>
-                <SelectValue placeholder="Seleccionar vehículo" />
-              </SelectTrigger>
-              <SelectContent className={theme === 'dark' ? 'bg-zinc-800 border-zinc-700' : ''}>
-                {vehicles.map((vehicle) => (
-                  <SelectItem key={vehicle.id} value={vehicle.id} className={theme === 'dark' ? 'text-white focus:bg-zinc-700' : ''}>
-                    {vehicle.internal_number} - {vehicle.plate} ({vehicle.manufacturer} {vehicle.model})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            
+            {selectedVehicle && !novedad ? (
+              <div className={cn(
+                "flex items-center justify-between p-3 rounded-lg border",
+                theme === 'dark' ? 'bg-zinc-800 border-zinc-700' : 'bg-gray-50 border-gray-200'
+              )}>
+                <div>
+                  <p className={cn("font-medium", theme === 'dark' ? 'text-white' : 'text-gray-900')}>
+                    {selectedVehicle.internal_number} - {selectedVehicle.plate}
+                  </p>
+                  <p className={cn("text-sm", theme === 'dark' ? 'text-zinc-400' : 'text-gray-500')}>
+                    {selectedVehicle.manufacturer} {selectedVehicle.model}
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    setFormData({ ...formData, vehicle_id: "" });
+                    setSelectedVehicle(null);
+                  }}
+                  className={theme === 'dark' ? 'text-zinc-400 hover:text-white' : ''}
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            ) : !novedad ? (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowVehicleSelector(!showVehicleSelector)}
+                className={cn(
+                  "w-full justify-start",
+                  theme === 'dark' ? 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:text-white' : ''
+                )}
+              >
+                <Search className="w-4 h-4 mr-2" />
+                Buscar vehículo...
+              </Button>
+            ) : (
+              <div className={cn(
+                "p-3 rounded-lg border",
+                theme === 'dark' ? 'bg-zinc-800 border-zinc-700' : 'bg-gray-50 border-gray-200'
+              )}>
+                <p className={cn("font-medium", theme === 'dark' ? 'text-white' : 'text-gray-900')}>
+                  {selectedVehicle?.internal_number} - {selectedVehicle?.plate}
+                </p>
+              </div>
+            )}
+
+            {showVehicleSelector && !novedad && (
+              <div className={cn(
+                "border rounded-lg p-4 space-y-3",
+                theme === 'dark' ? 'bg-zinc-800/50 border-zinc-700' : 'bg-gray-50 border-gray-200'
+              )}>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <Input
+                    placeholder="Buscar por patente, número interno, marca, modelo..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className={cn(
+                      "pl-10",
+                      theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-white' : ''
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <Select value={companyFilter} onValueChange={setCompanyFilter}>
+                    <SelectTrigger className={theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-white' : ''}>
+                      <SelectValue placeholder="Empresa" />
+                    </SelectTrigger>
+                    <SelectContent className={theme === 'dark' ? 'bg-zinc-800 border-zinc-700' : ''}>
+                      <SelectItem value="all" className={theme === 'dark' ? 'text-white focus:bg-zinc-700' : ''}>
+                        Todas las empresas
+                      </SelectItem>
+                      {companies.map((company) => (
+                        <SelectItem 
+                          key={company.id} 
+                          value={company.id}
+                          className={theme === 'dark' ? 'text-white focus:bg-zinc-700' : ''}
+                        >
+                          {company.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  <Select 
+                    value={locationFilter} 
+                    onValueChange={setLocationFilter}
+                    disabled={companyFilter === "all"}
+                  >
+                    <SelectTrigger className={theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-white' : ''}>
+                      <SelectValue placeholder="Ubicación" />
+                    </SelectTrigger>
+                    <SelectContent className={theme === 'dark' ? 'bg-zinc-800 border-zinc-700' : ''}>
+                      <SelectItem value="all" className={theme === 'dark' ? 'text-white focus:bg-zinc-700' : ''}>
+                        Todas las ubicaciones
+                      </SelectItem>
+                      {filteredLocations.map((location) => (
+                        <SelectItem 
+                          key={location.id} 
+                          value={location.id}
+                          className={theme === 'dark' ? 'text-white focus:bg-zinc-700' : ''}
+                        >
+                          {location.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className={cn(
+                  "max-h-64 overflow-y-auto space-y-1 rounded-lg border",
+                  theme === 'dark' ? 'bg-zinc-900 border-zinc-700' : 'bg-white border-gray-200'
+                )}>
+                  {filteredVehicles.length === 0 ? (
+                    <div className="p-4 text-center">
+                      <p className={cn("text-sm", theme === 'dark' ? 'text-zinc-400' : 'text-gray-500')}>
+                        No se encontraron vehículos
+                      </p>
+                    </div>
+                  ) : (
+                    filteredVehicles.map((vehicle) => (
+                      <button
+                        key={vehicle.id}
+                        type="button"
+                        onClick={() => handleSelectVehicle(vehicle)}
+                        className={cn(
+                          "w-full text-left p-3 hover:bg-opacity-80 transition-colors border-b last:border-b-0",
+                          theme === 'dark' 
+                            ? 'hover:bg-zinc-800 border-zinc-700' 
+                            : 'hover:bg-gray-50 border-gray-100'
+                        )}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className={cn("font-medium", theme === 'dark' ? 'text-white' : 'text-gray-900')}>
+                              {vehicle.internal_number} - {vehicle.plate}
+                            </p>
+                            <p className={cn("text-sm", theme === 'dark' ? 'text-zinc-400' : 'text-gray-500')}>
+                              {vehicle.manufacturer} {vehicle.model}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className={cn("text-xs", theme === 'dark' ? 'text-zinc-500' : 'text-gray-400')}>
+                              {companies.find(c => c.id === vehicle.company_id)?.name}
+                            </p>
+                          </div>
+                        </div>
+                      </button>
+                    ))
+                  )}
+                </div>
+
+                <p className={cn("text-xs text-center", theme === 'dark' ? 'text-zinc-500' : 'text-gray-400')}>
+                  {filteredVehicles.length} vehículo{filteredVehicles.length !== 1 ? 's' : ''} encontrado{filteredVehicles.length !== 1 ? 's' : ''}
+                </p>
+              </div>
+            )}
           </div>
 
           {selectedVehicle && (
