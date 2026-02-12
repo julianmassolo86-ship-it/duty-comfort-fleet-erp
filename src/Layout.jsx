@@ -329,7 +329,7 @@ function LayoutContent({ children, currentPageName }) {
               </div>
             }
             <span className={cn("text-lg font-bold", theme === 'dark' ? 'text-white' : 'text-gray-900')}>
-              Mass Effect ERP
+              Duty Comfort
             </span>
           </div>
           <div className="flex items-center gap-2">
