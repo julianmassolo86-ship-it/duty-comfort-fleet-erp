@@ -23,28 +23,58 @@ export default function Drivers() {
 
   const queryClient = useQueryClient();
 
-  React.useEffect(() => {
+  useEffect(() => {
     base44.auth.me().then(setCurrentUser).catch(() => {});
   }, []);
 
+  const isSuperAdmin = !currentUser?.company_id;
+
   const { data: drivers = [], isLoading } = useQuery({
-    queryKey: ['drivers'],
-    queryFn: () => base44.entities.Driver.list(),
+    queryKey: ['drivers', currentUser?.company_id],
+    queryFn: async () => {
+      const allDrivers = await base44.entities.Driver.list();
+      if (currentUser?.company_id) {
+        return allDrivers.filter(d => d.company_id === currentUser.company_id);
+      }
+      return allDrivers;
+    },
+    enabled: !!currentUser,
   });
 
   const { data: companies = [] } = useQuery({
-    queryKey: ['companies'],
-    queryFn: () => base44.entities.Company.list(),
+    queryKey: ['companies', currentUser?.company_id],
+    queryFn: async () => {
+      const allCompanies = await base44.entities.Company.list();
+      if (currentUser?.company_id) {
+        return allCompanies.filter(c => c.id === currentUser.company_id);
+      }
+      return allCompanies;
+    },
+    enabled: !!currentUser,
   });
 
   const { data: locations = [] } = useQuery({
-    queryKey: ['locations'],
-    queryFn: () => base44.entities.Location.list(),
+    queryKey: ['locations', currentUser?.company_id],
+    queryFn: async () => {
+      const allLocations = await base44.entities.Location.list();
+      if (currentUser?.company_id) {
+        return allLocations.filter(l => l.company_id === currentUser.company_id);
+      }
+      return allLocations;
+    },
+    enabled: !!currentUser,
   });
 
   const { data: vehicles = [] } = useQuery({
-    queryKey: ['vehicles'],
-    queryFn: () => base44.entities.Vehicle.list(),
+    queryKey: ['vehicles', currentUser?.company_id],
+    queryFn: async () => {
+      const allVehicles = await base44.entities.Vehicle.list();
+      if (currentUser?.company_id) {
+        return allVehicles.filter(v => v.company_id === currentUser.company_id);
+      }
+      return allVehicles;
+    },
+    enabled: !!currentUser,
   });
 
   const createMutation = useMutation({
