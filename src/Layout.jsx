@@ -70,7 +70,7 @@ function LayoutContent({ children, currentPageName }) {
   }, []);
 
   const handleLogout = () => {
-    base44.auth.logout(createPageUrl("Welcome"));
+    base44.auth.logout();
   };
 
   const handlePhotoUpload = async (file) => {
