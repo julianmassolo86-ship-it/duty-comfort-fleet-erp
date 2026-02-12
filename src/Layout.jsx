@@ -2,10 +2,10 @@ import React, { useState, useEffect, createContext, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
-import { 
-  LayoutDashboard, Car, Users, Wrench, FileText, 
-  BarChart3, Menu, X, LogOut, ChevronRight, ChevronDown, Building2, MapPin, UserCog, Sun, Moon, Upload, Settings, Factory, MapPinned, Cog
-} from "lucide-react";
+import {
+  LayoutDashboard, Car, Users, Wrench, FileText,
+  BarChart3, Menu, X, LogOut, ChevronRight, ChevronDown, Building2, MapPin, UserCog, Sun, Moon, Upload, Settings, Factory, MapPinned, Cog } from
+"lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -17,8 +17,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuSub,
   DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-} from "@/components/ui/dropdown-menu";
+  DropdownMenuSubTrigger } from
+"@/components/ui/dropdown-menu";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 import { ThemeContextValue } from "@/components/common/ThemeWrapper";
@@ -39,7 +39,7 @@ const ThemeProvider = ({ children }) => {
 
   useEffect(() => {
     localStorage.setItem('theme', theme);
-    
+
     if (theme === 'dark') {
       document.documentElement.classList.add('dark');
     } else {
@@ -48,14 +48,14 @@ const ThemeProvider = ({ children }) => {
   }, [theme]);
 
   const toggleTheme = () => {
-    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+    setTheme((prev) => prev === 'dark' ? 'light' : 'dark');
   };
 
   return (
     <ThemeContextValue.Provider value={{ theme, toggleTheme }}>
       {children}
-    </ThemeContextValue.Provider>
-  );
+    </ThemeContextValue.Provider>);
+
 };
 
 function LayoutContent({ children, currentPageName }) {
@@ -100,151 +100,151 @@ function LayoutContent({ children, currentPageName }) {
 
   // Menú para Super Admin - Organizado por módulos
   const superAdminMenu = [
+  {
+    section: null,
+    items: [
+    { name: "Dashboard", icon: LayoutDashboard, page: "Dashboard" }]
+
+  },
+  {
+    section: "Administración",
+    items: [
+    { name: "Empresas", icon: Building2, page: "Companies" },
+    { name: "Locaciones", icon: MapPin, page: "Locations" },
+    { name: "Vehículos", icon: Car, page: "Vehicles" }]
+
+  },
+  {
+    section: "Personal",
+    items: [
+    { name: "Administradores", icon: UserCog, page: "CompanyAdmins" },
+    { name: "Conductores", icon: Users, page: "Drivers" }]
+
+  },
+  {
+    section: "Operaciones",
+    items: [
+    { name: "Mantenimiento", icon: Wrench, page: "Maintenance" },
+    { name: "Documentos", icon: FileText, page: "Documents" },
+    { name: "Reportes", icon: BarChart3, page: "Reports" }]
+
+  },
+  {
+    section: "Configuración",
+    items: [
     {
-      section: null,
-      items: [
-        { name: "Dashboard", icon: LayoutDashboard, page: "Dashboard" }
-      ]
+      name: "Empresas",
+      icon: Factory,
+      isSubmenu: true,
+      subItems: [
+      { name: "Tipo de industria" }]
+
     },
     {
-      section: "Administración",
-      items: [
-        { name: "Empresas", icon: Building2, page: "Companies" },
-        { name: "Locaciones", icon: MapPin, page: "Locations" },
-        { name: "Vehículos", icon: Car, page: "Vehicles" }
-      ]
+      name: "Ubicación",
+      icon: MapPinned,
+      isSubmenu: true,
+      subItems: [
+      { name: "Tipo de ubicación" }]
+
     },
     {
-      section: "Personal",
-      items: [
-        { name: "Administradores", icon: UserCog, page: "CompanyAdmins" },
-        { name: "Conductores", icon: Users, page: "Drivers" }
-      ]
-    },
-    {
-      section: "Operaciones",
-      items: [
-        { name: "Mantenimiento", icon: Wrench, page: "Maintenance" },
-        { name: "Documentos", icon: FileText, page: "Documents" },
-        { name: "Reportes", icon: BarChart3, page: "Reports" }
-      ]
-    },
-    {
-      section: "Configuración",
-      items: [
-        { 
-          name: "Empresas", 
-          icon: Factory, 
-          isSubmenu: true,
-          subItems: [
-            { name: "Tipo de industria" }
-          ]
-        },
-        { 
-          name: "Ubicación", 
-          icon: MapPinned, 
-          isSubmenu: true,
-          subItems: [
-            { name: "Tipo de ubicación" }
-          ]
-        },
-        { 
-          name: "Vehículos", 
-          icon: Cog, 
-          isSubmenu: true,
-          subItems: [
-            { name: "Marcas", page: "Manufacturers" },
-            { name: "Tipos", page: "VehicleTypes" },
-            { name: "Estados", page: "VehicleStatuses" }
-          ]
-        }
-      ]
-    }
-  ];
+      name: "Vehículos",
+      icon: Cog,
+      isSubmenu: true,
+      subItems: [
+      { name: "Marcas", page: "Manufacturers" },
+      { name: "Tipos", page: "VehicleTypes" },
+      { name: "Estados", page: "VehicleStatuses" }]
+
+    }]
+
+  }];
+
 
   // Menú para Admin de Empresa - Organizado por módulos
   const companyAdminMenu = [
+  {
+    section: null,
+    items: [
+    { name: "Dashboard", icon: LayoutDashboard, page: "Dashboard" }]
+
+  },
+  {
+    section: "Administración",
+    items: [
+    { name: "Locaciones", icon: MapPin, page: "Locations" },
+    { name: "Vehículos", icon: Car, page: "Vehicles" }]
+
+  },
+  {
+    section: "Personal",
+    items: [
+    { name: "Conductores", icon: Users, page: "Drivers" }]
+
+  },
+  {
+    section: "Operaciones",
+    items: [
+    { name: "Mantenimiento", icon: Wrench, page: "Maintenance" },
+    { name: "Documentos", icon: FileText, page: "Documents" },
+    { name: "Reportes", icon: BarChart3, page: "Reports" }]
+
+  },
+  {
+    section: "Configuración",
+    items: [
     {
-      section: null,
-      items: [
-        { name: "Dashboard", icon: LayoutDashboard, page: "Dashboard" }
-      ]
+      name: "Ubicación",
+      icon: MapPinned,
+      isSubmenu: true,
+      subItems: [
+      { name: "Tipo de ubicación" }]
+
     },
     {
-      section: "Administración",
-      items: [
-        { name: "Locaciones", icon: MapPin, page: "Locations" },
-        { name: "Vehículos", icon: Car, page: "Vehicles" }
-      ]
-    },
-    {
-      section: "Personal",
-      items: [
-        { name: "Conductores", icon: Users, page: "Drivers" }
-      ]
-    },
-    {
-      section: "Operaciones",
-      items: [
-        { name: "Mantenimiento", icon: Wrench, page: "Maintenance" },
-        { name: "Documentos", icon: FileText, page: "Documents" },
-        { name: "Reportes", icon: BarChart3, page: "Reports" }
-      ]
-    },
-    {
-      section: "Configuración",
-      items: [
-        { 
-          name: "Ubicación", 
-          icon: MapPinned, 
-          isSubmenu: true,
-          subItems: [
-            { name: "Tipo de ubicación" }
-          ]
-        },
-        { 
-          name: "Vehículos", 
-          icon: Cog, 
-          isSubmenu: true,
-          subItems: [
-            { name: "Marcas", page: "Manufacturers" },
-            { name: "Tipos", page: "VehicleTypes" },
-            { name: "Estados", page: "VehicleStatuses" }
-          ]
-        }
-      ]
-    }
-  ];
+      name: "Vehículos",
+      icon: Cog,
+      isSubmenu: true,
+      subItems: [
+      { name: "Marcas", page: "Manufacturers" },
+      { name: "Tipos", page: "VehicleTypes" },
+      { name: "Estados", page: "VehicleStatuses" }]
+
+    }]
+
+  }];
+
 
   const menuSections = isSuperAdmin ? superAdminMenu : companyAdminMenu;
 
   return (
     <div className={cn("min-h-screen transition-colors", theme === 'dark' ? 'bg-black' : 'bg-gray-50')}>
       {/* Desktop Top Bar */}
-      <header className="hidden lg:fixed lg:top-0 lg:right-0 lg:left-72 lg:z-50 lg:flex lg:items-center lg:justify-end lg:h-16 lg:px-6 lg:border-b lg:backdrop-blur" 
-        style={{
-          backgroundColor: theme === 'dark' ? 'rgba(0, 0, 0, 0.95)' : 'rgba(255, 255, 255, 0.95)',
-          borderColor: theme === 'dark' ? 'rgb(39, 39, 42)' : 'rgb(229, 231, 235)'
-        }}>
+      <header className="hidden lg:fixed lg:top-0 lg:right-0 lg:left-72 lg:z-50 lg:flex lg:items-center lg:justify-end lg:h-16 lg:px-6 lg:border-b lg:backdrop-blur"
+      style={{
+        backgroundColor: theme === 'dark' ? 'rgba(0, 0, 0, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+        borderColor: theme === 'dark' ? 'rgb(39, 39, 42)' : 'rgb(229, 231, 235)'
+      }}>
         <div className="flex items-center gap-3">
           {/* Theme Toggle */}
           <Button
             variant="ghost"
             size="icon"
             onClick={toggleTheme}
-            className={theme === 'dark' ? 'text-zinc-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'}
-          >
+            className={theme === 'dark' ? 'text-zinc-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'}>
+
             {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
           </Button>
 
           {/* User Menu */}
-          {user && (
-            <DropdownMenu>
+          {user &&
+          <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className={cn(
-                  "flex items-center gap-3 p-2 rounded-xl transition-colors",
-                  theme === 'dark' ? 'hover:bg-zinc-800/50' : 'hover:bg-gray-100'
-                )}>
+                "flex items-center gap-3 p-2 rounded-xl transition-colors",
+                theme === 'dark' ? 'hover:bg-zinc-800/50' : 'hover:bg-gray-100'
+              )}>
                   <Avatar className="w-9 h-9 border-2" style={{ borderColor: theme === 'dark' ? 'rgb(63, 63, 70)' : 'rgb(229, 231, 235)' }}>
                     {user.profile_photo && <AvatarImage src={user.profile_photo} />}
                     <AvatarFallback className={theme === 'dark' ? 'bg-yellow-500/10 text-yellow-400' : 'bg-yellow-500/20 text-yellow-600'}>
@@ -261,10 +261,10 @@ function LayoutContent({ children, currentPageName }) {
                   </div>
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent 
-                align="end" 
-                className={cn("w-64", theme === 'dark' ? 'bg-zinc-900 border-zinc-700' : 'bg-white border-gray-200')}
-              >
+              <DropdownMenuContent
+              align="end"
+              className={cn("w-64", theme === 'dark' ? 'bg-zinc-900 border-zinc-700' : 'bg-white border-gray-200')}>
+
                 <div className="px-3 py-2">
                   <p className={cn("text-sm font-medium", theme === 'dark' ? 'text-white' : 'text-gray-900')}>
                     {user.full_name || 'Usuario'}
@@ -277,58 +277,58 @@ function LayoutContent({ children, currentPageName }) {
                 <DropdownMenuItem asChild>
                   <label className={cn("cursor-pointer", theme === 'dark' ? 'text-zinc-300 focus:bg-zinc-700 focus:text-white' : 'text-gray-700 focus:bg-gray-100 focus:text-gray-900')}>
                     <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => handlePhotoUpload(e.target.files[0])}
-                      disabled={uploadingPhoto}
-                    />
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => handlePhotoUpload(e.target.files[0])}
+                    disabled={uploadingPhoto} />
+
                     <Upload className="w-4 h-4 mr-2" />
                     {uploadingPhoto ? "Subiendo..." : "Cambiar Foto"}
                   </label>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link 
-                    to={createPageUrl("Profile")}
-                    className={cn("cursor-pointer", theme === 'dark' ? 'text-zinc-300 focus:bg-zinc-700 focus:text-white' : 'text-gray-700 focus:bg-gray-100 focus:text-gray-900')}
-                  >
+                  <Link
+                  to={createPageUrl("Profile")}
+                  className={cn("cursor-pointer", theme === 'dark' ? 'text-zinc-300 focus:bg-zinc-700 focus:text-white' : 'text-gray-700 focus:bg-gray-100 focus:text-gray-900')}>
+
                     <UserCog className="w-4 h-4 mr-2" />
                     Mi Perfil
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator className={theme === 'dark' ? 'bg-zinc-700' : 'bg-gray-200'} />
-                <DropdownMenuItem 
-                  className={cn("cursor-pointer", theme === 'dark' ? 'text-zinc-300 focus:bg-zinc-700 focus:text-white' : 'text-gray-700 focus:bg-gray-100 focus:text-gray-900')}
-                  onClick={handleLogout}
-                >
+                <DropdownMenuItem
+                className={cn("cursor-pointer", theme === 'dark' ? 'text-zinc-300 focus:bg-zinc-700 focus:text-white' : 'text-gray-700 focus:bg-gray-100 focus:text-gray-900')}
+                onClick={handleLogout}>
+
                   <LogOut className="w-4 h-4 mr-2" />
                   Cerrar sesión
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          )}
+          }
         </div>
       </header>
 
       {/* Mobile Header */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 z-50 backdrop-blur border-b" 
-        style={{
-          backgroundColor: theme === 'dark' ? 'rgba(0, 0, 0, 0.95)' : 'rgba(255, 255, 255, 0.95)',
-          borderColor: theme === 'dark' ? 'rgb(39, 39, 42)' : 'rgb(229, 231, 235)'
-        }}>
+      <header className="lg:hidden fixed top-0 left-0 right-0 z-50 backdrop-blur border-b"
+      style={{
+        backgroundColor: theme === 'dark' ? 'rgba(0, 0, 0, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+        borderColor: theme === 'dark' ? 'rgb(39, 39, 42)' : 'rgb(229, 231, 235)'
+      }}>
         <div className="flex items-center justify-between h-16 px-4">
           <div className="flex items-center gap-3">
-            {user?.logo_url ? (
-              <img 
-                src={user.logo_url} 
-                alt="Logo" 
-                className="w-8 h-8 rounded-lg object-contain"
-              />
-            ) : (
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-yellow-500 to-yellow-600 flex items-center justify-center">
+            {user?.logo_url ?
+            <img
+              src={user.logo_url}
+              alt="Logo"
+              className="w-8 h-8 rounded-lg object-contain" /> :
+
+
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-yellow-500 to-yellow-600 flex items-center justify-center">
                 <Car className="w-5 h-5 text-black" />
               </div>
-            )}
+            }
             <span className={cn("text-lg font-bold", theme === 'dark' ? 'text-white' : 'text-gray-900')}>
               Mass Effect ERP
             </span>
@@ -338,16 +338,16 @@ function LayoutContent({ children, currentPageName }) {
               variant="ghost"
               size="icon"
               onClick={toggleTheme}
-              className={theme === 'dark' ? 'text-slate-400' : 'text-gray-600'}
-            >
+              className={theme === 'dark' ? 'text-slate-400' : 'text-gray-600'}>
+
               {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </Button>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className={theme === 'dark' ? 'text-slate-400' : 'text-gray-600'}
-            >
+              className={theme === 'dark' ? 'text-slate-400' : 'text-gray-600'}>
+
               {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </Button>
           </div>
@@ -368,20 +368,20 @@ function LayoutContent({ children, currentPageName }) {
           <div className="h-16 flex items-center gap-3 px-6 border-b" style={{
             borderColor: theme === 'dark' ? 'rgb(39, 39, 42)' : 'rgb(229, 231, 235)'
           }}>
-            {user?.logo_url ? (
-              <img 
-                src={user.logo_url} 
-                alt="Logo" 
-                className="w-10 h-10 rounded-xl object-contain"
-              />
-            ) : (
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-500 to-yellow-600 flex items-center justify-center shadow-lg shadow-yellow-500/20">
+            {user?.logo_url ?
+            <img
+              src={user.logo_url}
+              alt="Logo"
+              className="w-10 h-10 rounded-xl object-contain" /> :
+
+
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-500 to-yellow-600 flex items-center justify-center shadow-lg shadow-yellow-500/20">
                 <Car className="w-6 h-6 text-black" />
               </div>
-            )}
+            }
             <div>
-              <span className={cn("text-lg font-bold", theme === 'dark' ? 'text-white' : 'text-gray-900')}>
-                Duty Comfort
+              <span className="text-lg font-bold text-white">Duty
+
               </span>
               <p className={cn("text-xs", theme === 'dark' ? 'text-zinc-500' : 'text-gray-500')}>
                 {isSuperAdmin ? "Super Admin" : "Gestión de Flotas"}
@@ -391,138 +391,138 @@ function LayoutContent({ children, currentPageName }) {
 
           {/* Navigation */}
           <nav className="flex-1 px-4 py-6 overflow-y-auto">
-            {menuSections.map((section, sectionIndex) => (
-              <div key={sectionIndex} className={sectionIndex > 0 ? "mt-6" : ""}>
-                {section.section && (
-                  <h3 className={cn(
-                    "px-4 mb-2 text-xs font-bold uppercase tracking-wider",
-                    theme === 'dark' ? 'text-zinc-600' : 'text-gray-400'
-                  )}>
+            {menuSections.map((section, sectionIndex) =>
+            <div key={sectionIndex} className={sectionIndex > 0 ? "mt-6" : ""}>
+                {section.section &&
+              <h3 className={cn(
+                "px-4 mb-2 text-xs font-bold uppercase tracking-wider",
+                theme === 'dark' ? 'text-zinc-600' : 'text-gray-400'
+              )}>
                     {section.section}
                   </h3>
-                )}
+              }
                 <div className="space-y-1">
                   {section.items.map((item) => {
-                    if (item.isSubmenu) {
-                      const isAnySubActive = item.subItems?.some(sub => sub.page === currentPageName);
-                      return (
-                        <Collapsible key={item.name} open={configOpen} onOpenChange={setConfigOpen}>
+                  if (item.isSubmenu) {
+                    const isAnySubActive = item.subItems?.some((sub) => sub.page === currentPageName);
+                    return (
+                      <Collapsible key={item.name} open={configOpen} onOpenChange={setConfigOpen}>
                           <CollapsibleTrigger asChild>
                             <button
-                              className={cn(
-                                "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 w-full",
-                                theme === 'dark' 
-                                  ? (isAnySubActive ? "bg-yellow-500/10 text-yellow-400 shadow-sm" : "text-zinc-400 hover:text-white hover:bg-zinc-800/50")
-                                  : (isAnySubActive ? "bg-yellow-500/10 text-yellow-600 shadow-sm" : "text-gray-600 hover:text-gray-900 hover:bg-gray-100")
-                              )}
-                            >
+                            className={cn(
+                              "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 w-full",
+                              theme === 'dark' ?
+                              isAnySubActive ? "bg-yellow-500/10 text-yellow-400 shadow-sm" : "text-zinc-400 hover:text-white hover:bg-zinc-800/50" :
+                              isAnySubActive ? "bg-yellow-500/10 text-yellow-600 shadow-sm" : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                            )}>
+
                               <item.icon className={cn(
-                                "w-5 h-5 transition-colors",
-                                theme === 'dark'
-                                  ? (isAnySubActive ? "text-yellow-400" : "text-zinc-500")
-                                  : (isAnySubActive ? "text-yellow-600" : "text-gray-500")
-                              )} />
+                              "w-5 h-5 transition-colors",
+                              theme === 'dark' ?
+                              isAnySubActive ? "text-yellow-400" : "text-zinc-500" :
+                              isAnySubActive ? "text-yellow-600" : "text-gray-500"
+                            )} />
                               <span>{item.name}</span>
                               <ChevronDown className={cn(
-                                "w-4 h-4 ml-auto transition-transform",
-                                configOpen && "rotate-180",
-                                theme === 'dark'
-                                  ? (isAnySubActive ? "text-yellow-400" : "text-zinc-500")
-                                  : (isAnySubActive ? "text-yellow-600" : "text-gray-500")
-                              )} />
+                              "w-4 h-4 ml-auto transition-transform",
+                              configOpen && "rotate-180",
+                              theme === 'dark' ?
+                              isAnySubActive ? "text-yellow-400" : "text-zinc-500" :
+                              isAnySubActive ? "text-yellow-600" : "text-gray-500"
+                            )} />
                             </button>
                           </CollapsibleTrigger>
                           <CollapsibleContent className="mt-1 space-y-1">
                             {item.subItems?.map((subItem, subIdx) => {
-                              if (!subItem.page) {
-                                return (
-                                  <div
-                                    key={subIdx}
-                                    className={cn(
-                                      "flex items-center gap-3 pl-12 pr-4 py-2 rounded-xl text-sm font-medium",
-                                      theme === 'dark' ? "text-zinc-500" : "text-gray-400"
-                                    )}
-                                  >
-                                    <span>{subItem.name}</span>
-                                  </div>
-                                );
-                              }
-                              const isSubActive = currentPageName === subItem.page;
+                            if (!subItem.page) {
                               return (
-                                <Link
-                                  key={subItem.page}
-                                  to={createPageUrl(subItem.page)}
-                                  onClick={() => setSidebarOpen(false)}
+                                <div
+                                  key={subIdx}
                                   className={cn(
-                                    "flex items-center gap-3 pl-12 pr-4 py-2 rounded-xl text-sm font-medium transition-all duration-200",
-                                    theme === 'dark' 
-                                      ? (isSubActive ? "bg-yellow-500/10 text-yellow-400" : "text-zinc-400 hover:text-white hover:bg-zinc-800/50")
-                                      : (isSubActive ? "bg-yellow-500/10 text-yellow-600" : "text-gray-600 hover:text-gray-900 hover:bg-gray-100")
-                                  )}
-                                >
+                                    "flex items-center gap-3 pl-12 pr-4 py-2 rounded-xl text-sm font-medium",
+                                    theme === 'dark' ? "text-zinc-500" : "text-gray-400"
+                                  )}>
+
+                                    <span>{subItem.name}</span>
+                                  </div>);
+
+                            }
+                            const isSubActive = currentPageName === subItem.page;
+                            return (
+                              <Link
+                                key={subItem.page}
+                                to={createPageUrl(subItem.page)}
+                                onClick={() => setSidebarOpen(false)}
+                                className={cn(
+                                  "flex items-center gap-3 pl-12 pr-4 py-2 rounded-xl text-sm font-medium transition-all duration-200",
+                                  theme === 'dark' ?
+                                  isSubActive ? "bg-yellow-500/10 text-yellow-400" : "text-zinc-400 hover:text-white hover:bg-zinc-800/50" :
+                                  isSubActive ? "bg-yellow-500/10 text-yellow-600" : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                                )}>
+
                                   <span>{subItem.name}</span>
-                                  {isSubActive && (
-                                    <ChevronRight className={cn(
-                                      "w-4 h-4 ml-auto",
-                                      theme === 'dark' ? 'text-yellow-400' : 'text-yellow-600'
-                                    )} />
-                                  )}
-                                </Link>
-                              );
-                            })}
+                                  {isSubActive &&
+                                <ChevronRight className={cn(
+                                  "w-4 h-4 ml-auto",
+                                  theme === 'dark' ? 'text-yellow-400' : 'text-yellow-600'
+                                )} />
+                                }
+                                </Link>);
+
+                          })}
                           </CollapsibleContent>
-                        </Collapsible>
-                      );
-                    }
-                    
-                    const isActive = currentPageName === item.page;
-                    return (
-                      <Link
-                        key={item.page}
-                        to={createPageUrl(item.page)}
-                        onClick={() => setSidebarOpen(false)}
-                        className={cn(
-                          "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200",
-                          theme === 'dark' 
-                            ? (isActive ? "bg-yellow-500/10 text-yellow-400 shadow-sm" : "text-zinc-400 hover:text-white hover:bg-zinc-800/50")
-                            : (isActive ? "bg-yellow-500/10 text-yellow-600 shadow-sm" : "text-gray-600 hover:text-gray-900 hover:bg-gray-100")
-                        )}
-                      >
+                        </Collapsible>);
+
+                  }
+
+                  const isActive = currentPageName === item.page;
+                  return (
+                    <Link
+                      key={item.page}
+                      to={createPageUrl(item.page)}
+                      onClick={() => setSidebarOpen(false)}
+                      className={cn(
+                        "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200",
+                        theme === 'dark' ?
+                        isActive ? "bg-yellow-500/10 text-yellow-400 shadow-sm" : "text-zinc-400 hover:text-white hover:bg-zinc-800/50" :
+                        isActive ? "bg-yellow-500/10 text-yellow-600 shadow-sm" : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                      )}>
+
                         <item.icon className={cn(
-                          "w-5 h-5 transition-colors",
-                          theme === 'dark'
-                            ? (isActive ? "text-yellow-400" : "text-zinc-500")
-                            : (isActive ? "text-yellow-600" : "text-gray-500")
-                        )} />
+                        "w-5 h-5 transition-colors",
+                        theme === 'dark' ?
+                        isActive ? "text-yellow-400" : "text-zinc-500" :
+                        isActive ? "text-yellow-600" : "text-gray-500"
+                      )} />
                         <span>{item.name}</span>
-                        {isActive && (
-                          <ChevronRight className={cn(
-                            "w-4 h-4 ml-auto",
-                            theme === 'dark' ? 'text-yellow-400' : 'text-yellow-600'
-                          )} />
-                        )}
-                      </Link>
-                    );
-                  })}
+                        {isActive &&
+                      <ChevronRight className={cn(
+                        "w-4 h-4 ml-auto",
+                        theme === 'dark' ? 'text-yellow-400' : 'text-yellow-600'
+                      )} />
+                      }
+                      </Link>);
+
+                })}
                 </div>
               </div>
-            ))}
+            )}
           </nav>
 
           {/* User Menu - Mobile Only */}
-          {user && (
-            <div className="lg:hidden p-4 border-t" style={{
-              borderColor: theme === 'dark' ? 'rgb(39, 39, 42)' : 'rgb(229, 231, 235)'
-            }}>
+          {user &&
+          <div className="lg:hidden p-4 border-t" style={{
+            borderColor: theme === 'dark' ? 'rgb(39, 39, 42)' : 'rgb(229, 231, 235)'
+          }}>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className={cn(
-                    "flex items-center gap-3 w-full p-3 rounded-xl transition-colors",
-                    theme === 'dark' ? 'hover:bg-zinc-800/50' : 'hover:bg-gray-100'
-                  )}>
+                  "flex items-center gap-3 w-full p-3 rounded-xl transition-colors",
+                  theme === 'dark' ? 'hover:bg-zinc-800/50' : 'hover:bg-gray-100'
+                )}>
                     <Avatar className="w-10 h-10 border-2" style={{
-                      borderColor: theme === 'dark' ? 'rgb(63, 63, 70)' : 'rgb(229, 231, 235)'
-                    }}>
+                    borderColor: theme === 'dark' ? 'rgb(63, 63, 70)' : 'rgb(229, 231, 235)'
+                  }}>
                       {user.profile_photo && <AvatarImage src={user.profile_photo} />}
                       <AvatarFallback className={theme === 'dark' ? 'bg-yellow-500/10 text-yellow-400 font-medium' : 'bg-yellow-500/20 text-yellow-600 font-medium'}>
                         {user.full_name?.charAt(0) || user.email?.charAt(0) || 'U'}
@@ -538,54 +538,54 @@ function LayoutContent({ children, currentPageName }) {
                     </div>
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent 
-                  align="end" 
-                  className={cn("w-56", theme === 'dark' ? 'bg-zinc-900 border-zinc-700' : 'bg-white border-gray-200')}
-                >
+                <DropdownMenuContent
+                align="end"
+                className={cn("w-56", theme === 'dark' ? 'bg-zinc-900 border-zinc-700' : 'bg-white border-gray-200')}>
+
                   <DropdownMenuItem asChild>
                     <label className={cn("cursor-pointer", theme === 'dark' ? 'text-zinc-300 focus:bg-zinc-700 focus:text-white' : 'text-gray-700 focus:bg-gray-100 focus:text-gray-900')}>
                       <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) => handlePhotoUpload(e.target.files[0])}
-                        disabled={uploadingPhoto}
-                      />
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => handlePhotoUpload(e.target.files[0])}
+                      disabled={uploadingPhoto} />
+
                       <Upload className="w-4 h-4 mr-2" />
                       {uploadingPhoto ? "Subiendo..." : "Cambiar Foto"}
                     </label>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link 
-                      to={createPageUrl("Profile")}
-                      className={cn("cursor-pointer", theme === 'dark' ? 'text-zinc-300 focus:bg-zinc-700 focus:text-white' : 'text-gray-700 focus:bg-gray-100 focus:text-gray-900')}
-                    >
+                    <Link
+                    to={createPageUrl("Profile")}
+                    className={cn("cursor-pointer", theme === 'dark' ? 'text-zinc-300 focus:bg-zinc-700 focus:text-white' : 'text-gray-700 focus:bg-gray-100 focus:text-gray-900')}>
+
                       <UserCog className="w-4 h-4 mr-2" />
                       Mi Perfil
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator className={theme === 'dark' ? 'bg-zinc-700' : 'bg-gray-200'} />
-                  <DropdownMenuItem 
-                    className={cn("cursor-pointer", theme === 'dark' ? 'text-zinc-300 focus:bg-zinc-700 focus:text-white' : 'text-gray-700 focus:bg-gray-100 focus:text-gray-900')}
-                    onClick={handleLogout}
-                  >
+                  <DropdownMenuItem
+                  className={cn("cursor-pointer", theme === 'dark' ? 'text-zinc-300 focus:bg-zinc-700 focus:text-white' : 'text-gray-700 focus:bg-gray-100 focus:text-gray-900')}
+                  onClick={handleLogout}>
+
                     <LogOut className="w-4 h-4 mr-2" />
                     Cerrar sesión
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
-          )}
+          }
         </div>
       </aside>
 
       {/* Overlay */}
-      {sidebarOpen && (
-        <div 
-          className="fixed inset-0 z-30 bg-black/50 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
+      {sidebarOpen &&
+      <div
+        className="fixed inset-0 z-30 bg-black/50 lg:hidden"
+        onClick={() => setSidebarOpen(false)} />
+
+      }
 
       {/* Main Content */}
       <main className={cn(
@@ -593,14 +593,14 @@ function LayoutContent({ children, currentPageName }) {
       )}>
         {children}
       </main>
-    </div>
-  );
+    </div>);
+
 }
 
 export default function Layout({ children, currentPageName }) {
   return (
     <ThemeProvider>
       <LayoutContent children={children} currentPageName={currentPageName} />
-    </ThemeProvider>
-  );
+    </ThemeProvider>);
+
 }
