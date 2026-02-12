@@ -63,6 +63,24 @@ export default function Profile() {
     }
   };
 
+  const handleDeleteAccount = async () => {
+    if (!confirm("¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.")) {
+      return;
+    }
+    
+    if (!confirm("ADVERTENCIA: Se eliminarán todos tus datos permanentemente. ¿Confirmas la eliminación?")) {
+      return;
+    }
+
+    try {
+      await base44.entities.User.delete(user.id);
+      await base44.auth.logout(window.location.origin);
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      alert("Error al eliminar la cuenta. Por favor contacta al soporte.");
+    }
+  };
+
   if (!user) {
     return (
       <div className={cn("min-h-screen p-4 sm:p-6 lg:p-8 flex items-center justify-center", theme === 'dark' ? 'bg-black' : 'bg-gray-50')}>
@@ -168,6 +186,28 @@ export default function Profile() {
               >
                 {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                 Guardar Cambios
+              </Button>
+            </div>
+
+            <div className={cn(
+              "mt-8 pt-6 border-t",
+              theme === 'dark' ? 'border-zinc-800' : 'border-gray-200'
+            )}>
+              <h3 className={cn(
+                "text-sm font-semibold mb-3",
+                theme === 'dark' ? 'text-red-400' : 'text-red-600'
+              )}>
+                Zona de Peligro
+              </h3>
+              <Button
+                onClick={handleDeleteAccount}
+                variant="outline"
+                className={cn(
+                  "border-red-500 text-red-500 hover:bg-red-500 hover:text-white",
+                  theme === 'dark' && 'border-red-500/50 hover:border-red-500'
+                )}
+              >
+                Eliminar Cuenta
               </Button>
             </div>
           </CardContent>
