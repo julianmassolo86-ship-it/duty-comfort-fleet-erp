@@ -42,18 +42,39 @@ export default function Locations() {
   const isSuperAdmin = !currentUser?.company_id;
 
   const { data: locations = [], isLoading } = useQuery({
-    queryKey: ['locations'],
-    queryFn: () => base44.entities.Location.list(),
+    queryKey: ['locations', currentUser?.company_id],
+    queryFn: async () => {
+      const allLocations = await base44.entities.Location.list();
+      if (currentUser?.company_id) {
+        return allLocations.filter(l => l.company_id === currentUser.company_id);
+      }
+      return allLocations;
+    },
+    enabled: !!currentUser,
   });
 
   const { data: companies = [] } = useQuery({
-    queryKey: ['companies'],
-    queryFn: () => base44.entities.Company.list(),
+    queryKey: ['companies', currentUser?.company_id],
+    queryFn: async () => {
+      const allCompanies = await base44.entities.Company.list();
+      if (currentUser?.company_id) {
+        return allCompanies.filter(c => c.id === currentUser.company_id);
+      }
+      return allCompanies;
+    },
+    enabled: !!currentUser,
   });
 
   const { data: vehicles = [] } = useQuery({
-    queryKey: ['vehicles'],
-    queryFn: () => base44.entities.Vehicle.list(),
+    queryKey: ['vehicles', currentUser?.company_id],
+    queryFn: async () => {
+      const allVehicles = await base44.entities.Vehicle.list();
+      if (currentUser?.company_id) {
+        return allVehicles.filter(v => v.company_id === currentUser.company_id);
+      }
+      return allVehicles;
+    },
+    enabled: !!currentUser,
   });
 
   const companiesMap = companies.reduce((acc, c) => ({ ...acc, [c.id]: c }), {});

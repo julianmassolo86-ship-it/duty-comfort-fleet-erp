@@ -35,41 +35,51 @@ export default function Vehicles() {
   const isSuperAdmin = !currentUser?.company_id;
 
   const { data: vehicles = [], isLoading } = useQuery({
-    queryKey: ['vehicles'],
-    queryFn: () => base44.entities.Vehicle.list(),
+    queryKey: ['vehicles', currentUser?.company_id],
+    queryFn: async () => {
+      const allVehicles = await base44.entities.Vehicle.list();
+      if (currentUser?.company_id) {
+        return allVehicles.filter(v => v.company_id === currentUser.company_id);
+      }
+      return allVehicles;
+    },
+    enabled: !!currentUser,
   });
 
   const { data: drivers = [] } = useQuery({
-    queryKey: ['drivers'],
+    queryKey: ['drivers', currentUser?.company_id],
     queryFn: async () => {
       const allDrivers = await base44.entities.Driver.list();
-      if (user?.company_id) {
-        return allDrivers.filter(d => d.company_id === user.company_id);
+      if (currentUser?.company_id) {
+        return allDrivers.filter(d => d.company_id === currentUser.company_id);
       }
       return allDrivers;
     },
+    enabled: !!currentUser,
   });
 
   const { data: locations = [] } = useQuery({
-    queryKey: ['locations'],
+    queryKey: ['locations', currentUser?.company_id],
     queryFn: async () => {
       const allLocations = await base44.entities.Location.list();
-      if (user?.company_id) {
-        return allLocations.filter(l => l.company_id === user.company_id);
+      if (currentUser?.company_id) {
+        return allLocations.filter(l => l.company_id === currentUser.company_id);
       }
       return allLocations;
     },
+    enabled: !!currentUser,
   });
 
   const { data: companies = [] } = useQuery({
-    queryKey: ['companies'],
+    queryKey: ['companies', currentUser?.company_id],
     queryFn: async () => {
       const allCompanies = await base44.entities.Company.list();
-      if (user?.company_id) {
-        return allCompanies.filter(c => c.id === user.company_id);
+      if (currentUser?.company_id) {
+        return allCompanies.filter(c => c.id === currentUser.company_id);
       }
       return allCompanies;
     },
+    enabled: !!currentUser,
   });
 
   const { data: manufacturers = [] } = useQuery({
