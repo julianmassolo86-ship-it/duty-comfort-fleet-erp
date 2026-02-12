@@ -245,7 +245,7 @@ export default function VehicleTable({ vehicles, locations, companies, drivers, 
               ¿Estás seguro de que deseas eliminar el vehículo <strong>{deleteVehicle?.plate}</strong> ({deleteVehicle?.manufacturer} {deleteVehicle?.model})? Esta acción no se puede deshacer.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialog.Footer>
+          <div className="flex justify-end gap-3 mt-4">
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction 
               onClick={() => {
@@ -256,9 +256,9 @@ export default function VehicleTable({ vehicles, locations, companies, drivers, 
             >
               Eliminar
             </AlertDialogAction>
-          </AlertDialog.Footer>
+          </div>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </>
   );
 }
