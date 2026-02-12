@@ -66,81 +66,84 @@ export default function NovedadCard({ novedad, vehicle, onUpdateEstado, onClick 
       onClick={onClick}
     >
       <CardHeader className="pb-3">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex items-start gap-3 flex-1 min-w-0">
-            <div className={cn(
-              "p-2 rounded-lg",
-              theme === 'dark' ? 'bg-zinc-800' : 'bg-gray-100'
-            )}>
-              <IconoEstado className="w-5 h-5" />
-            </div>
+        <div className="space-y-3">
+          {/* Vehículo y Estado */}
+          <div className="flex items-start justify-between gap-3">
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap mb-1">
-                <h3 className={cn("font-semibold truncate", theme === 'dark' ? 'text-white' : 'text-gray-900')}>
-                  {vehicle?.internal_number} - {vehicle?.plate}
-                </h3>
-                <Badge className={prioridadInfo.color}>
-                  {prioridadInfo.label}
-                </Badge>
-              </div>
-              <p className={cn("text-sm truncate", theme === 'dark' ? 'text-zinc-400' : 'text-gray-500')}>
+              <h3 className={cn("font-semibold text-base mb-1", theme === 'dark' ? 'text-white' : 'text-gray-900')}>
+                {vehicle?.internal_number} - {vehicle?.plate}
+              </h3>
+              <p className={cn("text-sm", theme === 'dark' ? 'text-zinc-400' : 'text-gray-500')}>
                 {vehicle?.manufacturer} {vehicle?.model}
               </p>
             </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  disabled={updating}
+                  className={cn(
+                    "shrink-0",
+                    theme === 'dark' ? 'border-zinc-700 hover:bg-zinc-800' : 'border-gray-300 hover:bg-gray-50'
+                  )}
+                >
+                  <IconoEstado className="w-4 h-4 mr-1.5" />
+                  <span className="text-xs font-medium">{estadoInfo.label}</span>
+                  <ChevronRight className="w-3.5 h-3.5 ml-1" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className={theme === 'dark' ? 'bg-zinc-900 border-zinc-700' : ''}>
+                {Object.entries(estadoConfig).map(([key, config]) => {
+                  const Icon = config.icon;
+                  return (
+                    <DropdownMenuItem 
+                      key={key}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleChangeEstado(key);
+                      }}
+                      disabled={novedad.estado === key}
+                      className={theme === 'dark' ? 'focus:bg-zinc-800' : ''}
+                    >
+                      <Icon className="w-4 h-4 mr-2" />
+                      {config.label}
+                    </DropdownMenuItem>
+                  );
+                })}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-              <Button 
-                variant="outline" 
-                size="sm"
-                disabled={updating}
-                className={theme === 'dark' ? 'border-zinc-700' : ''}
-              >
-                <Badge className={estadoInfo.color}>
-                  {estadoInfo.label}
-                </Badge>
-                <ChevronRight className="w-4 h-4 ml-1" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className={theme === 'dark' ? 'bg-zinc-900 border-zinc-700' : ''}>
-              {Object.entries(estadoConfig).map(([key, config]) => {
-                const Icon = config.icon;
-                return (
-                  <DropdownMenuItem 
-                    key={key}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleChangeEstado(key);
-                    }}
-                    disabled={novedad.estado === key}
-                    className={theme === 'dark' ? 'focus:bg-zinc-800' : ''}
-                  >
-                    <Icon className="w-4 h-4 mr-2" />
-                    {config.label}
-                  </DropdownMenuItem>
-                );
-              })}
-            </DropdownMenuContent>
-          </DropdownMenu>
+
+          {/* Prioridad */}
+          <div>
+            <Badge className={prioridadInfo.color}>
+              {prioridadInfo.label}
+            </Badge>
+          </div>
         </div>
       </CardHeader>
       
-      <CardContent>
-        <p className={cn("text-sm mb-3", theme === 'dark' ? 'text-zinc-300' : 'text-gray-700')}>
+      <CardContent className="space-y-3">
+        {/* Descripción */}
+        <p className={cn("text-sm leading-relaxed", theme === 'dark' ? 'text-zinc-300' : 'text-gray-700')}>
           {novedad.descripcion}
         </p>
         
-        <div className="flex items-center gap-4 text-xs">
-          <span className={theme === 'dark' ? 'text-zinc-500' : 'text-gray-500'}>
-            {format(new Date(novedad.fecha_reporte), "dd MMM yyyy", { locale: es })}
+        {/* Metadata */}
+        <div className="flex items-center gap-4 pt-2 border-t" style={{
+          borderColor: theme === 'dark' ? 'rgb(39, 39, 42)' : 'rgb(229, 231, 235)'
+        }}>
+          <span className={cn("text-xs", theme === 'dark' ? 'text-zinc-500' : 'text-gray-500')}>
+            📅 {format(new Date(novedad.fecha_reporte), "dd MMM yyyy", { locale: es })}
           </span>
           {novedad.kilometraje_reportado && (
-            <span className={theme === 'dark' ? 'text-zinc-500' : 'text-gray-500'}>
+            <span className={cn("text-xs", theme === 'dark' ? 'text-zinc-500' : 'text-gray-500')}>
               📏 {novedad.kilometraje_reportado.toLocaleString()} km
             </span>
           )}
           {novedad.horas_reportadas && (
-            <span className={theme === 'dark' ? 'text-zinc-500' : 'text-gray-500'}>
+            <span className={cn("text-xs", theme === 'dark' ? 'text-zinc-500' : 'text-gray-500')}>
               ⏱️ {novedad.horas_reportadas.toLocaleString()} hs
             </span>
           )}
