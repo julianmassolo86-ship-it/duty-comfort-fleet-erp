@@ -261,29 +261,6 @@ function LayoutContent({ children, currentPageName }) {
     { name: "Documentos", icon: FileText, page: "Documents" },
     { name: "Reportes", icon: BarChart3, page: "Reports" }]
 
-  },
-  {
-    section: "Configuración",
-    items: [
-    {
-      name: "Ubicación",
-      icon: MapPinned,
-      isSubmenu: true,
-      subItems: [
-      { name: "Tipo de ubicación" }]
-
-    },
-    {
-      name: "Vehículos",
-      icon: Cog,
-      isSubmenu: true,
-      subItems: [
-      { name: "Marcas", page: "Manufacturers" },
-      { name: "Tipos", page: "VehicleTypes" },
-      { name: "Estados", page: "VehicleStatuses" }]
-
-    }]
-
   }];
 
 
