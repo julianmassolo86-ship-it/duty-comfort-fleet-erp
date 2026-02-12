@@ -12,6 +12,7 @@ import PageHeader from "../components/common/PageHeader";
 import EmptyState from "../components/common/EmptyState";
 import StatusBadge from "../components/common/StatusBadge";
 import CompanyDialog from "../components/companies/CompanyDialog";
+import PullToRefresh from "../components/common/PullToRefresh";
 import { useTheme } from "../components/common/ThemeWrapper";
 
 export default function Companies() {
@@ -19,9 +20,18 @@ export default function Companies() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const { theme } = useTheme();
 
   const queryClient = useQueryClient();
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await queryClient.invalidateQueries({ queryKey: ['companies'] });
+    await queryClient.invalidateQueries({ queryKey: ['locations'] });
+    await queryClient.invalidateQueries({ queryKey: ['users'] });
+    setTimeout(() => setIsRefreshing(false), 500);
+  };
 
   useEffect(() => {
     base44.auth.me().then(setCurrentUser).catch(() => {});
@@ -44,6 +54,18 @@ export default function Companies() {
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Company.create(data),
+    onMutate: async (newCompany) => {
+      await queryClient.cancelQueries({ queryKey: ['companies'] });
+      const previousCompanies = queryClient.getQueryData(['companies']);
+      queryClient.setQueryData(['companies'], (old = []) => [
+        ...old,
+        { ...newCompany, id: 'temp-' + Date.now() }
+      ]);
+      return { previousCompanies };
+    },
+    onError: (err, newCompany, context) => {
+      queryClient.setQueryData(['companies'], context.previousCompanies);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['companies'] });
       setDialogOpen(false);
@@ -52,6 +74,17 @@ export default function Companies() {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Company.update(id, data),
+    onMutate: async ({ id, data }) => {
+      await queryClient.cancelQueries({ queryKey: ['companies'] });
+      const previousCompanies = queryClient.getQueryData(['companies']);
+      queryClient.setQueryData(['companies'], (old = []) =>
+        old.map(c => c.id === id ? { ...c, ...data } : c)
+      );
+      return { previousCompanies };
+    },
+    onError: (err, variables, context) => {
+      queryClient.setQueryData(['companies'], context.previousCompanies);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['companies'] });
       setDialogOpen(false);
@@ -61,6 +94,17 @@ export default function Companies() {
 
   const deleteMutation = useMutation({
     mutationFn: (id) => base44.entities.Company.delete(id),
+    onMutate: async (deletedId) => {
+      await queryClient.cancelQueries({ queryKey: ['companies'] });
+      const previousCompanies = queryClient.getQueryData(['companies']);
+      queryClient.setQueryData(['companies'], (old = []) =>
+        old.filter(c => c.id !== deletedId)
+      );
+      return { previousCompanies };
+    },
+    onError: (err, deletedId, context) => {
+      queryClient.setQueryData(['companies'], context.previousCompanies);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['companies'] });
       setDialogOpen(false);
@@ -97,8 +141,9 @@ export default function Companies() {
   );
 
   return (
-    <div className={cn("min-h-screen p-4 sm:p-6 lg:p-8", theme === 'dark' ? 'bg-black' : 'bg-gray-50')}>
-      <div className="max-w-7xl mx-auto">
+    <PullToRefresh onRefresh={handleRefresh} isRefreshing={isRefreshing}>
+      <div className={cn("min-h-screen p-4 sm:p-6 lg:p-8", theme === 'dark' ? 'bg-black' : 'bg-gray-50')}>
+        <div className="max-w-7xl mx-auto">
         <PageHeader 
           title="Empresas" 
           description="Gestiona las empresas del sistema"
@@ -212,7 +257,8 @@ export default function Companies() {
           isDeleting={deleteMutation.isPending}
           hasLocations={selectedCompany ? !canDeleteCompany(selectedCompany.id) : false}
         />
+        </div>
       </div>
-    </div>
+    </PullToRefresh>
   );
 }
