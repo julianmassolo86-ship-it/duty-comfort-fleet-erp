@@ -39,7 +39,7 @@ export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess }
   }, []);
 
   useEffect(() => {
-    if (open) {
+    if (open && user) {
       loadVehicles();
       loadCompanies();
       loadLocations();
@@ -60,7 +60,7 @@ export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess }
       setLocationFilter("all");
       setShowVehicleSelector(false);
     }
-  }, [open, novedad]);
+  }, [open, novedad, user]);
 
   useEffect(() => {
     if (formData.vehicle_id) {
@@ -78,7 +78,14 @@ export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess }
 
   const loadVehicles = async () => {
     try {
-      const allVehicles = await base44.entities.Vehicle.list();
+      let allVehicles;
+      if (user?.company_id) {
+        // Admin de empresa: solo vehículos de su empresa
+        allVehicles = await base44.entities.Vehicle.filter({ company_id: user.company_id });
+      } else {
+        // Super admin: todos los vehículos
+        allVehicles = await base44.entities.Vehicle.list();
+      }
       setVehicles(allVehicles);
     } catch (err) {
       console.error("Error loading vehicles:", err);
@@ -87,7 +94,14 @@ export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess }
 
   const loadCompanies = async () => {
     try {
-      const allCompanies = await base44.entities.Company.list();
+      let allCompanies;
+      if (user?.company_id) {
+        // Admin de empresa: solo su empresa
+        allCompanies = await base44.entities.Company.filter({ id: user.company_id });
+      } else {
+        // Super admin: todas las empresas
+        allCompanies = await base44.entities.Company.list();
+      }
       setCompanies(allCompanies);
     } catch (err) {
       console.error("Error loading companies:", err);
@@ -96,7 +110,14 @@ export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess }
 
   const loadLocations = async () => {
     try {
-      const allLocations = await base44.entities.Location.list();
+      let allLocations;
+      if (user?.company_id) {
+        // Admin de empresa: solo ubicaciones de su empresa
+        allLocations = await base44.entities.Location.filter({ company_id: user.company_id });
+      } else {
+        // Super admin: todas las ubicaciones
+        allLocations = await base44.entities.Location.list();
+      }
       setLocations(allLocations);
     } catch (err) {
       console.error("Error loading locations:", err);
