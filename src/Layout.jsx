@@ -380,7 +380,7 @@ function LayoutContent({ children, currentPageName }) {
               </div>
             }
             <div>
-              <span className="text-lg font-bold text-white">Duty
+              <span className="text-lg font-bold text-white">Duty Comfort
 
               </span>
               <p className={cn("text-xs", theme === 'dark' ? 'text-zinc-500' : 'text-gray-500')}>
