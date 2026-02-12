@@ -1,5 +1,5 @@
 import React, { useState, useEffect, createContext, useContext } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import { 
@@ -64,6 +64,7 @@ function LayoutContent({ children, currentPageName }) {
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [configOpen, setConfigOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
+  const navigate = useNavigate();
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -71,6 +72,7 @@ function LayoutContent({ children, currentPageName }) {
 
   const handleLogout = () => {
     base44.auth.logout();
+    navigate(createPageUrl("LandingPage"));
   };
 
   const handlePhotoUpload = async (file) => {

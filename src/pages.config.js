@@ -50,16 +50,17 @@
 import Companies from './pages/Companies';
 import CompanyAdmins from './pages/CompanyAdmins';
 import Dashboard from './pages/Dashboard';
+import Documents from './pages/Documents';
+import Drivers from './pages/Drivers';
 import Locations from './pages/Locations';
+import Maintenance from './pages/Maintenance';
 import Manufacturers from './pages/Manufacturers';
 import Profile from './pages/Profile';
 import Reports from './pages/Reports';
 import VehicleStatuses from './pages/VehicleStatuses';
 import VehicleTypes from './pages/VehicleTypes';
 import Vehicles from './pages/Vehicles';
-import Documents from './pages/Documents';
-import Maintenance from './pages/Maintenance';
-import Drivers from './pages/Drivers';
+import LandingPage from './pages/LandingPage';
 import __Layout from './Layout.jsx';
 
 
@@ -67,16 +68,17 @@ export const PAGES = {
     "Companies": Companies,
     "CompanyAdmins": CompanyAdmins,
     "Dashboard": Dashboard,
+    "Documents": Documents,
+    "Drivers": Drivers,
     "Locations": Locations,
+    "Maintenance": Maintenance,
     "Manufacturers": Manufacturers,
     "Profile": Profile,
     "Reports": Reports,
     "VehicleStatuses": VehicleStatuses,
     "VehicleTypes": VehicleTypes,
     "Vehicles": Vehicles,
-    "Documents": Documents,
-    "Maintenance": Maintenance,
-    "Drivers": Drivers,
+    "LandingPage": LandingPage,
 }
 
 export const pagesConfig = {
