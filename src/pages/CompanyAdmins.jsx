@@ -50,7 +50,24 @@ export default function CompanyAdmins() {
   const handleInviteAdmin = async (data) => {
     try {
       await base44.users.inviteUser(data.email, "user");
-      toast.success(`Invitación enviada a ${data.email}. Una vez que el usuario se registre, asígnale la empresa desde esta pantalla.`);
+      
+      // Esperar un momento para que el usuario se cree en la base de datos
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Buscar al usuario recién invitado y asignarle la empresa inmediatamente
+      const allUsers = await base44.entities.User.list();
+      const newUser = allUsers.find(u => u.email === data.email);
+      
+      if (newUser && data.company_id) {
+        await base44.entities.User.update(newUser.id, {
+          company_id: data.company_id,
+          user_role: "company_admin",
+          phone: "",
+          status: "active"
+        });
+      }
+      
+      toast.success(`Invitación enviada a ${data.email} y empresa asignada correctamente.`);
       setDialogOpen(false);
       queryClient.invalidateQueries({ queryKey: ['users'] });
     } catch (error) {

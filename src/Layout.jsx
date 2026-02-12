@@ -92,6 +92,9 @@ function LayoutContent({ children, currentPageName }) {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
 
+  // Verificar si el usuario es admin sin empresa asignada
+  const isAdminWithoutCompany = user && user.role !== 'admin' && !user.company_id;
+
   // Track page changes for transitions
   const prevPageRef = React.useRef(currentPageName);
   useEffect(() => {
@@ -137,6 +140,33 @@ function LayoutContent({ children, currentPageName }) {
   // Si estamos en la landing page, no mostrar el layout
   if (currentPageName === "LandingPage") {
     return <>{children}</>;
+  }
+
+  // Si el usuario es admin sin empresa asignada, mostrar pantalla de espera
+  if (isAdminWithoutCompany) {
+    return (
+      <div className={cn("min-h-screen flex items-center justify-center p-6", theme === 'dark' ? 'bg-black' : 'bg-gray-50')}>
+        <div className={cn("max-w-md w-full text-center p-8 rounded-2xl border", theme === 'dark' ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-gray-200')}>
+          <div className="w-16 h-16 rounded-full bg-yellow-500/10 flex items-center justify-center mx-auto mb-4">
+            <Settings className="w-8 h-8 text-yellow-500" />
+          </div>
+          <h2 className={cn("text-2xl font-bold mb-2", theme === 'dark' ? 'text-white' : 'text-gray-900')}>
+            Configuración Pendiente
+          </h2>
+          <p className={cn("mb-6", theme === 'dark' ? 'text-slate-400' : 'text-gray-600')}>
+            Tu cuenta está siendo configurada por el administrador del sistema. Por favor, espera a que te asignen una empresa para poder acceder a la plataforma.
+          </p>
+          <Button
+            onClick={handleLogout}
+            variant="outline"
+            className={cn("w-full", theme === 'dark' ? 'border-zinc-700 text-zinc-300 hover:bg-zinc-800' : 'border-gray-300 text-gray-700 hover:bg-gray-100')}
+          >
+            <LogOut className="w-4 h-4 mr-2" />
+            Cerrar Sesión
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   // Menú para Super Admin - Organizado por módulos
