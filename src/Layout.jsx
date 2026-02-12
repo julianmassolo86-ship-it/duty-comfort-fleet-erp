@@ -92,8 +92,8 @@ function LayoutContent({ children, currentPageName }) {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
 
-  // Verificar si el usuario es admin sin empresa asignada
-  const isAdminWithoutCompany = user && user.role !== 'admin' && !user.company_id;
+  // Verificar si el usuario es admin sin empresa asignada (y NO es super_admin)
+  const isAdminWithoutCompany = user && !user.company_id && user.user_role !== 'super_admin';
 
   // Track page changes for transitions
   const prevPageRef = React.useRef(currentPageName);
@@ -126,8 +126,8 @@ function LayoutContent({ children, currentPageName }) {
     }
   };
 
-  // Si el usuario no tiene company_id, es super admin
-  const isSuperAdmin = !user?.company_id;
+  // Si el usuario no tiene company_id O tiene user_role = 'super_admin', es super admin
+  const isSuperAdmin = !user?.company_id || user?.user_role === 'super_admin';
 
   // Detect if current page is a sub-page
   const subPages = ['Manufacturers', 'VehicleTypes', 'VehicleStatuses'];
