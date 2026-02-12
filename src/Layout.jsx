@@ -71,8 +71,7 @@ function LayoutContent({ children, currentPageName }) {
   }, []);
 
   const handleLogout = () => {
-    base44.auth.logout();
-    navigate(createPageUrl("LandingPage"));
+    base44.auth.logout(window.location.origin + createPageUrl("LandingPage"));
   };
 
   const handlePhotoUpload = async (file) => {
