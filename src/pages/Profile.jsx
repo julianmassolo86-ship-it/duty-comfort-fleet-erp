@@ -51,16 +51,34 @@ export default function Profile() {
     e?.preventDefault();
     setSaving(true);
     try {
-      await base44.auth.updateMe(form);
+      // Actualizar solo los campos que existen en el usuario
+      const updateData = {
+        full_name: form.full_name,
+        phone: form.phone
+      };
+      
+      // Solo agregar logo_url si es super admin
+      if (isSuperAdmin) {
+        updateData.logo_url = form.logo_url;
+      }
+      
+      await base44.auth.updateMe(updateData);
+      
       // Reload user data
       const userData = await base44.auth.me();
       setUser(userData);
+      setForm({
+        full_name: userData.full_name || "",
+        phone: userData.phone || "",
+        logo_url: userData.logo_url || "",
+      });
+      
       // Trigger a custom event to notify the Layout to refresh user data
       window.dispatchEvent(new CustomEvent('userProfileUpdated'));
       alert("Perfil actualizado correctamente");
     } catch (error) {
       console.error("Error saving profile:", error);
-      alert("Error al guardar el perfil");
+      alert("Error al guardar el perfil: " + (error.message || "Error desconocido"));
     } finally {
       setSaving(false);
     }
