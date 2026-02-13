@@ -318,154 +318,289 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
   const handleExportPDF = () => {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
     const margin = 15;
     let y = 20;
 
-    // Título
-    doc.setFontSize(18);
-    doc.setFont("helvetica", "bold");
-    doc.text("INFORME DE INSPECCIÓN A/C", pageWidth / 2, y, { align: "center" });
-    y += 15;
+    const addHeader = () => {
+      // Banda superior amarilla
+      doc.setFillColor(234, 179, 8);
+      doc.rect(0, 0, pageWidth, 25, 'F');
+      
+      // Título en blanco
+      doc.setTextColor(0, 0, 0);
+      doc.setFontSize(20);
+      doc.setFont("helvetica", "bold");
+      doc.text("INFORME DE INSPECCIÓN A/C", pageWidth / 2, 16, { align: "center" });
+      
+      // Línea divisoria
+      doc.setDrawColor(234, 179, 8);
+      doc.setLineWidth(0.5);
+      doc.line(margin, 27, pageWidth - margin, 27);
+      
+      doc.setTextColor(0, 0, 0);
+    };
 
-    // Información del vehículo
-    doc.setFontSize(12);
+    const addFooter = (pageNum) => {
+      doc.setFontSize(8);
+      doc.setTextColor(128, 128, 128);
+      doc.text(`Página ${pageNum}`, pageWidth / 2, pageHeight - 10, { align: "center" });
+      doc.text(`Generado: ${new Date().toLocaleDateString('es-AR')} ${new Date().toLocaleTimeString('es-AR')}`, pageWidth - margin, pageHeight - 10, { align: "right" });
+    };
+
+    const addSection = (title, resetY = false) => {
+      if (resetY || y > pageHeight - 40) {
+        doc.addPage();
+        addHeader();
+        y = 35;
+      }
+      doc.setFillColor(245, 245, 245);
+      doc.rect(margin, y - 5, pageWidth - 2 * margin, 10, 'F');
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(0, 0, 0);
+      doc.text(title, margin + 3, y + 2);
+      y += 12;
+    };
+
+    const addStatusBox = (label, status, obs = "", extraData = null) => {
+      if (y > pageHeight - 30) {
+        doc.addPage();
+        addHeader();
+        y = 35;
+      }
+
+      // Color según estado
+      let bgColor, textColor;
+      switch (status) {
+        case 'ok':
+          bgColor = [34, 197, 94]; textColor = [255, 255, 255];
+          break;
+        case 'mal':
+          bgColor = [239, 68, 68]; textColor = [255, 255, 255];
+          break;
+        case 'monitorear':
+          bgColor = [234, 179, 8]; textColor = [0, 0, 0];
+          break;
+        default:
+          bgColor = [229, 231, 235]; textColor = [0, 0, 0];
+      }
+
+      // Caja principal
+      doc.setDrawColor(200, 200, 200);
+      doc.setLineWidth(0.3);
+      doc.rect(margin, y, pageWidth - 2 * margin, 8, 'S');
+      
+      // Label
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "bold");
+      doc.text(label, margin + 2, y + 5.5);
+      
+      // Estado badge
+      doc.setFillColor(...bgColor);
+      const statusText = status.toUpperCase();
+      const statusWidth = 20;
+      doc.roundedRect(pageWidth - margin - statusWidth - 2, y + 1.5, statusWidth, 5, 1, 1, 'F');
+      doc.setTextColor(...textColor);
+      doc.setFontSize(8);
+      doc.setFont("helvetica", "bold");
+      doc.text(statusText, pageWidth - margin - statusWidth / 2 - 2, y + 5, { align: "center" });
+      doc.setTextColor(0, 0, 0);
+      
+      y += 8;
+
+      // Observaciones y datos extra
+      if (obs || extraData) {
+        doc.setFontSize(8);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(80, 80, 80);
+        
+        if (obs) {
+          const obsLines = doc.splitTextToSize(`• ${obs}`, pageWidth - 2 * margin - 4);
+          doc.text(obsLines, margin + 2, y + 3);
+          y += obsLines.length * 4 + 2;
+        }
+        
+        if (extraData) {
+          doc.text(extraData, margin + 2, y + 3);
+          y += 5;
+        }
+        
+        doc.setTextColor(0, 0, 0);
+      }
+      
+      y += 2;
+    };
+
+    // Página 1: Encabezado
+    addHeader();
+    y = 35;
+
+    // Información del Activo
+    doc.setFillColor(254, 243, 199);
+    doc.roundedRect(margin, y, pageWidth - 2 * margin, 45, 2, 2, 'F');
+    doc.setFontSize(11);
     doc.setFont("helvetica", "bold");
-    doc.text("INFORMACIÓN DEL ACTIVO", margin, y);
-    y += 7;
+    doc.text("DATOS DEL ACTIVO", margin + 3, y + 6);
+    
+    doc.setFontSize(9);
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
+    y += 12;
     if (selectedVehicle) {
-      doc.text(`Vehículo: ${selectedVehicle.internal_number} - ${selectedVehicle.plate}`, margin, y);
+      doc.text(`Vehículo: ${selectedVehicle.internal_number} - ${selectedVehicle.plate}`, margin + 3, y);
       y += 5;
-      doc.text(`Marca/Modelo: ${selectedVehicle.manufacturer} ${selectedVehicle.model}`, margin, y);
+      doc.text(`Marca/Modelo: ${selectedVehicle.manufacturer} ${selectedVehicle.model}`, margin + 3, y);
       y += 5;
     }
-    doc.text(`Fecha: ${formData.inspection_date.split('T')[0].split('-').reverse().join('/')}`, margin, y);
+    doc.text(`Fecha de Inspección: ${formData.inspection_date.split('T')[0].split('-').reverse().join('/')}`, margin + 3, y);
     y += 5;
-    doc.text(`Temperatura Ambiente: ${formData.ambient_temperature}°C`, margin, y);
+    doc.text(`Temperatura Ambiente: ${formData.ambient_temperature}°C`, margin + 3, y);
+    doc.text(`Tipo: ${formData.tipo_mantenimiento.toUpperCase()}`, pageWidth - margin - 3, y, { align: "right" });
     y += 5;
     if (formData.odometer_reading) {
-      doc.text(`KMS/HS: ${formData.odometer_reading}`, margin, y);
+      doc.text(`Kilometraje/Horas: ${formData.odometer_reading}`, margin + 3, y);
       y += 5;
     }
-    doc.text(`Tipo: ${formData.tipo_mantenimiento}`, margin, y);
+    
     y += 10;
 
-    // Inspecciones
-    doc.setFontSize(12);
-    doc.setFont("helvetica", "bold");
-    doc.text("INSPECCIONES", margin, y);
-    y += 7;
-    doc.setFontSize(9);
+    // Inspecciones Iniciales
+    addSection("1. INSPECCIONES INICIALES Y MEDICIONES");
     inspecciones.forEach((insp) => {
-      if (y > 270) {
-        doc.addPage();
-        y = 20;
-      }
       const estado = formData[`inspeccion_${insp.id}_estado`] || "pendiente";
       const obs = formData[`inspeccion_${insp.id}_observacion`] || "";
-      doc.setFont("helvetica", "bold");
-      doc.text(`${insp.num}. ${insp.label}`, margin, y);
-      y += 5;
-      doc.setFont("helvetica", "normal");
-      doc.text(`Estado: ${estado.toUpperCase()}`, margin + 5, y);
-      if (obs) {
-        y += 5;
-        const obsLines = doc.splitTextToSize(`Obs: ${obs}`, pageWidth - margin * 2 - 5);
-        doc.text(obsLines, margin + 5, y);
-        y += obsLines.length * 5;
+      let extraData = null;
+      
+      if (insp.hasPressure && formData.inspeccion_8_presion_estatica) {
+        extraData = `• Presión estática: ${formData.inspeccion_8_presion_estatica} PSI`;
       }
-      y += 6;
+      if (insp.hasFields) {
+        extraData = `• LP: ${formData.inspeccion_10_lp || 'N/A'} PSI | HP: ${formData.inspeccion_10_hp || 'N/A'} PSI`;
+      }
+      if (insp.hasTemp && formData[`inspeccion_${insp.id}_temperatura`]) {
+        extraData = `• Temperatura: ${formData[`inspeccion_${insp.id}_temperatura`]}°C`;
+      }
+      
+      addStatusBox(`${insp.num}. ${insp.label}`, estado, obs, extraData);
     });
 
     // Componentes
-    if (y > 250) {
-      doc.addPage();
-      y = 20;
-    }
-    doc.setFontSize(12);
-    doc.setFont("helvetica", "bold");
-    doc.text("COMPONENTES", margin, y);
-    y += 7;
-    doc.setFontSize(9);
+    addSection("2. ESTADO DE COMPONENTES", true);
     componentes.forEach((comp) => {
-      if (y > 270) {
-        doc.addPage();
-        y = 20;
-      }
       const estado = formData[`componente_${comp.key}_estado`] || "pendiente";
       const obs = formData[`componente_${comp.key}_observacion`] || "";
-      doc.setFont("helvetica", "bold");
-      doc.text(comp.label, margin, y);
-      y += 5;
-      doc.setFont("helvetica", "normal");
-      doc.text(`Estado: ${estado.toUpperCase()}`, margin + 5, y);
-      if (obs) {
-        y += 5;
-        const obsLines = doc.splitTextToSize(`Obs: ${obs}`, pageWidth - margin * 2 - 5);
-        doc.text(obsLines, margin + 5, y);
-        y += obsLines.length * 5;
-      }
-      y += 6;
+      addStatusBox(comp.label, estado, obs);
     });
 
-    // Acciones y Mediciones Finales
-    if (y > 230) {
-      doc.addPage();
-      y = 20;
-    }
-    doc.setFontSize(12);
-    doc.setFont("helvetica", "bold");
-    doc.text("ACCIONES Y MEDICIONES FINALES", margin, y);
-    y += 7;
-    doc.setFontSize(9);
-    doc.setFont("helvetica", "normal");
+    // Acciones y Mediciones
+    addSection("3. ACCIONES Y MEDICIONES FINALES", true);
+    
     if (formData.acciones_realizadas) {
-      const accionesLines = doc.splitTextToSize(`Acciones: ${formData.acciones_realizadas}`, pageWidth - margin * 2);
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "bold");
+      doc.text("Acciones Realizadas:", margin, y);
+      y += 5;
+      doc.setFont("helvetica", "normal");
+      const accionesLines = doc.splitTextToSize(formData.acciones_realizadas, pageWidth - 2 * margin);
       doc.text(accionesLines, margin, y);
       y += accionesLines.length * 5 + 5;
     }
-    if (formData.medicion_final_lp) doc.text(`Presión LP Final: ${formData.medicion_final_lp} PSI`, margin, y), y += 5;
-    if (formData.medicion_final_hp) doc.text(`Presión HP Final: ${formData.medicion_final_hp} PSI`, margin, y), y += 5;
-    if (formData.medicion_final_temp_frio_corte) doc.text(`Temp. Frío Corte: ${formData.medicion_final_temp_frio_corte}°C`, margin, y), y += 5;
-    if (formData.medicion_final_temp_frio_acople) doc.text(`Temp. Frío Acople: ${formData.medicion_final_temp_frio_acople}°C`, margin, y), y += 5;
-    if (formData.medicion_final_temp_calefaccion) doc.text(`Temp. Calefacción: ${formData.medicion_final_temp_calefaccion}°C`, margin, y), y += 5;
+
+    // Tabla de mediciones finales
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    doc.text("Mediciones Finales:", margin, y);
+    y += 7;
+    
+    const mediciones = [
+      { label: "Presión LP Final", value: formData.medicion_final_lp ? `${formData.medicion_final_lp} PSI` : 'N/A' },
+      { label: "Presión HP Final", value: formData.medicion_final_hp ? `${formData.medicion_final_hp} PSI` : 'N/A' },
+      { label: "Temp. Frío Corte", value: formData.medicion_final_temp_frio_corte ? `${formData.medicion_final_temp_frio_corte}°C` : 'N/A' },
+      { label: "Temp. Frío Acople", value: formData.medicion_final_temp_frio_acople ? `${formData.medicion_final_temp_frio_acople}°C` : 'N/A' },
+      { label: "Temp. Calefacción", value: formData.medicion_final_temp_calefaccion ? `${formData.medicion_final_temp_calefaccion}°C` : 'N/A' },
+    ];
+
+    mediciones.forEach((med, idx) => {
+      if (y > pageHeight - 20) {
+        doc.addPage();
+        addHeader();
+        y = 35;
+      }
+      doc.setFillColor(idx % 2 === 0 ? 250 : 255, idx % 2 === 0 ? 250 : 255, idx % 2 === 0 ? 250 : 255);
+      doc.rect(margin, y, pageWidth - 2 * margin, 7, 'F');
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "normal");
+      doc.text(med.label, margin + 2, y + 4.5);
+      doc.setFont("helvetica", "bold");
+      doc.text(med.value, pageWidth - margin - 2, y + 4.5, { align: "right" });
+      y += 7;
+    });
+
+    y += 8;
 
     // Información Final
-    y += 5;
-    if (y > 250) {
-      doc.addPage();
-      y = 20;
-    }
-    doc.setFontSize(12);
-    doc.setFont("helvetica", "bold");
-    doc.text("INFORMACIÓN FINAL", margin, y);
-    y += 7;
-    doc.setFontSize(9);
-    doc.setFont("helvetica", "normal");
+    addSection("4. INFORMACIÓN FINAL");
+    
     if (formData.estado_final_equipo) {
-      doc.text(`Estado Final: ${formData.estado_final_equipo}`, margin, y);
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "bold");
+      doc.text("Estado Final del Equipo:", margin, y);
       y += 5;
-    }
-    if (formData.observaciones_finales) {
-      const obsFinalesLines = doc.splitTextToSize(`Observaciones: ${formData.observaciones_finales}`, pageWidth - margin * 2);
-      doc.text(obsFinalesLines, margin, y);
-      y += obsFinalesLines.length * 5 + 5;
-    }
-    if (formData.mecanico_responsable_name) {
-      doc.text(`Mecánico: ${formData.mecanico_responsable_name}`, margin, y);
-      y += 5;
-    }
-    if (formData.planificador_mantenimiento_name) {
-      doc.text(`Planificador: ${formData.planificador_mantenimiento_name}`, margin, y);
-      y += 5;
-    }
-    if (formData.supervisor_mantenimiento_name) {
-      doc.text(`Supervisor: ${formData.supervisor_mantenimiento_name}`, margin, y);
-      y += 5;
+      doc.setFont("helvetica", "normal");
+      doc.text(formData.estado_final_equipo, margin, y);
+      y += 8;
     }
 
-    doc.save(`Inspeccion_AC_${selectedVehicle?.plate || 'sin_patente'}_${formData.inspection_date}.pdf`);
+    if (formData.observaciones_finales) {
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "bold");
+      doc.text("Observaciones y Recomendaciones:", margin, y);
+      y += 5;
+      doc.setFont("helvetica", "normal");
+      const obsLines = doc.splitTextToSize(formData.observaciones_finales, pageWidth - 2 * margin);
+      doc.text(obsLines, margin, y);
+      y += obsLines.length * 5 + 8;
+    }
+
+    // Firmas
+    y += 5;
+    if (y > pageHeight - 50) {
+      doc.addPage();
+      addHeader();
+      y = 35;
+    }
+    
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    doc.text("RESPONSABLES", margin, y);
+    y += 8;
+
+    const firmas = [
+      { label: "Mecánico Responsable", name: formData.mecanico_responsable_name },
+      { label: "Planificador de Mantenimiento", name: formData.planificador_mantenimiento_name },
+      { label: "Supervisor de Mantenimiento", name: formData.supervisor_mantenimiento_name }
+    ].filter(f => f.name);
+
+    const firmaWidth = (pageWidth - 2 * margin - 10) / Math.max(firmas.length, 1);
+    firmas.forEach((firma, idx) => {
+      const x = margin + idx * (firmaWidth + 5);
+      doc.setDrawColor(200, 200, 200);
+      doc.line(x, y + 20, x + firmaWidth, y + 20);
+      doc.setFontSize(8);
+      doc.setFont("helvetica", "bold");
+      doc.text(firma.label, x + firmaWidth / 2, y + 25, { align: "center" });
+      doc.setFont("helvetica", "normal");
+      doc.text(firma.name || '', x + firmaWidth / 2, y + 30, { align: "center" });
+    });
+
+    // Añadir footers a todas las páginas
+    const totalPages = doc.internal.pages.length - 1;
+    for (let i = 1; i <= totalPages; i++) {
+      doc.setPage(i);
+      addFooter(i);
+    }
+
+    doc.save(`Inspeccion_AC_${selectedVehicle?.plate || 'sin_patente'}_${formData.inspection_date.split('T')[0]}.pdf`);
   };
 
   return (
