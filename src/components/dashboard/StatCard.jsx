@@ -6,7 +6,7 @@ export default function StatCard({ title, value, subtitle, icon: Icon, trend, tr
   
   return (
     <div className={cn(
-      "relative overflow-hidden rounded-2xl border p-6",
+      "relative overflow-hidden rounded-2xl border p-6 h-36",
       "backdrop-blur-xl shadow-2xl hover:-translate-y-1",
       "transition-all duration-500 group",
       theme === 'dark' ? 'bg-zinc-900/80 border-zinc-800/50 shadow-black/20 hover:bg-zinc-900 hover:border-yellow-500/30 hover:shadow-yellow-500/10 hover:shadow-2xl' : 'bg-white border-gray-200 shadow-gray-200/50 hover:shadow-xl hover:border-yellow-500/30',
