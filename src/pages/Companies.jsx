@@ -191,7 +191,7 @@ export default function Companies() {
                   <div className="relative flex items-start justify-between mb-4">
                     <div className="flex items-center gap-4">
                       {company.logo_url ? (
-                        <div className="p-2 rounded-xl bg-zinc-800 border border-zinc-700">
+                        <div className={cn("p-2 rounded-xl border", theme === 'dark' ? 'bg-zinc-800 border-zinc-700' : 'bg-gray-100 border-gray-200')}>
                           <img src={company.logo_url} alt={company.name} className="w-12 h-12 object-contain" />
                         </div>
                       ) : (
@@ -211,15 +211,15 @@ export default function Companies() {
                   </div>
                   
                   <div className="relative flex items-center gap-2">
-                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-zinc-800/50 border border-zinc-700/50">
+                    <div className={cn("flex items-center gap-2 px-3 py-2 rounded-lg border", theme === 'dark' ? 'bg-zinc-800/50 border-zinc-700/50' : 'bg-gray-100/50 border-gray-200/50')}>
                       <MapPin className="w-4 h-4 text-emerald-500" />
-                      <span className="text-sm font-semibold text-white">{stats.locations}</span>
-                      <span className="text-xs text-zinc-500">locaciones</span>
+                      <span className={cn("text-sm font-semibold", theme === 'dark' ? 'text-white' : 'text-gray-900')}>{stats.locations}</span>
+                      <span className={cn("text-xs", theme === 'dark' ? 'text-zinc-500' : 'text-gray-500')}>locaciones</span>
                     </div>
-                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-zinc-800/50 border border-zinc-700/50">
+                    <div className={cn("flex items-center gap-2 px-3 py-2 rounded-lg border", theme === 'dark' ? 'bg-zinc-800/50 border-zinc-700/50' : 'bg-gray-100/50 border-gray-200/50')}>
                       <Users className="w-4 h-4 text-cyan-500" />
-                      <span className="text-sm font-semibold text-white">{stats.admins}</span>
-                      <span className="text-xs text-zinc-500">admins</span>
+                      <span className={cn("text-sm font-semibold", theme === 'dark' ? 'text-white' : 'text-gray-900')}>{stats.admins}</span>
+                      <span className={cn("text-xs", theme === 'dark' ? 'text-zinc-500' : 'text-gray-500')}>admins</span>
                     </div>
                   </div>
 
