@@ -76,6 +76,9 @@ const initialState = {
   componente_tapones_estado: "pendiente",
   componente_tapones_observacion: "",
   
+  // Acciones realizadas
+  acciones_realizadas: "",
+  
   // Mediciones finales
   medicion_final_lp: "",
   medicion_final_hp: "",
@@ -257,8 +260,7 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
     setSearchTerm("");
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSave = async (closeAfterSave = true) => {
     setError("");
     setLoading(true);
 
@@ -288,16 +290,25 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
       if (maintenance) {
         await base44.entities.AirConditioningMaintenance.update(maintenance.id, dataToSave);
       } else {
-        await base44.entities.AirConditioningMaintenance.create(dataToSave);
+        const created = await base44.entities.AirConditioningMaintenance.create(dataToSave);
+        // Si se acaba de crear, actualizar formData con el ID para futuras actualizaciones
+        setFormData({ ...dataToSave, id: created.id });
       }
 
       onSuccess?.();
-      onOpenChange(false);
+      if (closeAfterSave) {
+        onOpenChange(false);
+      }
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    await handleSave(true);
   };
 
   return (
@@ -696,8 +707,23 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
 
             <TabsContent value="mediciones" className="space-y-4 mt-4">
               <h3 className={cn("font-semibold mb-4", theme === 'dark' ? 'text-white' : 'text-gray-900')}>
-                Mediciones Finales
+                Acciones y Mediciones Finales
               </h3>
+              
+              <div className="space-y-2 mb-6">
+                <Label className={theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}>Acciones Realizadas sobre la Unidad</Label>
+                <Textarea
+                  value={formData.acciones_realizadas}
+                  onChange={(e) => setFormData({ ...formData, acciones_realizadas: e.target.value })}
+                  placeholder="Describa las acciones realizadas durante el mantenimiento (reparaciones, ajustes, reemplazos, etc.)"
+                  rows={4}
+                  className={theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-white' : ''}
+                />
+              </div>
+
+              <h4 className={cn("font-semibold mb-3 text-sm", theme === 'dark' ? 'text-zinc-300' : 'text-gray-700')}>
+                Mediciones Finales
+              </h4>
               
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -841,28 +867,47 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
             </TabsContent>
           </Tabs>
 
-          <div className="flex justify-end gap-3 pt-4 border-t" style={{ borderColor: theme === 'dark' ? 'rgb(63, 63, 70)' : 'rgb(229, 231, 235)' }}>
+          <div className="flex justify-between gap-3 pt-4 border-t" style={{ borderColor: theme === 'dark' ? 'rgb(63, 63, 70)' : 'rgb(229, 231, 235)' }}>
             <Button
               type="button"
               variant="outline"
-              onClick={() => onOpenChange(false)}
+              onClick={() => handleSave(false)}
               disabled={loading}
               className={theme === 'dark' ? 'border-zinc-700 text-zinc-300 hover:bg-zinc-800' : ''}
-            >
-              Cancelar
-            </Button>
-            <Button
-              type="submit"
-              disabled={loading}
-              className="bg-yellow-500 hover:bg-yellow-600 text-black"
             >
               {loading ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   Guardando...
                 </>
-              ) : maintenance ? "Actualizar" : "Guardar Inspección"}
+              ) : (
+                "Guardar Progreso"
+              )}
             </Button>
+            
+            <div className="flex gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                disabled={loading}
+                className={theme === 'dark' ? 'border-zinc-700 text-zinc-300 hover:bg-zinc-800' : ''}
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                disabled={loading}
+                className="bg-yellow-500 hover:bg-yellow-600 text-black"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Guardando...
+                  </>
+                ) : maintenance ? "Actualizar y Cerrar" : "Guardar y Cerrar"}
+              </Button>
+            </div>
           </div>
         </form>
       </DialogContent>
