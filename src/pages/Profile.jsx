@@ -55,6 +55,8 @@ export default function Profile() {
       // Reload user data
       const userData = await base44.auth.me();
       setUser(userData);
+      // Trigger a custom event to notify the Layout to refresh user data
+      window.dispatchEvent(new CustomEvent('userProfileUpdated'));
     } catch (error) {
       console.error("Error saving profile:", error);
       alert("Error al guardar el perfil");

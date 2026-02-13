@@ -90,6 +90,14 @@ function LayoutContent({ children, currentPageName }) {
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
+    
+    // Listen for profile updates
+    const handleProfileUpdate = () => {
+      base44.auth.me().then(setUser).catch(() => {});
+    };
+    
+    window.addEventListener('userProfileUpdated', handleProfileUpdate);
+    return () => window.removeEventListener('userProfileUpdated', handleProfileUpdate);
   }, []);
 
   // Verificar si el usuario es admin sin empresa asignada (y NO es super_admin)
