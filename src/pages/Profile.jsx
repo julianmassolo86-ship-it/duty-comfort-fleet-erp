@@ -12,7 +12,7 @@ import { useTheme } from "../components/common/ThemeWrapper";
 export default function Profile() {
   const [user, setUser] = useState(null);
   const [form, setForm] = useState({
-    full_name: "",
+    display_name: "",
     phone: "",
     logo_url: "",
   });
@@ -27,7 +27,7 @@ export default function Profile() {
         console.log("User data loaded:", userData);
         setUser(userData);
         setForm({
-          full_name: userData.full_name || "",
+          display_name: userData.display_name || "",
           phone: userData.phone || "",
           logo_url: userData.logo_url || "",
         });
@@ -58,36 +58,26 @@ export default function Profile() {
     e?.preventDefault();
     setSaving(true);
     
-    console.log("Saving profile with data:", form);
-    
     try {
-      // Actualizar solo los campos que existen en el usuario
       const updateData = {
-        full_name: form.full_name.trim(),
+        display_name: form.display_name.trim(),
         phone: form.phone
       };
       
-      // Solo agregar logo_url si es super admin
       if (isSuperAdmin) {
         updateData.logo_url = form.logo_url;
       }
       
-      console.log("Update data:", updateData);
-      const result = await base44.auth.updateMe(updateData);
-      console.log("Update result:", result);
+      await base44.auth.updateMe(updateData);
       
-      // Reload user data
       const userData = await base44.auth.me();
-      console.log("Reloaded user data:", userData);
-      
       setUser(userData);
       setForm({
-        full_name: userData.full_name || "",
+        display_name: userData.display_name || "",
         phone: userData.phone || "",
         logo_url: userData.logo_url || "",
       });
       
-      // Trigger a custom event to notify the Layout to refresh user data
       window.dispatchEvent(new CustomEvent('userProfileUpdated'));
       alert("Perfil actualizado correctamente");
     } catch (error) {

@@ -305,12 +305,12 @@ function LayoutContent({ children, currentPageName }) {
                   <Avatar className="w-9 h-9 border-2" style={{ borderColor: theme === 'dark' ? 'rgb(63, 63, 70)' : 'rgb(229, 231, 235)' }}>
                     {user.profile_photo && <AvatarImage src={user.profile_photo} />}
                     <AvatarFallback className={theme === 'dark' ? 'bg-yellow-500/10 text-yellow-400' : 'bg-yellow-500/20 text-yellow-600'}>
-                      {user.full_name?.charAt(0) || user.email?.charAt(0) || 'U'}
+                      {(user.display_name || user.full_name)?.charAt(0) || user.email?.charAt(0) || 'U'}
                     </AvatarFallback>
                   </Avatar>
                   <div className="text-left hidden xl:block">
                     <p className={cn("text-sm font-medium truncate max-w-32", theme === 'dark' ? 'text-white' : 'text-gray-900')}>
-                      {user.full_name || 'Usuario'}
+                      {user.display_name || user.full_name || 'Usuario'}
                     </p>
                     <p className={cn("text-xs truncate max-w-32", theme === 'dark' ? 'text-zinc-500' : 'text-gray-500')}>
                       {user.email}
@@ -324,7 +324,7 @@ function LayoutContent({ children, currentPageName }) {
 
                 <div className="px-3 py-2">
                   <p className={cn("text-sm font-medium", theme === 'dark' ? 'text-white' : 'text-gray-900')}>
-                    {user.full_name || 'Usuario'}
+                    {user.display_name || user.full_name || 'Usuario'}
                   </p>
                   <p className={cn("text-xs", theme === 'dark' ? 'text-zinc-500' : 'text-gray-500')}>
                     {user.email}
@@ -597,12 +597,12 @@ function LayoutContent({ children, currentPageName }) {
                   }}>
                       {user.profile_photo && <AvatarImage src={user.profile_photo} />}
                       <AvatarFallback className={theme === 'dark' ? 'bg-yellow-500/10 text-yellow-400 font-medium' : 'bg-yellow-500/20 text-yellow-600 font-medium'}>
-                        {user.full_name?.charAt(0) || user.email?.charAt(0) || 'U'}
+                        {(user.display_name || user.full_name)?.charAt(0) || user.email?.charAt(0) || 'U'}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 text-left">
                       <p className={cn("text-sm font-medium truncate", theme === 'dark' ? 'text-white' : 'text-gray-900')}>
-                        {user.full_name || 'Usuario'}
+                        {user.display_name || user.full_name || 'Usuario'}
                       </p>
                       <p className={cn("text-xs truncate", theme === 'dark' ? 'text-zinc-500' : 'text-gray-500')}>
                         {user.email}
