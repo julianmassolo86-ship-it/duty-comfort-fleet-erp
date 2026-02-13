@@ -66,8 +66,9 @@ export default function VehicleTypeDialog({ open, onOpenChange, vehicleType, onS
     }
   }, [open, vehicleType]);
 
-  const handleSave = () => {
-    onSave(formData);
+  const handleSave = async () => {
+    if (!formData.name || !formData.category_id) return;
+    await onSave(formData);
   };
 
   const handleDelete = () => {

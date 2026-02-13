@@ -375,7 +375,13 @@ export default function VehicleDialog({
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Categoría</Label>
-                  <Select value={form.category_id || ""} onValueChange={(v) => handleChange("category_id", v)}>
+                  <Select 
+                    value={form.category_id || ""} 
+                    onValueChange={(v) => {
+                      handleChange("category_id", v);
+                      handleChange("type_id", "");
+                    }}
+                  >
                     <SelectTrigger className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50">
                       <SelectValue placeholder="Seleccionar categoría" />
                     </SelectTrigger>
@@ -391,17 +397,23 @@ export default function VehicleDialog({
                 </div>
                 <div className="space-y-2">
                   <Label>Tipo</Label>
-                  <Select value={form.type_id || ""} onValueChange={(v) => handleChange("type_id", v)}>
+                  <Select 
+                    value={form.type_id || ""} 
+                    onValueChange={(v) => handleChange("type_id", v)}
+                    disabled={!form.category_id}
+                  >
                     <SelectTrigger className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50">
-                      <SelectValue placeholder="Seleccionar tipo" />
+                      <SelectValue placeholder={form.category_id ? "Seleccionar tipo" : "Primero seleccione categoría"} />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value={null}>Sin tipo</SelectItem>
-                      {vehicleTypes.map(vt => (
-                        <SelectItem key={vt.id} value={vt.id}>
-                          {vt.name}
-                        </SelectItem>
-                      ))}
+                      {vehicleTypes
+                        .filter(vt => vt.category_id === form.category_id)
+                        .map(vt => (
+                          <SelectItem key={vt.id} value={vt.id}>
+                            {vt.name}
+                          </SelectItem>
+                        ))}
                     </SelectContent>
                   </Select>
                 </div>

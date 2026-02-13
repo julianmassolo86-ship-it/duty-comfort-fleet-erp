@@ -62,11 +62,13 @@ export default function VehicleTypesPage() {
     setDialogOpen(true);
   };
 
-  const handleSave = (data) => {
+  const handleSave = async (data) => {
+    if (createVehicleTypeMutation.isPending || updateVehicleTypeMutation.isPending) return;
+    
     if (selectedVehicleType) {
-      updateVehicleTypeMutation.mutate({ id: selectedVehicleType.id, data });
+      await updateVehicleTypeMutation.mutateAsync({ id: selectedVehicleType.id, data });
     } else {
-      createVehicleTypeMutation.mutate(data);
+      await createVehicleTypeMutation.mutateAsync(data);
     }
   };
 
