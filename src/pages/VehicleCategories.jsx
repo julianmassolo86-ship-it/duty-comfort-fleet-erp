@@ -68,11 +68,13 @@ export default function VehicleCategoriesPage() {
     setDialogOpen(true);
   };
 
-  const handleSave = (data) => {
+  const handleSave = async (data) => {
+    if (createMutation.isPending || updateMutation.isPending) return;
+    
     if (selectedCategory) {
-      updateMutation.mutate({ id: selectedCategory.id, data });
+      await updateMutation.mutateAsync({ id: selectedCategory.id, data });
     } else {
-      createMutation.mutate(data);
+      await createMutation.mutateAsync(data);
     }
   };
 
