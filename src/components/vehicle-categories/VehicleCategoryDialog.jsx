@@ -26,6 +26,7 @@ export default function VehicleCategoryDialog({ open, onOpenChange, category, on
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isLoading) return; // Prevent double submission
     setIsLoading(true);
     try {
       await onSave(formData);
