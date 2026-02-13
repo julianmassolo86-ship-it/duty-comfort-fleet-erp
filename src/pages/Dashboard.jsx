@@ -17,6 +17,8 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTheme } from "../components/common/ThemeWrapper";
 import ExpiryListDialog from "../components/dashboard/ExpiryListDialog";
+import VehicleStatusPieChart from "../components/dashboard/VehicleStatusPieChart";
+import VehicleTypePieChart from "../components/dashboard/VehicleTypePieChart";
 
 export default function Dashboard() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -380,6 +382,33 @@ export default function Dashboard() {
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
+            </div>
+          </div>
+        )}
+
+        {/* Pie Charts Section - Para todos los usuarios */}
+        {!isLoading && accessibleVehicles.length > 0 && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            {/* Vehicle Status Pie Chart */}
+            <div className={cn("rounded-2xl border p-6 backdrop-blur-xl shadow-2xl", theme === 'dark' ? 'bg-zinc-900/80 border-zinc-800/50 shadow-black/20' : 'bg-white border-gray-200 shadow-gray-200/50')}>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-3 rounded-xl bg-gradient-to-br from-yellow-500/20 to-yellow-600/10 border border-yellow-500/20">
+                  <BarChart3 className="w-5 h-5 text-yellow-400" />
+                </div>
+                <h3 className={cn("text-lg font-bold", theme === 'dark' ? 'text-white' : 'text-gray-900')}>Estados de Vehículos</h3>
+              </div>
+              <VehicleStatusPieChart vehicles={accessibleVehicles} />
+            </div>
+
+            {/* Vehicle Type Pie Chart */}
+            <div className={cn("rounded-2xl border p-6 backdrop-blur-xl shadow-2xl", theme === 'dark' ? 'bg-zinc-900/80 border-zinc-800/50 shadow-black/20' : 'bg-white border-gray-200 shadow-gray-200/50')}>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-600/10 border border-blue-500/20">
+                  <Car className="w-5 h-5 text-blue-400" />
+                </div>
+                <h3 className={cn("text-lg font-bold", theme === 'dark' ? 'text-white' : 'text-gray-900')}>Tipos de Vehículos</h3>
+              </div>
+              <VehicleTypePieChart vehicles={accessibleVehicles} />
             </div>
           </div>
         )}
