@@ -7,7 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, Loader2, Search, X, Check, AlertTriangle, Eye } from "lucide-react";
+import { AlertCircle, Loader2, Search, X, Check, AlertTriangle, Eye, FileDown } from "lucide-react";
+import jsPDF from "jspdf";
 import { cn } from "@/lib/utils";
 import { useTheme } from "../common/ThemeWrapper";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -271,6 +272,9 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
       if (!formData.ambient_temperature) {
         throw new Error("Debe ingresar la temperatura ambiente");
       }
+      if (!formData.inspeccion_6_estado || formData.inspeccion_6_estado === "pendiente") {
+        throw new Error("Debe completar al menos hasta la inspección punto 6 (Forzador)");
+      }
 
       const dataToSave = { ...formData };
       
@@ -309,6 +313,159 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
   const handleSubmit = async (e) => {
     e.preventDefault();
     await handleSave(true);
+  };
+
+  const handleExportPDF = () => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 15;
+    let y = 20;
+
+    // Título
+    doc.setFontSize(18);
+    doc.setFont("helvetica", "bold");
+    doc.text("INFORME DE INSPECCIÓN A/C", pageWidth / 2, y, { align: "center" });
+    y += 15;
+
+    // Información del vehículo
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.text("INFORMACIÓN DEL ACTIVO", margin, y);
+    y += 7;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    if (selectedVehicle) {
+      doc.text(`Vehículo: ${selectedVehicle.internal_number} - ${selectedVehicle.plate}`, margin, y);
+      y += 5;
+      doc.text(`Marca/Modelo: ${selectedVehicle.manufacturer} ${selectedVehicle.model}`, margin, y);
+      y += 5;
+    }
+    doc.text(`Fecha: ${formData.inspection_date.split('T')[0].split('-').reverse().join('/')}`, margin, y);
+    y += 5;
+    doc.text(`Temperatura Ambiente: ${formData.ambient_temperature}°C`, margin, y);
+    y += 5;
+    if (formData.odometer_reading) {
+      doc.text(`KMS/HS: ${formData.odometer_reading}`, margin, y);
+      y += 5;
+    }
+    doc.text(`Tipo: ${formData.tipo_mantenimiento}`, margin, y);
+    y += 10;
+
+    // Inspecciones
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.text("INSPECCIONES", margin, y);
+    y += 7;
+    doc.setFontSize(9);
+    inspecciones.forEach((insp) => {
+      if (y > 270) {
+        doc.addPage();
+        y = 20;
+      }
+      const estado = formData[`inspeccion_${insp.id}_estado`] || "pendiente";
+      const obs = formData[`inspeccion_${insp.id}_observacion`] || "";
+      doc.setFont("helvetica", "bold");
+      doc.text(`${insp.num}. ${insp.label}`, margin, y);
+      y += 5;
+      doc.setFont("helvetica", "normal");
+      doc.text(`Estado: ${estado.toUpperCase()}`, margin + 5, y);
+      if (obs) {
+        y += 5;
+        const obsLines = doc.splitTextToSize(`Obs: ${obs}`, pageWidth - margin * 2 - 5);
+        doc.text(obsLines, margin + 5, y);
+        y += obsLines.length * 5;
+      }
+      y += 6;
+    });
+
+    // Componentes
+    if (y > 250) {
+      doc.addPage();
+      y = 20;
+    }
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.text("COMPONENTES", margin, y);
+    y += 7;
+    doc.setFontSize(9);
+    componentes.forEach((comp) => {
+      if (y > 270) {
+        doc.addPage();
+        y = 20;
+      }
+      const estado = formData[`componente_${comp.key}_estado`] || "pendiente";
+      const obs = formData[`componente_${comp.key}_observacion`] || "";
+      doc.setFont("helvetica", "bold");
+      doc.text(comp.label, margin, y);
+      y += 5;
+      doc.setFont("helvetica", "normal");
+      doc.text(`Estado: ${estado.toUpperCase()}`, margin + 5, y);
+      if (obs) {
+        y += 5;
+        const obsLines = doc.splitTextToSize(`Obs: ${obs}`, pageWidth - margin * 2 - 5);
+        doc.text(obsLines, margin + 5, y);
+        y += obsLines.length * 5;
+      }
+      y += 6;
+    });
+
+    // Acciones y Mediciones Finales
+    if (y > 230) {
+      doc.addPage();
+      y = 20;
+    }
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.text("ACCIONES Y MEDICIONES FINALES", margin, y);
+    y += 7;
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "normal");
+    if (formData.acciones_realizadas) {
+      const accionesLines = doc.splitTextToSize(`Acciones: ${formData.acciones_realizadas}`, pageWidth - margin * 2);
+      doc.text(accionesLines, margin, y);
+      y += accionesLines.length * 5 + 5;
+    }
+    if (formData.medicion_final_lp) doc.text(`Presión LP Final: ${formData.medicion_final_lp} PSI`, margin, y), y += 5;
+    if (formData.medicion_final_hp) doc.text(`Presión HP Final: ${formData.medicion_final_hp} PSI`, margin, y), y += 5;
+    if (formData.medicion_final_temp_frio_corte) doc.text(`Temp. Frío Corte: ${formData.medicion_final_temp_frio_corte}°C`, margin, y), y += 5;
+    if (formData.medicion_final_temp_frio_acople) doc.text(`Temp. Frío Acople: ${formData.medicion_final_temp_frio_acople}°C`, margin, y), y += 5;
+    if (formData.medicion_final_temp_calefaccion) doc.text(`Temp. Calefacción: ${formData.medicion_final_temp_calefaccion}°C`, margin, y), y += 5;
+
+    // Información Final
+    y += 5;
+    if (y > 250) {
+      doc.addPage();
+      y = 20;
+    }
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.text("INFORMACIÓN FINAL", margin, y);
+    y += 7;
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "normal");
+    if (formData.estado_final_equipo) {
+      doc.text(`Estado Final: ${formData.estado_final_equipo}`, margin, y);
+      y += 5;
+    }
+    if (formData.observaciones_finales) {
+      const obsFinalesLines = doc.splitTextToSize(`Observaciones: ${formData.observaciones_finales}`, pageWidth - margin * 2);
+      doc.text(obsFinalesLines, margin, y);
+      y += obsFinalesLines.length * 5 + 5;
+    }
+    if (formData.mecanico_responsable_name) {
+      doc.text(`Mecánico: ${formData.mecanico_responsable_name}`, margin, y);
+      y += 5;
+    }
+    if (formData.planificador_mantenimiento_name) {
+      doc.text(`Planificador: ${formData.planificador_mantenimiento_name}`, margin, y);
+      y += 5;
+    }
+    if (formData.supervisor_mantenimiento_name) {
+      doc.text(`Supervisor: ${formData.supervisor_mantenimiento_name}`, margin, y);
+      y += 5;
+    }
+
+    doc.save(`Inspeccion_AC_${selectedVehicle?.plate || 'sin_patente'}_${formData.inspection_date}.pdf`);
   };
 
   return (
@@ -868,22 +1025,38 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
           </Tabs>
 
           <div className="flex justify-between gap-3 pt-4 border-t" style={{ borderColor: theme === 'dark' ? 'rgb(63, 63, 70)' : 'rgb(229, 231, 235)' }}>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => handleSave(false)}
-              disabled={loading}
-              className={theme === 'dark' ? 'border-zinc-700 text-zinc-300 hover:bg-zinc-800' : ''}
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Guardando...
-                </>
-              ) : (
-                "Guardar Progreso"
+            <div className="flex gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => handleSave(false)}
+                disabled={loading}
+                className={theme === 'dark' ? 'border-zinc-700 text-zinc-300 hover:bg-zinc-800' : ''}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Guardando...
+                  </>
+                ) : (
+                  "Guardar Progreso"
+                )}
+              </Button>
+              {maintenance && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleExportPDF}
+                  className={cn(
+                    "bg-blue-500 hover:bg-blue-600 text-white border-blue-600",
+                    theme === 'dark' ? 'hover:bg-blue-700' : ''
+                  )}
+                >
+                  <FileDown className="w-4 h-4 mr-2" />
+                  Exportar PDF
+                </Button>
               )}
-            </Button>
+            </div>
             
             <div className="flex gap-3">
               <Button
