@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Search, Wrench, AlertCircle } from "lucide-react";
+import { Plus, Search, Wrench, AlertCircle, Wind } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -14,6 +14,7 @@ import MaintenanceCard from "../components/maintenance/MaintenanceCard";
 import MaintenanceDialog from "../components/maintenance/MaintenanceDialog";
 import NovedadDialog from "../components/novedades/NovedadDialog";
 import NovedadCard from "../components/novedades/NovedadCard";
+import AirConditioningMaintenanceDialog from "../components/ac-maintenance/AirConditioningMaintenanceDialog";
 import { useTheme } from "../components/common/ThemeWrapper";
 
 export default function Maintenance() {
@@ -26,7 +27,9 @@ export default function Maintenance() {
   const [activeTab, setActiveTab] = useState(tabFromUrl === "novedades" ? "novedades" : "mantenimientos");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [novedadDialogOpen, setNovedadDialogOpen] = useState(false);
+  const [acDialogOpen, setAcDialogOpen] = useState(false);
   const [selectedMaintenance, setSelectedMaintenance] = useState(null);
+  const [selectedAcMaintenance, setSelectedAcMaintenance] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { theme } = useTheme();
@@ -39,6 +42,7 @@ export default function Maintenance() {
     await queryClient.invalidateQueries({ queryKey: ['maintenances'] });
     await queryClient.invalidateQueries({ queryKey: ['vehicles'] });
     await queryClient.invalidateQueries({ queryKey: ['novedades'] });
+    await queryClient.invalidateQueries({ queryKey: ['ac-maintenances'] });
     setTimeout(() => setIsRefreshing(false), 500);
   };
 
@@ -108,6 +112,18 @@ export default function Maintenance() {
         return allNovedades.filter(n => n.company_id === currentUser.company_id);
       }
       return allNovedades;
+    },
+    enabled: !!currentUser,
+  });
+
+  const { data: acMaintenances = [], isLoading: isLoadingAc } = useQuery({
+    queryKey: ['ac-maintenances', currentUser?.company_id],
+    queryFn: async () => {
+      const allAc = await base44.entities.AirConditioningMaintenance.list('-inspection_date');
+      if (currentUser?.company_id) {
+        return allAc.filter(ac => ac.company_id === currentUser.company_id);
+      }
+      return allAc;
     },
     enabled: !!currentUser,
   });
@@ -210,6 +226,14 @@ export default function Maintenance() {
           actions={
             <div className="flex gap-2">
               <Button 
+                onClick={() => { setSelectedAcMaintenance(null); setAcDialogOpen(true); }}
+                className="bg-green-500 hover:bg-green-600 text-white font-semibold"
+              >
+                <Wind className="w-4 h-4 mr-2" />
+                <span className="hidden sm:inline">Inspección A/C</span>
+                <span className="sm:hidden">A/C</span>
+              </Button>
+              <Button 
                 onClick={() => { setNovedadDialogOpen(true); }}
                 className="bg-blue-500 hover:bg-blue-600 text-white font-semibold"
               >
@@ -233,6 +257,14 @@ export default function Maintenance() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
           <TabsList className={theme === 'dark' ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-gray-200'}>
             <TabsTrigger value="mantenimientos">Mantenimientos</TabsTrigger>
+            <TabsTrigger value="ac">
+              A/C
+              {acMaintenances.filter(ac => ac.status === 'en_proceso').length > 0 && (
+                <span className="ml-2 px-1.5 py-0.5 text-xs rounded-full bg-green-500 text-white">
+                  {acMaintenances.filter(ac => ac.status === 'en_proceso').length}
+                </span>
+              )}
+            </TabsTrigger>
             <TabsTrigger value="novedades">
               Novedades
               {novedades.filter(n => n.estado === 'pendiente').length > 0 && (
@@ -305,7 +337,79 @@ export default function Maintenance() {
         </div>
 
         {/* Maintenance Grid */}
-        {activeTab === 'mantenimientos' ? (
+        {activeTab === 'ac' ? (
+          isLoadingAc ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Array(6).fill(0).map((_, i) => (
+                <Skeleton key={i} className={cn("h-52 rounded-2xl", theme === 'dark' ? 'bg-zinc-900/50' : 'bg-gray-200')} />
+              ))}
+            </div>
+          ) : acMaintenances.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {acMaintenances.map(ac => {
+                const vehicle = vehiclesMap[ac.vehicle_id];
+                return (
+                  <div 
+                    key={ac.id}
+                    onClick={() => { setSelectedAcMaintenance(ac); setAcDialogOpen(true); }}
+                    className={cn(
+                      "p-6 rounded-2xl border cursor-pointer transition-all hover:shadow-lg",
+                      theme === 'dark' 
+                        ? 'bg-zinc-900/50 border-zinc-800 hover:border-green-500/50' 
+                        : 'bg-white border-gray-200 hover:border-green-500'
+                    )}
+                  >
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
+                          <Wind className="w-5 h-5 text-green-500" />
+                        </div>
+                        <div>
+                          <p className={cn("text-sm font-medium", theme === 'dark' ? 'text-white' : 'text-gray-900')}>
+                            {vehicle?.internal_number || 'N/A'} - {vehicle?.plate || 'Sin patente'}
+                          </p>
+                          <p className={cn("text-xs", theme === 'dark' ? 'text-zinc-500' : 'text-gray-500')}>
+                            {vehicle?.manufacturer} {vehicle?.model}
+                          </p>
+                        </div>
+                      </div>
+                      <span className={cn(
+                        "text-xs px-2 py-1 rounded-full",
+                        ac.status === 'completado' 
+                          ? 'bg-green-500/10 text-green-600' 
+                          : ac.status === 'aprobado'
+                          ? 'bg-blue-500/10 text-blue-600'
+                          : 'bg-yellow-500/10 text-yellow-600'
+                      )}>
+                        {ac.status === 'completado' ? 'Completado' : ac.status === 'aprobado' ? 'Aprobado' : 'En Proceso'}
+                      </span>
+                    </div>
+                    <div className={cn("text-sm space-y-1", theme === 'dark' ? 'text-zinc-400' : 'text-gray-600')}>
+                      <p>📅 {new Date(ac.inspection_date).toLocaleDateString()}</p>
+                      <p>🌡️ Temp. Ambiente: {ac.ambient_temperature}°C</p>
+                      {ac.odometer_reading && <p>📊 {ac.odometer_reading} km/hs</p>}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <EmptyState
+              icon={Wind}
+              title="Sin inspecciones de A/C"
+              description="Registra la primera inspección de aire acondicionado"
+              action={
+                <Button 
+                  onClick={() => { setSelectedAcMaintenance(null); setAcDialogOpen(true); }}
+                  className="bg-green-500 hover:bg-green-600 text-white font-semibold"
+                >
+                  <Wind className="w-4 h-4 mr-2" />
+                  Nueva Inspección A/C
+                </Button>
+              }
+            />
+          )
+        ) : activeTab === 'mantenimientos' ? (
           isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {Array(6).fill(0).map((_, i) => (
@@ -398,6 +502,18 @@ export default function Maintenance() {
             queryClient.invalidateQueries({ queryKey: ['vehicles'] });
             queryClient.invalidateQueries({ queryKey: ['novedades'] });
             setActiveTab('novedades');
+          }}
+        />
+
+        <AirConditioningMaintenanceDialog
+          open={acDialogOpen}
+          onOpenChange={setAcDialogOpen}
+          maintenance={selectedAcMaintenance}
+          onSuccess={() => {
+            queryClient.invalidateQueries({ queryKey: ['ac-maintenances'] });
+            setAcDialogOpen(false);
+            setSelectedAcMaintenance(null);
+            setActiveTab('ac');
           }}
         />
       </div>
