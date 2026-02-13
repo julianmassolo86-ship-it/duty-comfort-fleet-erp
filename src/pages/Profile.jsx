@@ -47,16 +47,17 @@ export default function Profile() {
     }
   };
 
-  const handleSave = async () => {
+  const handleSave = async (e) => {
+    e?.preventDefault();
     setSaving(true);
     try {
       await base44.auth.updateMe(form);
-      alert("Perfil actualizado correctamente");
       // Reload user data
       const userData = await base44.auth.me();
       setUser(userData);
       // Trigger a custom event to notify the Layout to refresh user data
       window.dispatchEvent(new CustomEvent('userProfileUpdated'));
+      alert("Perfil actualizado correctamente");
     } catch (error) {
       console.error("Error saving profile:", error);
       alert("Error al guardar el perfil");
@@ -99,11 +100,12 @@ export default function Profile() {
           description="Administra tu información personal"
         />
 
-        <Card className={cn("backdrop-blur-xl shadow-2xl", theme === 'dark' ? 'bg-zinc-900/80 border-zinc-800 shadow-black/20' : 'bg-white border-gray-200 shadow-gray-200/50')}>
-          <CardHeader>
-            <CardTitle className={theme === 'dark' ? 'text-white' : 'text-gray-900'}>Información Personal</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
+        <form onSubmit={handleSave}>
+          <Card className={cn("backdrop-blur-xl shadow-2xl", theme === 'dark' ? 'bg-zinc-900/80 border-zinc-800 shadow-black/20' : 'bg-white border-gray-200 shadow-gray-200/50')}>
+            <CardHeader>
+              <CardTitle className={theme === 'dark' ? 'text-white' : 'text-gray-900'}>Información Personal</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
             <div className="space-y-2">
               <Label>Email</Label>
               <Input
@@ -182,7 +184,7 @@ export default function Profile() {
 
             <div className="pt-4">
               <Button
-                onClick={handleSave}
+                type="submit"
                 disabled={saving}
                 className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
               >
@@ -214,6 +216,7 @@ export default function Profile() {
             </div>
           </CardContent>
         </Card>
+        </form>
       </div>
     </div>
   );
