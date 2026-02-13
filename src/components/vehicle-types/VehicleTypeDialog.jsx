@@ -30,46 +30,36 @@ import {
 import { Trash2, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/common/ThemeWrapper";
-
-const categoryOptions = [
-  { value: "car", label: "Auto" },
-  { value: "truck", label: "Camión" },
-  { value: "van", label: "Furgón" },
-  { value: "bus", label: "Ómnibus" },
-  { value: "motorcycle", label: "Moto" },
-  { value: "machinery", label: "Maquinaria" },
-  { value: "trailer", label: "Remolque" },
-  { value: "pickup", label: "Pickup" },
-  { value: "semi_truck", label: "Semi" },
-  { value: "crane", label: "Grúa" },
-  { value: "excavator", label: "Excavadora" },
-  { value: "loader", label: "Cargadora" },
-  { value: "grader", label: "Niveladora" },
-  { value: "roller", label: "Rodillo" },
-  { value: "tractor", label: "Tractor" }
-];
+import { base44 } from "@/api/base44Client";
+import { useQuery } from "@tanstack/react-query";
 
 export default function VehicleTypeDialog({ open, onOpenChange, vehicleType, onSave, onDelete, isLoading, isDeleting }) {
   const { theme } = useTheme();
   const [formData, setFormData] = useState({
     name: "",
-    category: "car",
+    category_id: "",
     notes: ""
   });
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
+  const { data: categories = [] } = useQuery({
+    queryKey: ['vehicleCategories'],
+    queryFn: () => base44.entities.VehicleCategory.list(),
+    enabled: open,
+  });
 
   useEffect(() => {
     if (open) {
       if (vehicleType) {
         setFormData({
           name: vehicleType.name || "",
-          category: vehicleType.category || "car",
+          category_id: vehicleType.category_id || "",
           notes: vehicleType.notes || ""
         });
       } else {
         setFormData({
           name: "",
-          category: "car",
+          category_id: "",
           notes: ""
         });
       }
@@ -116,16 +106,16 @@ export default function VehicleTypeDialog({ open, onOpenChange, vehicleType, onS
                 Categoría *
               </Label>
               <Select
-                value={formData.category}
-                onValueChange={(value) => setFormData({ ...formData, category: value })}
+                value={formData.category_id}
+                onValueChange={(value) => setFormData({ ...formData, category_id: value })}
               >
                 <SelectTrigger className={theme === 'dark' ? 'bg-zinc-800 border-zinc-600 text-white' : ''}>
-                  <SelectValue />
+                  <SelectValue placeholder="Selecciona una categoría" />
                 </SelectTrigger>
                 <SelectContent className={theme === 'dark' ? 'bg-zinc-800 border-zinc-600' : ''}>
-                  {categoryOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
