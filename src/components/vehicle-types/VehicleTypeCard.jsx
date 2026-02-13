@@ -6,44 +6,24 @@ import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/common/ThemeWrapper";
 
 const categoryIcons = {
-  car: Car,
-  truck: Truck,
-  van: Car,
-  bus: Bus,
-  motorcycle: Bike,
-  machinery: Wrench,
-  trailer: TrendingUp,
-  pickup: Truck,
-  semi_truck: Truck,
-  crane: Forklift,
-  excavator: Forklift,
-  loader: Forklift,
-  grader: Forklift,
-  roller: Forklift,
-  tractor: Forklift
-};
-
-const categoryLabels = {
-  car: "Auto",
-  truck: "Camión",
-  van: "Furgón",
-  bus: "Ómnibus",
-  motorcycle: "Moto",
-  machinery: "Maquinaria",
-  trailer: "Remolque",
-  pickup: "Pickup",
-  semi_truck: "Semi",
-  crane: "Grúa",
-  excavator: "Excavadora",
-  loader: "Cargadora",
-  grader: "Niveladora",
-  roller: "Rodillo",
-  tractor: "Tractor"
+  "Automóvil": Car,
+  "Camión": Truck,
+  "Camioneta": Truck,
+  "Maquinaria Pesada": Wrench,
+  "Autobús": Bus,
+  "Motocicleta": Bike,
+  "Vehículo de Recreación": TrendingUp,
+  "Vehículo Eléctrico": Car,
+  "Vehículo Híbrido": Car,
+  "Vehículo Comercial Ligero": Car,
+  "Vehículo Especializado": Car,
+  "Pick-UP": Truck,
+  "Excavadora": Forklift
 };
 
 export default function VehicleTypeCard({ vehicleType, onClick }) {
   const { theme } = useTheme();
-  const Icon = categoryIcons[vehicleType.category] || Car;
+  const Icon = categoryIcons[vehicleType.category_name] || Car;
 
   return (
     <Card
@@ -71,7 +51,7 @@ export default function VehicleTypeCard({ vehicleType, onClick }) {
               ? 'bg-zinc-800 text-zinc-300 border-zinc-600' 
               : 'bg-gray-100 text-gray-700 border-gray-300'
           )}>
-            {categoryLabels[vehicleType.category] || vehicleType.category}
+            {vehicleType.category_name}
           </Badge>
         </div>
         <CardTitle className={cn(

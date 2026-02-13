@@ -1,131 +1,123 @@
 import React, { useState } from "react";
-import { base44 } from "@/api/base44Client";
+import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { base44 } from "@/api/base44Client";
+import PageHeader from "@/components/common/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Search } from "lucide-react";
-import PageHeader from "@/components/common/PageHeader";
-import EmptyState from "@/components/common/EmptyState";
 import VehicleTypeCard from "@/components/vehicle-types/VehicleTypeCard";
 import VehicleTypeDialog from "@/components/vehicle-types/VehicleTypeDialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import EmptyState from "@/components/common/EmptyState";
 import { useTheme } from "@/components/common/ThemeWrapper";
-import { cn } from "@/lib/utils";
 
 export default function VehicleTypesPage() {
-  const { theme } = useTheme();
   const [searchTerm, setSearchTerm] = useState("");
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedVehicleType, setSelectedVehicleType] = useState(null);
-  const [user, setUser] = useState(null);
-
+  const { theme } = useTheme();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
+
+  const [user, setUser] = React.useState(null);
 
   React.useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
 
-  const { data: vehicleTypes = [], isLoading } = useQuery({
+  const { data: vehicleTypes = [], isLoading: isLoadingVehicleTypes } = useQuery({
     queryKey: ['vehicleTypes'],
     queryFn: () => base44.entities.VehicleType.list(),
   });
 
-  const createVehicleTypeMutation = useMutation({
+  const { data: vehicleCategories = [], isLoading: isLoadingVehicleCategories } = useQuery({
+    queryKey: ['vehicleCategories'],
+    queryFn: () => base44.entities.VehicleCategory.list(),
+  });
+
+  const categoriesMap = new Map(vehicleCategories.map(cat => [cat.id, cat.name]));
+
+  const vehicleTypesWithCategoryName = vehicleTypes.map(vt => ({
+    ...vt,
+    category_name: categoriesMap.get(vt.category_id) || "Sin categoría"
+  }));
+
+  const createMutation = useMutation({
     mutationFn: (data) => base44.entities.VehicleType.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vehicleTypes'] });
-      setDialogOpen(false);
-      setSelectedVehicleType(null);
+      setIsDialogOpen(false);
     },
   });
 
-  const updateVehicleTypeMutation = useMutation({
+  const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.VehicleType.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vehicleTypes'] });
-      setDialogOpen(false);
+      setIsDialogOpen(false);
       setSelectedVehicleType(null);
     },
   });
 
-  const deleteVehicleTypeMutation = useMutation({
+  const deleteMutation = useMutation({
     mutationFn: (id) => base44.entities.VehicleType.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vehicleTypes'] });
-      setDialogOpen(false);
+      setIsDialogOpen(false);
       setSelectedVehicleType(null);
     },
   });
 
-  const handleOpenDialog = (vehicleType = null) => {
-    setSelectedVehicleType(vehicleType);
-    setDialogOpen(true);
-  };
-
-  const handleSave = async (data) => {
-    if (createVehicleTypeMutation.isPending || updateVehicleTypeMutation.isPending) return;
-    
-    if (selectedVehicleType) {
-      await updateVehicleTypeMutation.mutateAsync({ id: selectedVehicleType.id, data });
-    } else {
-      await createVehicleTypeMutation.mutateAsync(data);
-    }
-  };
-
-  const handleDelete = (id) => {
-    deleteVehicleTypeMutation.mutate(id);
-  };
-
-  const filteredVehicleTypes = vehicleTypes.filter((vt) =>
+  const filteredVehicleTypes = vehicleTypesWithCategoryName.filter((vt) =>
     vt.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    vt.category?.toLowerCase().includes(searchTerm.toLowerCase())
+    vt.category_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Solo super admins pueden acceder
-  const isSuperAdmin = !user?.company_id;
+  const isSuperAdmin = !user?.company_id || user?.user_role === 'super_admin';
 
-  if (user && !isSuperAdmin) {
+  if (!isSuperAdmin) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <EmptyState
-          title="Acceso Restringido"
-          description="Solo los super administradores pueden gestionar tipos de vehículos."
-        />
+      <div className="p-6 max-w-7xl mx-auto">
+        <div className="text-center py-12">
+          <p className={theme === 'dark' ? 'text-zinc-400' : 'text-gray-600'}>
+            No tienes permisos para acceder a esta sección
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className={cn("p-6", theme === 'dark' ? 'bg-black' : 'bg-gray-50')}>
-      <div className="max-w-7xl mx-auto space-y-6">
-        <PageHeader
-          title="Tipos de Vehículos"
-          subtitle="Gestiona los tipos de vehículos disponibles en el sistema"
-          actions={
-            <Button onClick={() => handleOpenDialog()} className="gap-2">
-              <Plus className="w-4 h-4" />
-              Nuevo Tipo
-            </Button>
-          }
-        />
+    <div className="p-6 max-w-7xl mx-auto">
+      <PageHeader
+        title="Tipos de Vehículo"
+        description="Gestiona los tipos de vehículos del sistema"
+        actions={
+          <Button onClick={() => {
+            setSelectedVehicleType(null);
+            setIsDialogOpen(true);
+          }}>
+            <Plus className="w-4 h-4 mr-2" />
+            Nuevo Tipo
+          </Button>
+        }
+      />
 
+      <div className="mb-6">
         <div className="relative">
-          <Search className={cn(
-            "absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4",
-            theme === 'dark' ? 'text-zinc-500' : 'text-gray-400'
-          )} />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
           <Input
-            placeholder="Buscar tipos de vehículos..."
+            placeholder="Buscar tipos de vehículo..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className={cn(
-              "pl-9",
-              theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-white' : ''
-            )}
+            className={`pl-10 ${theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-white' : 'bg-white border-gray-200'}`}
           />
         </div>
+      </div>
 
-        {isLoading ? (
+      <div className="space-y-6">
+        {(isLoadingVehicleTypes || isLoadingVehicleCategories) ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <Skeleton key={i} className="h-32" />
@@ -134,40 +126,46 @@ export default function VehicleTypesPage() {
         ) : filteredVehicleTypes.length === 0 ? (
           <EmptyState
             title={searchTerm ? "No se encontraron tipos" : "No hay tipos de vehículos"}
-            description={
-              searchTerm
-                ? "Intenta con otros términos de búsqueda"
-                : "Comienza creando tu primer tipo de vehículo"
-            }
-            action={
-              !searchTerm && (
-                <Button onClick={() => handleOpenDialog()} className="gap-2">
-                  <Plus className="w-4 h-4" />
-                  Nuevo Tipo
-                </Button>
-              )
-            }
+            description={searchTerm ? "Intenta con otros términos de búsqueda" : "Comienza creando un nuevo tipo de vehículo"}
+            action={!searchTerm && (
+              <Button onClick={() => {
+                setSelectedVehicleType(null);
+                setIsDialogOpen(true);
+              }}>
+                <Plus className="w-4 h-4 mr-2" />
+                Crear Primer Tipo
+              </Button>
+            )}
           />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredVehicleTypes.map((vehicleType) => (
+            {filteredVehicleTypes.map((vt) => (
               <VehicleTypeCard
-                key={vehicleType.id}
-                vehicleType={vehicleType}
-                onClick={() => handleOpenDialog(vehicleType)}
+                key={vt.id}
+                vehicleType={vt}
+                onClick={() => {
+                  setSelectedVehicleType(vt);
+                  setIsDialogOpen(true);
+                }}
               />
             ))}
           </div>
         )}
-
-        <VehicleTypeDialog
-          open={dialogOpen}
-          onOpenChange={setDialogOpen}
-          vehicleType={selectedVehicleType}
-          onSave={handleSave}
-          onDelete={handleDelete}
-        />
       </div>
+
+      <VehicleTypeDialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        vehicleType={selectedVehicleType}
+        onSave={(data) => {
+          if (selectedVehicleType) {
+            updateMutation.mutate({ id: selectedVehicleType.id, data });
+          } else {
+            createMutation.mutate(data);
+          }
+        }}
+        onDelete={(id) => deleteMutation.mutate(id)}
+      />
     </div>
   );
 }
