@@ -278,9 +278,11 @@ function LayoutContent({ children, currentPageName }) {
   return (
     <div className={cn("min-h-screen transition-colors", theme === 'dark' ? 'bg-black' : 'bg-gray-50')}>
       {/* Desktop Top Bar */}
-      <header className="hidden lg:fixed lg:top-0 lg:right-0 lg:left-72 lg:z-50 lg:flex lg:items-center lg:justify-end lg:h-16 lg:px-6 lg:border-b lg:backdrop-blur"
+      <header className="hidden lg:fixed lg:top-0 lg:right-0 lg:left-72 lg:z-50 lg:flex lg:items-center lg:justify-end lg:h-16 lg:px-6 lg:border-b"
       style={{
-        backgroundColor: theme === 'dark' ? 'rgba(0, 0, 0, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+        backgroundColor: theme === 'dark' ? 'rgba(0, 0, 0, 0.8)' : 'rgba(255, 255, 255, 0.8)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
         borderColor: theme === 'dark' ? 'rgb(39, 39, 42)' : 'rgb(229, 231, 235)'
       }}>
         <div className="flex items-center gap-3">
@@ -368,9 +370,11 @@ function LayoutContent({ children, currentPageName }) {
       </header>
 
       {/* Mobile Header */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 z-50 backdrop-blur border-b"
+      <header className="lg:hidden fixed top-0 left-0 right-0 z-50 border-b"
       style={{
-        backgroundColor: theme === 'dark' ? 'rgba(0, 0, 0, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+        backgroundColor: theme === 'dark' ? 'rgba(0, 0, 0, 0.8)' : 'rgba(255, 255, 255, 0.8)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
         borderColor: theme === 'dark' ? 'rgb(39, 39, 42)' : 'rgb(229, 231, 235)'
       }}>
         <div className="flex items-center justify-between h-16 px-4">
@@ -680,9 +684,11 @@ function LayoutContent({ children, currentPageName }) {
       </main>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 border-t backdrop-blur-lg"
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 border-t"
         style={{
-          backgroundColor: theme === 'dark' ? 'rgba(0, 0, 0, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+          backgroundColor: theme === 'dark' ? 'rgba(0, 0, 0, 0.8)' : 'rgba(255, 255, 255, 0.8)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
           borderColor: theme === 'dark' ? 'rgb(39, 39, 42)' : 'rgb(229, 231, 235)',
           paddingBottom: 'env(safe-area-inset-bottom)'
         }}>
