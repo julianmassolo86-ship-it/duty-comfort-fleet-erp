@@ -31,6 +31,8 @@ const initialState = {
   chassis_number: "",
   engine_number: "",
   vin: "",
+  category_id: "",
+  type_id: "",
   type: "",
   technical_description: "",
   status: "active",
@@ -74,6 +76,7 @@ export default function VehicleDialog({
   companies = [],
   manufacturers = [],
   vehicleTypes = [],
+  vehicleCategories = [],
   isSuperAdmin,
   currentUser,
   onSave, 
@@ -357,34 +360,48 @@ export default function VehicleDialog({
                 </div>
               </div>
 
+              <div className="space-y-2">
+                <Label>Patente *</Label>
+                <Input
+                  value={form.plate}
+                  onChange={(e) => handleChange("plate", e.target.value.slice(0, 10).toUpperCase())}
+                  className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
+                  placeholder="ABC123"
+                  maxLength={10}
+                  required
+                />
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Patente *</Label>
-                  <Input
-                    value={form.plate}
-                    onChange={(e) => handleChange("plate", e.target.value.slice(0, 10).toUpperCase())}
-                    className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
-                    placeholder="ABC123"
-                    maxLength={10}
-                    required
-                  />
+                  <Label>Categoría</Label>
+                  <Select value={form.category_id || ""} onValueChange={(v) => handleChange("category_id", v)}>
+                    <SelectTrigger className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50">
+                      <SelectValue placeholder="Seleccionar categoría" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={null}>Sin categoría</SelectItem>
+                      {vehicleCategories.map(vc => (
+                        <SelectItem key={vc.id} value={vc.id}>
+                          {vc.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Tipo *</Label>
-                  <Select value={form.type} onValueChange={(v) => handleChange("type", v)} required>
+                  <Label>Tipo</Label>
+                  <Select value={form.type_id || ""} onValueChange={(v) => handleChange("type_id", v)}>
                     <SelectTrigger className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50">
                       <SelectValue placeholder="Seleccionar tipo" />
                     </SelectTrigger>
                     <SelectContent>
-                      {vehicleTypes.length > 0 ? (
-                        vehicleTypes.map(vt => (
-                          <SelectItem key={vt.id} value={vt.name}>
-                            {vt.name}
-                          </SelectItem>
-                        ))
-                      ) : (
-                        <div className="px-2 py-1.5 text-sm text-zinc-500">No hay tipos configurados</div>
-                      )}
+                      <SelectItem value={null}>Sin tipo</SelectItem>
+                      {vehicleTypes.map(vt => (
+                        <SelectItem key={vt.id} value={vt.id}>
+                          {vt.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>

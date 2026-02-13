@@ -180,15 +180,37 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
   useEffect(() => {
     if (formData.vehicle_id) {
       const vehicle = vehicles.find(v => v.id === formData.vehicle_id);
-      setSelectedVehicle(vehicle);
-      if (vehicle && !maintenance) {
-        setFormData(prev => ({
-          ...prev,
-          odometer_reading: vehicle.mileage || vehicle.hours || ""
-        }));
+      if (vehicle) {
+        // Obtener información adicional
+        const company = companies.find(c => c.id === vehicle.company_id);
+        const location = locations.find(l => l.id === vehicle.location_id);
+        
+        // Cargar categorías y tipos para obtener nombres
+        Promise.all([
+          vehicle.category_id ? base44.entities.VehicleCategory.filter({ id: vehicle.category_id }) : Promise.resolve([]),
+          vehicle.type_id ? base44.entities.VehicleType.filter({ id: vehicle.type_id }) : Promise.resolve([])
+        ]).then(([categories, types]) => {
+          const category = categories[0];
+          const type = types[0];
+          
+          setSelectedVehicle({
+            ...vehicle,
+            company_name: company?.name,
+            location_name: location?.name,
+            category_name: category?.name,
+            type_name: type?.name
+          });
+        });
+        
+        if (!maintenance) {
+          setFormData(prev => ({
+            ...prev,
+            odometer_reading: vehicle.mileage || vehicle.hours || ""
+          }));
+        }
       }
     }
-  }, [formData.vehicle_id, vehicles, maintenance]);
+  }, [formData.vehicle_id, vehicles, companies, locations, maintenance]);
 
   const loadVehicles = async () => {
     try {
@@ -437,8 +459,9 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
     y = 35;
 
     // Información del Activo
+    const boxHeight = selectedVehicle?.category_name || selectedVehicle?.type_name ? 55 : 45;
     doc.setFillColor(254, 243, 199);
-    doc.roundedRect(margin, y, pageWidth - 2 * margin, 45, 2, 2, 'F');
+    doc.roundedRect(margin, y, pageWidth - 2 * margin, boxHeight, 2, 2, 'F');
     doc.setFontSize(11);
     doc.setFont("helvetica", "bold");
     doc.text("DATOS DEL ACTIVO", margin + 3, y + 6);
@@ -451,6 +474,19 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
       y += 5;
       doc.text(`Marca/Modelo: ${selectedVehicle.manufacturer} ${selectedVehicle.model}`, margin + 3, y);
       y += 5;
+      if (selectedVehicle.category_name || selectedVehicle.type_name) {
+        const catType = [selectedVehicle.category_name, selectedVehicle.type_name].filter(Boolean).join(' - ');
+        doc.text(`Categoría/Tipo: ${catType}`, margin + 3, y);
+        y += 5;
+      }
+      if (selectedVehicle.company_name) {
+        doc.text(`Empresa: ${selectedVehicle.company_name}`, margin + 3, y);
+        y += 5;
+      }
+      if (selectedVehicle.location_name) {
+        doc.text(`Ubicación: ${selectedVehicle.location_name}`, margin + 3, y);
+        y += 5;
+      }
     }
     doc.text(`Fecha de Inspección: ${formData.inspection_date.split('T')[0].split('-').reverse().join('/')}`, margin + 3, y);
     y += 5;
@@ -639,6 +675,11 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
                     <p className={cn("text-sm", theme === 'dark' ? 'text-zinc-400' : 'text-gray-500')}>
                       {selectedVehicle.manufacturer} {selectedVehicle.model}
                     </p>
+                    {(selectedVehicle.category_name || selectedVehicle.type_name) && (
+                      <p className={cn("text-xs", theme === 'dark' ? 'text-zinc-500' : 'text-gray-400')}>
+                        {[selectedVehicle.category_name, selectedVehicle.type_name].filter(Boolean).join(' - ')}
+                      </p>
+                    )}
                   </div>
                 </div>
                 <Button
