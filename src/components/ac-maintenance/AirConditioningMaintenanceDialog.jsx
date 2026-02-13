@@ -94,18 +94,18 @@ const initialState = {
 };
 
 const inspecciones = [
-  { id: 6, label: "Comprobar el funcionamiento del forzador en todas las velocidades" },
-  { id: 7, label: "Revisar las direcciones del flujo de aire (parabrisas, pies, frente)" },
-  { id: 8, label: "Colocar manómetros en válvulas de servicio L/HP y verificar presión estática", hasPressure: true },
-  { id: 9, label: "Encender el motor y A/C, confirmar el acople del compresor y ventilaciones" },
-  { id: 10, label: "Registrar presiones LP y HP (PSI)", hasFields: true },
-  { id: 11, label: "Revisar el estado del rendimiento del sistema con un sensor de temperatura (FRÍO)", hasTemp: true },
-  { id: 12, label: "Revisar el estado del rendimiento del sistema con un sensor de temperatura (CALOR)", hasTemp: true },
-  { id: 1, label: "Tomar una muestra del estado de aceite" },
-  { id: 2, label: "Inspeccionar tuberías o mangueras en búsqueda de fugas de refrigerante o daños visibles" },
-  { id: 3, label: "Comprobar la limpieza del condensador, radiador e intercooler (si tiene)" },
-  { id: 4, label: "Examinar el estado de cableado y terminales o fichas" },
-  { id: 5, label: "Inspeccionar visualmente la correa, el embrague del compresor y ventilador del condensador" }
+  { num: 1, id: 6, label: "Comprobar el funcionamiento del forzador en todas las velocidades" },
+  { num: 2, id: 7, label: "Revisar las direcciones del flujo de aire (parabrisas, pies, frente)" },
+  { num: 3, id: 8, label: "Colocar manómetros en válvulas de servicio L/HP y verificar presión estática", hasPressure: true },
+  { num: 4, id: 9, label: "Encender el motor y A/C, confirmar el acople del compresor y ventilaciones" },
+  { num: 5, id: 10, label: "Registrar presiones LP y HP (PSI)", hasFields: true },
+  { num: 6, id: 11, label: "Revisar el estado del rendimiento del sistema con un sensor de temperatura (FRÍO)", hasTemp: true },
+  { num: 7, id: 12, label: "Revisar el estado del rendimiento del sistema con un sensor de temperatura (CALOR)", hasTemp: true },
+  { num: 8, id: 1, label: "Tomar una muestra del estado de aceite" },
+  { num: 9, id: 2, label: "Inspeccionar tuberías o mangueras en búsqueda de fugas de refrigerante o daños visibles" },
+  { num: 10, id: 3, label: "Comprobar la limpieza del condensador, radiador e intercooler (si tiene)" },
+  { num: 11, id: 4, label: "Examinar el estado de cableado y terminales o fichas" },
+  { num: 12, id: 5, label: "Inspeccionar visualmente la correa, el embrague del compresor y ventilador del condensador" }
 ];
 
 const componentes = [
@@ -147,6 +147,8 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [companyFilter, setCompanyFilter] = useState("all");
+  const [locationFilter, setLocationFilter] = useState("all");
   const [showVehicleSelector, setShowVehicleSelector] = useState(false);
 
   useEffect(() => {
@@ -165,6 +167,8 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
       }
       setError("");
       setSearchTerm("");
+      setCompanyFilter("all");
+      setLocationFilter("all");
       setShowVehicleSelector(!maintenance);
     }
   }, [open, maintenance, user]);
@@ -224,12 +228,22 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
     }
   };
 
-  const filteredVehicles = vehicles.filter(vehicle =>
-    searchTerm === "" ||
-    vehicle.plate?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    vehicle.internal_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    vehicle.manufacturer?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    vehicle.model?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredVehicles = vehicles.filter(vehicle => {
+    const matchesSearch = searchTerm === "" || 
+      vehicle.plate?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      vehicle.internal_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      vehicle.manufacturer?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      vehicle.model?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      vehicle.type?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesCompany = companyFilter === "all" || vehicle.company_id === companyFilter;
+    const matchesLocation = locationFilter === "all" || vehicle.location_id === locationFilter;
+    
+    return matchesSearch && matchesCompany && matchesLocation;
+  });
+
+  const filteredLocations = locations.filter(loc => 
+    companyFilter === "all" || loc.company_id === companyFilter
   );
 
   const handleSelectVehicle = (vehicle) => {
@@ -364,14 +378,60 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <Input
-                    placeholder="Buscar por patente, número interno, marca..."
+                    placeholder="Buscar por patente, número interno, marca, modelo..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className={cn("pl-10", theme === 'dark' ? 'bg-zinc-800 border-zinc-700 text-white' : '')}
+                    className={cn("pl-10", theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-white' : '')}
                   />
                 </div>
 
-                <div className={cn("max-h-48 overflow-y-auto space-y-1 rounded-lg border", theme === 'dark' ? 'bg-zinc-800 border-zinc-700' : 'bg-white border-gray-200')}>
+                <div className="grid grid-cols-2 gap-2">
+                  <Select value={companyFilter} onValueChange={setCompanyFilter}>
+                    <SelectTrigger className={theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-white' : ''}>
+                      <SelectValue placeholder="Empresa" />
+                    </SelectTrigger>
+                    <SelectContent className={theme === 'dark' ? 'bg-zinc-800 border-zinc-700' : ''}>
+                      <SelectItem value="all" className={theme === 'dark' ? 'text-white focus:bg-zinc-700' : ''}>
+                        Todas las empresas
+                      </SelectItem>
+                      {companies.map((company) => (
+                        <SelectItem 
+                          key={company.id} 
+                          value={company.id}
+                          className={theme === 'dark' ? 'text-white focus:bg-zinc-700' : ''}
+                        >
+                          {company.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  <Select 
+                    value={locationFilter} 
+                    onValueChange={setLocationFilter}
+                    disabled={companyFilter === "all"}
+                  >
+                    <SelectTrigger className={theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-white' : ''}>
+                      <SelectValue placeholder="Ubicación" />
+                    </SelectTrigger>
+                    <SelectContent className={theme === 'dark' ? 'bg-zinc-800 border-zinc-700' : ''}>
+                      <SelectItem value="all" className={theme === 'dark' ? 'text-white focus:bg-zinc-700' : ''}>
+                        Todas las ubicaciones
+                      </SelectItem>
+                      {filteredLocations.map((location) => (
+                        <SelectItem 
+                          key={location.id} 
+                          value={location.id}
+                          className={theme === 'dark' ? 'text-white focus:bg-zinc-700' : ''}
+                        >
+                          {location.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className={cn("max-h-64 overflow-y-auto space-y-1 rounded-lg border", theme === 'dark' ? 'bg-zinc-900 border-zinc-700' : 'bg-white border-gray-200')}>
                   {filteredVehicles.length === 0 ? (
                     <div className="p-4 text-center">
                       <p className={cn("text-sm", theme === 'dark' ? 'text-zinc-400' : 'text-gray-500')}>
@@ -384,18 +444,36 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
                         key={vehicle.id}
                         type="button"
                         onClick={() => handleSelectVehicle(vehicle)}
-                        className={cn("w-full text-left p-3 hover:bg-opacity-80 transition-colors border-b last:border-b-0", theme === 'dark' ? 'hover:bg-zinc-700 border-zinc-700' : 'hover:bg-gray-50 border-gray-100')}
+                        className={cn("w-full text-left p-3 hover:bg-opacity-80 transition-colors border-b last:border-b-0", theme === 'dark' ? 'hover:bg-zinc-800 border-zinc-700' : 'hover:bg-gray-50 border-gray-100')}
                       >
                         <div className="flex items-center gap-3">
-                          {vehicle.image_url && (
-                            <img src={vehicle.image_url} alt={vehicle.plate} className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
+                          {vehicle.image_url ? (
+                            <img 
+                              src={vehicle.image_url} 
+                              alt={vehicle.plate}
+                              className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
+                            />
+                          ) : (
+                            <div className={cn(
+                              "w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0",
+                              theme === 'dark' ? 'bg-zinc-800' : 'bg-gray-200'
+                            )}>
+                              <span className={cn("text-xs font-medium", theme === 'dark' ? 'text-zinc-500' : 'text-gray-400')}>
+                                {vehicle.internal_number}
+                              </span>
+                            </div>
                           )}
-                          <div className="flex-1">
-                            <p className={cn("font-medium", theme === 'dark' ? 'text-white' : 'text-gray-900')}>
+                          <div className="flex-1 min-w-0">
+                            <p className={cn("font-medium truncate", theme === 'dark' ? 'text-white' : 'text-gray-900')}>
                               {vehicle.internal_number} - {vehicle.plate}
                             </p>
-                            <p className={cn("text-sm", theme === 'dark' ? 'text-zinc-400' : 'text-gray-500')}>
+                            <p className={cn("text-sm truncate", theme === 'dark' ? 'text-zinc-400' : 'text-gray-500')}>
                               {vehicle.manufacturer} {vehicle.model}
+                            </p>
+                          </div>
+                          <div className="text-right flex-shrink-0">
+                            <p className={cn("text-xs", theme === 'dark' ? 'text-zinc-500' : 'text-gray-400')}>
+                              {companies.find(c => c.id === vehicle.company_id)?.name}
                             </p>
                           </div>
                         </div>
@@ -403,6 +481,10 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
                     ))
                   )}
                 </div>
+
+                <p className={cn("text-xs text-center", theme === 'dark' ? 'text-zinc-500' : 'text-gray-400')}>
+                  {filteredVehicles.length} vehículo{filteredVehicles.length !== 1 ? 's' : ''} encontrado{filteredVehicles.length !== 1 ? 's' : ''}
+                </p>
               </div>
             )}
 
@@ -489,7 +571,7 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
                     <StatusIcon status={formData[`inspeccion_${insp.id}_estado`]} />
                     <div className="flex-1">
                       <p className={cn("text-sm font-medium mb-2", theme === 'dark' ? 'text-white' : 'text-gray-900')}>
-                        {insp.id}. {insp.label}
+                        {insp.num}. {insp.label}
                       </p>
                       
                       <div className="grid grid-cols-2 gap-3">
