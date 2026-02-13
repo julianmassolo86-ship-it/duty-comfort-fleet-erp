@@ -130,7 +130,7 @@ function LayoutContent({ children, currentPageName }) {
   const isSuperAdmin = !user?.company_id || user?.user_role === 'super_admin';
 
   // Detect if current page is a sub-page
-  const subPages = ['Manufacturers', 'VehicleTypes', 'VehicleStatuses'];
+  const subPages = ['Manufacturers', 'VehicleTypes', 'VehicleStatuses', 'VehicleCategories'];
   const isSubPage = subPages.includes(currentPageName);
 
   const handleBackClick = () => {

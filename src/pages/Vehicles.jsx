@@ -102,6 +102,11 @@ export default function Vehicles() {
     queryFn: () => base44.entities.VehicleType.list('name'),
   });
 
+  const { data: vehicleCategories = [] } = useQuery({
+    queryKey: ['vehicleCategories'],
+    queryFn: () => base44.entities.VehicleCategory.list('name'),
+  });
+
   const { data: vehicleStatuses = [] } = useQuery({
     queryKey: ['vehicleStatuses'],
     queryFn: () => base44.entities.VehicleStatus.list(),
@@ -372,6 +377,7 @@ export default function Vehicles() {
           companies={companies}
           manufacturers={manufacturers}
           vehicleTypes={vehicleTypes}
+          vehicleCategories={vehicleCategories}
           isSuperAdmin={isSuperAdmin}
           currentUser={currentUser}
           onSave={handleSave}
