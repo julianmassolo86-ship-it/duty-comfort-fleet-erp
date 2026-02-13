@@ -21,14 +21,21 @@ export default function Profile() {
   const { theme } = useTheme();
 
   useEffect(() => {
-    base44.auth.me().then(userData => {
-      setUser(userData);
-      setForm({
-        full_name: userData.full_name || "",
-        phone: userData.phone || "",
-        logo_url: userData.logo_url || "",
-      });
-    });
+    const loadUser = async () => {
+      try {
+        const userData = await base44.auth.me();
+        console.log("User data loaded:", userData);
+        setUser(userData);
+        setForm({
+          full_name: userData.full_name || "",
+          phone: userData.phone || "",
+          logo_url: userData.logo_url || "",
+        });
+      } catch (error) {
+        console.error("Error loading user:", error);
+      }
+    };
+    loadUser();
   }, []);
 
   const isSuperAdmin = !user?.company_id;
@@ -50,10 +57,13 @@ export default function Profile() {
   const handleSave = async (e) => {
     e?.preventDefault();
     setSaving(true);
+    
+    console.log("Saving profile with data:", form);
+    
     try {
       // Actualizar solo los campos que existen en el usuario
       const updateData = {
-        full_name: form.full_name,
+        full_name: form.full_name.trim(),
         phone: form.phone
       };
       
@@ -62,10 +72,14 @@ export default function Profile() {
         updateData.logo_url = form.logo_url;
       }
       
-      await base44.auth.updateMe(updateData);
+      console.log("Update data:", updateData);
+      const result = await base44.auth.updateMe(updateData);
+      console.log("Update result:", result);
       
       // Reload user data
       const userData = await base44.auth.me();
+      console.log("Reloaded user data:", userData);
+      
       setUser(userData);
       setForm({
         full_name: userData.full_name || "",
@@ -78,7 +92,7 @@ export default function Profile() {
       alert("Perfil actualizado correctamente");
     } catch (error) {
       console.error("Error saving profile:", error);
-      alert("Error al guardar el perfil: " + (error.message || "Error desconocido"));
+      alert("Error al guardar el perfil: " + (error.message || JSON.stringify(error)));
     } finally {
       setSaving(false);
     }
