@@ -34,6 +34,8 @@ export default function VehicleCategoriesPage() {
     mutationFn: (data) => base44.entities.VehicleCategory.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vehicleCategories'] });
+    },
+    onSettled: () => {
       setDialogOpen(false);
       setSelectedCategory(null);
     },
@@ -43,6 +45,8 @@ export default function VehicleCategoriesPage() {
     mutationFn: ({ id, data }) => base44.entities.VehicleCategory.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vehicleCategories'] });
+    },
+    onSettled: () => {
       setDialogOpen(false);
       setSelectedCategory(null);
     },
@@ -52,6 +56,8 @@ export default function VehicleCategoriesPage() {
     mutationFn: (id) => base44.entities.VehicleCategory.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vehicleCategories'] });
+    },
+    onSettled: () => {
       setDialogOpen(false);
       setSelectedCategory(null);
     },
