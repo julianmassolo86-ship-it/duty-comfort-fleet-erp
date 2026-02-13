@@ -224,8 +224,9 @@ function LayoutContent({ children, currentPageName }) {
       icon: Cog,
       isSubmenu: true,
       subItems: [
-      { name: "Marcas", page: "Manufacturers" },
+      { name: "Categorías", page: "VehicleCategories" },
       { name: "Tipos", page: "VehicleTypes" },
+      { name: "Marcas", page: "Manufacturers" },
       { name: "Estados", page: "VehicleStatuses" }]
 
     }]

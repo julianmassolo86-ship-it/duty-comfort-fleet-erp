@@ -61,6 +61,7 @@ import Reports from './pages/Reports';
 import VehicleStatuses from './pages/VehicleStatuses';
 import VehicleTypes from './pages/VehicleTypes';
 import Vehicles from './pages/Vehicles';
+import VehicleCategories from './pages/VehicleCategories';
 import __Layout from './Layout.jsx';
 
 
@@ -79,6 +80,7 @@ export const PAGES = {
     "VehicleStatuses": VehicleStatuses,
     "VehicleTypes": VehicleTypes,
     "Vehicles": Vehicles,
+    "VehicleCategories": VehicleCategories,
 }
 
 export const pagesConfig = {
