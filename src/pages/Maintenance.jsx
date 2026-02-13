@@ -385,7 +385,7 @@ export default function Maintenance() {
                       </span>
                     </div>
                     <div className={cn("text-sm space-y-1", theme === 'dark' ? 'text-zinc-400' : 'text-gray-600')}>
-                      <p>📅 {new Date(ac.inspection_date).toLocaleDateString()}</p>
+                      <p>📅 {ac.inspection_date.split('T')[0].split('-').reverse().join('/')}</p>
                       <p>🌡️ Temp. Ambiente: {ac.ambient_temperature}°C</p>
                       {ac.odometer_reading && <p>📊 {ac.odometer_reading} km/hs</p>}
                     </div>
