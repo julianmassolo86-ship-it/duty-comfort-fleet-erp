@@ -7,11 +7,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, Loader2, Search, X, Check, AlertTriangle, Eye, FileDown } from "lucide-react";
+import { AlertCircle, Loader2, Search, X, Check, AlertTriangle, Eye, FileDown, Plus } from "lucide-react";
 import jsPDF from "jspdf";
 import { cn } from "@/lib/utils";
 import { useTheme } from "../common/ThemeWrapper";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import QuickVehicleDialog from "../vehicles/QuickVehicleDialog";
 
 const initialState = {
   vehicle_id: "",
@@ -154,6 +155,7 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
   const [companyFilter, setCompanyFilter] = useState("all");
   const [locationFilter, setLocationFilter] = useState("all");
   const [showVehicleSelector, setShowVehicleSelector] = useState(false);
+  const [showQuickVehicleDialog, setShowQuickVehicleDialog] = useState(false);
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -281,6 +283,13 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
     });
     setShowVehicleSelector(false);
     setSearchTerm("");
+  };
+
+  const handleQuickVehicleCreated = async (newVehicle) => {
+    // Recargar vehículos
+    await loadVehicles();
+    // Seleccionar el nuevo vehículo
+    handleSelectVehicle(newVehicle);
   };
 
   const handleSave = async (closeAfterSave = true) => {
@@ -697,15 +706,26 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
                 </Button>
               </div>
             ) : !maintenance && !selectedVehicle ? (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setShowVehicleSelector(!showVehicleSelector)}
-                className={cn("w-full justify-start mb-4", theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:text-white' : '')}
-              >
-                <Search className="w-4 h-4 mr-2" />
-                Buscar vehículo...
-              </Button>
+              <div className="flex gap-2 mb-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowVehicleSelector(!showVehicleSelector)}
+                  className={cn("flex-1 justify-start", theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:text-white' : '')}
+                >
+                  <Search className="w-4 h-4 mr-2" />
+                  Buscar vehículo...
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowQuickVehicleDialog(true)}
+                  className={cn("", theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-yellow-500 hover:text-yellow-400 hover:bg-zinc-800' : 'border-yellow-500 text-yellow-600 hover:bg-yellow-50')}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Crear Rápido
+                </Button>
+              </div>
             ) : maintenance && selectedVehicle ? (
               <div className={cn("p-3 rounded-lg border mb-4", theme === 'dark' ? 'bg-zinc-900 border-zinc-700' : 'bg-white border-gray-200')}>
                 <p className={cn("font-medium", theme === 'dark' ? 'text-white' : 'text-gray-900')}>
@@ -1259,6 +1279,13 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
             </div>
           </div>
         </form>
+
+        <QuickVehicleDialog
+          open={showQuickVehicleDialog}
+          onOpenChange={setShowQuickVehicleDialog}
+          onSuccess={handleQuickVehicleCreated}
+          user={user}
+        />
       </DialogContent>
     </Dialog>
   );
