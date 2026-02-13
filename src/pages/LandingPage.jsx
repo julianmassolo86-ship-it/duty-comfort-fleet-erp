@@ -1,13 +1,45 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { createPageUrl } from '@/utils';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Car, BarChart3, Shield, Clock, ArrowRight, CheckCircle2, Zap, TrendingUp } from 'lucide-react';
 
 export default function LandingPage() {
+  const [checkingAuth, setCheckingAuth] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkAuthentication = async () => {
+      try {
+        const isAuthenticated = await base44.auth.isAuthenticated();
+        if (isAuthenticated) {
+          navigate(createPageUrl('Dashboard'));
+        }
+      } catch (error) {
+        console.error('Auth check error:', error);
+      } finally {
+        setCheckingAuth(false);
+      }
+    };
+    
+    checkAuthentication();
+  }, [navigate]);
+
   const handleLogin = () => {
     base44.auth.redirectToLogin(window.location.origin + createPageUrl('Dashboard'));
   };
+
+  if (checkingAuth) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-slate-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Verificando sesión...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-slate-100">
