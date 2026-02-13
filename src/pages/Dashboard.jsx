@@ -211,42 +211,52 @@ export default function Dashboard() {
           ) : (
             <>
               {isSuperAdmin && (
-                <StatCard 
-                  title="Empresas" 
-                  value={companies.length}
-                  subtitle={`${companies.filter(c => c.status === 'active').length} activas`}
-                  icon={Building2}
-                />
+                <Link to={createPageUrl("Companies")} className="block">
+                  <StatCard 
+                    title="Empresas" 
+                    value={companies.length}
+                    subtitle={`${companies.filter(c => c.status === 'active').length} activas`}
+                    icon={Building2}
+                  />
+                </Link>
               )}
               {isSuperAdmin && (
-                <StatCard 
-                  title="Locaciones" 
-                  value={locations.length}
-                  subtitle={`${locations.filter(l => l.status === 'active').length} activas`}
-                  icon={MapPin}
-                />
+                <Link to={createPageUrl("Locations")} className="block">
+                  <StatCard 
+                    title="Locaciones" 
+                    value={locations.length}
+                    subtitle={`${locations.filter(l => l.status === 'active').length} activas`}
+                    icon={MapPin}
+                  />
+                </Link>
               )}
               {!isSuperAdmin && (
-                <StatCard 
-                  title="Locaciones" 
-                  value={accessibleLocations.length}
-                  subtitle={`${accessibleLocations.filter(l => l.status === 'active').length} activas`}
-                  icon={MapPin}
-                />
+                <Link to={createPageUrl("Locations")} className="block">
+                  <StatCard 
+                    title="Locaciones" 
+                    value={accessibleLocations.length}
+                    subtitle={`${accessibleLocations.filter(l => l.status === 'active').length} activas`}
+                    icon={MapPin}
+                  />
+                </Link>
               )}
-              <StatCard 
-                title="Vehículos Activos" 
-                value={activeVehicles}
-                subtitle={`de ${accessibleVehicles.length} totales`}
-                icon={Car}
-              />
-              {!isSuperAdmin && (
+              <Link to={createPageUrl("Vehicles")} className="block">
                 <StatCard 
-                  title="Conductores Activos" 
-                  value={activeDrivers}
-                  subtitle={`de ${accessibleDrivers.length} totales`}
-                  icon={Users}
+                  title="Vehículos Activos" 
+                  value={activeVehicles}
+                  subtitle={`de ${accessibleVehicles.length} totales`}
+                  icon={Car}
                 />
+              </Link>
+              {!isSuperAdmin && (
+                <Link to={createPageUrl("Drivers")} className="block">
+                  <StatCard 
+                    title="Conductores Activos" 
+                    value={activeDrivers}
+                    subtitle={`de ${accessibleDrivers.length} totales`}
+                    icon={Users}
+                  />
+                </Link>
               )}
               <Link to={createPageUrl("Maintenance")} className="block">
                 <StatCard 
@@ -264,12 +274,17 @@ export default function Dashboard() {
                   icon={AlertTriangle}
                 />
               </Link>
-              <StatCard 
-                title="Alertas Activas" 
-                value={alerts.length}
-                subtitle="documentos por vencer"
-                icon={AlertTriangle}
-              />
+              <button 
+                onClick={() => setShowExpiryList(true)}
+                className="block w-full text-left"
+              >
+                <StatCard 
+                  title="Alertas Activas" 
+                  value={alerts.length}
+                  subtitle="documentos por vencer"
+                  icon={AlertTriangle}
+                />
+              </button>
             </>
           )}
         </div>
