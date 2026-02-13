@@ -36,6 +36,7 @@ const initialState = {
   inspeccion_7_observacion: "",
   inspeccion_8_estado: "pendiente",
   inspeccion_8_observacion: "",
+  inspeccion_8_presion_estatica: "",
   inspeccion_9_estado: "pendiente",
   inspeccion_9_observacion: "",
   inspeccion_10_estado: "pendiente",
@@ -93,18 +94,18 @@ const initialState = {
 };
 
 const inspecciones = [
+  { id: 6, label: "Comprobar el funcionamiento del forzador en todas las velocidades" },
+  { id: 7, label: "Revisar las direcciones del flujo de aire (parabrisas, pies, frente)" },
+  { id: 8, label: "Colocar manómetros en válvulas de servicio L/HP y verificar presión estática", hasPressure: true },
+  { id: 9, label: "Encender el motor y A/C, confirmar el acople del compresor y ventilaciones" },
+  { id: 10, label: "Registrar presiones LP y HP (PSI)", hasFields: true },
+  { id: 11, label: "Revisar el estado del rendimiento del sistema con un sensor de temperatura (FRÍO)", hasTemp: true },
+  { id: 12, label: "Revisar el estado del rendimiento del sistema con un sensor de temperatura (CALOR)", hasTemp: true },
   { id: 1, label: "Tomar una muestra del estado de aceite" },
   { id: 2, label: "Inspeccionar tuberías o mangueras en búsqueda de fugas de refrigerante o daños visibles" },
   { id: 3, label: "Comprobar la limpieza del condensador, radiador e intercooler (si tiene)" },
   { id: 4, label: "Examinar el estado de cableado y terminales o fichas" },
-  { id: 5, label: "Inspeccionar visualmente la correa, el embrague del compresor y ventilador del condensador" },
-  { id: 6, label: "Comprobar el funcionamiento del forzador en todas las velocidades" },
-  { id: 7, label: "Revisar las direcciones del flujo de aire (parabrisas, pies, frente)" },
-  { id: 8, label: "Colocar manómetros en válvulas de servicio L/HP y verificar presión estática" },
-  { id: 9, label: "Encender el motor y A/C, confirmar el acople del compresor y ventilaciones" },
-  { id: 10, label: "Registrar presiones LP y HP", hasFields: true },
-  { id: 11, label: "Revisar el estado del rendimiento del sistema con un sensor de temperatura (FRÍO)", hasTemp: true },
-  { id: 12, label: "Revisar el estado del rendimiento del sistema con un sensor de temperatura (CALOR)", hasTemp: true }
+  { id: 5, label: "Inspeccionar visualmente la correa, el embrague del compresor y ventilador del condensador" }
 ];
 
 const componentes = [
@@ -262,7 +263,8 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
         if (dataToSave[key] === "" && (
           key.includes("temperatura") || 
           key.includes("lp") || 
-          key.includes("hp") || 
+          key.includes("hp") ||
+          key.includes("presion_estatica") ||
           key === "odometer_reading"
         )) {
           dataToSave[key] = null;
@@ -515,6 +517,19 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
                         />
                       </div>
 
+                      {insp.hasPressure && (
+                        <div className="mt-3">
+                          <Input
+                            type="number"
+                            step="0.1"
+                            value={formData.inspeccion_8_presion_estatica}
+                            onChange={(e) => setFormData({ ...formData, inspeccion_8_presion_estatica: e.target.value })}
+                            placeholder="Presión estática (PSI)"
+                            className={theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-white' : ''}
+                          />
+                        </div>
+                      )}
+
                       {insp.hasFields && (
                         <div className="grid grid-cols-2 gap-3 mt-3">
                           <Input
@@ -522,7 +537,7 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
                             step="0.1"
                             value={formData.inspeccion_10_lp}
                             onChange={(e) => setFormData({ ...formData, inspeccion_10_lp: e.target.value })}
-                            placeholder="Presión LP"
+                            placeholder="Presión LP (PSI)"
                             className={theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-white' : ''}
                           />
                           <Input
@@ -530,7 +545,7 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
                             step="0.1"
                             value={formData.inspeccion_10_hp}
                             onChange={(e) => setFormData({ ...formData, inspeccion_10_hp: e.target.value })}
-                            placeholder="Presión HP"
+                            placeholder="Presión HP (PSI)"
                             className={theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-white' : ''}
                           />
                         </div>
@@ -604,25 +619,25 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
               
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className={theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}>Presión LP Final</Label>
+                  <Label className={theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}>Presión LP Final (PSI)</Label>
                   <Input
                     type="number"
                     step="0.1"
                     value={formData.medicion_final_lp}
                     onChange={(e) => setFormData({ ...formData, medicion_final_lp: e.target.value })}
-                    placeholder="LP"
+                    placeholder="LP (PSI)"
                     className={theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-white' : ''}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label className={theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}>Presión HP Final</Label>
+                  <Label className={theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}>Presión HP Final (PSI)</Label>
                   <Input
                     type="number"
                     step="0.1"
                     value={formData.medicion_final_hp}
                     onChange={(e) => setFormData({ ...formData, medicion_final_hp: e.target.value })}
-                    placeholder="HP"
+                    placeholder="HP (PSI)"
                     className={theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-white' : ''}
                   />
                 </div>
