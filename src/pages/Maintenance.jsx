@@ -227,7 +227,7 @@ export default function Maintenance() {
             <div className="flex gap-2">
               <Button 
                 onClick={() => { setSelectedAcMaintenance(null); setAcDialogOpen(true); }}
-                className="bg-green-500 hover:bg-green-600 text-white font-semibold"
+                className="bg-sky-500 hover:bg-sky-600 text-white font-semibold"
               >
                 <Wind className="w-4 h-4 mr-2" />
                 <span className="hidden sm:inline">Inspección A/C</span>
@@ -260,7 +260,7 @@ export default function Maintenance() {
             <TabsTrigger value="ac">
               A/C
               {acMaintenances.filter(ac => ac.status === 'en_proceso').length > 0 && (
-                <span className="ml-2 px-1.5 py-0.5 text-xs rounded-full bg-green-500 text-white">
+                <span className="ml-2 px-1.5 py-0.5 text-xs rounded-full bg-sky-500 text-white">
                   {acMaintenances.filter(ac => ac.status === 'en_proceso').length}
                 </span>
               )}
@@ -355,14 +355,14 @@ export default function Maintenance() {
                     className={cn(
                       "p-6 rounded-2xl border cursor-pointer transition-all hover:shadow-lg",
                       theme === 'dark' 
-                        ? 'bg-zinc-900/50 border-zinc-800 hover:border-green-500/50' 
-                        : 'bg-white border-gray-200 hover:border-green-500'
+                        ? 'bg-zinc-900/50 border-zinc-800 hover:border-sky-500/50' 
+                        : 'bg-white border-gray-200 hover:border-sky-500'
                     )}
                   >
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
-                          <Wind className="w-5 h-5 text-green-500" />
+                        <div className="w-10 h-10 rounded-lg bg-sky-500/10 flex items-center justify-center">
+                          <Wind className="w-5 h-5 text-sky-500" />
                         </div>
                         <div>
                           <p className={cn("text-sm font-medium", theme === 'dark' ? 'text-white' : 'text-gray-900')}>
@@ -401,7 +401,7 @@ export default function Maintenance() {
               action={
                 <Button 
                   onClick={() => { setSelectedAcMaintenance(null); setAcDialogOpen(true); }}
-                  className="bg-green-500 hover:bg-green-600 text-white font-semibold"
+                  className="bg-sky-500 hover:bg-sky-600 text-white font-semibold"
                 >
                   <Wind className="w-4 h-4 mr-2" />
                   Nueva Inspección A/C
