@@ -41,11 +41,29 @@ const TYPE_LABELS = {
 export default function VehicleTypePieChart({ vehicles }) {
   const { theme } = useTheme();
 
-  const typeData = Object.entries(TYPE_LABELS).map(([key, label]) => ({
-    name: label,
-    value: vehicles.filter(v => v.type === key).length,
-    color: TYPE_COLORS[key]
-  })).filter(item => item.value > 0);
+  // Agrupar vehículos por type_id y contar
+  const typeCounts = {};
+  vehicles.forEach(vehicle => {
+    if (vehicle.type_id) {
+      typeCounts[vehicle.type_id] = (typeCounts[vehicle.type_id] || 0) + 1;
+    }
+  });
+
+  // Crear datos para el gráfico usando type_id
+  const typeData = Object.entries(typeCounts).map(([typeId, count], index) => {
+    // Buscar el nombre del tipo de vehículo
+    const vehicle = vehicles.find(v => v.type_id === typeId);
+    const typeName = vehicle?.type_name || `Tipo ${index + 1}`;
+    
+    // Generar color único basado en el índice
+    const colors = ['#3b82f6', '#ef4444', '#8b5cf6', '#f59e0b', '#06b6d4', '#eab308', '#84cc16', '#10b981', '#f97316', '#ec4899', '#14b8a6', '#6366f1', '#a855f7', '#22c55e', '#fb923c'];
+    
+    return {
+      name: typeName,
+      value: count,
+      color: colors[index % colors.length]
+    };
+  }).filter(item => item.value > 0);
 
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
