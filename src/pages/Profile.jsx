@@ -141,8 +141,8 @@ export default function Profile() {
             <div className="space-y-2">
               <Label>Nombre Completo</Label>
               <Input
-                value={form.full_name}
-                onChange={(e) => setForm(prev => ({ ...prev, full_name: e.target.value }))}
+                value={form.display_name}
+                onChange={(e) => setForm(prev => ({ ...prev, display_name: e.target.value }))}
                 className={theme === 'dark' ? 'bg-zinc-900 border-zinc-700 focus:border-yellow-500/50 transition-colors' : 'bg-white border-gray-300 focus:border-yellow-500 transition-colors'}
               />
             </div>
