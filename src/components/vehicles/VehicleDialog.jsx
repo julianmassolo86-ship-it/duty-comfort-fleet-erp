@@ -111,17 +111,13 @@ export default function VehicleDialog({
         const locationId = vehicle.location_id || "";
         
         setSelectedCompanyId(companyId);
-        
-        // Usar setTimeout para asegurar que el estado se actualice después del render
-        setTimeout(() => {
-          setForm({ 
-            ...initialState, 
-            ...vehicle,
-            assigned_driver_ids: driverIds,
-            company_id: companyId,
-            location_id: locationId
-          });
-        }, 0);
+        setForm({ 
+          ...initialState, 
+          ...vehicle,
+          assigned_driver_ids: driverIds,
+          company_id: companyId,
+          location_id: locationId
+        });
       } else {
         const defaultCompanyId = isSuperAdmin ? "" : (currentUser?.company_id || "");
         setSelectedCompanyId(defaultCompanyId);
