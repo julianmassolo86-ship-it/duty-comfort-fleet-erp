@@ -551,11 +551,13 @@ export default function VehicleDialog({
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value={null}>Sin asignar</SelectItem>
-                            {filteredDrivers.filter(d => d.status === 'active' && d.location_id === form.location_id).map(driver => (
-                              <SelectItem key={driver.id} value={driver.id}>
-                                {driver.full_name}
-                              </SelectItem>
-                            ))}
+                            {filteredDrivers
+                              .filter(d => d.status === 'active' && (d.location_id === form.location_id || form.assigned_driver_ids.includes(d.id)))
+                              .map(driver => (
+                                <SelectItem key={driver.id} value={driver.id}>
+                                  {driver.full_name}
+                                </SelectItem>
+                              ))}
                           </SelectContent>
                         </Select>
                         <Button
