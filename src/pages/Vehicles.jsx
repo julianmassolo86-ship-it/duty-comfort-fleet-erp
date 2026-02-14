@@ -102,6 +102,18 @@ export default function Vehicles() {
     queryFn: () => base44.entities.VehicleType.list('name'),
   });
 
+  // Enriquecer vehículos con el nombre del tipo
+  const enrichedVehicles = vehicles.map(vehicle => {
+    if (vehicle.type_id) {
+      const vehicleType = vehicleTypes.find(vt => vt.id === vehicle.type_id);
+      return {
+        ...vehicle,
+        type_name: vehicleType?.name || 'Sin tipo'
+      };
+    }
+    return vehicle;
+  });
+
   const { data: vehicleCategories = [] } = useQuery({
     queryKey: ['vehicleCategories'],
     queryFn: () => base44.entities.VehicleCategory.list('name'),
@@ -190,8 +202,8 @@ export default function Vehicles() {
 
   // Filtrar por empresa del usuario si no es super admin
   const accessibleVehicles = isSuperAdmin 
-    ? vehicles 
-    : vehicles.filter(v => v.company_id === currentUser?.company_id);
+    ? enrichedVehicles 
+    : enrichedVehicles.filter(v => v.company_id === currentUser?.company_id);
 
   // Locaciones accesibles
   const accessibleLocations = isSuperAdmin 
