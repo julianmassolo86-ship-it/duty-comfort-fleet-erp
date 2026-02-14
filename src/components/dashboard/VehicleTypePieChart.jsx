@@ -38,28 +38,28 @@ const TYPE_LABELS = {
   tractor: 'Tractor'
 };
 
-export default function VehicleTypePieChart({ vehicles }) {
+export default function VehicleTypePieChart({ vehicles, vehicleCategories }) {
   const { theme } = useTheme();
 
-  // Agrupar vehículos por type_id y contar
-  const typeCounts = {};
+  // Agrupar vehículos por categoría y contar
+  const categoryCounts = {};
   vehicles.forEach(vehicle => {
-    if (vehicle.type_id) {
-      typeCounts[vehicle.type_id] = (typeCounts[vehicle.type_id] || 0) + 1;
+    if (vehicle.category_id) {
+      categoryCounts[vehicle.category_id] = (categoryCounts[vehicle.category_id] || 0) + 1;
     }
   });
 
-  // Crear datos para el gráfico usando type_id
-  const typeData = Object.entries(typeCounts).map(([typeId, count], index) => {
-    // Buscar el nombre del tipo de vehículo
-    const vehicle = vehicles.find(v => v.type_id === typeId);
-    const typeName = vehicle?.type_name || `Tipo ${index + 1}`;
+  // Crear datos para el gráfico usando categorías
+  const typeData = Object.entries(categoryCounts).map(([categoryId, count], index) => {
+    // Buscar el nombre de la categoría
+    const category = vehicleCategories?.find(vc => vc.id === categoryId);
+    const categoryName = category?.name || 'Sin categoría';
     
     // Generar color único basado en el índice
     const colors = ['#3b82f6', '#ef4444', '#8b5cf6', '#f59e0b', '#06b6d4', '#eab308', '#84cc16', '#10b981', '#f97316', '#ec4899', '#14b8a6', '#6366f1', '#a855f7', '#22c55e', '#fb923c'];
     
     return {
-      name: typeName,
+      name: categoryName,
       value: count,
       color: colors[index % colors.length]
     };

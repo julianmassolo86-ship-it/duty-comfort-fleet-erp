@@ -57,6 +57,11 @@ export default function Dashboard() {
     queryFn: () => base44.entities.VehicleType.list(),
   });
 
+  const { data: vehicleCategories = [] } = useQuery({
+    queryKey: ['vehicleCategories'],
+    queryFn: () => base44.entities.VehicleCategory.list(),
+  });
+
   const { data: companies = [] } = useQuery({
     queryKey: ['companies'],
     queryFn: () => base44.entities.Company.list(),
@@ -75,13 +80,16 @@ export default function Dashboard() {
 
   const isLoading = loadingVehicles || loadingDrivers || loadingMaintenance || loadingDocuments || loadingNovedades;
 
-  // Enriquecer vehículos con nombre del tipo
+  // Enriquecer vehículos con nombre del tipo y categoría
   const enrichedVehicles = vehicles.map(vehicle => {
     if (vehicle.type_id) {
       const vehicleType = vehicleTypes.find(vt => vt.id === vehicle.type_id);
+      const category = vehicleType ? vehicleCategories.find(vc => vc.id === vehicleType.category_id) : null;
       return {
         ...vehicle,
-        type_name: vehicleType?.name || 'Sin tipo'
+        type_name: vehicleType?.name || 'Sin tipo',
+        category_id: vehicleType?.category_id,
+        category_name: category?.name || 'Sin categoría'
       };
     }
     return vehicle;
@@ -423,9 +431,9 @@ export default function Dashboard() {
                 <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-600/10 border border-blue-500/20">
                   <Car className="w-5 h-5 text-blue-400" />
                 </div>
-                <h3 className={cn("text-lg font-bold", theme === 'dark' ? 'text-white' : 'text-gray-900')}>Tipos de Vehículos</h3>
+                <h3 className={cn("text-lg font-bold", theme === 'dark' ? 'text-white' : 'text-gray-900')}>Categorías de Vehículos</h3>
               </div>
-              <VehicleTypePieChart vehicles={accessibleVehicles} />
+              <VehicleTypePieChart vehicles={accessibleVehicles} vehicleCategories={vehicleCategories} />
             </div>
           </div>
         )}
