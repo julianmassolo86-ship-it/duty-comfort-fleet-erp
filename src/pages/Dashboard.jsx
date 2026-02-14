@@ -52,6 +52,11 @@ export default function Dashboard() {
     queryFn: () => base44.entities.Document.list(),
   });
 
+  const { data: vehicleTypes = [] } = useQuery({
+    queryKey: ['vehicleTypes'],
+    queryFn: () => base44.entities.VehicleType.list(),
+  });
+
   const { data: companies = [] } = useQuery({
     queryKey: ['companies'],
     queryFn: () => base44.entities.Company.list(),
@@ -70,10 +75,22 @@ export default function Dashboard() {
 
   const isLoading = loadingVehicles || loadingDrivers || loadingMaintenance || loadingDocuments || loadingNovedades;
 
+  // Enriquecer vehículos con nombre del tipo
+  const enrichedVehicles = vehicles.map(vehicle => {
+    if (vehicle.type_id) {
+      const vehicleType = vehicleTypes.find(vt => vt.id === vehicle.type_id);
+      return {
+        ...vehicle,
+        type_name: vehicleType?.name || 'Sin tipo'
+      };
+    }
+    return vehicle;
+  });
+
   // Filtrar datos según rol
   const accessibleVehicles = isSuperAdmin 
-    ? vehicles 
-    : vehicles.filter(v => v.company_id === currentUser?.company_id);
+    ? enrichedVehicles 
+    : enrichedVehicles.filter(v => v.company_id === currentUser?.company_id);
   
   const accessibleDrivers = isSuperAdmin 
     ? drivers 
