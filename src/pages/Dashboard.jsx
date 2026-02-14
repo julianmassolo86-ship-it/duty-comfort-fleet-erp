@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { 
   Car, Users, Wrench, FileText, AlertTriangle, 
-  TrendingUp, Calendar, ArrowRight, Building2, MapPin, BarChart3
+  TrendingUp, Calendar, ArrowRight, Building2, MapPin, BarChart3, Wind, FileWarning, Plus
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from "recharts";
 import { differenceInDays } from "date-fns";
@@ -19,10 +19,16 @@ import { useTheme } from "../components/common/ThemeWrapper";
 import ExpiryListDialog from "../components/dashboard/ExpiryListDialog";
 import VehicleStatusPieChart from "../components/dashboard/VehicleStatusPieChart";
 import VehicleTypePieChart from "../components/dashboard/VehicleTypePieChart";
+import MaintenanceDialog from "../components/maintenance/MaintenanceDialog";
+import NovedadDialog from "../components/novedades/NovedadDialog";
+import AirConditioningMaintenanceDialog from "../components/ac-maintenance/AirConditioningMaintenanceDialog";
 
 export default function Dashboard() {
   const [currentUser, setCurrentUser] = useState(null);
   const [showExpiryList, setShowExpiryList] = useState(false);
+  const [showMaintenanceDialog, setShowMaintenanceDialog] = useState(false);
+  const [showNovedadDialog, setShowNovedadDialog] = useState(false);
+  const [showACDialog, setShowACDialog] = useState(false);
   const { theme } = useTheme();
 
   useEffect(() => {
@@ -394,6 +400,40 @@ export default function Dashboard() {
           <div className={cn("rounded-2xl border p-6 backdrop-blur-xl shadow-2xl", theme === 'dark' ? 'bg-zinc-900/80 border-zinc-800/50 shadow-black/20' : 'bg-white border-gray-200 shadow-gray-200/50')}>
             <h2 className={cn("text-xl font-bold mb-6", theme === 'dark' ? 'text-white' : 'text-gray-900')}>Accesos Rápidos</h2>
             <div className="space-y-3">
+              {/* Quick Create Actions */}
+              <button onClick={() => setShowMaintenanceDialog(true)} className="block w-full group">
+                <div className={cn("flex items-center gap-4 p-4 rounded-xl border transition-all duration-300", theme === 'dark' ? 'bg-zinc-800/50 border-zinc-700/50 hover:bg-zinc-800 hover:border-yellow-500/30 hover:shadow-lg hover:shadow-yellow-500/5' : 'bg-gray-50 border-gray-200 hover:bg-gray-100 hover:border-yellow-500/30')}>
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-amber-500/10 to-amber-600/5 border border-amber-500/10 group-hover:from-amber-500/20 group-hover:to-amber-600/10 transition-all duration-300">
+                    <Plus className="w-5 h-5 text-amber-400" />
+                  </div>
+                  <div className="text-left">
+                    <p className={cn("font-semibold", theme === 'dark' ? 'text-white' : 'text-gray-900')}>Nuevo Mantenimiento</p>
+                    <p className={cn("text-sm", theme === 'dark' ? 'text-zinc-500' : 'text-gray-500')}>Registrar mantenimiento</p>
+                  </div>
+                </div>
+              </button>
+              <button onClick={() => setShowNovedadDialog(true)} className="block w-full group">
+                <div className={cn("flex items-center gap-4 p-4 rounded-xl border transition-all duration-300", theme === 'dark' ? 'bg-zinc-800/50 border-zinc-700/50 hover:bg-zinc-800 hover:border-yellow-500/30 hover:shadow-lg hover:shadow-yellow-500/5' : 'bg-gray-50 border-gray-200 hover:bg-gray-100 hover:border-yellow-500/30')}>
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-orange-500/10 to-orange-600/5 border border-orange-500/10 group-hover:from-orange-500/20 group-hover:to-orange-600/10 transition-all duration-300">
+                    <Plus className="w-5 h-5 text-orange-400" />
+                  </div>
+                  <div className="text-left">
+                    <p className={cn("font-semibold", theme === 'dark' ? 'text-white' : 'text-gray-900')}>Nueva Novedad Diaria</p>
+                    <p className={cn("text-sm", theme === 'dark' ? 'text-zinc-500' : 'text-gray-500')}>Reportar novedad</p>
+                  </div>
+                </div>
+              </button>
+              <button onClick={() => setShowACDialog(true)} className="block w-full group">
+                <div className={cn("flex items-center gap-4 p-4 rounded-xl border transition-all duration-300", theme === 'dark' ? 'bg-zinc-800/50 border-zinc-700/50 hover:bg-zinc-800 hover:border-yellow-500/30 hover:shadow-lg hover:shadow-yellow-500/5' : 'bg-gray-50 border-gray-200 hover:bg-gray-100 hover:border-yellow-500/30')}>
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-sky-500/10 to-sky-600/5 border border-sky-500/10 group-hover:from-sky-500/20 group-hover:to-sky-600/10 transition-all duration-300">
+                    <Plus className="w-5 h-5 text-sky-400" />
+                  </div>
+                  <div className="text-left">
+                    <p className={cn("font-semibold", theme === 'dark' ? 'text-white' : 'text-gray-900')}>Inspección Aire Acondicionado</p>
+                    <p className={cn("text-sm", theme === 'dark' ? 'text-zinc-500' : 'text-gray-500')}>Nueva inspección AC</p>
+                  </div>
+                </div>
+              </button>
               {isSuperAdmin && (
                 <Link to={createPageUrl("Companies")} className="block group">
                   <div className={cn("flex items-center gap-4 p-4 rounded-xl border transition-all duration-300", theme === 'dark' ? 'bg-zinc-800/50 border-zinc-700/50 hover:bg-zinc-800 hover:border-yellow-500/30 hover:shadow-lg hover:shadow-yellow-500/5' : 'bg-gray-50 border-gray-200 hover:bg-gray-100 hover:border-yellow-500/30')}>
@@ -462,6 +502,36 @@ export default function Dashboard() {
         onOpenChange={setShowExpiryList}
         vehicles={accessibleVehicles}
         drivers={accessibleDrivers}
+      />
+
+      {/* Maintenance Dialog */}
+      <MaintenanceDialog
+        open={showMaintenanceDialog}
+        onOpenChange={setShowMaintenanceDialog}
+        onSave={async (data) => {
+          await base44.entities.Maintenance.create(data);
+          setShowMaintenanceDialog(false);
+        }}
+      />
+
+      {/* Novedad Dialog */}
+      <NovedadDialog
+        open={showNovedadDialog}
+        onOpenChange={setShowNovedadDialog}
+        onSave={async (data) => {
+          await base44.entities.Novedad.create(data);
+          setShowNovedadDialog(false);
+        }}
+      />
+
+      {/* AC Maintenance Dialog */}
+      <AirConditioningMaintenanceDialog
+        open={showACDialog}
+        onOpenChange={setShowACDialog}
+        onSave={async (data) => {
+          await base44.entities.AirConditioningMaintenance.create(data);
+          setShowACDialog(false);
+        }}
       />
     </div>
   );
