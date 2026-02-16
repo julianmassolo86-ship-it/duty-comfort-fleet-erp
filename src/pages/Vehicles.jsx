@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Search, Car, Building2, MapPin, Grid3x3, List } from "lucide-react";
+import { Plus, Search, Car, Building2, MapPin, Grid3x3, List, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -12,6 +12,7 @@ import EmptyState from "../components/common/EmptyState";
 import VehicleCard from "../components/vehicles/VehicleCard";
 import VehicleTable from "../components/vehicles/VehicleTable";
 import VehicleDialog from "../components/vehicles/VehicleDialog";
+import QuickVehicleCapture from "../components/vehicles/QuickVehicleCapture";
 import PullToRefresh from "../components/common/PullToRefresh";
 import { useTheme } from "../components/common/ThemeWrapper";
 
@@ -25,6 +26,8 @@ export default function Vehicles() {
   const [currentUser, setCurrentUser] = useState(null);
   const [viewMode, setViewMode] = useState("grid"); // "grid" o "table"
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [captureDialogOpen, setCaptureDialogOpen] = useState(false);
+  const [prefilledData, setPrefilledData] = useState(null);
   const { theme } = useTheme();
 
   const queryClient = useQueryClient();
@@ -200,6 +203,19 @@ export default function Vehicles() {
     setDialogOpen(true);
   };
 
+  const handleVehicleFound = (vehicle) => {
+    // Vehículo encontrado - abrir en modo edición
+    setSelectedVehicle(vehicle);
+    setDialogOpen(true);
+  };
+
+  const handleVehicleNotFound = (extractedData) => {
+    // Vehículo no encontrado - abrir diálogo con datos pre-llenados
+    setPrefilledData(extractedData);
+    setSelectedVehicle(null);
+    setDialogOpen(true);
+  };
+
   // Filtrar por empresa del usuario si no es super admin
   const accessibleVehicles = isSuperAdmin 
     ? enrichedVehicles 
@@ -230,13 +246,22 @@ export default function Vehicles() {
           description="Gestiona tu flota de vehículos"
           actions={
             accessibleLocations.length > 0 && (
-              <Button 
-                onClick={() => { setSelectedVehicle(null); setDialogOpen(true); }}
-                className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Nuevo Vehículo
-              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  onClick={() => setCaptureDialogOpen(true)}
+                  className="bg-yellow-600 hover:bg-yellow-700 text-white font-semibold"
+                >
+                  <Camera className="w-4 h-4 mr-2" />
+                  Captura Rápida
+                </Button>
+                <Button 
+                  onClick={() => { setSelectedVehicle(null); setPrefilledData(null); setDialogOpen(true); }}
+                  className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nuevo Vehículo
+                </Button>
+              </div>
             )
           }
         />
@@ -382,8 +407,12 @@ export default function Vehicles() {
 
         <VehicleDialog
           open={dialogOpen}
-          onOpenChange={setDialogOpen}
+          onOpenChange={(open) => {
+            setDialogOpen(open);
+            if (!open) setPrefilledData(null);
+          }}
           vehicle={selectedVehicle}
+          prefilledData={prefilledData}
           drivers={drivers.filter(d => isSuperAdmin || d.company_id === currentUser?.company_id)}
           locations={accessibleLocations}
           companies={companies}
@@ -396,6 +425,14 @@ export default function Vehicles() {
           onDelete={selectedVehicle ? () => deleteMutation.mutate(selectedVehicle.id) : undefined}
           isLoading={createMutation.isPending || updateMutation.isPending}
           isDeleting={deleteMutation.isPending}
+        />
+
+        <QuickVehicleCapture
+          open={captureDialogOpen}
+          onOpenChange={setCaptureDialogOpen}
+          onVehicleFound={handleVehicleFound}
+          onVehicleNotFound={handleVehicleNotFound}
+          theme={theme}
         />
         </div>
       </div>
