@@ -71,6 +71,7 @@ export default function VehicleDialog({
   open, 
   onOpenChange, 
   vehicle, 
+  prefilledData,
   drivers = [],
   locations = [],
   companies = [],
@@ -121,10 +122,23 @@ export default function VehicleDialog({
       } else {
         const defaultCompanyId = isSuperAdmin ? "" : (currentUser?.company_id || "");
         setSelectedCompanyId(defaultCompanyId);
-        setForm({ ...initialState, company_id: defaultCompanyId, location_id: "" });
+        
+        // Si hay datos pre-llenados de la captura rápida, usarlos
+        const baseForm = { ...initialState, company_id: defaultCompanyId, location_id: "" };
+        if (prefilledData) {
+          setForm({
+            ...baseForm,
+            plate: prefilledData.plate || baseForm.plate,
+            internal_number: prefilledData.internal_number || baseForm.internal_number,
+            manufacturer: prefilledData.manufacturer || baseForm.manufacturer,
+            model: prefilledData.model || baseForm.model,
+          });
+        } else {
+          setForm(baseForm);
+        }
       }
     }
-  }, [vehicle, open, isSuperAdmin, currentUser]);
+  }, [vehicle, prefilledData, open, isSuperAdmin, currentUser]);
 
   const handleChange = (field, value) => {
     if (field === "company_id") {
