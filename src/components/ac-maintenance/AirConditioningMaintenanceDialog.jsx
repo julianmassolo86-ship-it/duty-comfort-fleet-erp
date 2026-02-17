@@ -170,13 +170,7 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
       if (maintenance) {
         setFormData({ ...initialState, ...maintenance });
       } else {
-        // Intentar recuperar el vehículo seleccionado desde localStorage
-        const savedVehicleId = localStorage.getItem('ac_inspection_vehicle_id');
-        if (savedVehicleId) {
-          setFormData({ ...initialState, vehicle_id: savedVehicleId });
-        } else {
-          setFormData(initialState);
-        }
+        setFormData(initialState);
       }
       setError("");
       setSearchTerm("");
@@ -289,8 +283,6 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
       company_id: vehicle.company_id,
       location_id: vehicle.location_id
     });
-    // Guardar el vehículo seleccionado en localStorage
-    localStorage.setItem('ac_inspection_vehicle_id', vehicle.id);
     setShowVehicleSelector(false);
     setSearchTerm("");
   };
@@ -339,11 +331,6 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
         const created = await base44.entities.AirConditioningMaintenance.create(dataToSave);
         // Si se acaba de crear, actualizar formData con el ID para futuras actualizaciones
         setFormData({ ...dataToSave, id: created.id });
-      }
-
-      // Limpiar el vehículo guardado si se guardó exitosamente
-      if (closeAfterSave) {
-        localStorage.removeItem('ac_inspection_vehicle_id');
       }
 
       onSuccess?.();
