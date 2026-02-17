@@ -18,7 +18,8 @@ const initialState = {
   vehicle_id: "",
   inspection_date: new Date().toISOString().split('T')[0],
   ambient_temperature: "",
-  odometer_reading: "",
+  kilometraje: "",
+  horas: "",
   tipo_mantenimiento: "preventivo",
   
   // Inspecciones iniciales (1-12)
@@ -169,7 +170,13 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
       if (maintenance) {
         setFormData({ ...initialState, ...maintenance });
       } else {
-        setFormData(initialState);
+        // Intentar recuperar el vehículo seleccionado desde localStorage
+        const savedVehicleId = localStorage.getItem('ac_inspection_vehicle_id');
+        if (savedVehicleId) {
+          setFormData({ ...initialState, vehicle_id: savedVehicleId });
+        } else {
+          setFormData(initialState);
+        }
       }
       setError("");
       setSearchTerm("");
@@ -207,7 +214,8 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
         if (!maintenance) {
           setFormData(prev => ({
             ...prev,
-            odometer_reading: vehicle.mileage || vehicle.hours || ""
+            kilometraje: vehicle.mileage || "",
+            horas: vehicle.hours || ""
           }));
         }
       }
@@ -281,6 +289,8 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
       company_id: vehicle.company_id,
       location_id: vehicle.location_id
     });
+    // Guardar el vehículo seleccionado en localStorage
+    localStorage.setItem('ac_inspection_vehicle_id', vehicle.id);
     setShowVehicleSelector(false);
     setSearchTerm("");
   };
@@ -316,7 +326,8 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
           key.includes("lp") || 
           key.includes("hp") ||
           key.includes("presion_estatica") ||
-          key === "odometer_reading"
+          key === "kilometraje" ||
+          key === "horas"
         )) {
           dataToSave[key] = null;
         }
@@ -328,6 +339,11 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
         const created = await base44.entities.AirConditioningMaintenance.create(dataToSave);
         // Si se acaba de crear, actualizar formData con el ID para futuras actualizaciones
         setFormData({ ...dataToSave, id: created.id });
+      }
+
+      // Limpiar el vehículo guardado si se guardó exitosamente
+      if (closeAfterSave) {
+        localStorage.removeItem('ac_inspection_vehicle_id');
       }
 
       onSuccess?.();
@@ -502,8 +518,12 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
     doc.text(`Temperatura Ambiente: ${formData.ambient_temperature}°C`, margin + 3, y);
     doc.text(`Tipo: ${formData.tipo_mantenimiento.toUpperCase()}`, pageWidth - margin - 3, y, { align: "right" });
     y += 5;
-    if (formData.odometer_reading) {
-      doc.text(`Kilometraje/Horas: ${formData.odometer_reading}`, margin + 3, y);
+    if (formData.kilometraje || formData.horas) {
+      const kmsHrs = [
+        formData.kilometraje ? `${formData.kilometraje} km` : '',
+        formData.horas ? `${formData.horas} hs` : ''
+      ].filter(Boolean).join(' / ');
+      doc.text(`Lectura: ${kmsHrs}`, margin + 3, y);
       y += 5;
     }
     
@@ -878,18 +898,6 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
               </div>
 
               <div className="space-y-2">
-                <Label className={theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}>KMS/HS</Label>
-                <Input
-                  type="number"
-                  step="0.1"
-                  value={formData.odometer_reading}
-                  onChange={(e) => setFormData({ ...formData, odometer_reading: e.target.value })}
-                  placeholder="Lectura actual"
-                  className={theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-white' : ''}
-                />
-              </div>
-
-              <div className="space-y-2">
                 <Label className={theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}>Tipo de Mantenimiento</Label>
                 <Select
                   value={formData.tipo_mantenimiento}
@@ -904,6 +912,32 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
                     <SelectItem value="inspeccion" className={theme === 'dark' ? 'text-white focus:bg-zinc-700' : ''}>Inspección</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 mt-4">
+              <div className="space-y-2">
+                <Label className={theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}>Kilómetros</Label>
+                <Input
+                  type="number"
+                  step="0.1"
+                  value={formData.kilometraje}
+                  onChange={(e) => setFormData({ ...formData, kilometraje: e.target.value })}
+                  placeholder="Km"
+                  className={theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-white' : ''}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className={theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}>Horas</Label>
+                <Input
+                  type="number"
+                  step="0.1"
+                  value={formData.horas}
+                  onChange={(e) => setFormData({ ...formData, horas: e.target.value })}
+                  placeholder="Hs"
+                  className={theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-white' : ''}
+                />
               </div>
             </div>
           </div>
