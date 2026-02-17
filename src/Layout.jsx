@@ -89,7 +89,10 @@ function LayoutContent({ children, currentPageName }) {
   const location = useLocation();
 
   useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
+    // Solo intentar cargar el usuario si no estamos en la LandingPage
+    if (currentPageName !== "LandingPage") {
+      base44.auth.me().then(setUser).catch(() => {});
+    }
     
     // Listen for profile updates
     const handleProfileUpdate = () => {
@@ -98,7 +101,7 @@ function LayoutContent({ children, currentPageName }) {
     
     window.addEventListener('userProfileUpdated', handleProfileUpdate);
     return () => window.removeEventListener('userProfileUpdated', handleProfileUpdate);
-  }, []);
+  }, [currentPageName]);
 
   // Track page changes for transitions
   const prevPageRef = React.useRef(currentPageName);
