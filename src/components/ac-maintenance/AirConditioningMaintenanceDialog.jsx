@@ -1264,10 +1264,7 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
                   type="button"
                   variant="outline"
                   onClick={handleExportPDF}
-                  className={cn(
-                    "bg-blue-500 hover:bg-blue-600 text-white border-blue-600",
-                    theme === 'dark' ? 'hover:bg-blue-700' : ''
-                  )}
+                  className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white border-none shadow-lg hover:shadow-xl transition-all"
                 >
                   <FileDown className="w-4 h-4 mr-2" />
                   Exportar PDF
