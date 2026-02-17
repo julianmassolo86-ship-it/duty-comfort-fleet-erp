@@ -165,6 +165,13 @@ export default function VehicleDialog({
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    // Validar que al menos uno de los dos campos esté presente
+    if (!form.internal_number && !form.plate) {
+      alert("Debe completar al menos Interno o Patente");
+      return;
+    }
+    
     const finalData = {
       ...form,
       company_id: isSuperAdmin ? form.company_id : currentUser?.company_id,
@@ -275,7 +282,7 @@ export default function VehicleDialog({
 
             <TabsContent value="general" className="space-y-4">
               <div className="space-y-2">
-                <Label>Interno (Calco ID)</Label>
+                <Label>Interno (Calco ID) *</Label>
                 <Input
                   value={form.internal_number}
                   onChange={(e) => handleChange("internal_number", e.target.value.slice(0, 10))}
@@ -283,6 +290,7 @@ export default function VehicleDialog({
                   placeholder="Ej: MTU736"
                   maxLength={10}
                 />
+                <p className="text-xs text-zinc-500">* Se requiere Interno o Patente</p>
               </div>
 
               {isSuperAdmin && (
@@ -400,8 +408,8 @@ export default function VehicleDialog({
                   className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
                   placeholder="ABC123"
                   maxLength={10}
-                  required
                 />
+                <p className="text-xs text-zinc-500">* Se requiere Interno o Patente</p>
               </div>
 
               <div className="space-y-2">
