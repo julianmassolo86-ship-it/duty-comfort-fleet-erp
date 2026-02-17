@@ -125,7 +125,21 @@ export default function QuickVehicleCapture({ open, onOpenChange, onVehicleFound
   };
 
   const triggerCamera = () => {
-    fileInputRef.current?.click();
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+      fileInputRef.current.click();
+    }
+  };
+
+  const triggerGallery = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = (e) => {
+      const file = e.target.files?.[0];
+      if (file) handleFileSelect(file);
+    };
+    input.click();
   };
 
   return (
@@ -183,13 +197,7 @@ export default function QuickVehicleCapture({ open, onOpenChange, onVehicleFound
               </div>
 
               <Button
-                onClick={() => {
-                  const input = document.createElement('input');
-                  input.type = 'file';
-                  input.accept = 'image/*';
-                  input.onchange = (e) => handleFileSelect(e.target.files[0]);
-                  input.click();
-                }}
+                onClick={triggerGallery}
                 variant="outline"
                 className={cn("w-full", theme === 'dark' ? 'border-zinc-700 text-zinc-300 hover:bg-zinc-800' : 'border-gray-300 text-gray-700 hover:bg-gray-100')}
               >
