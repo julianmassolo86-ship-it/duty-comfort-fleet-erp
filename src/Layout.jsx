@@ -100,14 +100,6 @@ function LayoutContent({ children, currentPageName }) {
     return () => window.removeEventListener('userProfileUpdated', handleProfileUpdate);
   }, []);
 
-  // Si estamos en la landing page, no mostrar el layout
-  if (currentPageName === "LandingPage") {
-    return <>{children}</>;
-  }
-
-  // Verificar si el usuario es admin sin empresa asignada (y NO es super_admin)
-  const isAdminWithoutCompany = user && !user.company_id && user.user_role !== 'super_admin';
-
   // Track page changes for transitions
   const prevPageRef = React.useRef(currentPageName);
   useEffect(() => {
@@ -149,6 +141,14 @@ function LayoutContent({ children, currentPageName }) {
   const handleBackClick = () => {
     navigate(-1);
   };
+
+  // Si estamos en la landing page, no mostrar el layout
+  if (currentPageName === "LandingPage") {
+    return <>{children}</>;
+  }
+
+  // Verificar si el usuario es admin sin empresa asignada (y NO es super_admin)
+  const isAdminWithoutCompany = user && !user.company_id && user.user_role !== 'super_admin';
 
   // Si el usuario es admin sin empresa asignada, mostrar pantalla de espera
   if (isAdminWithoutCompany) {
