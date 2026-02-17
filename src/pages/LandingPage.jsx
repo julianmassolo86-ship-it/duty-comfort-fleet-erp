@@ -213,8 +213,8 @@ export default function LandingPage() {
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-3xl blur-3xl" />
               <img 
-                src="https://images.unsplash.com/photo-1585870852959-7b52c8ebd8e7?q=80&w=2070&auto=format&fit=crop" 
-                alt="Fleet Control Dashboard" 
+                src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=2426&auto=format&fit=crop" 
+                alt="Sistema de Gestión de Flotas" 
                 className="relative rounded-2xl shadow-2xl border-4 border-white"
               />
             </div>
