@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { createPageUrl } from '@/utils';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Car, BarChart3, Shield, Clock, ArrowRight, CheckCircle2, Zap, TrendingUp } from 'lucide-react';
+import { Car, BarChart3, Shield, Clock, ArrowRight, CheckCircle2, Zap, TrendingUp, Users, Wrench, FileText, MapPin } from 'lucide-react';
 
 export default function LandingPage() {
   const [checkingAuth, setCheckingAuth] = useState(true);
@@ -62,31 +62,36 @@ export default function LandingPage() {
 
       {/* Hero Section */}
       <div className="relative overflow-hidden pt-24">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 via-transparent to-blue-500/5" />
-        <div className="absolute inset-0" style={{
-          backgroundImage: 'radial-gradient(circle at 1px 1px, rgb(203 213 225 / 0.15) 1px, transparent 0)',
-          backgroundSize: '40px 40px'
-        }} />
+        {/* Background Image with Overlay */}
+        <div className="absolute inset-0">
+          <img 
+            src="https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?q=80&w=2070&auto=format&fit=crop" 
+            alt="Fleet Management" 
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/70 to-black/60" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+        </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 md:py-40 relative">
           <div className="text-center space-y-8">
             {/* Main Heading */}
-            <div className="space-y-4">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-500/10 border border-yellow-500/20 rounded-full text-yellow-700 font-medium text-sm">
+            <div className="space-y-6">
+              <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-yellow-500/20 backdrop-blur-sm border border-yellow-500/30 rounded-full text-yellow-400 font-semibold text-sm shadow-lg">
                 <Zap className="w-4 h-4" />
-                Sistema de Gestión Integral
+                Sistema de Gestión Integral de Flotas
               </div>
-              <h1 className="text-5xl md:text-7xl font-bold text-gray-900 leading-tight">
-                Gestiona tu Flota
-                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-yellow-600 to-yellow-500">
-                  de Forma Inteligente
+              <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white leading-tight drop-shadow-2xl">
+                Control Total
+                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-500 mt-2">
+                  de tu Flota
                 </span>
               </h1>
             </div>
 
-            <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              La plataforma completa para optimizar operaciones, reducir costos y maximizar la eficiencia de tu flota vehicular.
+            <p className="text-xl md:text-2xl text-gray-200 max-w-3xl mx-auto leading-relaxed drop-shadow-lg">
+              Plataforma profesional para gestionar vehículos, conductores, ubicaciones y mantenimiento. 
+              <span className="block mt-2 text-yellow-400 font-semibold">Optimiza operaciones y reduce costos en tiempo real.</span>
             </p>
 
             {/* CTA Buttons */}
@@ -94,30 +99,30 @@ export default function LandingPage() {
               <Button
                 onClick={handleLogin}
                 size="lg"
-                className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black text-lg px-10 py-6 rounded-xl shadow-xl shadow-yellow-500/20 transition-all duration-300 transform hover:scale-105 font-bold"
+                className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-black text-lg px-12 py-7 rounded-xl shadow-2xl shadow-yellow-500/30 transition-all duration-300 transform hover:scale-105 font-bold"
               >
-                Comenzar Ahora
-                <ArrowRight className="ml-2 h-5 w-5" />
+                Acceder al Sistema
+                <ArrowRight className="ml-2 h-6 w-6" />
               </Button>
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-16 max-w-4xl mx-auto">
-              <div className="text-center">
-                <div className="text-4xl font-bold text-gray-900">100%</div>
-                <div className="text-sm text-gray-600 mt-1">Control Total</div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-20 max-w-5xl mx-auto">
+              <div className="text-center backdrop-blur-sm bg-black/30 rounded-2xl p-6 border border-white/10">
+                <div className="text-5xl font-bold text-yellow-400 mb-2">+15</div>
+                <div className="text-sm text-gray-300 font-medium">Años de Experiencia</div>
               </div>
-              <div className="text-center">
-                <div className="text-4xl font-bold text-gray-900">24/7</div>
-                <div className="text-sm text-gray-600 mt-1">Disponibilidad</div>
+              <div className="text-center backdrop-blur-sm bg-black/30 rounded-2xl p-6 border border-white/10">
+                <div className="text-5xl font-bold text-yellow-400 mb-2">24/7</div>
+                <div className="text-sm text-gray-300 font-medium">Monitoreo Continuo</div>
               </div>
-              <div className="text-center">
-                <div className="text-4xl font-bold text-gray-900">-30%</div>
-                <div className="text-sm text-gray-600 mt-1">Costos</div>
+              <div className="text-center backdrop-blur-sm bg-black/30 rounded-2xl p-6 border border-white/10">
+                <div className="text-5xl font-bold text-yellow-400 mb-2">100%</div>
+                <div className="text-sm text-gray-300 font-medium">Control Total</div>
               </div>
-              <div className="text-center">
-                <div className="text-4xl font-bold text-gray-900">+50%</div>
-                <div className="text-sm text-gray-600 mt-1">Eficiencia</div>
+              <div className="text-center backdrop-blur-sm bg-black/30 rounded-2xl p-6 border border-white/10">
+                <div className="text-5xl font-bold text-yellow-400 mb-2">-35%</div>
+                <div className="text-sm text-gray-300 font-medium">Reducción de Costos</div>
               </div>
             </div>
           </div>
@@ -125,70 +130,74 @@ export default function LandingPage() {
       </div>
 
       {/* Benefits Section */}
-      <div className="bg-white py-24">
+      <div className="bg-gradient-to-b from-white to-gray-50 py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-500/10 border border-yellow-500/20 rounded-full text-yellow-700 font-medium text-sm mb-6">
+              <TrendingUp className="w-4 h-4" />
+              Soluciones Integrales
+            </div>
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              Potencia tu operación
+              Gestión Profesional de Flotas
             </h2>
-            <p className="text-xl text-gray-600">
-              Herramientas profesionales para una gestión eficiente
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Herramientas especializadas para el control total de vehículos, conductores, ubicaciones y mantenimiento
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {/* Benefit 1 */}
             <div className="group relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 to-transparent rounded-2xl transform group-hover:scale-105 transition-transform" />
-              <div className="relative p-8 bg-white border border-gray-200 rounded-2xl hover:border-yellow-500/50 hover:shadow-xl transition-all">
-                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-yellow-500 to-yellow-600 flex items-center justify-center mb-6 shadow-lg shadow-yellow-500/20">
-                  <BarChart3 className="w-7 h-7 text-black" />
+              <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 to-transparent rounded-2xl transform group-hover:scale-105 transition-transform" />
+              <div className="relative p-8 bg-white border border-gray-200 rounded-2xl hover:border-yellow-500/50 hover:shadow-2xl transition-all h-full">
+                <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-yellow-500 to-yellow-600 flex items-center justify-center mb-6 shadow-lg shadow-yellow-500/30">
+                  <Car className="w-8 h-8 text-black" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Control Total</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Gestión de Vehículos</h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Visualiza el estado completo de tu flota en tiempo real desde un solo lugar.
+                  Registro completo de tu flota con control de estados, documentación y asignaciones en tiempo real.
                 </p>
               </div>
             </div>
 
             {/* Benefit 2 */}
             <div className="group relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent rounded-2xl transform group-hover:scale-105 transition-transform" />
-              <div className="relative p-8 bg-white border border-gray-200 rounded-2xl hover:border-blue-500/50 hover:shadow-xl transition-all">
-                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mb-6 shadow-lg shadow-blue-500/20">
-                  <Clock className="w-7 h-7 text-white" />
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent rounded-2xl transform group-hover:scale-105 transition-transform" />
+              <div className="relative p-8 bg-white border border-gray-200 rounded-2xl hover:border-blue-500/50 hover:shadow-2xl transition-all h-full">
+                <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mb-6 shadow-lg shadow-blue-500/30">
+                  <Users className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Mantenimiento Proactivo</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Control de Conductores</h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Programa mantenimientos y recibe alertas para evitar interrupciones.
+                  Administra licencias, vencimientos y asignaciones de conductores con alertas automáticas.
                 </p>
               </div>
             </div>
 
             {/* Benefit 3 */}
             <div className="group relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent rounded-2xl transform group-hover:scale-105 transition-transform" />
-              <div className="relative p-8 bg-white border border-gray-200 rounded-2xl hover:border-green-500/50 hover:shadow-xl transition-all">
-                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center mb-6 shadow-lg shadow-green-500/20">
-                  <Shield className="w-7 h-7 text-white" />
+              <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-transparent rounded-2xl transform group-hover:scale-105 transition-transform" />
+              <div className="relative p-8 bg-white border border-gray-200 rounded-2xl hover:border-orange-500/50 hover:shadow-2xl transition-all h-full">
+                <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center mb-6 shadow-lg shadow-orange-500/30">
+                  <Wrench className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Gestión de Documentos</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Mantenimiento Preventivo</h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Organiza documentos y controla vencimientos de forma automática.
+                  Planifica servicios, registra inspecciones y evita paradas imprevistas con seguimiento continuo.
                 </p>
               </div>
             </div>
 
             {/* Benefit 4 */}
             <div className="group relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent rounded-2xl transform group-hover:scale-105 transition-transform" />
-              <div className="relative p-8 bg-white border border-gray-200 rounded-2xl hover:border-purple-500/50 hover:shadow-xl transition-all">
-                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center mb-6 shadow-lg shadow-purple-500/20">
-                  <TrendingUp className="w-7 h-7 text-white" />
+              <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-transparent rounded-2xl transform group-hover:scale-105 transition-transform" />
+              <div className="relative p-8 bg-white border border-gray-200 rounded-2xl hover:border-green-500/50 hover:shadow-2xl transition-all h-full">
+                <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center mb-6 shadow-lg shadow-green-500/30">
+                  <BarChart3 className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Eficiencia Operativa</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Reportes y Análisis</h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Optimiza recursos y toma decisiones basadas en datos reales.
+                  Toma decisiones basadas en datos con reportes detallados de operación y rendimiento.
                 </p>
               </div>
             </div>
@@ -196,60 +205,81 @@ export default function LandingPage() {
         </div>
       </div>
 
-      {/* Features List */}
-      <div className="bg-gradient-to-br from-gray-50 to-slate-100 py-24">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              Funcionalidades completas
-            </h2>
-            <p className="text-xl text-gray-600">
-              Todo lo que necesitas para gestionar tu flota profesionalmente
-            </p>
-          </div>
+      {/* Features Section with Image */}
+      <div className="bg-white py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            {/* Left: Image */}
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-3xl blur-3xl" />
+              <img 
+                src="https://images.unsplash.com/photo-1585870852959-7b52c8ebd8e7?q=80&w=2070&auto=format&fit=crop" 
+                alt="Fleet Control Dashboard" 
+                className="relative rounded-2xl shadow-2xl border-4 border-white"
+              />
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {[
-              'Registro completo de vehículos y conductores',
-              'Control de mantenimientos preventivos y correctivos',
-              'Gestión centralizada de documentos',
-              'Alertas de vencimientos automáticas',
-              'Reportes y análisis detallados',
-              'Múltiples ubicaciones y empresas',
-              'Gestión de estados de vehículos',
-              'Asignación de conductores y recursos'
-            ].map((feature, index) => (
-              <div key={index} className="flex items-center gap-4 p-5 bg-white rounded-xl border border-gray-200 hover:border-yellow-500/50 hover:shadow-lg transition-all">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-yellow-500 to-yellow-600 flex items-center justify-center flex-shrink-0">
-                  <CheckCircle2 className="w-5 h-5 text-black" />
-                </div>
-                <span className="text-gray-700 font-medium">{feature}</span>
+            {/* Right: Features */}
+            <div>
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-500/10 border border-yellow-500/20 rounded-full text-yellow-700 font-medium text-sm mb-6">
+                <CheckCircle2 className="w-4 h-4" />
+                Funcionalidades Completas
               </div>
-            ))}
-          </div>
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                Todo lo que necesitas en una sola plataforma
+              </h2>
+              <p className="text-xl text-gray-600 mb-8">
+                Sistema integral diseñado para la gestión profesional de flotas con todas las herramientas esenciales
+              </p>
 
-          {/* Final CTA */}
-          <div className="text-center mt-16">
-            <div className="bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-3xl p-12 shadow-2xl">
-              <h3 className="text-3xl font-bold text-black mb-4">
-                ¿Listo para optimizar tu flota?
-              </h3>
-              <p className="text-black/80 text-lg mb-8 max-w-2xl mx-auto">
-                Únete a las empresas que ya están transformando su gestión de flotas
-              </p>
-              <Button
-                onClick={handleLogin}
-                size="lg"
-                className="bg-black hover:bg-gray-900 text-white text-lg px-12 py-6 rounded-xl shadow-xl transition-all duration-300 transform hover:scale-105 font-bold"
-              >
-                Acceder a la Plataforma
-                <ArrowRight className="ml-2 h-6 w-6" />
-              </Button>
-              <p className="text-black/70 mt-6">
-                ¿Necesitas una cuenta? Contacta al administrador de tu empresa.
-              </p>
+              <div className="space-y-4">
+                {[
+                  { icon: Car, text: 'Registro completo de vehículos con historial detallado' },
+                  { icon: Users, text: 'Gestión de conductores y licencias con alertas' },
+                  { icon: Wrench, text: 'Control de mantenimientos preventivos y correctivos' },
+                  { icon: FileText, text: 'Documentación centralizada y control de vencimientos' },
+                  { icon: BarChart3, text: 'Reportes y análisis en tiempo real' },
+                  { icon: MapPin, text: 'Gestión de múltiples ubicaciones y empresas' },
+                  { icon: Clock, text: 'Alertas automáticas de vencimientos' },
+                  { icon: Shield, text: 'Seguimiento de estados y novedades diarias' }
+                ].map((feature, index) => (
+                  <div key={index} className="flex items-start gap-4 p-4 rounded-xl hover:bg-gray-50 transition-all group">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-yellow-500/10 to-yellow-600/10 flex items-center justify-center flex-shrink-0 group-hover:from-yellow-500/20 group-hover:to-yellow-600/20 transition-all">
+                      <feature.icon className="w-5 h-5 text-yellow-600" />
+                    </div>
+                    <span className="text-gray-700 font-medium pt-2">{feature.text}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* CTA Section */}
+      <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-black py-24">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-500/20 backdrop-blur-sm border border-yellow-500/30 rounded-full text-yellow-400 font-medium text-sm mb-8">
+            <Zap className="w-4 h-4" />
+            Comienza Hoy
+          </div>
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+            Transforma la gestión de tu flota
+          </h2>
+          <p className="text-xl text-gray-300 mb-10 max-w-2xl mx-auto">
+            Únete a las empresas que confían en nuestra plataforma para optimizar sus operaciones y reducir costos
+          </p>
+          <Button
+            onClick={handleLogin}
+            size="lg"
+            className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-black text-lg px-12 py-7 rounded-xl shadow-2xl shadow-yellow-500/30 transition-all duration-300 transform hover:scale-105 font-bold"
+          >
+            Acceder al Sistema
+            <ArrowRight className="ml-2 h-6 w-6" />
+          </Button>
+          <p className="text-gray-400 mt-8 text-sm">
+            ¿Necesitas acceso? Contacta al administrador de tu empresa
+          </p>
         </div>
       </div>
 
