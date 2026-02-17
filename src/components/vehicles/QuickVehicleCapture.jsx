@@ -11,6 +11,8 @@ export default function QuickVehicleCapture({ open, onOpenChange, onVehicleFound
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [extractedData, setExtractedData] = useState(null);
+  const cameraInputRef = useRef(null);
+  const galleryInputRef = useRef(null);
 
   const resetState = () => {
     setStep("initial");
@@ -116,15 +118,28 @@ export default function QuickVehicleCapture({ open, onOpenChange, onVehicleFound
     }
   };
 
+  const handleCameraChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleFileSelect(file);
+      e.target.value = '';
+    }
+  };
+
+  const handleGalleryChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleFileSelect(file);
+      e.target.value = '';
+    }
+  };
+
+  const triggerCamera = () => {
+    cameraInputRef.current?.click();
+  };
+
   const triggerGallery = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.onchange = (e) => {
-      const file = e.target.files?.[0];
-      if (file) handleFileSelect(file);
-    };
-    input.click();
+    galleryInputRef.current?.click();
   };
 
   return (
@@ -145,6 +160,23 @@ export default function QuickVehicleCapture({ open, onOpenChange, onVehicleFound
         <div className="space-y-4">
           {step === "initial" && (
             <>
+              {/* Hidden file inputs */}
+              <input
+                ref={cameraInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                onChange={handleCameraChange}
+                style={{ display: 'none' }}
+              />
+              <input
+                ref={galleryInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleGalleryChange}
+                style={{ display: 'none' }}
+              />
+              
               <div className={cn(
                 "border-2 border-dashed rounded-lg p-8 text-center",
                 theme === 'dark' ? 'border-zinc-700 bg-zinc-800/50' : 'border-gray-300 bg-gray-50'
@@ -154,17 +186,7 @@ export default function QuickVehicleCapture({ open, onOpenChange, onVehicleFound
                   Asegúrate de que la patente o número interno sean claramente visibles
                 </p>
                 <Button
-                  onClick={() => {
-                    const input = document.createElement('input');
-                    input.type = 'file';
-                    input.accept = 'image/*';
-                    input.capture = 'environment';
-                    input.onchange = (e) => {
-                      const file = e.target.files?.[0];
-                      if (file) handleFileSelect(file);
-                    };
-                    input.click();
-                  }}
+                  onClick={triggerCamera}
                   className="bg-yellow-600 hover:bg-yellow-700 text-white"
                 >
                   <Camera className="w-4 h-4 mr-2" />
