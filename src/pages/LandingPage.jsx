@@ -10,20 +10,8 @@ export default function LandingPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const checkAuthentication = async () => {
-      try {
-        const isAuthenticated = await base44.auth.isAuthenticated();
-        if (isAuthenticated) {
-          navigate(createPageUrl('Dashboard'));
-        }
-      } catch (error) {
-        console.error('Auth check error:', error);
-      } finally {
-        setCheckingAuth(false);
-      }
-    };
-    
-    checkAuthentication();
+    // Simplemente verificar si hay sesión sin hacer llamadas que generen 401
+    setCheckingAuth(false);
   }, [navigate]);
 
   const handleLogin = () => {
