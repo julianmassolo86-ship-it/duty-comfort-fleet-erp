@@ -11,7 +11,6 @@ export default function QuickVehicleCapture({ open, onOpenChange, onVehicleFound
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [extractedData, setExtractedData] = useState(null);
-  const fileInputRef = useRef(null);
 
   const resetState = () => {
     setStep("initial");
@@ -117,20 +116,6 @@ export default function QuickVehicleCapture({ open, onOpenChange, onVehicleFound
     }
   };
 
-  const handleCapture = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      handleFileSelect(file);
-    }
-  };
-
-  const triggerCamera = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-      fileInputRef.current.click();
-    }
-  };
-
   const triggerGallery = () => {
     const input = document.createElement('input');
     input.type = 'file';
@@ -168,16 +153,18 @@ export default function QuickVehicleCapture({ open, onOpenChange, onVehicleFound
                 <p className={cn("text-sm mb-4", theme === 'dark' ? 'text-zinc-400' : 'text-gray-600')}>
                   Asegúrate de que la patente o número interno sean claramente visibles
                 </p>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  capture="environment"
-                  onChange={handleCapture}
-                  className="hidden"
-                />
                 <Button
-                  onClick={triggerCamera}
+                  onClick={() => {
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = 'image/*';
+                    input.capture = 'environment';
+                    input.onchange = (e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleFileSelect(file);
+                    };
+                    input.click();
+                  }}
                   className="bg-yellow-600 hover:bg-yellow-700 text-white"
                 >
                   <Camera className="w-4 h-4 mr-2" />
