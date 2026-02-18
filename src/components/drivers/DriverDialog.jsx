@@ -90,7 +90,7 @@ export default function DriverDialog({
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     const finalData = isSuperAdmin ? form : { 
@@ -106,6 +106,30 @@ export default function DriverDialog({
       alert("Debes seleccionar una ubicación");
       return;
     }
+
+    // Si se asignó un vehículo, verificar el límite de 3 conductores
+    if (finalData.vehicle_id) {
+      try {
+        const targetVehicle = await base44.entities.Vehicle.filter({ id: finalData.vehicle_id });
+        if (targetVehicle && targetVehicle[0]) {
+          const vehicle = targetVehicle[0];
+          const currentDriverIds = vehicle.assigned_driver_ids || [];
+          
+          // Si el conductor ya está asignado a este vehículo, no hay problema
+          const isAlreadyAssigned = driver && currentDriverIds.includes(driver.id);
+          
+          // Si no está asignado y el vehículo ya tiene 3 conductores, rechazar
+          if (!isAlreadyAssigned && currentDriverIds.length >= 3) {
+            alert("Este vehículo ya tiene el número máximo de conductores asignados (3). No se puede asignar más conductores.");
+            return;
+          }
+        }
+      } catch (error) {
+        console.error("Error verificando vehículo:", error);
+        alert("Error al verificar el vehículo");
+        return;
+      }
+    }
     
     onSave(finalData);
   };
@@ -115,9 +139,9 @@ export default function DriverDialog({
     loc.company_id === form.company_id
   );
 
-  // Filtrar vehículos según la ubicación seleccionada
+  // Filtrar vehículos según la empresa seleccionada (no por ubicación)
   const filteredVehicles = vehicles.filter(veh => 
-    veh.location_id === form.location_id
+    veh.company_id === form.company_id
   );
 
   return (
@@ -552,7 +576,7 @@ export default function DriverDialog({
                   <Select 
                     value={form.vehicle_id || ""} 
                     onValueChange={(v) => handleChange("vehicle_id", v === "" ? "" : v)}
-                    disabled={!form.location_id}
+                    disabled={!form.company_id}
                   >
                     <SelectTrigger className="bg-slate-800 border-slate-700">
                       <SelectValue placeholder="Seleccionar vehículo (opcional)" />
@@ -561,14 +585,22 @@ export default function DriverDialog({
                       <SelectItem value={null}>Sin vehículo asignado</SelectItem>
                       {filteredVehicles.length === 0 ? (
                         <div className="px-2 py-1.5 text-sm text-slate-400">
-                          {form.location_id ? "No hay vehículos disponibles" : "Primero selecciona una ubicación"}
+                          {form.company_id ? "No hay vehículos disponibles en esta empresa" : "Primero selecciona una empresa"}
                         </div>
                       ) : (
-                        filteredVehicles.map(vehicle => (
-                          <SelectItem key={vehicle.id} value={vehicle.id}>
-                            {vehicle.internal_number ? `#${vehicle.internal_number} - ` : ""}{vehicle.plate} - {vehicle.manufacturer} {vehicle.model}
-                          </SelectItem>
-                        ))
+                        filteredVehicles.map(vehicle => {
+                          const assignedCount = (vehicle.assigned_driver_ids || []).length;
+                          const isCurrentDriver = driver && (vehicle.assigned_driver_ids || []).includes(driver.id);
+                          const isFull = assignedCount >= 3 && !isCurrentDriver;
+                          
+                          return (
+                            <SelectItem key={vehicle.id} value={vehicle.id} disabled={isFull}>
+                              {vehicle.internal_number ? `#${vehicle.internal_number} - ` : ""}{vehicle.plate} - {vehicle.manufacturer} {vehicle.model}
+                              {isFull && " (3/3 conductores)"}
+                              {!isFull && assignedCount > 0 && ` (${assignedCount}/3 conductores)`}
+                            </SelectItem>
+                          );
+                        })
                       )}
                     </SelectContent>
                   </Select>
