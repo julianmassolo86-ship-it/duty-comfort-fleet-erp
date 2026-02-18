@@ -147,11 +147,52 @@ export default function Drivers() {
     },
   });
 
-  const handleSave = (data) => {
-    if (selectedDriver) {
-      updateMutation.mutate({ id: selectedDriver.id, data });
-    } else {
-      createMutation.mutate(data);
+  const handleSave = async (data) => {
+    try {
+      // Si hay un vehículo asignado, necesitamos sincronizar el vehicle.assigned_driver_ids
+      const previousVehicleId = selectedDriver?.vehicle_id;
+      const newVehicleId = data.vehicle_id;
+      
+      let driverId = selectedDriver?.id;
+      
+      // 1. Guardar el conductor
+      if (selectedDriver) {
+        await updateMutation.mutateAsync({ id: selectedDriver.id, data });
+        driverId = selectedDriver.id;
+      } else {
+        const created = await createMutation.mutateAsync(data);
+        driverId = created.id;
+      }
+      
+      // 2. Sincronizar vehículos
+      // Eliminar del vehículo anterior si cambió
+      if (previousVehicleId && previousVehicleId !== newVehicleId) {
+        const prevVehicle = await base44.entities.Vehicle.filter({ id: previousVehicleId });
+        if (prevVehicle && prevVehicle[0]) {
+          const updatedDriverIds = (prevVehicle[0].assigned_driver_ids || []).filter(id => id !== driverId);
+          await base44.entities.Vehicle.update(previousVehicleId, { assigned_driver_ids: updatedDriverIds });
+        }
+      }
+      
+      // Agregar al nuevo vehículo si se asignó uno
+      if (newVehicleId) {
+        const newVehicle = await base44.entities.Vehicle.filter({ id: newVehicleId });
+        if (newVehicle && newVehicle[0]) {
+          const currentDriverIds = newVehicle[0].assigned_driver_ids || [];
+          if (!currentDriverIds.includes(driverId)) {
+            await base44.entities.Vehicle.update(newVehicleId, { 
+              assigned_driver_ids: [...currentDriverIds, driverId] 
+            });
+          }
+        }
+      }
+      
+      // Invalidar queries para refrescar los datos
+      await queryClient.invalidateQueries({ queryKey: ['vehicles'] });
+      await queryClient.invalidateQueries({ queryKey: ['drivers'] });
+    } catch (error) {
+      console.error("Error al guardar conductor:", error);
+      alert("Error al guardar el conductor");
     }
   };
 
