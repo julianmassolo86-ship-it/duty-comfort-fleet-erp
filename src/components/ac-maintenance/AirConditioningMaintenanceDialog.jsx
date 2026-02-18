@@ -82,6 +82,11 @@ const initialState = {
   // Acciones realizadas
   acciones_realizadas: "",
   
+  // Imágenes de muestra
+  image_url_1: "",
+  image_url_2: "",
+  image_url_3: "",
+  
   // Mediciones finales
   medicion_final_lp: "",
   medicion_final_hp: "",
@@ -157,6 +162,8 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
   const [locationFilter, setLocationFilter] = useState("all");
   const [showVehicleSelector, setShowVehicleSelector] = useState(false);
   const [showQuickVehicleDialog, setShowQuickVehicleDialog] = useState(false);
+  const [vehicleStatuses, setVehicleStatuses] = useState([]);
+  const [uploadingImage, setUploadingImage] = useState({ 1: false, 2: false, 3: false });
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -167,6 +174,7 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
       loadVehicles();
       loadCompanies();
       loadLocations();
+      loadVehicleStatuses();
       if (maintenance) {
         setFormData({ ...initialState, ...maintenance });
       } else {
@@ -258,6 +266,15 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
     }
   };
 
+  const loadVehicleStatuses = async () => {
+    try {
+      const statuses = await base44.entities.VehicleStatus.list();
+      setVehicleStatuses(statuses.filter(s => s.is_active).sort((a, b) => (a.order || 0) - (b.order || 0)));
+    } catch (err) {
+      console.error("Error loading vehicle statuses:", err);
+    }
+  };
+
   const filteredVehicles = vehicles.filter(vehicle => {
     const matchesSearch = searchTerm === "" || 
       vehicle.plate?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -292,6 +309,21 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
     await loadVehicles();
     // Seleccionar el nuevo vehículo
     handleSelectVehicle(newVehicle);
+  };
+
+  const handleImageUpload = async (file, imageNum) => {
+    if (!file) return;
+    
+    setUploadingImage({ ...uploadingImage, [imageNum]: true });
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      setFormData({ ...formData, [`image_url_${imageNum}`]: file_url });
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      setError(`Error al subir imagen ${imageNum}: ${error.message}`);
+    } finally {
+      setUploadingImage({ ...uploadingImage, [imageNum]: false });
+    }
   };
 
   const handleSave = async (closeAfterSave = true) => {
@@ -331,6 +363,31 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
         const created = await base44.entities.AirConditioningMaintenance.create(dataToSave);
         // Si se acaba de crear, actualizar formData con el ID para futuras actualizaciones
         setFormData({ ...dataToSave, id: created.id });
+      }
+
+      // Actualizar vehículo si el estado final está definido o si hay kilometraje/horas
+      if (formData.vehicle_id) {
+        const vehicleUpdates = {};
+        
+        // Actualizar estado del vehículo si se definió estado final
+        if (dataToSave.estado_final_equipo) {
+          vehicleUpdates.status = dataToSave.estado_final_equipo;
+        }
+        
+        // Actualizar kilometraje si se ingresó
+        if (dataToSave.kilometraje) {
+          vehicleUpdates.mileage = dataToSave.kilometraje;
+        }
+        
+        // Actualizar horas si se ingresó
+        if (dataToSave.horas) {
+          vehicleUpdates.hours = dataToSave.horas;
+        }
+        
+        // Solo hacer el update si hay algo que actualizar
+        if (Object.keys(vehicleUpdates).length > 0) {
+          await base44.entities.Vehicle.update(formData.vehicle_id, vehicleUpdates);
+        }
       }
 
       onSuccess?.();
@@ -931,7 +988,7 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
 
           {/* Tabs para Inspecciones, Componentes y Mediciones */}
           <Tabs defaultValue="inspecciones" className="w-full">
-            <TabsList className={cn("grid w-full grid-cols-4", theme === 'dark' ? 'bg-zinc-800' : 'bg-gray-100')}>
+            <TabsList className={cn("grid w-full grid-cols-5", theme === 'dark' ? 'bg-zinc-800' : 'bg-gray-100')}>
               <TabsTrigger value="inspecciones" className={theme === 'dark' ? 'data-[state=active]:bg-zinc-900' : ''}>
                 Inspecciones
               </TabsTrigger>
@@ -940,6 +997,9 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
               </TabsTrigger>
               <TabsTrigger value="mediciones" className={theme === 'dark' ? 'data-[state=active]:bg-zinc-900' : ''}>
                 Mediciones
+              </TabsTrigger>
+              <TabsTrigger value="imagenes" className={theme === 'dark' ? 'data-[state=active]:bg-zinc-900' : ''}>
+                Imágenes
               </TabsTrigger>
               <TabsTrigger value="final" className={theme === 'dark' ? 'data-[state=active]:bg-zinc-900' : ''}>
                 Final
@@ -1162,6 +1222,74 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
               </div>
             </TabsContent>
 
+            <TabsContent value="imagenes" className="space-y-4 mt-4">
+              <h3 className={cn("font-semibold mb-4", theme === 'dark' ? 'text-white' : 'text-gray-900')}>
+                Imágenes de Muestra del Trabajo
+              </h3>
+              
+              <p className={cn("text-sm mb-6", theme === 'dark' ? 'text-zinc-400' : 'text-gray-600')}>
+                Sube hasta 3 imágenes del trabajo realizado en el equipo
+              </p>
+
+              <div className="grid grid-cols-3 gap-4">
+                {[1, 2, 3].map((num) => (
+                  <div key={num} className={cn("space-y-2")}>
+                    <Label className={theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}>
+                      Imagen {num}
+                    </Label>
+                    
+                    {formData[`image_url_${num}`] ? (
+                      <div className="relative">
+                        <img 
+                          src={formData[`image_url_${num}`]} 
+                          alt={`Muestra ${num}`}
+                          className="w-full h-40 object-cover rounded-lg border-2"
+                          style={{ borderColor: theme === 'dark' ? 'rgb(63, 63, 70)' : 'rgb(229, 231, 235)' }}
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="icon"
+                          className="absolute top-2 right-2"
+                          onClick={() => setFormData({ ...formData, [`image_url_${num}`]: "" })}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <label className={cn(
+                        "flex flex-col items-center justify-center h-40 border-2 border-dashed rounded-lg cursor-pointer transition-colors",
+                        theme === 'dark' ? 'border-zinc-700 hover:border-zinc-600 bg-zinc-900' : 'border-gray-300 hover:border-gray-400 bg-gray-50'
+                      )}>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => handleImageUpload(e.target.files[0], num)}
+                          disabled={uploadingImage[num]}
+                        />
+                        {uploadingImage[num] ? (
+                          <>
+                            <Loader2 className={cn("w-8 h-8 mb-2 animate-spin", theme === 'dark' ? 'text-zinc-500' : 'text-gray-400')} />
+                            <span className={cn("text-xs", theme === 'dark' ? 'text-zinc-500' : 'text-gray-500')}>
+                              Subiendo...
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <Plus className={cn("w-8 h-8 mb-2", theme === 'dark' ? 'text-zinc-500' : 'text-gray-400')} />
+                            <span className={cn("text-xs", theme === 'dark' ? 'text-zinc-500' : 'text-gray-500')}>
+                              Subir imagen
+                            </span>
+                          </>
+                        )}
+                      </label>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </TabsContent>
+
             <TabsContent value="final" className="space-y-4 mt-4">
               <h3 className={cn("font-semibold mb-4", theme === 'dark' ? 'text-white' : 'text-gray-900')}>
                 Información Final
@@ -1170,12 +1298,31 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label className={theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}>Estado Final del Equipo</Label>
-                  <Input
+                  <Select
                     value={formData.estado_final_equipo}
-                    onChange={(e) => setFormData({ ...formData, estado_final_equipo: e.target.value })}
-                    placeholder="Ej: Equipo funcionando correctamente"
-                    className={theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-white' : ''}
-                  />
+                    onValueChange={(value) => setFormData({ ...formData, estado_final_equipo: value })}
+                  >
+                    <SelectTrigger className={theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-white' : ''}>
+                      <SelectValue placeholder="Seleccionar estado..." />
+                    </SelectTrigger>
+                    <SelectContent className={theme === 'dark' ? 'bg-zinc-800 border-zinc-700' : ''}>
+                      {vehicleStatuses.map((status) => (
+                        <SelectItem 
+                          key={status.id} 
+                          value={status.code}
+                          className={theme === 'dark' ? 'text-white focus:bg-zinc-700' : ''}
+                        >
+                          <div className="flex items-center gap-2">
+                            <div 
+                              className="w-3 h-3 rounded-full" 
+                              style={{ backgroundColor: status.color }}
+                            />
+                            {status.name}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-2">
