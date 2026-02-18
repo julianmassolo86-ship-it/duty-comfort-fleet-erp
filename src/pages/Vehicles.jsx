@@ -190,11 +190,51 @@ export default function Vehicles() {
     },
   });
 
-  const handleSave = (data) => {
-    if (selectedVehicle) {
-      updateMutation.mutate({ id: selectedVehicle.id, data });
-    } else {
-      createMutation.mutate(data);
+  const handleSave = async (data) => {
+    try {
+      // Obtener los IDs de conductores anteriores (si es una edición)
+      const previousDriverIds = selectedVehicle?.assigned_driver_ids || [];
+      const newDriverIds = data.assigned_driver_ids || [];
+      
+      let vehicleId = selectedVehicle?.id;
+      
+      // 1. Guardar el vehículo
+      if (selectedVehicle) {
+        await updateMutation.mutateAsync({ id: selectedVehicle.id, data });
+        vehicleId = selectedVehicle.id;
+      } else {
+        const created = await createMutation.mutateAsync(data);
+        vehicleId = created.id;
+      }
+      
+      // 2. Sincronizar conductores - Eliminar vehículo de conductores que fueron desasignados
+      const removedDriverIds = previousDriverIds.filter(id => !newDriverIds.includes(id));
+      for (const driverId of removedDriverIds) {
+        if (driverId) {
+          const driver = await base44.entities.Driver.filter({ id: driverId });
+          if (driver && driver[0]) {
+            // Si el conductor tenía este vehículo, quitarlo
+            if (driver[0].vehicle_id === vehicleId) {
+              await base44.entities.Driver.update(driverId, { vehicle_id: "" });
+            }
+          }
+        }
+      }
+      
+      // 3. Asignar vehículo a los nuevos conductores
+      const addedDriverIds = newDriverIds.filter(id => !previousDriverIds.includes(id));
+      for (const driverId of addedDriverIds) {
+        if (driverId) {
+          await base44.entities.Driver.update(driverId, { vehicle_id: vehicleId });
+        }
+      }
+      
+      // Invalidar queries para refrescar los datos
+      await queryClient.invalidateQueries({ queryKey: ['vehicles'] });
+      await queryClient.invalidateQueries({ queryKey: ['drivers'] });
+    } catch (error) {
+      console.error("Error al guardar vehículo:", error);
+      alert("Error al guardar el vehículo");
     }
   };
 
