@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Dialog,
   DialogContent,
@@ -229,9 +229,17 @@ export default function VehicleDialog({
     }
   };
 
-  const filteredLocations = isSuperAdmin 
-    ? locations.filter(l => l.company_id === selectedCompanyId)
-    : locations;
+  const filteredLocations = useMemo(() => {
+    if (isSuperAdmin) {
+      return selectedCompanyId ? locations.filter(l => l.company_id === selectedCompanyId) : locations;
+    }
+    return locations;
+  }, [locations, selectedCompanyId, isSuperAdmin]);
+
+  const selectedLocationName = useMemo(() => {
+    const selected = locations.find(l => l.id === form.location_id);
+    return selected ? selected.name : "";
+  }, [locations, form.location_id]);
 
   const filteredDrivers = isSuperAdmin
     ? drivers.filter(d => d.company_id === selectedCompanyId)
@@ -345,9 +353,11 @@ export default function VehicleDialog({
                   </div>
                   <div className="space-y-2">
                     <Label>Locación *</Label>
-                    <Select value={form.location_id || ""} onValueChange={(v) => handleChange("location_id", v)} required disabled={!selectedCompanyId}>
+                    <Select value={form.location_id || ""} onValueChange={(v) => handleChange("location_id", v)} required>
                       <SelectTrigger className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50">
-                        <SelectValue placeholder={selectedCompanyId ? "Seleccionar locación" : "Primero seleccione empresa"} />
+                        <SelectValue placeholder={selectedCompanyId ? "Seleccionar locación" : "Primero seleccione empresa"}>
+                          {selectedLocationName}
+                        </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         {filteredLocations.length > 0 ? (
@@ -368,7 +378,9 @@ export default function VehicleDialog({
                   <Label>Locación *</Label>
                   <Select value={form.location_id || ""} onValueChange={(v) => handleChange("location_id", v)} required>
                     <SelectTrigger className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50">
-                      <SelectValue placeholder="Seleccionar locación" />
+                      <SelectValue placeholder="Seleccionar locación">
+                        {selectedLocationName}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {filteredLocations.length > 0 ? (
