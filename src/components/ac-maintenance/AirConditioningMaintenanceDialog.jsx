@@ -351,9 +351,6 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
       if (!formData.inspection_date) {
         throw new Error("Debe ingresar la fecha de inspección");
       }
-      if (!formData.ambient_temperature) {
-        throw new Error("Debe ingresar la temperatura ambiente");
-      }
       if (!formData.tipo_mantenimiento) {
         throw new Error("Debe seleccionar el tipo de mantenimiento");
       }
