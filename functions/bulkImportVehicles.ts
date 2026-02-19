@@ -61,8 +61,8 @@ Deno.serve(async (req) => {
     for (const vehicle of vehicles) {
       try {
         // Mapear los campos (normalizar para búsqueda)
-        const categoryName = vehicle.tipo_activo?.trim().toLowerCase().replace(/\s+/g, ' ');
-        const typeName = vehicle.utilidad?.trim().toLowerCase().replace(/\s+/g, ' ');
+        const categoryName = normalize(vehicle.tipo_activo);
+        const typeName = normalize(vehicle.utilidad);
         const manufacturerName = vehicle.marca?.trim();
 
         const categoryId = categoryMap[categoryName];
