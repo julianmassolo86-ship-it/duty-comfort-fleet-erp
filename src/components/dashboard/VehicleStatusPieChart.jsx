@@ -9,7 +9,8 @@ const STATUS_COLORS = {
   maintenance: '#eab308',
   reserved: '#f59e0b',
   in_transit: '#06b6d4',
-  retired: '#6b7280'
+  retired: '#6b7280',
+  fuera_de_servicio: '#ef4444'
 };
 
 const STATUS_LABELS = {
@@ -19,7 +20,8 @@ const STATUS_LABELS = {
   maintenance: 'En Mantenimiento',
   reserved: 'Reservado',
   in_transit: 'En Tránsito',
-  retired: 'Retirado'
+  retired: 'Retirado',
+  fuera_de_servicio: 'Fuera de Servicio'
 };
 
 export default function VehicleStatusPieChart({ vehicles }) {
