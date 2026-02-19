@@ -182,24 +182,26 @@ export default function VehicleDialog({
       return;
     }
     
-    // Validar patente duplicada globalmente
-    if (form.plate) {
+    const currentVehicleId = vehicle?.id || form.id;
+    
+    // Validar patente duplicada globalmente (solo si cambió la patente)
+    if (form.plate && form.plate !== vehicle?.plate) {
       const existingByPlate = await base44.entities.Vehicle.filter({ plate: form.plate });
-      const duplicatePlate = existingByPlate.find(v => v.id !== vehicle?.id);
+      const duplicatePlate = existingByPlate.find(v => v.id !== currentVehicleId);
       if (duplicatePlate) {
         alert(`La patente "${form.plate}" ya existe en el sistema (Interno: ${duplicatePlate.internal_number})`);
         return;
       }
     }
     
-    // Validar número interno duplicado dentro de la misma empresa
-    if (form.internal_number) {
+    // Validar número interno duplicado dentro de la misma empresa (solo si cambió el interno)
+    if (form.internal_number && form.internal_number !== vehicle?.internal_number) {
       const companyId = isSuperAdmin ? form.company_id : currentUser?.company_id;
       const existingByInternal = await base44.entities.Vehicle.filter({ 
         internal_number: form.internal_number,
         company_id: companyId
       });
-      const duplicateInternal = existingByInternal.find(v => v.id !== vehicle?.id);
+      const duplicateInternal = existingByInternal.find(v => v.id !== currentVehicleId);
       if (duplicateInternal) {
         alert(`El número interno "${form.internal_number}" ya existe en esta empresa (Patente: ${duplicateInternal.plate})`);
         return;
