@@ -717,7 +717,11 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={cn("max-w-5xl max-h-[90vh] overflow-y-auto", theme === 'dark' ? 'bg-zinc-900 border-zinc-700' : 'bg-white')}>
+      <DialogContent 
+        className={cn("max-w-5xl max-h-[90vh] overflow-y-auto", theme === 'dark' ? 'bg-zinc-900 border-zinc-700' : 'bg-white')}
+        onInteractOutside={(e) => e.preventDefault()}
+        onEscapeKeyDown={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle className={theme === 'dark' ? 'text-white' : 'text-gray-900'}>
             {maintenance ? "Editar Inspección A/C" : "Nueva Inspección de Aire Acondicionado"}
