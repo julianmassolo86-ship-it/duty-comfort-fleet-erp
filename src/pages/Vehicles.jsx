@@ -166,10 +166,10 @@ export default function Vehicles() {
       
       // 1. Guardar el vehículo
       if (selectedVehicle) {
-        await updateMutation.mutateAsync({ id: selectedVehicle.id, data });
+        await base44.entities.Vehicle.update(selectedVehicle.id, data);
         vehicleId = selectedVehicle.id;
       } else {
-        const created = await createMutation.mutateAsync(data);
+        const created = await base44.entities.Vehicle.create(data);
         vehicleId = created.id;
       }
       
@@ -198,6 +198,10 @@ export default function Vehicles() {
       // Invalidar queries para refrescar los datos
       await queryClient.invalidateQueries({ queryKey: ['vehicles'] });
       await queryClient.invalidateQueries({ queryKey: ['drivers'] });
+      
+      // Cerrar el diálogo manualmente
+      setDialogOpen(false);
+      setSelectedVehicle(null);
     } catch (error) {
       console.error("Error al guardar vehículo:", error);
       alert("Error al guardar el vehículo");
