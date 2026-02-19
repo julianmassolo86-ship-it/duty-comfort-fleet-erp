@@ -181,7 +181,6 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
         setGeneratedReportNumber(maintenance.report_number);
       } else {
         setFormData(initialState);
-        generateReportNumber();
       }
       setError("");
       setSearchTerm("");
