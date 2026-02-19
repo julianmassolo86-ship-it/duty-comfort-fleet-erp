@@ -160,9 +160,15 @@ export default function VehicleMaintenanceHistory({ vehicleId }) {
                       size="sm"
                       className="text-yellow-400 hover:text-yellow-300 hover:bg-yellow-500/10"
                       onClick={() => {
-                        navigate(createPageUrl('Maintenance'));
+                        navigate(createPageUrl('Maintenance'), {
+                          state: {
+                            openDialog: record.recordType === 'ac_report' ? 'ac' : 'maintenance',
+                            recordId: record.id,
+                            recordData: record
+                          }
+                        });
                       }}
-                      title="Ver en sección de Mantenimiento"
+                      title={record.recordType === 'ac_report' ? 'Ver Informe A/C' : 'Ver Mantenimiento'}
                     >
                       <ExternalLink className="w-4 h-4" />
                     </Button>
