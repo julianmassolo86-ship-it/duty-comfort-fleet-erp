@@ -364,11 +364,15 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
       if (maintenance) {
         await base44.entities.AirConditioningMaintenance.update(maintenance.id, dataToSave);
       } else {
-        // Asignar el número de reporte generado
-        dataToSave.report_number = generatedReportNumber;
+        // Generar el número de reporte justo antes de crear
+        const { report_number } = await base44.functions.invoke('getNextReportNumber', {
+          report_type: 'ac_maintenance'
+        });
+        dataToSave.report_number = report_number;
         const created = await base44.entities.AirConditioningMaintenance.create(dataToSave);
-        // Si se acaba de crear, actualizar formData con el ID para futuras actualizaciones
+        // Actualizar formData con el ID y el número para futuras actualizaciones
         setFormData({ ...dataToSave, id: created.id });
+        setGeneratedReportNumber(report_number);
       }
 
       // Actualizar vehículo si el estado final está definido o si hay kilometraje/horas
