@@ -28,7 +28,7 @@ const initialState = {
   manufacturer: "",
   manufacturer_logo_url: "",
   model: "",
-  year: new Date().getFullYear(),
+  year: "",
   chassis_number: "",
   engine_number: "",
   vin: "",
@@ -121,7 +121,7 @@ export default function VehicleDialog({
           company_id: companyId,
           location_id: locationId,
           // Asegurar que campos numéricos no sean null/undefined
-          year: vehicle.year || new Date().getFullYear(),
+          year: vehicle.year || "",
           mileage: vehicle.mileage || 0,
           hours: vehicle.hours || 0,
           last_service_mileage: vehicle.last_service_mileage || 0,
