@@ -191,16 +191,7 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
     }
   }, [open, maintenance, user]);
 
-  const generateReportNumber = async () => {
-    try {
-      const { report_number } = await base44.functions.invoke('getNextReportNumber', {
-        report_type: 'ac_maintenance'
-      });
-      setGeneratedReportNumber(report_number);
-    } catch (err) {
-      console.error("Error generating report number:", err);
-    }
-  };
+
 
   useEffect(() => {
     if (formData.vehicle_id) {
