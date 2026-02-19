@@ -450,11 +450,12 @@ export default function VehicleDialog({
                 </div>
                 <div className="space-y-2">
                   <Label>Año</Label>
-                  <Select value={form.year?.toString()} onValueChange={(v) => handleChange("year", parseInt(v))}>
+                  <Select value={form.year?.toString() || ""} onValueChange={(v) => handleChange("year", v === "" ? null : parseInt(v))}>
                     <SelectTrigger className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="max-h-64">
+                      <SelectItem value={null}>Sin año</SelectItem>
                       {Array.from({ length: 151 }, (_, i) => 2050 - i).map(year => (
                         <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
                       ))}
