@@ -66,8 +66,13 @@ Deno.serve(async (req) => {
         const typeName = normalize(vehicle.utilidad);
         const manufacturerName = vehicle.marca?.trim();
 
+        console.log(`\nVehicle ${vehicle.interno}: tipo_activo="${vehicle.tipo_activo}" -> normalized="${categoryName}"`);
+        console.log(`Vehicle ${vehicle.interno}: utilidad="${vehicle.utilidad}" -> normalized="${typeName}"`);
+
         const categoryId = categoryMap[categoryName];
         const typeId = typeMap[typeName];
+
+        console.log(`Vehicle ${vehicle.interno}: categoryId=${categoryId}, typeId=${typeId}`);
 
         // Buscar manufacturer (case insensitive)
         const mfrKey = manufacturerName?.toLowerCase();
