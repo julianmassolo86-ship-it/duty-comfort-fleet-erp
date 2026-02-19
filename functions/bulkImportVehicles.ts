@@ -45,6 +45,7 @@ Deno.serve(async (req) => {
     types.forEach(type => {
       const normalized = normalize(type.name);
       typeMap[normalized] = type.id;
+      console.log(`Type mapping: "${type.name}" -> "${normalized}" -> ${type.id}`);
     });
 
     const manufacturerMap = {};
