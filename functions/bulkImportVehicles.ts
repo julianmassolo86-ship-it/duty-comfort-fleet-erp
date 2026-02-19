@@ -51,9 +51,9 @@ Deno.serve(async (req) => {
     // Procesar cada vehículo
     for (const vehicle of vehicles) {
       try {
-        // Mapear los campos
-        const categoryName = vehicle.tipo_activo?.trim().toLowerCase();
-        const typeName = vehicle.utilidad?.trim().toLowerCase();
+        // Mapear los campos (normalizar para búsqueda)
+        const categoryName = vehicle.tipo_activo?.trim().toLowerCase().replace(/\s+/g, ' ');
+        const typeName = vehicle.utilidad?.trim().toLowerCase().replace(/\s+/g, ' ');
         const manufacturerName = vehicle.marca?.trim();
 
         const categoryId = categoryMap[categoryName];
