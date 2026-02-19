@@ -381,9 +381,14 @@ export default function Vehicles() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos</SelectItem>
-              <SelectItem value="active">Activo</SelectItem>
-              <SelectItem value="maintenance">En mantenimiento</SelectItem>
-              <SelectItem value="inactive">Inactivo</SelectItem>
+              {vehicleStatuses
+                .filter(s => s.is_active)
+                .sort((a, b) => (a.order || 0) - (b.order || 0))
+                .map(status => (
+                  <SelectItem key={status.id} value={status.code}>
+                    {status.name}
+                  </SelectItem>
+                ))}
             </SelectContent>
           </Select>
         </div>
