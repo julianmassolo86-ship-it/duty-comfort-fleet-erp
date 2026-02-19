@@ -1,5 +1,7 @@
 import { Car, Truck, Bus, Bike, MapPin, Building2, User } from "lucide-react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import { base44 } from "@/api/base44Client";
 import StatusBadge from "../common/StatusBadge";
 import { useTheme } from "../common/ThemeWrapper";
 
@@ -21,6 +23,20 @@ const fuelLabels = {
 export default function VehicleCard({ vehicle, location, company, drivers = [], vehicleStatuses = [], onClick }) {
   const Icon = vehicleIcons[vehicle.type] || Car;
   const { theme } = useTheme();
+  const [manufacturerLogo, setManufacturerLogo] = useState(vehicle.manufacturer_logo_url);
+  
+  // Obtener el logo actual del fabricante
+  useEffect(() => {
+    if (vehicle.manufacturer) {
+      base44.entities.Manufacturer.filter({ name: vehicle.manufacturer })
+        .then(results => {
+          if (results.length > 0 && results[0].logo_url) {
+            setManufacturerLogo(results[0].logo_url);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [vehicle.manufacturer]);
   
   // Obtener conductores asignados
   const driverIds = vehicle.assigned_driver_ids || (vehicle.assigned_driver_id ? [vehicle.assigned_driver_id] : []);
