@@ -962,7 +962,6 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
                   onChange={(e) => setFormData({ ...formData, ambient_temperature: e.target.value })}
                   placeholder="Ej: 25"
                   className={theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-white' : ''}
-                  required
                 />
               </div>
 
