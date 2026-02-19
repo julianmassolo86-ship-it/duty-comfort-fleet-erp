@@ -132,18 +132,6 @@ export default function Vehicles() {
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Vehicle.create(data),
-    onMutate: async (newVehicle) => {
-      await queryClient.cancelQueries({ queryKey: ['vehicles'] });
-      const previousVehicles = queryClient.getQueryData(['vehicles', currentUser?.company_id]);
-      queryClient.setQueryData(['vehicles', currentUser?.company_id], (old = []) => [
-        ...old,
-        { ...newVehicle, id: 'temp-' + Date.now() }
-      ]);
-      return { previousVehicles };
-    },
-    onError: (err, newVehicle, context) => {
-      queryClient.setQueryData(['vehicles', currentUser?.company_id], context.previousVehicles);
-    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vehicles'] });
       setDialogOpen(false);
@@ -152,17 +140,6 @@ export default function Vehicles() {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Vehicle.update(id, data),
-    onMutate: async ({ id, data }) => {
-      await queryClient.cancelQueries({ queryKey: ['vehicles'] });
-      const previousVehicles = queryClient.getQueryData(['vehicles', currentUser?.company_id]);
-      queryClient.setQueryData(['vehicles', currentUser?.company_id], (old = []) =>
-        old.map(v => v.id === id ? { ...v, ...data } : v)
-      );
-      return { previousVehicles };
-    },
-    onError: (err, variables, context) => {
-      queryClient.setQueryData(['vehicles', currentUser?.company_id], context.previousVehicles);
-    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vehicles'] });
       setDialogOpen(false);
@@ -172,17 +149,6 @@ export default function Vehicles() {
 
   const deleteMutation = useMutation({
     mutationFn: (id) => base44.entities.Vehicle.delete(id),
-    onMutate: async (deletedId) => {
-      await queryClient.cancelQueries({ queryKey: ['vehicles'] });
-      const previousVehicles = queryClient.getQueryData(['vehicles', currentUser?.company_id]);
-      queryClient.setQueryData(['vehicles', currentUser?.company_id], (old = []) =>
-        old.filter(v => v.id !== deletedId)
-      );
-      return { previousVehicles };
-    },
-    onError: (err, deletedId, context) => {
-      queryClient.setQueryData(['vehicles', currentUser?.company_id], context.previousVehicles);
-    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vehicles'] });
       setDialogOpen(false);
