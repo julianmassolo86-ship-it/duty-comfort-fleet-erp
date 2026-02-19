@@ -6,6 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { createPageUrl } from "@/utils";
+import { useNavigate } from "react-router-dom";
 
 const statusColors = {
   scheduled: "bg-blue-500/20 text-blue-400 border-blue-500/30",
@@ -37,6 +39,8 @@ const typeLabels = {
 };
 
 export default function VehicleMaintenanceHistory({ vehicleId }) {
+  const navigate = useNavigate();
+
   // Fetch maintenance records
   const { data: maintenanceRecords = [], isLoading: loadingMaintenance } = useQuery({
     queryKey: ['maintenance', vehicleId],
@@ -156,13 +160,9 @@ export default function VehicleMaintenanceHistory({ vehicleId }) {
                       size="sm"
                       className="text-yellow-400 hover:text-yellow-300 hover:bg-yellow-500/10"
                       onClick={() => {
-                        // Navigate to the maintenance or AC report page
-                        if (record.recordType === 'maintenance') {
-                          window.open(`#/maintenance/${record.id}`, '_blank');
-                        } else {
-                          window.open(`#/ac-maintenance/${record.id}`, '_blank');
-                        }
+                        navigate(createPageUrl('Maintenance'));
                       }}
+                      title="Ver en sección de Mantenimiento"
                     >
                       <ExternalLink className="w-4 h-4" />
                     </Button>
