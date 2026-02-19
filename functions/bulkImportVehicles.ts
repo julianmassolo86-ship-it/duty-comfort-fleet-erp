@@ -45,7 +45,6 @@ Deno.serve(async (req) => {
     types.forEach(type => {
       const normalized = normalize(type.name);
       typeMap[normalized] = type.id;
-      console.log(`Type mapping: "${type.name}" -> "${normalized}" -> ${type.id}`);
     });
 
     const manufacturerMap = {};
@@ -58,21 +57,31 @@ Deno.serve(async (req) => {
       errors: []
     };
 
+    // Obtener vehículos existentes para evitar duplicados
+    const existingVehicles = await base44.asServiceRole.entities.Vehicle.list();
+    const existingInternals = new Set(existingVehicles.map(v => v.internal_number?.toLowerCase()));
+
     // Procesar cada vehículo
     for (const vehicle of vehicles) {
       try {
+        const internalNumber = vehicle.interno?.toString();
+        
+        // Verificar si ya existe
+        if (existingInternals.has(internalNumber?.toLowerCase())) {
+          results.errors.push({
+            vehicle: internalNumber,
+            error: `Vehículo duplicado (ya existe)`
+          });
+          continue;
+        }
+
         // Mapear los campos (normalizar para búsqueda)
         const categoryName = normalize(vehicle.tipo_activo);
         const typeName = normalize(vehicle.utilidad);
         const manufacturerName = vehicle.marca?.trim();
 
-        console.log(`\nVehicle ${vehicle.interno}: tipo_activo="${vehicle.tipo_activo}" -> normalized="${categoryName}"`);
-        console.log(`Vehicle ${vehicle.interno}: utilidad="${vehicle.utilidad}" -> normalized="${typeName}"`);
-
         const categoryId = categoryMap[categoryName];
         const typeId = typeMap[typeName];
-
-        console.log(`Vehicle ${vehicle.interno}: categoryId=${categoryId}, typeId=${typeId}`);
 
         // Buscar manufacturer (case insensitive)
         const mfrKey = manufacturerName?.toLowerCase();
@@ -80,38 +89,34 @@ Deno.serve(async (req) => {
 
         if (!categoryId) {
           results.errors.push({
-            vehicle: vehicle.interno,
+            vehicle: internalNumber,
             error: `Categoría no encontrada: ${vehicle.tipo_activo}`
           });
           continue;
         }
 
-        if (!typeId) {
-          results.errors.push({
-            vehicle: vehicle.interno,
-            error: `Tipo no encontrado: ${vehicle.utilidad}`
-          });
-          continue;
-        }
-
-        // Crear el objeto del vehículo
+        // Crear el objeto del vehículo (tipo es opcional)
         const vehicleData = {
-          internal_number: vehicle.interno?.toString(),
+          internal_number: internalNumber,
           plate: vehicle.dominio?.toString().toUpperCase(),
           year: vehicle.año ? parseInt(vehicle.año) : null,
           manufacturer: finalManufacturer,
           model: vehicle.modelo?.trim(),
           category_id: categoryId,
-          type_id: typeId,
           company_id: companyId,
           location_id: locationId,
           status: 'active'
         };
 
+        // Agregar type_id solo si se encontró
+        if (typeId) {
+          vehicleData.type_id = typeId;
+        }
+
         // Crear el vehículo
         const created = await base44.asServiceRole.entities.Vehicle.create(vehicleData);
         results.success.push({
-          internal_number: vehicle.interno,
+          internal_number: internalNumber,
           plate: vehicle.dominio,
           id: created.id
         });
