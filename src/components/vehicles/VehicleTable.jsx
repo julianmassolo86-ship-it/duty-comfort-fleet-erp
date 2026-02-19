@@ -48,11 +48,13 @@ export default function VehicleTable({ vehicles, locations, companies, drivers, 
     
     return [...vehicles].sort((a, b) => {
       let aValue, bValue;
+      let isNumeric = false;
       
       switch (sortColumn) {
         case "internal_number":
-          aValue = a.internal_number || "";
-          bValue = b.internal_number || "";
+          aValue = parseInt(a.internal_number) || 0;
+          bValue = parseInt(b.internal_number) || 0;
+          isNumeric = true;
           break;
         case "plate":
           aValue = a.plate || "";
@@ -82,10 +84,10 @@ export default function VehicleTable({ vehicles, locations, companies, drivers, 
           return 0;
       }
       
-      if (sortDirection === "asc") {
-        return aValue.localeCompare(bValue);
+      if (isNumeric) {
+        return sortDirection === "asc" ? aValue - bValue : bValue - aValue;
       } else {
-        return bValue.localeCompare(aValue);
+        return sortDirection === "asc" ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
       }
     });
   }, [vehicles, sortColumn, sortDirection, locations, companies, drivers, vehicleStatuses]);
