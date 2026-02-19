@@ -89,6 +89,8 @@ export default function VehicleDialog({
   const [form, setForm] = useState(initialState);
   const [selectedCompanyId, setSelectedCompanyId] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+
 
   const { data: vehicleStatuses = [] } = useQuery({
     queryKey: ['vehicleStatuses'],
@@ -220,7 +222,15 @@ export default function VehicleDialog({
       finalData.id = vehicle.id;
     }
     
-    onSave(finalData);
+    try {
+  onSave(finalData);
+  setSaveSuccess(true);
+  setTimeout(() => {
+    setSaveSuccess(false);
+  }, 2000);
+} catch (error) {
+  setSaveSuccess(false);
+}
   };
 
   const handleImageUpload = async (e, field = "image_url") => {
@@ -932,19 +942,30 @@ export default function VehicleDialog({
               Cancelar
             </Button>
             <Button 
-              type="submit" 
-              disabled={isLoading} 
-              className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600/50 disabled:cursor-not-allowed transition-all min-w-[120px]"
-            >
-              {isLoading ? (
-                <div className="flex items-center gap-2">
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Guardando...</span>
-                </div>
-              ) : (
-                <span>{vehicle ? "Guardar" : "Crear"}</span>
-              )}
-            </Button>
+  type="submit" 
+  disabled={isLoading || saveSuccess} 
+  className={`transition-all min-w-[120px] font-semibold ${
+    isLoading 
+      ? 'bg-blue-600 hover:bg-blue-700' 
+      : saveSuccess 
+        ? 'bg-green-600 hover:bg-green-700' 
+        : 'bg-yellow-500 hover:bg-yellow-600'
+  }`}
+>
+  {isLoading ? (
+    <div className="flex items-center gap-2">
+      <Loader2 className="w-4 h-4 animate-spin" />
+      <span>Guardando...</span>
+    </div>
+  ) : saveSuccess ? (
+    <div className="flex items-center gap-2">
+      <Check className="w-4 h-4" />
+      <span>¡Listo!</span>
+    </div>
+  ) : (
+    <span>{vehicle ? "Guardar" : "Crear"}</span>
+  )}
+</Button>
           </DialogFooter>
         </form>
       </DialogContent>
