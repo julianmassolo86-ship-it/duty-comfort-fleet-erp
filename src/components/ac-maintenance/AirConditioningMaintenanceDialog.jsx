@@ -334,11 +334,14 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
       if (!formData.vehicle_id) {
         throw new Error("Debe seleccionar un vehículo");
       }
+      if (!formData.inspection_date) {
+        throw new Error("Debe ingresar la fecha de inspección");
+      }
       if (!formData.ambient_temperature) {
         throw new Error("Debe ingresar la temperatura ambiente");
       }
-      if (!formData.inspeccion_6_estado || formData.inspeccion_6_estado === "pendiente") {
-        throw new Error("Debe completar al menos hasta la inspección punto 6 (Forzador)");
+      if (!formData.tipo_mantenimiento) {
+        throw new Error("Debe seleccionar el tipo de mantenimiento");
       }
 
       const dataToSave = { ...formData };
@@ -942,7 +945,7 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
               </div>
 
               <div className="space-y-2">
-                <Label className={theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}>Tipo de Mantenimiento</Label>
+                <Label className={theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}>Tipo de Mantenimiento *</Label>
                 <Select
                   value={formData.tipo_mantenimiento}
                   onValueChange={(value) => setFormData({ ...formData, tipo_mantenimiento: value })}
