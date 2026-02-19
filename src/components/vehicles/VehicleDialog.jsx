@@ -931,9 +931,19 @@ export default function VehicleDialog({
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading} className="border-zinc-700 text-zinc-300 hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed">
               Cancelar
             </Button>
-            <Button type="submit" disabled={isLoading} className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600/50 disabled:cursor-not-allowed">
-              {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              {isLoading ? "Guardando..." : (vehicle ? "Guardar" : "Crear")}
+            <Button 
+              type="submit" 
+              disabled={isLoading} 
+              className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600/50 disabled:cursor-not-allowed transition-all min-w-[120px]"
+            >
+              {isLoading ? (
+                <div className="flex items-center gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Guardando...</span>
+                </div>
+              ) : (
+                <span>{vehicle ? "Guardar" : "Crear"}</span>
+              )}
             </Button>
           </DialogFooter>
         </form>
