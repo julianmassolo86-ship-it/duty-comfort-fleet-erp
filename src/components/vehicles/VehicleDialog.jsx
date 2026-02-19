@@ -272,8 +272,16 @@ export default function VehicleDialog({
 
   const fileInputRef = React.useRef(null);
 
+  const handleOpenChange = (newOpen) => {
+    // Prevenir cerrar el modal si está guardando o borrando
+    if (!newOpen && (isLoading || isDeleting)) {
+      return;
+    }
+    onOpenChange(newOpen);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-3xl bg-zinc-950 border-zinc-800 text-white max-h-[90vh] overflow-y-auto shadow-2xl shadow-black/50 backdrop-blur-xl">
         <DialogHeader>
           <DialogTitle>{vehicle ? "Editar Vehículo" : "Nuevo Vehículo"}</DialogTitle>
