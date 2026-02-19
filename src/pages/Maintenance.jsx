@@ -399,6 +399,9 @@ export default function Maintenance() {
                     </div>
                     
                     <div className={cn("text-sm space-y-1", theme === 'dark' ? 'text-zinc-400' : 'text-gray-600')}>
+                      <p className="flex items-center gap-2">
+                        📋 <span className="font-mono font-medium">{ac.report_number || 'Sin número'}</span>
+                      </p>
                       <p>📅 {ac.inspection_date.split('T')[0].split('-').reverse().join('/')}</p>
                       <p>🌡️ Temp. Ambiente: {ac.ambient_temperature}°C</p>
                       {(ac.kilometraje || ac.horas) && (
