@@ -164,6 +164,7 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
   const [showQuickVehicleDialog, setShowQuickVehicleDialog] = useState(false);
   const [vehicleStatuses, setVehicleStatuses] = useState([]);
   const [uploadingImage, setUploadingImage] = useState({ 1: false, 2: false, 3: false });
+  const [generatedReportNumber, setGeneratedReportNumber] = useState(null);
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -177,8 +178,10 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
       loadVehicleStatuses();
       if (maintenance) {
         setFormData({ ...initialState, ...maintenance });
+        setGeneratedReportNumber(maintenance.report_number);
       } else {
         setFormData(initialState);
+        generateReportNumber();
       }
       setError("");
       setSearchTerm("");
@@ -187,6 +190,17 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
       setShowVehicleSelector(!maintenance);
     }
   }, [open, maintenance, user]);
+
+  const generateReportNumber = async () => {
+    try {
+      const { report_number } = await base44.functions.invoke('getNextReportNumber', {
+        report_type: 'ac_maintenance'
+      });
+      setGeneratedReportNumber(report_number);
+    } catch (err) {
+      console.error("Error generating report number:", err);
+    }
+  };
 
   useEffect(() => {
     if (formData.vehicle_id) {
@@ -363,6 +377,8 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
       if (maintenance) {
         await base44.entities.AirConditioningMaintenance.update(maintenance.id, dataToSave);
       } else {
+        // Asignar el número de reporte generado
+        dataToSave.report_number = generatedReportNumber;
         const created = await base44.entities.AirConditioningMaintenance.create(dataToSave);
         // Si se acaba de crear, actualizar formData con el ID para futuras actualizaciones
         setFormData({ ...dataToSave, id: created.id });
@@ -723,8 +739,13 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
         onEscapeKeyDown={(e) => e.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle className={theme === 'dark' ? 'text-white' : 'text-gray-900'}>
-            {maintenance ? "Editar Inspección A/C" : "Nueva Inspección de Aire Acondicionado"}
+          <DialogTitle className={cn("flex items-center gap-3", theme === 'dark' ? 'text-white' : 'text-gray-900')}>
+            <span>{maintenance ? "Editar Inspección A/C" : "Nueva Inspección de Aire Acondicionado"}</span>
+            {generatedReportNumber && (
+              <span className="text-sm font-mono px-3 py-1 rounded-full bg-yellow-500/20 text-yellow-600 border border-yellow-500/30">
+                {generatedReportNumber}
+              </span>
+            )}
           </DialogTitle>
         </DialogHeader>
 

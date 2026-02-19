@@ -33,6 +33,7 @@ export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess }
   const [companyFilter, setCompanyFilter] = useState("all");
   const [locationFilter, setLocationFilter] = useState("all");
   const [showVehicleSelector, setShowVehicleSelector] = useState(false);
+  const [generatedReportNumber, setGeneratedReportNumber] = useState(null);
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -51,8 +52,10 @@ export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess }
           kilometraje: "",
           horas: ""
         });
+        setGeneratedReportNumber(novedad.report_number);
       } else {
         setFormData(initialState);
+        generateReportNumber();
       }
       setError("");
       setSearchTerm("");
@@ -61,6 +64,17 @@ export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess }
       setShowVehicleSelector(false);
     }
   }, [open, novedad, user]);
+
+  const generateReportNumber = async () => {
+    try {
+      const { report_number } = await base44.functions.invoke('getNextReportNumber', {
+        report_type: 'novedad'
+      });
+      setGeneratedReportNumber(report_number);
+    } catch (err) {
+      console.error("Error generating report number:", err);
+    }
+  };
 
   useEffect(() => {
     if (formData.vehicle_id) {
@@ -201,7 +215,8 @@ export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess }
         fecha_reporte: fechaReporte,
         estado: "pendiente",
         kilometraje_reportado: formData.kilometraje ? newKm : null,
-        horas_reportadas: formData.horas ? newHours : null
+        horas_reportadas: formData.horas ? newHours : null,
+        report_number: generatedReportNumber
       } : null;
 
       if (novedad) {
@@ -237,8 +252,13 @@ export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess }
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className={cn("max-w-2xl max-h-[90vh] overflow-y-auto", theme === 'dark' ? 'bg-zinc-900 border-zinc-700' : 'bg-white')}>
         <DialogHeader>
-          <DialogTitle className={theme === 'dark' ? 'text-white' : 'text-gray-900'}>
-            {novedad ? "Editar Novedad" : "Registrar Novedad Diaria"}
+          <DialogTitle className={cn("flex items-center gap-3", theme === 'dark' ? 'text-white' : 'text-gray-900')}>
+            <span>{novedad ? "Editar Novedad" : "Registrar Novedad Diaria"}</span>
+            {generatedReportNumber && (
+              <span className="text-sm font-mono px-3 py-1 rounded-full bg-yellow-500/20 text-yellow-600 border border-yellow-500/30">
+                {generatedReportNumber}
+              </span>
+            )}
           </DialogTitle>
         </DialogHeader>
 

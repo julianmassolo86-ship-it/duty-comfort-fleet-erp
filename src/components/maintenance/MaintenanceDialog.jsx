@@ -47,15 +47,32 @@ export default function MaintenanceDialog({
   const { theme } = useTheme();
   const [form, setForm] = useState(initialState);
   const [error, setError] = useState("");
+  const [generatedReportNumber, setGeneratedReportNumber] = useState(null);
 
   useEffect(() => {
     if (maintenance) {
       setForm({ ...initialState, ...maintenance });
+      setGeneratedReportNumber(maintenance.report_number);
     } else {
       setForm(initialState);
+      if (open) {
+        generateReportNumber();
+      }
     }
     setError("");
   }, [maintenance, open]);
+
+  const generateReportNumber = async () => {
+    try {
+      const { report_number } = await base44.functions.invoke('getNextReportNumber', {
+        report_type: 'maintenance'
+      });
+      setGeneratedReportNumber(report_number);
+      setForm(prev => ({ ...prev, report_number }));
+    } catch (err) {
+      console.error("Error generating report number:", err);
+    }
+  };
 
   const handleChange = (field, value) => {
     setForm(prev => ({ ...prev, [field]: value }));
@@ -81,8 +98,13 @@ export default function MaintenanceDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className={cn("max-w-2xl max-h-[90vh] overflow-y-auto", theme === 'dark' ? 'bg-zinc-900 border-zinc-700' : 'bg-white')}>
         <DialogHeader>
-          <DialogTitle className={theme === 'dark' ? 'text-white' : 'text-gray-900'}>
-            {maintenance ? "Editar Mantenimiento" : "Nuevo Mantenimiento"}
+          <DialogTitle className={cn("flex items-center gap-3", theme === 'dark' ? 'text-white' : 'text-gray-900')}>
+            <span>{maintenance ? "Editar Mantenimiento" : "Nuevo Mantenimiento"}</span>
+            {generatedReportNumber && (
+              <span className="text-sm font-mono px-3 py-1 rounded-full bg-yellow-500/20 text-yellow-600 border border-yellow-500/30">
+                {generatedReportNumber}
+              </span>
+            )}
           </DialogTitle>
         </DialogHeader>
 
