@@ -447,8 +447,8 @@ export default function Dashboard() {
                     <Plus className="w-5 h-5 text-sky-400" />
                   </div>
                   <div className="text-left">
-                    <p className={cn("font-semibold", theme === 'dark' ? 'text-white' : 'text-gray-900')}>Inspección Aire Acondicionado</p>
-                    <p className={cn("text-sm", theme === 'dark' ? 'text-zinc-500' : 'text-gray-500')}>Nueva inspección AC</p>
+                    <p className={cn("font-semibold", theme === 'dark' ? 'text-white' : 'text-gray-900')}>Informe A/C</p>
+                    <p className={cn("text-sm", theme === 'dark' ? 'text-zinc-500' : 'text-gray-500')}>Nuevo informe AC</p>
                   </div>
                 </div>
               </button>
