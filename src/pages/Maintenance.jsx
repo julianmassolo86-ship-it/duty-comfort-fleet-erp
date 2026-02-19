@@ -235,7 +235,7 @@ export default function Maintenance() {
               </Button>
               <Button 
                 onClick={() => { setNovedadDialogOpen(true); }}
-                className="bg-blue-500 hover:bg-blue-600 text-white font-semibold"
+                className="bg-green-500 hover:bg-green-600 text-white font-semibold"
               >
                 <Wrench className="w-4 h-4 mr-2" />
                 <span className="hidden sm:inline">Novedad Diaria</span>
@@ -489,7 +489,7 @@ export default function Maintenance() {
                 !search && (
                   <Button 
                     onClick={() => { setNovedadDialogOpen(true); }}
-                    className="bg-blue-500 hover:bg-blue-600 text-white font-semibold"
+                    className="bg-green-500 hover:bg-green-600 text-white font-semibold"
                   >
                     <Wrench className="w-4 h-4 mr-2" />
                     Registrar Novedad
