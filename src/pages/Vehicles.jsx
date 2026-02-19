@@ -158,19 +158,22 @@ export default function Vehicles() {
 
   const handleSave = async (data) => {
     try {
+      // Determinar si es edición o creación basándose en el ID incluido en data o en selectedVehicle
+      const isEditing = data.id || selectedVehicle?.id;
+      const vehicleId = data.id || selectedVehicle?.id;
+      
+      // Separar el ID del resto de datos para no incluirlo en la actualización
+      const { id, ...dataWithoutId } = data;
+      
       // Obtener los IDs de conductores anteriores (si es una edición)
       const previousDriverIds = selectedVehicle?.assigned_driver_ids || [];
       const newDriverIds = data.assigned_driver_ids || [];
       
-      let vehicleId = selectedVehicle?.id;
-      
       // 1. Guardar el vehículo
-      if (selectedVehicle) {
-        await base44.entities.Vehicle.update(selectedVehicle.id, data);
-        vehicleId = selectedVehicle.id;
+      if (isEditing && vehicleId) {
+        await base44.entities.Vehicle.update(vehicleId, dataWithoutId);
       } else {
-        const created = await base44.entities.Vehicle.create(data);
-        vehicleId = created.id;
+        const created = await base44.entities.Vehicle.create(dataWithoutId);
       }
       
       // 2. Sincronizar conductores - Eliminar vehículo de conductores que fueron desasignados
