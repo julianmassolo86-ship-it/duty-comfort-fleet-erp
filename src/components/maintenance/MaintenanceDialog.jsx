@@ -301,14 +301,14 @@ export default function MaintenanceDialog({
               variant="outline" 
               onClick={() => onOpenChange(false)} 
               disabled={isLoading}
-              className={theme === 'dark' ? 'border-zinc-700 text-zinc-300 hover:bg-zinc-800' : ''}
+              className={theme === 'dark' ? 'border-zinc-700 text-zinc-300 hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed' : 'disabled:opacity-50 disabled:cursor-not-allowed'}
             >
               Cancelar
             </Button>
             <Button 
               type="submit" 
               disabled={isLoading} 
-              className="bg-yellow-500 hover:bg-yellow-600 text-black"
+              className="bg-yellow-500 hover:bg-yellow-600 text-black disabled:bg-yellow-500/50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <>
