@@ -230,7 +230,7 @@ export default function Maintenance() {
                 className="bg-sky-500 hover:bg-sky-600 text-white font-semibold"
               >
                 <Wind className="w-4 h-4 mr-2" />
-                <span className="hidden sm:inline">Inspección A/C</span>
+                <span className="hidden sm:inline">Informe A/C</span>
                 <span className="sm:hidden">A/C</span>
               </Button>
               <Button 
@@ -359,7 +359,7 @@ export default function Maintenance() {
                         : 'bg-white border-gray-200 hover:border-sky-500'
                     )}
                   >
-                    <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-lg bg-sky-500/10 flex items-center justify-center">
                           <Wind className="w-5 h-5 text-sky-500" />
@@ -373,21 +373,37 @@ export default function Maintenance() {
                           </p>
                         </div>
                       </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 mb-3">
                       <span className={cn(
-                        "text-xs px-2 py-1 rounded-full",
+                        "text-xs px-2.5 py-1 rounded-full font-medium uppercase",
+                        ac.tipo_mantenimiento === 'preventivo'
+                          ? theme === 'dark' ? 'bg-blue-500/10 text-blue-400' : 'bg-blue-500/10 text-blue-600'
+                          : ac.tipo_mantenimiento === 'correctivo'
+                          ? theme === 'dark' ? 'bg-red-500/10 text-red-400' : 'bg-red-500/10 text-red-600'
+                          : theme === 'dark' ? 'bg-purple-500/10 text-purple-400' : 'bg-purple-500/10 text-purple-600'
+                      )}>
+                        {ac.tipo_mantenimiento || 'preventivo'}
+                      </span>
+                      <span className={cn(
+                        "text-xs px-2.5 py-1 rounded-full font-medium",
                         ac.status === 'completado' 
-                          ? 'bg-green-500/10 text-green-600' 
+                          ? theme === 'dark' ? 'bg-blue-500/10 text-blue-400' : 'bg-blue-500/10 text-blue-600'
                           : ac.status === 'aprobado'
-                          ? 'bg-blue-500/10 text-blue-600'
-                          : 'bg-yellow-500/10 text-yellow-600'
+                          ? theme === 'dark' ? 'bg-green-500/10 text-green-400' : 'bg-green-500/10 text-green-600'
+                          : theme === 'dark' ? 'bg-orange-500/10 text-orange-400' : 'bg-orange-500/10 text-orange-600'
                       )}>
                         {ac.status === 'completado' ? 'Completado' : ac.status === 'aprobado' ? 'Aprobado' : 'En Proceso'}
                       </span>
                     </div>
+                    
                     <div className={cn("text-sm space-y-1", theme === 'dark' ? 'text-zinc-400' : 'text-gray-600')}>
                       <p>📅 {ac.inspection_date.split('T')[0].split('-').reverse().join('/')}</p>
                       <p>🌡️ Temp. Ambiente: {ac.ambient_temperature}°C</p>
-                      {ac.odometer_reading && <p>📊 {ac.odometer_reading} km/hs</p>}
+                      {(ac.kilometraje || ac.horas) && (
+                        <p>📊 {[ac.kilometraje ? `${ac.kilometraje} km` : '', ac.horas ? `${ac.horas} hs` : ''].filter(Boolean).join(' / ')}</p>
+                      )}
                     </div>
                   </div>
                 );
@@ -396,15 +412,15 @@ export default function Maintenance() {
           ) : (
             <EmptyState
               icon={Wind}
-              title="Sin inspecciones de A/C"
-              description="Registra la primera inspección de aire acondicionado"
+              title="Sin informes de A/C"
+              description="Registra el primer informe de aire acondicionado"
               action={
                 <Button 
                   onClick={() => { setSelectedAcMaintenance(null); setAcDialogOpen(true); }}
                   className="bg-sky-500 hover:bg-sky-600 text-white font-semibold"
                 >
                   <Wind className="w-4 h-4 mr-2" />
-                  Nueva Inspección A/C
+                  Nuevo Informe A/C
                 </Button>
               }
             />
