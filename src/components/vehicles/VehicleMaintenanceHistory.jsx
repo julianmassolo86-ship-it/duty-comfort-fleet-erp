@@ -158,7 +158,7 @@ export default function VehicleMaintenanceHistory({ vehicleId }) {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-yellow-400 hover:text-yellow-300 hover:bg-yellow-500/10"
+                      className="text-yellow-400 hover:text-yellow-300 hover:bg-yellow-500/10 flex items-center gap-2"
                       onClick={() => {
                         navigate(createPageUrl('Maintenance'), {
                           state: {
@@ -170,6 +170,7 @@ export default function VehicleMaintenanceHistory({ vehicleId }) {
                       }}
                       title={record.recordType === 'ac_report' ? 'Ver Informe A/C' : 'Ver Mantenimiento'}
                     >
+                      <span className="font-mono">{record.report_number || 'Sin número'}</span>
                       <ExternalLink className="w-4 h-4" />
                     </Button>
                   </td>
