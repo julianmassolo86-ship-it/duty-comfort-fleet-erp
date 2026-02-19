@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Trash2, X, Upload, Image as ImageIcon, UserPlus, UserMinus, ZoomIn, Download } from "lucide-react";
+import { Loader2, Trash2, X, Upload, Image as ImageIcon, UserPlus, UserMinus, ZoomIn, Download, Check } from "lucide-react";
 import DocumentCard from "./DocumentCard";
 import VehicleCardDocument from "./VehicleCardDocument";
 import VehicleMaintenanceHistory from "./VehicleMaintenanceHistory";
