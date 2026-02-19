@@ -213,6 +213,12 @@ export default function VehicleDialog({
       company_id: isSuperAdmin ? form.company_id : currentUser?.company_id,
       assigned_driver_id: undefined
     };
+    
+    // Si es una edición, incluir el ID para que Vehicles.js no lo trate como creación
+    if (vehicle?.id) {
+      finalData.id = vehicle.id;
+    }
+    
     onSave(finalData);
   };
 
