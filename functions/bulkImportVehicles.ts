@@ -57,20 +57,32 @@ Deno.serve(async (req) => {
       errors: []
     };
 
-    // Obtener vehículos existentes para evitar duplicados
-    const existingVehicles = await base44.asServiceRole.entities.Vehicle.list();
+    // Obtener vehículos existentes de esta empresa para evitar duplicados
+    const existingVehicles = await base44.asServiceRole.entities.Vehicle.filter({ company_id: companyId });
     const existingInternals = new Set(existingVehicles.map(v => v.internal_number?.toLowerCase()));
+    const existingPlates = new Set(existingVehicles.map(v => v.plate?.toLowerCase()).filter(Boolean));
 
-    // Procesar cada vehículo
+    // Procesar cada vehículo en batch
+    const vehiclesToCreate = [];
+    
     for (const vehicle of vehicles) {
       try {
-        const internalNumber = vehicle.interno?.toString();
+        const internalNumber = vehicle.interno?.toString()?.trim();
+        const plate = vehicle.dominio?.toString()?.trim().toUpperCase();
         
-        // Verificar si ya existe
-        if (existingInternals.has(internalNumber?.toLowerCase())) {
+        // Verificar si ya existe por interno o patente
+        if (internalNumber && existingInternals.has(internalNumber.toLowerCase())) {
           results.errors.push({
             vehicle: internalNumber,
-            error: `Vehículo duplicado (ya existe)`
+            error: `Vehículo duplicado (interno ya existe)`
+          });
+          continue;
+        }
+        
+        if (plate && existingPlates.has(plate.toLowerCase())) {
+          results.errors.push({
+            vehicle: plate,
+            error: `Vehículo duplicado (patente ya existe)`
           });
           continue;
         }
@@ -89,7 +101,7 @@ Deno.serve(async (req) => {
 
         if (!categoryId) {
           results.errors.push({
-            vehicle: internalNumber,
+            vehicle: internalNumber || plate,
             error: `Categoría no encontrada: ${vehicle.tipo_activo}`
           });
           continue;
@@ -98,7 +110,7 @@ Deno.serve(async (req) => {
         // Crear el objeto del vehículo (tipo es opcional)
         const vehicleData = {
           internal_number: internalNumber,
-          plate: vehicle.dominio?.toString().toUpperCase(),
+          plate: plate,
           year: vehicle.año ? parseInt(vehicle.año) : null,
           manufacturer: finalManufacturer,
           model: vehicle.modelo?.trim(),
@@ -113,17 +125,39 @@ Deno.serve(async (req) => {
           vehicleData.type_id = typeId;
         }
 
-        // Crear el vehículo
-        const created = await base44.asServiceRole.entities.Vehicle.create(vehicleData);
-        results.success.push({
-          internal_number: internalNumber,
-          plate: vehicle.dominio,
-          id: created.id
+        vehiclesToCreate.push({
+          data: vehicleData,
+          original: vehicle
         });
 
       } catch (error) {
         results.errors.push({
           vehicle: vehicle.interno || vehicle.dominio,
+          error: error.message
+        });
+      }
+    }
+    
+    // Crear todos los vehículos en batch
+    for (const item of vehiclesToCreate) {
+      try {
+        const created = await base44.asServiceRole.entities.Vehicle.create(item.data);
+        results.success.push({
+          internal_number: item.data.internal_number,
+          plate: item.data.plate,
+          id: created.id
+        });
+        
+        // Agregar a los sets para evitar duplicados en el mismo batch
+        if (item.data.internal_number) {
+          existingInternals.add(item.data.internal_number.toLowerCase());
+        }
+        if (item.data.plate) {
+          existingPlates.add(item.data.plate.toLowerCase());
+        }
+      } catch (error) {
+        results.errors.push({
+          vehicle: item.data.internal_number || item.data.plate,
           error: error.message
         });
       }
