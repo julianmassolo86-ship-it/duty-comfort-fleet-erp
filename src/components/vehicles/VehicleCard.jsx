@@ -65,10 +65,10 @@ export default function VehicleCard({ vehicle, location, company, drivers = [], 
         <StatusBadge status={vehicle.status} statusList={vehicleStatuses} className="absolute top-3 right-3" />
         
         {/* Logo de la marca superpuesto en la imagen */}
-        {vehicle.manufacturer_logo_url && (
+        {manufacturerLogo && (
           <div className="absolute bottom-3 left-3 bg-white/95 backdrop-blur-sm rounded-lg p-2 shadow-lg">
             <img 
-              src={vehicle.manufacturer_logo_url} 
+              src={manufacturerLogo} 
               alt={vehicle.manufacturer} 
               className="h-8 w-auto object-contain"
             />
