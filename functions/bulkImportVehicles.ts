@@ -24,17 +24,26 @@ Deno.serve(async (req) => {
     const types = await base44.asServiceRole.entities.VehicleType.list();
     const manufacturers = await base44.asServiceRole.entities.Manufacturer.list();
 
-    // Crear mapas para búsqueda rápida (case insensitive)
+    // Función para normalizar nombres (quitar tildes, guiones, espacios extra)
+    const normalize = (str) => {
+      if (!str) return '';
+      return str.toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Quitar tildes
+        .replace(/[-_]/g, '') // Quitar guiones y underscores
+        .replace(/\s+/g, '') // Quitar todos los espacios
+        .trim();
+    };
+
+    // Crear mapas para búsqueda rápida (case insensitive, sin tildes, sin guiones)
     const categoryMap = {};
     categories.forEach(cat => {
-      // Normalizar el nombre para búsqueda
-      const normalized = cat.name.toLowerCase().replace(/\s+/g, ' ').trim();
+      const normalized = normalize(cat.name);
       categoryMap[normalized] = cat.id;
     });
 
     const typeMap = {};
     types.forEach(type => {
-      const normalized = type.name.toLowerCase().replace(/\s+/g, ' ').trim();
+      const normalized = normalize(type.name);
       typeMap[normalized] = type.id;
     });
 
