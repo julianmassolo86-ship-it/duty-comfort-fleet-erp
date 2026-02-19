@@ -176,25 +176,28 @@ export default function Vehicles() {
         const created = await base44.entities.Vehicle.create(dataWithoutId);
       }
       
-      // 2. Sincronizar conductores - Eliminar vehículo de conductores que fueron desasignados
-      const removedDriverIds = previousDriverIds.filter(id => !newDriverIds.includes(id));
-      for (const driverId of removedDriverIds) {
-        if (driverId) {
-          const driver = await base44.entities.Driver.filter({ id: driverId });
-          if (driver && driver[0]) {
-            // Si el conductor tenía este vehículo, quitarlo
-            if (driver[0].vehicle_id === vehicleId) {
-              await base44.entities.Driver.update(driverId, { vehicle_id: "" });
+      // 2. Sincronizar conductores solo si es edición
+      if (isEditing && vehicleId) {
+        // Eliminar vehículo de conductores que fueron desasignados
+        const removedDriverIds = previousDriverIds.filter(id => !newDriverIds.includes(id));
+        for (const driverId of removedDriverIds) {
+          if (driverId) {
+            const driver = await base44.entities.Driver.filter({ id: driverId });
+            if (driver && driver[0]) {
+              // Si el conductor tenía este vehículo, quitarlo
+              if (driver[0].vehicle_id === vehicleId) {
+                await base44.entities.Driver.update(driverId, { vehicle_id: "" });
+              }
             }
           }
         }
-      }
-      
-      // 3. Asignar vehículo a los nuevos conductores
-      const addedDriverIds = newDriverIds.filter(id => !previousDriverIds.includes(id));
-      for (const driverId of addedDriverIds) {
-        if (driverId) {
-          await base44.entities.Driver.update(driverId, { vehicle_id: vehicleId });
+        
+        // 3. Asignar vehículo a los nuevos conductores
+        const addedDriverIds = newDriverIds.filter(id => !previousDriverIds.includes(id));
+        for (const driverId of addedDriverIds) {
+          if (driverId) {
+            await base44.entities.Driver.update(driverId, { vehicle_id: vehicleId });
+          }
         }
       }
       
