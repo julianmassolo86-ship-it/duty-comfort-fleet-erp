@@ -212,7 +212,7 @@ export default function VehicleDialog({
       ...form,
       company_id: isSuperAdmin ? form.company_id : currentUser?.company_id,
       assigned_driver_id: undefined,
-      year: form.year === "" ? null : (form.year ? Number(form.year) : null)
+      year: form.year === "" || form.year === null ? null : Number(form.year)
     };
     
     // Si es una edición, incluir el ID para que Vehicles.js no lo trate como creación
