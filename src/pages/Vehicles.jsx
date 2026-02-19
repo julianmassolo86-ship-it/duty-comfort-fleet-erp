@@ -267,10 +267,12 @@ export default function Vehicles() {
     : locations.filter(l => l.company_id === currentUser?.company_id);
 
   const filteredVehicles = accessibleVehicles.filter(v => {
+    const searchTerm = search.replace('#', '').toLowerCase();
     const matchesSearch = 
-      v.plate?.toLowerCase().includes(search.toLowerCase()) ||
-      v.manufacturer?.toLowerCase().includes(search.toLowerCase()) ||
-      v.model?.toLowerCase().includes(search.toLowerCase());
+      v.plate?.toLowerCase().includes(searchTerm) ||
+      v.internal_number?.toLowerCase().includes(searchTerm) ||
+      v.manufacturer?.toLowerCase().includes(searchTerm) ||
+      v.model?.toLowerCase().includes(searchTerm);
     const matchesStatus = statusFilter === "all" || v.status === statusFilter;
     const matchesLocation = locationFilter === "all" || v.location_id === locationFilter;
     const matchesCompany = companyFilter === "all" || v.company_id === companyFilter;
