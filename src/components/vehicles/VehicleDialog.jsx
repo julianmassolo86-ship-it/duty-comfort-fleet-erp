@@ -115,7 +115,7 @@ export default function VehicleDialog({
         setSelectedCompanyId(companyId);
         
         // IMPORTANTE: Mantener TODOS los datos del vehículo, incluido location_id
-        setForm({ 
+        setForm(prev => ({ 
           ...vehicle,
           assigned_driver_ids: driverIds,
           company_id: companyId,
@@ -128,7 +128,7 @@ export default function VehicleDialog({
           last_service_hours: vehicle.last_service_hours || 0,
           next_service_mileage: vehicle.next_service_mileage || 0,
           next_service_hours: vehicle.next_service_hours || 0,
-        });
+        }));
       } else {
         const defaultCompanyId = isSuperAdmin ? "" : (currentUser?.company_id || "");
         setSelectedCompanyId(defaultCompanyId);
