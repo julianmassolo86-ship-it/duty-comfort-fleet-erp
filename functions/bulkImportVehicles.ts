@@ -24,15 +24,18 @@ Deno.serve(async (req) => {
     const types = await base44.asServiceRole.entities.VehicleType.list();
     const manufacturers = await base44.asServiceRole.entities.Manufacturer.list();
 
-    // Crear mapas para búsqueda rápida
+    // Crear mapas para búsqueda rápida (case insensitive)
     const categoryMap = {};
     categories.forEach(cat => {
-      categoryMap[cat.name.toLowerCase()] = cat.id;
+      // Normalizar el nombre para búsqueda
+      const normalized = cat.name.toLowerCase().replace(/\s+/g, ' ').trim();
+      categoryMap[normalized] = cat.id;
     });
 
     const typeMap = {};
     types.forEach(type => {
-      typeMap[type.name.toLowerCase()] = type.id;
+      const normalized = type.name.toLowerCase().replace(/\s+/g, ' ').trim();
+      typeMap[normalized] = type.id;
     });
 
     const manufacturerMap = {};
