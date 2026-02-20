@@ -67,7 +67,9 @@ Deno.serve(async (req) => {
       ethanol: "Etanol"
     };
 
-    // Crear CSV
+    // Construir CSV con título
+    const title = `EXPORTACIÓN DE VEHÍCULOS - ${new Date().toLocaleDateString('es-AR')}\n\n`;
+    
     const headers = [
       "Interno",
       "Patente",
@@ -140,21 +142,27 @@ Deno.serve(async (req) => {
       ];
     });
 
-    // Construir CSV
+    // Función para escapar valores CSV correctamente
     const escapeCsvValue = (value) => {
+      if (value === null || value === undefined) {
+        return '';
+      }
       const stringValue = String(value);
-      if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
+      // Siempre usar comillas si hay comas, comillas, saltos de línea o punto y coma
+      if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n') || stringValue.includes(';')) {
         return `"${stringValue.replace(/"/g, '""')}"`;
       }
       return stringValue;
     };
 
     const csvContent = [
-      headers.map(escapeCsvValue).join(','),
-      ...rows.map(row => row.map(escapeCsvValue).join(','))
-    ].join('\n');
+      title.trim(),
+      '',
+      headers.map(h => escapeCsvValue(h)).join(','),
+      ...rows.map(row => row.map(v => escapeCsvValue(v)).join(','))
+    ].join('\r\n'); // Usar CRLF para mejor compatibilidad con Excel
 
-    // Agregar BOM para Excel compatibility con caracteres especiales
+    // Agregar BOM para compatibilidad con Excel y caracteres especiales
     const bom = '\uFEFF';
     const csvWithBom = bom + csvContent;
 
