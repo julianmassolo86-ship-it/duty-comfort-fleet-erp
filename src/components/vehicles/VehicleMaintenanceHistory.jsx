@@ -46,6 +46,7 @@ export default function VehicleMaintenanceHistory({ vehicleId }) {
     queryKey: ['maintenance', vehicleId],
     queryFn: () => base44.entities.Maintenance.filter({ vehicle_id: vehicleId }),
     enabled: !!vehicleId,
+    staleTime: 30000, // Cache por 30 segundos
   });
 
   // Fetch AC maintenance reports
@@ -53,6 +54,7 @@ export default function VehicleMaintenanceHistory({ vehicleId }) {
     queryKey: ['acMaintenance', vehicleId],
     queryFn: () => base44.entities.AirConditioningMaintenance.filter({ vehicle_id: vehicleId }),
     enabled: !!vehicleId,
+    staleTime: 30000, // Cache por 30 segundos
   });
 
   const isLoading = loadingMaintenance || loadingAC;
@@ -160,13 +162,8 @@ export default function VehicleMaintenanceHistory({ vehicleId }) {
                       size="sm"
                       className="text-yellow-400 hover:text-yellow-300 hover:bg-yellow-500/10 flex items-center gap-2"
                       onClick={() => {
-                        navigate(createPageUrl('Maintenance'), {
-                          state: {
-                            openDialog: record.recordType === 'ac_report' ? 'ac' : 'maintenance',
-                            recordId: record.id,
-                            recordData: record
-                          }
-                        });
+                        const type = record.recordType === 'ac_report' ? 'ac' : 'maintenance';
+                        navigate(`${createPageUrl('Maintenance')}?type=${type}&id=${record.id}`);
                       }}
                       title={record.recordType === 'ac_report' ? 'Ver Informe A/C' : 'Ver Mantenimiento'}
                     >
