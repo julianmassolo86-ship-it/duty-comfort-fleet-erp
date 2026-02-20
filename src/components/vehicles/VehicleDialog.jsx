@@ -90,6 +90,7 @@ export default function VehicleDialog({
   const [selectedCompanyId, setSelectedCompanyId] = useState("");
   const [uploading, setUploading] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
 
   const { data: vehicleStatuses = [] } = useQuery({
@@ -178,9 +179,14 @@ export default function VehicleDialog({
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // Prevenir múltiples envíos
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    
     // Validar que al menos uno de los dos campos esté presente
     if (!form.internal_number && !form.plate) {
       alert("Debe completar al menos Interno o Patente");
+      setIsSubmitting(false);
       return;
     }
     
@@ -192,6 +198,7 @@ export default function VehicleDialog({
       const duplicatePlate = existingByPlate.find(v => v.id !== currentVehicleId);
       if (duplicatePlate) {
         alert(`La patente "${form.plate}" ya existe en el sistema (Interno: ${duplicatePlate.internal_number})`);
+        setIsSubmitting(false);
         return;
       }
     }
@@ -206,6 +213,7 @@ export default function VehicleDialog({
       const duplicateInternal = existingByInternal.find(v => v.id !== currentVehicleId);
       if (duplicateInternal) {
         alert(`El número interno "${form.internal_number}" ya existe en esta empresa (Patente: ${duplicateInternal.plate})`);
+        setIsSubmitting(false);
         return;
       }
     }
@@ -223,14 +231,17 @@ export default function VehicleDialog({
     }
     
     try {
-  onSave(finalData);
-  setSaveSuccess(true);
-  setTimeout(() => {
-    setSaveSuccess(false);
-  }, 2000);
-} catch (error) {
-  setSaveSuccess(false);
-}
+      await onSave(finalData);
+      setSaveSuccess(true);
+      setTimeout(() => {
+        setSaveSuccess(false);
+      }, 2000);
+    } catch (error) {
+      console.error("Error al guardar el vehículo:", error);
+      setSaveSuccess(false);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleImageUpload = async (e, field = "image_url") => {
@@ -943,16 +954,16 @@ export default function VehicleDialog({
             </Button>
             <Button 
   type="submit" 
-  disabled={isLoading || saveSuccess} 
+  disabled={isLoading || isSubmitting || saveSuccess} 
   className={`transition-all min-w-[120px] font-semibold ${
-    isLoading 
+    isLoading || isSubmitting
       ? 'bg-blue-600 hover:bg-blue-700' 
       : saveSuccess 
         ? 'bg-green-600 hover:bg-green-700' 
         : 'bg-yellow-500 hover:bg-yellow-600'
   }`}
 >
-  {isLoading ? (
+  {isLoading || isSubmitting ? (
     <div className="flex items-center gap-2">
       <Loader2 className="w-4 h-4 animate-spin" />
       <span>Guardando...</span>
