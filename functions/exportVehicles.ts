@@ -10,26 +10,40 @@ Deno.serve(async (req) => {
     }
 
     // Obtener todos los vehículos (filtrar por empresa si no es super admin)
-    let vehicles = await base44.entities.Vehicle.list();
+    let vehicles = await base44.asServiceRole.entities.Vehicle.list();
     
     if (user.company_id) {
       vehicles = vehicles.filter(v => v.company_id === user.company_id);
     }
 
-    // Obtener datos relacionados para enriquecer la exportación
-    const companies = await base44.entities.Company.list();
-    const locations = await base44.entities.Location.list();
-    const drivers = await base44.entities.Driver.list();
-    const manufacturers = await base44.entities.Manufacturer.list();
-    const vehicleTypes = await base44.entities.VehicleType.list();
-    const vehicleStatuses = await base44.entities.VehicleStatus.list();
+    // Si no hay vehículos, retornar CSV vacío
+    if (vehicles.length === 0) {
+      const headers = ["Interno", "Patente", "Empresa", "Locación"];
+      const csvContent = headers.join(',') + '\n';
+      const bom = '\uFEFF';
+      return new Response(bom + csvContent, {
+        status: 200,
+        headers: {
+          'Content-Type': 'text/csv; charset=utf-8',
+          'Content-Disposition': `attachment; filename="vehiculos_${new Date().toISOString().split('T')[0]}.csv"`
+        }
+      });
+    }
+
+    // Obtener solo los datos necesarios
+    const [companies, locations, drivers, vehicleTypes, vehicleStatuses] = await Promise.all([
+      base44.asServiceRole.entities.Company.list(),
+      base44.asServiceRole.entities.Location.list(),
+      base44.asServiceRole.entities.Driver.list(),
+      base44.asServiceRole.entities.VehicleType.list(),
+      base44.asServiceRole.entities.VehicleStatus.list()
+    ]);
 
     // Crear mapas para búsqueda rápida
     const companyMap = Object.fromEntries(companies.map(c => [c.id, c.name]));
     const locationMap = Object.fromEntries(locations.map(l => [l.id, l.name]));
     const driverMap = Object.fromEntries(drivers.map(d => [d.id, d.full_name]));
     const typeMap = Object.fromEntries(vehicleTypes.map(t => [t.id, t.name]));
-    const statusMap = Object.fromEntries(vehicleStatuses.map(s => [s.id, s.name]));
 
     // Traducir estados del enum al español
     const statusTranslations = {
