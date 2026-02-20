@@ -949,7 +949,11 @@ export default function VehicleDialog({
                 </AlertDialogContent>
               </AlertDialog>
             )}
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading} className="border-zinc-700 text-zinc-300 hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed">
+            <Button type="button" variant="outline" onClick={() => {
+              setIsSubmitting(false);
+              setSaveSuccess(false);
+              onOpenChange(false);
+            }} disabled={isLoading} className="border-zinc-700 text-zinc-300 hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed">
               Cancelar
             </Button>
             <Button 
