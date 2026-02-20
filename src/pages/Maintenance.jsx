@@ -16,9 +16,12 @@ import NovedadDialog from "../components/novedades/NovedadDialog";
 import NovedadCard from "../components/novedades/NovedadCard";
 import AirConditioningMaintenanceDialog from "../components/ac-maintenance/AirConditioningMaintenanceDialog";
 import { useTheme } from "../components/common/ThemeWrapper";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export default function Maintenance() {
-  const urlParams = new URLSearchParams(window.location.search);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const urlParams = new URLSearchParams(location.search);
   const tabFromUrl = urlParams.get('tab');
   
   const [search, setSearch] = useState("");
@@ -77,6 +80,38 @@ export default function Maintenance() {
   useEffect(() => {
     base44.auth.me().then(setCurrentUser).catch(() => {});
   }, []);
+
+  // Manejo de apertura directa de informes desde URL
+  useEffect(() => {
+    const type = urlParams.get('type');
+    const id = urlParams.get('id');
+    
+    if (type && id && currentUser) {
+      if (type === 'ac') {
+        // Esperar a que se carguen los datos de AC
+        if (acMaintenances.length > 0) {
+          const record = acMaintenances.find(r => r.id === id);
+          if (record) {
+            setSelectedAcMaintenance(record);
+            setAcDialogOpen(true);
+            // Limpiar params de URL después de abrir
+            navigate(location.pathname, { replace: true });
+          }
+        }
+      } else if (type === 'maintenance') {
+        // Esperar a que se carguen los datos de mantenimiento
+        if (maintenances.length > 0) {
+          const record = maintenances.find(r => r.id === id);
+          if (record) {
+            setSelectedMaintenance(record);
+            setDialogOpen(true);
+            // Limpiar params de URL después de abrir
+            navigate(location.pathname, { replace: true });
+          }
+        }
+      }
+    }
+  }, [urlParams, currentUser, maintenances, acMaintenances, location.pathname, navigate]);
 
   const isSuperAdmin = !currentUser?.company_id;
 
