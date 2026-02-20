@@ -229,7 +229,7 @@ export default function VehicleDialog({
     setIsSubmitting(true);
     
     try {
-      onSave(finalData);
+      await onSave(finalData);
       setSaveSuccess(true);
       setTimeout(() => {
         setSaveSuccess(false);
@@ -239,6 +239,7 @@ export default function VehicleDialog({
       console.error("Error al guardar el vehículo:", error);
       setSaveSuccess(false);
       setIsSubmitting(false);
+      alert("Error al guardar. Por favor intente nuevamente.");
     }
   };
 
