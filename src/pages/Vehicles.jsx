@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Search, Car, Building2, MapPin, Grid3x3, List, Camera } from "lucide-react";
+import { Plus, Search, Car, Building2, MapPin, Grid3x3, List, Camera, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -28,6 +28,7 @@ export default function Vehicles() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [captureDialogOpen, setCaptureDialogOpen] = useState(false);
   const [prefilledData, setPrefilledData] = useState(null);
+  const [isExporting, setIsExporting] = useState(false);
   const { theme } = useTheme();
 
   const queryClient = useQueryClient();
@@ -38,6 +39,27 @@ export default function Vehicles() {
     await queryClient.invalidateQueries({ queryKey: ['drivers'] });
     await queryClient.invalidateQueries({ queryKey: ['locations'] });
     setTimeout(() => setIsRefreshing(false), 500);
+  };
+
+  const handleExport = async () => {
+    setIsExporting(true);
+    try {
+      const { data } = await base44.functions.invoke('exportVehicles');
+      const blob = new Blob([data], { type: 'text/csv;charset=utf-8;' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `vehiculos_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error al exportar:', error);
+      alert('Error al exportar los vehículos');
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   useEffect(() => {
@@ -263,24 +285,37 @@ export default function Vehicles() {
           title="Vehículos" 
           description="Gestiona tu flota de vehículos"
           actions={
-            accessibleLocations.length > 0 && (
-              <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
+              {vehicles.length > 0 && (
                 <Button 
-                  onClick={() => setCaptureDialogOpen(true)}
-                  className="bg-yellow-600 hover:bg-yellow-700 text-white font-semibold"
+                  onClick={handleExport}
+                  disabled={isExporting}
+                  variant="outline"
+                  className={cn("border-yellow-500/30 text-yellow-400 hover:bg-yellow-500/10")}
                 >
-                  <Camera className="w-4 h-4 mr-2" />
-                  Captura Rápida
+                  <Download className="w-4 h-4 mr-2" />
+                  {isExporting ? "Exportando..." : "Exportar CSV"}
                 </Button>
-                <Button 
-                  onClick={() => { setSelectedVehicle(null); setPrefilledData(null); setDialogOpen(true); }}
-                  className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Nuevo Vehículo
-                </Button>
-              </div>
-            )
+              )}
+              {accessibleLocations.length > 0 && (
+                <>
+                  <Button 
+                    onClick={() => setCaptureDialogOpen(true)}
+                    className="bg-yellow-600 hover:bg-yellow-700 text-white font-semibold"
+                  >
+                    <Camera className="w-4 h-4 mr-2" />
+                    Captura Rápida
+                  </Button>
+                  <Button 
+                    onClick={() => { setSelectedVehicle(null); setPrefilledData(null); setDialogOpen(true); }}
+                    className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Nuevo Vehículo
+                  </Button>
+                </>
+              )}
+            </div>
           }
         />
 
