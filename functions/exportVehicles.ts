@@ -30,13 +30,16 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Obtener solo los datos necesarios
-    const [companies, locations, drivers, vehicleTypes, vehicleStatuses] = await Promise.all([
+    // Obtener todos los datos relacionados
+    const [companies, locations, drivers, vehicleTypes, vehicleStatuses, maintenances, acMaintenances, novedades] = await Promise.all([
       base44.asServiceRole.entities.Company.list(),
       base44.asServiceRole.entities.Location.list(),
       base44.asServiceRole.entities.Driver.list(),
       base44.asServiceRole.entities.VehicleType.list(),
-      base44.asServiceRole.entities.VehicleStatus.list()
+      base44.asServiceRole.entities.VehicleStatus.list(),
+      base44.asServiceRole.entities.Maintenance.list(),
+      base44.asServiceRole.entities.AirConditioningMaintenance.list(),
+      base44.asServiceRole.entities.Novedad.list()
     ]);
 
     // Crear mapas para búsqueda rápida
@@ -44,6 +47,25 @@ Deno.serve(async (req) => {
     const locationMap = Object.fromEntries(locations.map(l => [l.id, l.name]));
     const driverMap = Object.fromEntries(drivers.map(d => [d.id, d.full_name]));
     const typeMap = Object.fromEntries(vehicleTypes.map(t => [t.id, t.name]));
+
+    // Agrupar datos relacionados por vehículo
+    const maintenancesByVehicle = maintenances.reduce((acc, m) => {
+      if (!acc[m.vehicle_id]) acc[m.vehicle_id] = [];
+      acc[m.vehicle_id].push(m);
+      return acc;
+    }, {});
+
+    const acMaintenancesByVehicle = acMaintenances.reduce((acc, ac) => {
+      if (!acc[ac.vehicle_id]) acc[ac.vehicle_id] = [];
+      acc[ac.vehicle_id].push(ac);
+      return acc;
+    }, {});
+
+    const novedadesByVehicle = novedades.reduce((acc, n) => {
+      if (!acc[n.vehicle_id]) acc[n.vehicle_id] = [];
+      acc[n.vehicle_id].push(n);
+      return acc;
+    }, {});
 
     // Traducir estados del enum al español
     const statusTranslations = {
@@ -95,8 +117,32 @@ Deno.serve(async (req) => {
       "Vto. Seguro",
       "Vto. VTV",
       "Vto. Cédula",
+      "Total Mantenimientos",
+      "Último Mantenimiento",
+      "Tipo Último Mant.",
+      "Total Informes A/C",
+      "Último Informe A/C",
+      "Total Novedades",
+      "Última Novedad",
+      "Estado Última Novedad",
       "Notas"
     ];
+
+    const typeTranslations = {
+      preventive: "Preventivo",
+      preventivo: "Preventivo",
+      corrective: "Correctivo",
+      correctivo: "Correctivo",
+      inspection: "Inspección",
+      inspeccion: "Inspección"
+    };
+
+    const novedadStatusTranslations = {
+      pendiente: "Pendiente",
+      en_proceso: "En Proceso",
+      resuelto: "Resuelto",
+      cerrado: "Cerrado"
+    };
 
     const rows = vehicles.map(v => {
       const assignedDrivers = (v.assigned_driver_ids || [])
@@ -112,6 +158,27 @@ Deno.serve(async (req) => {
       if (customStatus) {
         statusName = customStatus.name;
       }
+
+      // Datos de mantenimiento
+      const vehicleMaintenances = maintenancesByVehicle[v.id] || [];
+      const sortedMaintenances = vehicleMaintenances.sort((a, b) => 
+        new Date(b.scheduled_date || b.completed_date || 0) - new Date(a.scheduled_date || a.completed_date || 0)
+      );
+      const lastMaintenance = sortedMaintenances[0];
+
+      // Datos de aire acondicionado
+      const vehicleAC = acMaintenancesByVehicle[v.id] || [];
+      const sortedAC = vehicleAC.sort((a, b) => 
+        new Date(b.inspection_date || 0) - new Date(a.inspection_date || 0)
+      );
+      const lastAC = sortedAC[0];
+
+      // Datos de novedades
+      const vehicleNovedades = novedadesByVehicle[v.id] || [];
+      const sortedNovedades = vehicleNovedades.sort((a, b) => 
+        new Date(b.fecha_reporte || 0) - new Date(a.fecha_reporte || 0)
+      );
+      const lastNovedad = sortedNovedades[0];
 
       return [
         v.internal_number || "",
@@ -138,6 +205,14 @@ Deno.serve(async (req) => {
         v.insurance_expiry || "",
         v.technical_inspection_expiry || "",
         v.vehicle_card_front_expiry || "",
+        vehicleMaintenances.length,
+        lastMaintenance ? (lastMaintenance.scheduled_date || lastMaintenance.completed_date || "") : "",
+        lastMaintenance ? (typeTranslations[lastMaintenance.type] || lastMaintenance.type || "") : "",
+        vehicleAC.length,
+        lastAC ? (lastAC.inspection_date || "") : "",
+        vehicleNovedades.length,
+        lastNovedad ? (lastNovedad.fecha_reporte || "") : "",
+        lastNovedad ? (novedadStatusTranslations[lastNovedad.estado] || lastNovedad.estado || "") : "",
         v.notes || ""
       ];
     });
