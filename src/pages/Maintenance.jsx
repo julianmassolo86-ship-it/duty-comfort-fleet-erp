@@ -81,38 +81,6 @@ export default function Maintenance() {
     base44.auth.me().then(setCurrentUser).catch(() => {});
   }, []);
 
-  // Manejo de apertura directa de informes desde URL
-  useEffect(() => {
-    const type = urlParams.get('type');
-    const id = urlParams.get('id');
-    
-    if (type && id && currentUser) {
-      if (type === 'ac') {
-        // Esperar a que se carguen los datos de AC
-        if (acMaintenances.length > 0) {
-          const record = acMaintenances.find(r => r.id === id);
-          if (record) {
-            setSelectedAcMaintenance(record);
-            setAcDialogOpen(true);
-            // Limpiar params de URL después de abrir
-            navigate(location.pathname, { replace: true });
-          }
-        }
-      } else if (type === 'maintenance') {
-        // Esperar a que se carguen los datos de mantenimiento
-        if (maintenances.length > 0) {
-          const record = maintenances.find(r => r.id === id);
-          if (record) {
-            setSelectedMaintenance(record);
-            setDialogOpen(true);
-            // Limpiar params de URL después de abrir
-            navigate(location.pathname, { replace: true });
-          }
-        }
-      }
-    }
-  }, [urlParams, currentUser, maintenances, acMaintenances, location.pathname, navigate]);
-
   const isSuperAdmin = !currentUser?.company_id;
 
   const { data: maintenances = [], isLoading } = useQuery({
