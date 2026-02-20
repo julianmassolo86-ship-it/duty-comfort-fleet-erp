@@ -181,12 +181,10 @@ export default function VehicleDialog({
     
     // Prevenir múltiples envíos
     if (isSubmitting) return;
-    setIsSubmitting(true);
     
     // Validar que al menos uno de los dos campos esté presente
     if (!form.internal_number && !form.plate) {
       alert("Debe completar al menos Interno o Patente");
-      setIsSubmitting(false);
       return;
     }
     
@@ -198,7 +196,6 @@ export default function VehicleDialog({
       const duplicatePlate = existingByPlate.find(v => v.id !== currentVehicleId);
       if (duplicatePlate) {
         alert(`La patente "${form.plate}" ya existe en el sistema (Interno: ${duplicatePlate.internal_number})`);
-        setIsSubmitting(false);
         return;
       }
     }
@@ -213,7 +210,6 @@ export default function VehicleDialog({
       const duplicateInternal = existingByInternal.find(v => v.id !== currentVehicleId);
       if (duplicateInternal) {
         alert(`El número interno "${form.internal_number}" ya existe en esta empresa (Patente: ${duplicateInternal.plate})`);
-        setIsSubmitting(false);
         return;
       }
     }
@@ -230,23 +226,18 @@ export default function VehicleDialog({
       finalData.id = vehicle.id;
     }
     
+    setIsSubmitting(true);
+    
     try {
-      // Timeout de seguridad de 10 segundos
-      const savePromise = Promise.race([
-        onSave(finalData),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 10000))
-      ]);
-      
-      await savePromise;
+      onSave(finalData);
       setSaveSuccess(true);
       setTimeout(() => {
         setSaveSuccess(false);
+        setIsSubmitting(false);
       }, 2000);
     } catch (error) {
       console.error("Error al guardar el vehículo:", error);
       setSaveSuccess(false);
-      alert("Error al guardar. Por favor intente nuevamente.");
-    } finally {
       setIsSubmitting(false);
     }
   };
