@@ -231,7 +231,13 @@ export default function VehicleDialog({
     }
     
     try {
-      await onSave(finalData);
+      // Timeout de seguridad de 10 segundos
+      const savePromise = Promise.race([
+        onSave(finalData),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 10000))
+      ]);
+      
+      await savePromise;
       setSaveSuccess(true);
       setTimeout(() => {
         setSaveSuccess(false);
@@ -239,6 +245,7 @@ export default function VehicleDialog({
     } catch (error) {
       console.error("Error al guardar el vehículo:", error);
       setSaveSuccess(false);
+      alert("Error al guardar. Por favor intente nuevamente.");
     } finally {
       setIsSubmitting(false);
     }
