@@ -133,6 +133,34 @@ export default function Maintenance() {
 
   const vehiclesMap = vehicles.reduce((acc, v) => ({ ...acc, [v.id]: v }), {});
 
+  // Manejo de apertura directa de informes desde URL
+  useEffect(() => {
+    const type = urlParams.get('type');
+    const id = urlParams.get('id');
+    
+    if (type && id && currentUser) {
+      if (type === 'ac') {
+        if (acMaintenances.length > 0) {
+          const record = acMaintenances.find(r => r.id === id);
+          if (record) {
+            setSelectedAcMaintenance(record);
+            setAcDialogOpen(true);
+            navigate(location.pathname, { replace: true });
+          }
+        }
+      } else if (type === 'maintenance') {
+        if (maintenances.length > 0) {
+          const record = maintenances.find(r => r.id === id);
+          if (record) {
+            setSelectedMaintenance(record);
+            setDialogOpen(true);
+            navigate(location.pathname, { replace: true });
+          }
+        }
+      }
+    }
+  }, [urlParams, currentUser, maintenances, acMaintenances, location.pathname, navigate]);
+
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Maintenance.create(data),
     onSuccess: () => {
