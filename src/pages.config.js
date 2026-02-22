@@ -55,6 +55,7 @@ import Drivers from './pages/Drivers';
 import LandingPage from './pages/LandingPage';
 import Locations from './pages/Locations';
 import Maintenance from './pages/Maintenance';
+import MaintenancePrograms from './pages/MaintenancePrograms';
 import Manufacturers from './pages/Manufacturers';
 import Profile from './pages/Profile';
 import Reports from './pages/Reports';
@@ -62,7 +63,6 @@ import VehicleCategories from './pages/VehicleCategories';
 import VehicleStatuses from './pages/VehicleStatuses';
 import VehicleTypes from './pages/VehicleTypes';
 import Vehicles from './pages/Vehicles';
-import MaintenancePrograms from './pages/MaintenancePrograms';
 import __Layout from './Layout.jsx';
 
 
@@ -75,6 +75,7 @@ export const PAGES = {
     "LandingPage": LandingPage,
     "Locations": Locations,
     "Maintenance": Maintenance,
+    "MaintenancePrograms": MaintenancePrograms,
     "Manufacturers": Manufacturers,
     "Profile": Profile,
     "Reports": Reports,
@@ -82,7 +83,6 @@ export const PAGES = {
     "VehicleStatuses": VehicleStatuses,
     "VehicleTypes": VehicleTypes,
     "Vehicles": Vehicles,
-    "MaintenancePrograms": MaintenancePrograms,
 }
 
 export const pagesConfig = {

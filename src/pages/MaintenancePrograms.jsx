@@ -50,7 +50,7 @@ export default function MaintenancePrograms() {
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.MaintenanceTaskDefinition.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries(['maintenanceTaskDefinitions']);
+      queryClient.invalidateQueries({ queryKey: ['maintenanceTaskDefinitions'] });
       setDialogOpen(false);
       setSelectedProgram(null);
     },
@@ -59,7 +59,7 @@ export default function MaintenancePrograms() {
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.MaintenanceTaskDefinition.update(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries(['maintenanceTaskDefinitions']);
+      queryClient.invalidateQueries({ queryKey: ['maintenanceTaskDefinitions'] });
       setDialogOpen(false);
       setSelectedProgram(null);
     },
@@ -68,7 +68,7 @@ export default function MaintenancePrograms() {
   const deleteMutation = useMutation({
     mutationFn: (id) => base44.entities.MaintenanceTaskDefinition.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries(['maintenanceTaskDefinitions']);
+      queryClient.invalidateQueries({ queryKey: ['maintenanceTaskDefinitions'] });
       setDialogOpen(false);
       setSelectedProgram(null);
     },
@@ -99,7 +99,7 @@ export default function MaintenancePrograms() {
   };
 
   const handleRefresh = async () => {
-    await queryClient.invalidateQueries(['maintenanceTaskDefinitions']);
+    await queryClient.invalidateQueries({ queryKey: ['maintenanceTaskDefinitions'] });
   };
 
   const filteredPrograms = useMemo(() => {
