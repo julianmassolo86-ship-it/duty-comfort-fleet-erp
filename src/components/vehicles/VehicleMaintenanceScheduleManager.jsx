@@ -44,7 +44,9 @@ export default function VehicleMaintenanceScheduleManager({ vehicleId, currentMi
   const recordMaintenanceMutation = useMutation({
     mutationFn: async ({ scheduleId, data }) => {
       const schedule = schedules.find(s => s.id === scheduleId);
+      if (!schedule) throw new Error('Schedule not found');
       const taskDef = taskDefinitions.find(t => t.id === schedule.maintenance_task_definition_id);
+      if (!taskDef) throw new Error('Task definition not found');
       
       // Calcular próximo vencimiento
       let nextDueDate = null;
@@ -82,14 +84,16 @@ export default function VehicleMaintenanceScheduleManager({ vehicleId, currentMi
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['vehicleMaintenanceSchedules']);
-      setRecordDialogOpen(false);
-      setSelectedSchedule(null);
-      setRecordForm({
-        date: new Date().toISOString().split('T')[0],
-        mileage: currentMileage || 0,
-        hours: currentHours || 0,
-      });
+      queryClient.invalidateQueries({ queryKey: ['vehicleMaintenanceSchedules', vehicleId] });
+      setTimeout(() => {
+        setRecordDialogOpen(false);
+        setSelectedSchedule(null);
+        setRecordForm({
+          date: new Date().toISOString().split('T')[0],
+          mileage: currentMileage || 0,
+          hours: currentHours || 0,
+        });
+      }, 100);
     },
   });
 
@@ -254,7 +258,12 @@ export default function VehicleMaintenanceScheduleManager({ vehicleId, currentMi
 
               <Button
                 size="sm"
-                onClick={() => handleRecordClick(schedule)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleRecordClick(schedule);
+                }}
+                type="button"
                 className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold shrink-0"
               >
                 <CheckCircle2 className="w-4 h-4 mr-2" />
