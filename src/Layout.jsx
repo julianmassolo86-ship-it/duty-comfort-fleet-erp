@@ -174,9 +174,15 @@ function LayoutContent({ children, currentPageName }) {
 
   },
   {
+    section: "Mantenimiento",
+    items: [
+    { name: "Programas", icon: Wrench, page: "MaintenancePrograms" },
+    { name: "Registros", icon: FileText, page: "Maintenance" }]
+
+  },
+  {
     section: "Operaciones",
     items: [
-    { name: "Mantenimiento", icon: Wrench, page: "Maintenance" },
     { name: "Documentos", icon: FileText, page: "Documents" },
     { name: "Reportes", icon: BarChart3, page: "Reports" }]
 
@@ -237,9 +243,15 @@ function LayoutContent({ children, currentPageName }) {
 
   },
   {
+    section: "Mantenimiento",
+    items: [
+    { name: "Programas", icon: Wrench, page: "MaintenancePrograms" },
+    { name: "Registros", icon: FileText, page: "Maintenance" }]
+
+  },
+  {
     section: "Operaciones",
     items: [
-    { name: "Mantenimiento", icon: Wrench, page: "Maintenance" },
     { name: "Documentos", icon: FileText, page: "Documents" },
     { name: "Reportes", icon: BarChart3, page: "Reports" }]
 

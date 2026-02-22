@@ -62,6 +62,7 @@ import VehicleCategories from './pages/VehicleCategories';
 import VehicleStatuses from './pages/VehicleStatuses';
 import VehicleTypes from './pages/VehicleTypes';
 import Vehicles from './pages/Vehicles';
+import MaintenancePrograms from './pages/MaintenancePrograms';
 import __Layout from './Layout.jsx';
 
 
@@ -81,6 +82,7 @@ export const PAGES = {
     "VehicleStatuses": VehicleStatuses,
     "VehicleTypes": VehicleTypes,
     "Vehicles": Vehicles,
+    "MaintenancePrograms": MaintenancePrograms,
 }
 
 export const pagesConfig = {
