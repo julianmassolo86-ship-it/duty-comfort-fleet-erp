@@ -206,6 +206,7 @@ export default function MaintenanceProgramDialog({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="mileage">Kilómetros</SelectItem>
+                  <SelectItem value="miles">Millas</SelectItem>
                   <SelectItem value="hours">Horas</SelectItem>
                   <SelectItem value="months">Meses</SelectItem>
                   <SelectItem value="years">Años</SelectItem>
@@ -234,6 +235,7 @@ export default function MaintenanceProgramDialog({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="mileage">Kilómetros</SelectItem>
+                  <SelectItem value="miles">Millas</SelectItem>
                   <SelectItem value="hours">Horas</SelectItem>
                   <SelectItem value="days">Días</SelectItem>
                 </SelectContent>

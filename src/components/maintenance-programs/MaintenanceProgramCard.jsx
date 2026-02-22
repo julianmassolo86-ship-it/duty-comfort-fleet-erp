@@ -6,9 +6,11 @@ import { Calendar, Gauge, Clock, Edit, Package, Factory } from "lucide-react";
 
 const intervalTypeLabels = {
   mileage: { label: "Kilómetros", icon: Gauge },
+  miles: { label: "Millas", icon: Gauge },
   hours: { label: "Horas", icon: Clock },
   months: { label: "Meses", icon: Calendar },
   years: { label: "Años", icon: Calendar },
+  days: { label: "Días", icon: Calendar },
 };
 
 export default function MaintenanceProgramCard({ program, manufacturers, vehicleTypes, allPrograms, onEdit }) {
