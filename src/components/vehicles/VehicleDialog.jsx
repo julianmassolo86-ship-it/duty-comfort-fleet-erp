@@ -16,6 +16,7 @@ import { Loader2, Trash2, X, Upload, Image as ImageIcon, UserPlus, UserMinus, Zo
 import DocumentCard from "./DocumentCard";
 import VehicleCardDocument from "./VehicleCardDocument";
 import VehicleMaintenanceHistory from "./VehicleMaintenanceHistory";
+import VehicleMaintenanceScheduleManager from "./VehicleMaintenanceScheduleManager";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -42,12 +43,6 @@ const initialState = {
   hours: 0,
   assigned_driver_ids: [],
   circulation_permit_url: "",
-  last_service_date: "",
-  last_service_mileage: 0,
-  last_service_hours: 0,
-  next_service_date: "",
-  next_service_mileage: 0,
-  next_service_hours: 0,
   insurance_expiry: "",
   technical_inspection_expiry: "",
   circulation_permit_expiry: "",
@@ -127,10 +122,6 @@ export default function VehicleDialog({
           year: vehicle.year || "",
           mileage: vehicle.mileage || 0,
           hours: vehicle.hours || 0,
-          last_service_mileage: vehicle.last_service_mileage || 0,
-          last_service_hours: vehicle.last_service_hours || 0,
-          next_service_mileage: vehicle.next_service_mileage || 0,
-          next_service_hours: vehicle.next_service_hours || 0,
         }));
       } else {
         const defaultCompanyId = isSuperAdmin ? "" : (currentUser?.company_id || "");
@@ -679,96 +670,12 @@ export default function VehicleDialog({
               </div>
             </TabsContent>
 
-            <TabsContent value="service" className="space-y-6">
-              <div className="space-y-4">
-                <h3 className="text-sm font-semibold text-yellow-400 flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-yellow-400"></div>
-                  Último Servicio
-                </h3>
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label>Kilómetros</Label>
-                    <Input
-                      type="number"
-                      value={form.last_service_mileage}
-                      onChange={(e) => {
-                        const val = parseInt(e.target.value) || 0;
-                        handleChange("last_service_mileage", Math.min(val, 999999));
-                      }}
-                      className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
-                      max={999999}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Horas</Label>
-                    <Input
-                      type="number"
-                      value={form.last_service_hours}
-                      onChange={(e) => {
-                        const val = parseInt(e.target.value) || 0;
-                        handleChange("last_service_hours", Math.min(val, 99999));
-                      }}
-                      className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
-                      max={99999}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Fecha</Label>
-                    <Input
-                      type="date"
-                      value={form.last_service_date}
-                      onChange={(e) => handleChange("last_service_date", e.target.value)}
-                      className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="h-px bg-zinc-800"></div>
-
-              <div className="space-y-4">
-                <h3 className="text-sm font-semibold text-cyan-400 flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-cyan-400"></div>
-                  Próximo Servicio
-                </h3>
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label>Kilómetros</Label>
-                    <Input
-                      type="number"
-                      value={form.next_service_mileage}
-                      onChange={(e) => {
-                        const val = parseInt(e.target.value) || 0;
-                        handleChange("next_service_mileage", Math.min(val, 999999));
-                      }}
-                      className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
-                      max={999999}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Horas</Label>
-                    <Input
-                      type="number"
-                      value={form.next_service_hours}
-                      onChange={(e) => {
-                        const val = parseInt(e.target.value) || 0;
-                        handleChange("next_service_hours", Math.min(val, 99999));
-                      }}
-                      className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
-                      max={99999}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Fecha</Label>
-                    <Input
-                      type="date"
-                      value={form.next_service_date}
-                      onChange={(e) => handleChange("next_service_date", e.target.value)}
-                      className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
-                    />
-                  </div>
-                </div>
-              </div>
+            <TabsContent value="service" className="space-y-4">
+              <VehicleMaintenanceScheduleManager 
+                vehicleId={vehicle?.id}
+                currentMileage={form.mileage}
+                currentHours={form.hours}
+              />
             </TabsContent>
 
             <TabsContent value="documents" className="space-y-4">
