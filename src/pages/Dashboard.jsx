@@ -12,6 +12,7 @@ import { differenceInDays } from "date-fns";
 import { cn } from "@/lib/utils";
 import StatCard from "../components/dashboard/StatCard";
 import AlertCard from "../components/dashboard/AlertCard";
+import MaintenanceAlertCard from "../components/dashboard/MaintenanceAlertCard";
 import PageHeader from "../components/common/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -85,6 +86,16 @@ export default function Dashboard() {
     queryFn: () => base44.entities.Novedad.list('-fecha_reporte'),
   });
 
+  const { data: maintenanceSchedules = [] } = useQuery({
+    queryKey: ['vehicleMaintenanceSchedules'],
+    queryFn: () => base44.entities.VehicleMaintenanceSchedule.list(),
+  });
+
+  const { data: maintenanceTaskDefinitions = [] } = useQuery({
+    queryKey: ['maintenanceTaskDefinitions'],
+    queryFn: () => base44.entities.MaintenanceTaskDefinition.list(),
+  });
+
   const isLoading = loadingVehicles || loadingDrivers || loadingMaintenance || loadingDocuments || loadingNovedades;
 
   // Enriquecer vehículos con nombre del tipo y categoría
@@ -122,6 +133,90 @@ export default function Dashboard() {
   const accessibleNovedades = isSuperAdmin 
     ? novedades 
     : novedades.filter(n => n.company_id === currentUser?.company_id);
+
+  // Calculate maintenance alerts
+  const getMaintenanceAlerts = () => {
+    const alerts = [];
+    
+    maintenanceSchedules.forEach(schedule => {
+      const vehicle = accessibleVehicles.find(v => v.id === schedule.vehicle_id);
+      if (!vehicle) return;
+      
+      const taskDef = maintenanceTaskDefinitions.find(t => t.id === schedule.maintenance_task_definition_id);
+      if (!taskDef) return;
+
+      let status = 'on_track';
+      let dueInfo = '';
+      
+      // Calcular estado según el tipo de intervalo
+      if (taskDef.interval_type === 'mileage' || taskDef.interval_type === 'miles') {
+        if (schedule.next_due_mileage && vehicle.mileage) {
+          const remaining = schedule.next_due_mileage - vehicle.mileage;
+          const warningThreshold = taskDef.warning_interval_type === 'mileage' || taskDef.warning_interval_type === 'miles' 
+            ? taskDef.warning_interval_value || 500 
+            : 500;
+          
+          if (remaining <= 0) {
+            status = 'overdue';
+            dueInfo = `Vencido (${Math.abs(remaining)} km pasados)`;
+          } else if (remaining <= warningThreshold) {
+            status = 'due_soon';
+            dueInfo = `Faltan ${remaining} km`;
+          } else {
+            return; // No mostrar si está muy lejos
+          }
+        }
+      } else if (taskDef.interval_type === 'hours') {
+        if (schedule.next_due_hours && vehicle.hours) {
+          const remaining = schedule.next_due_hours - vehicle.hours;
+          const warningThreshold = taskDef.warning_interval_type === 'hours' 
+            ? taskDef.warning_interval_value || 50 
+            : 50;
+          
+          if (remaining <= 0) {
+            status = 'overdue';
+            dueInfo = `Vencido (${Math.abs(remaining)} hs pasadas)`;
+          } else if (remaining <= warningThreshold) {
+            status = 'due_soon';
+            dueInfo = `Faltan ${remaining} hs`;
+          } else {
+            return;
+          }
+        }
+      } else if (taskDef.interval_type === 'months' || taskDef.interval_type === 'years') {
+        if (schedule.next_due_date) {
+          const daysRemaining = differenceInDays(new Date(schedule.next_due_date), new Date());
+          const warningThreshold = taskDef.warning_interval_type === 'days' 
+            ? taskDef.warning_interval_value || 7 
+            : 7;
+          
+          if (daysRemaining < 0) {
+            status = 'overdue';
+            dueInfo = `Vencido hace ${Math.abs(daysRemaining)} días`;
+          } else if (daysRemaining <= warningThreshold) {
+            status = 'due_soon';
+            dueInfo = daysRemaining === 0 ? 'Vence hoy' : `Vence en ${daysRemaining} días`;
+          } else {
+            return;
+          }
+        }
+      }
+
+      alerts.push({
+        id: schedule.id,
+        vehiclePlate: vehicle.plate || vehicle.internal_number,
+        vehicleModel: `${vehicle.manufacturer} ${vehicle.model}`,
+        taskName: taskDef.name,
+        status,
+        dueInfo
+      });
+    });
+
+    return alerts.sort((a, b) => {
+      const order = { overdue: 0, due_soon: 1, on_track: 2 };
+      return order[a.status] - order[b.status];
+    }).slice(0, 10);
+  };
 
   // Calculate alerts
   const getAlerts = () => {
@@ -184,6 +279,7 @@ export default function Dashboard() {
   };
 
   const alerts = isLoading ? [] : getAlerts();
+  const maintenanceAlerts = isLoading ? [] : getMaintenanceAlerts();
   const activeVehicles = accessibleVehicles.filter(v => v.status === 'active').length;
   const activeDrivers = accessibleDrivers.filter(d => d.status === 'active').length;
   const pendingMaintenance = accessibleMaintenances.filter(m => m.status === 'scheduled' || m.status === 'in_progress').length;
@@ -371,14 +467,15 @@ export default function Dashboard() {
 
         {/* Alerts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 space-y-6">
+            {/* Document Alerts */}
             <div className={cn("rounded-2xl border p-6 backdrop-blur-xl shadow-2xl", theme === 'dark' ? 'bg-zinc-900/80 border-zinc-800/50 shadow-black/20' : 'bg-white border-gray-200 shadow-gray-200/50')}>
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
                   <div className="p-3 rounded-xl bg-gradient-to-br from-rose-500/20 to-rose-600/10 border border-rose-500/20 shadow-lg shadow-rose-500/10">
-                    <AlertTriangle className="w-6 h-6 text-rose-400" />
+                    <FileWarning className="w-6 h-6 text-rose-400" />
                   </div>
-                  <h2 className={cn("text-xl font-bold", theme === 'dark' ? 'text-white' : 'text-gray-900')}>Alertas y Vencimientos</h2>
+                  <h2 className={cn("text-xl font-bold", theme === 'dark' ? 'text-white' : 'text-gray-900')}>Documentación</h2>
                 </div>
                 <Button 
                   variant="ghost" 
@@ -409,6 +506,50 @@ export default function Dashboard() {
                   </div>
                   <p className={theme === 'dark' ? 'text-slate-400' : 'text-gray-600'}>No hay alertas pendientes</p>
                   <p className={cn("text-sm", theme === 'dark' ? 'text-slate-500' : 'text-gray-500')}>Todos los documentos están al día</p>
+                </div>
+              )}
+            </div>
+
+            {/* Maintenance Alerts */}
+            <div className={cn("rounded-2xl border p-6 backdrop-blur-xl shadow-2xl", theme === 'dark' ? 'bg-zinc-900/80 border-zinc-800/50 shadow-black/20' : 'bg-white border-gray-200 shadow-gray-200/50')}>
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-amber-500/20 to-amber-600/10 border border-amber-500/20 shadow-lg shadow-amber-500/10">
+                    <Wrench className="w-6 h-6 text-amber-400" />
+                  </div>
+                  <h2 className={cn("text-xl font-bold", theme === 'dark' ? 'text-white' : 'text-gray-900')}>Mantenimientos</h2>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className={theme === 'dark' ? 'text-slate-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'}
+                  asChild
+                >
+                  <Link to={createPageUrl("MaintenancePrograms")}>
+                    Ver programas <ArrowRight className="w-4 h-4 ml-2" />
+                  </Link>
+                </Button>
+              </div>
+              
+              {isLoading ? (
+                <div className="space-y-3">
+                  {Array(3).fill(0).map((_, i) => (
+                    <Skeleton key={i} className={cn("h-20 rounded-xl", theme === 'dark' ? 'bg-zinc-800/30' : 'bg-gray-200')} />
+                  ))}
+                </div>
+              ) : maintenanceAlerts.length > 0 ? (
+                <div className="space-y-3">
+                  {maintenanceAlerts.map(alert => (
+                    <MaintenanceAlertCard key={alert.id} {...alert} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 inline-block mb-4">
+                    <TrendingUp className="w-8 h-8 text-emerald-400" />
+                  </div>
+                  <p className={theme === 'dark' ? 'text-slate-400' : 'text-gray-600'}>No hay mantenimientos próximos</p>
+                  <p className={cn("text-sm", theme === 'dark' ? 'text-slate-500' : 'text-gray-500')}>Todos los vehículos están al día</p>
                 </div>
               )}
             </div>
