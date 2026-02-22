@@ -265,8 +265,8 @@ export default function VehicleMaintenanceScheduleManager({ vehicleId, currentMi
       })}
 
       {/* Dialog para registrar mantenimiento */}
-      <Dialog open={recordDialogOpen} onOpenChange={setRecordDialogOpen}>
-        <DialogContent className="bg-zinc-950 border-zinc-800 text-white">
+      <Dialog open={recordDialogOpen} onOpenChange={setRecordDialogOpen} modal={true}>
+        <DialogContent className="bg-zinc-950 border-zinc-800 text-white" onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle>Registrar Mantenimiento Completado</DialogTitle>
           </DialogHeader>
