@@ -33,8 +33,12 @@ const initialState = {
   description: "",
   interval_type: "mileage",
   interval_value: "",
+  interval_mileage: "",
+  interval_hours: "",
   warning_interval_type: "mileage",
   warning_interval_value: "",
+  warning_interval_mileage: "",
+  warning_interval_hours: "",
   is_program_group: false,
   linked_task_ids: [],
   applies_to_vehicle_type_id: "",
@@ -73,7 +77,11 @@ export default function MaintenanceProgramDialog({
         setForm({
           ...program,
           interval_value: program.interval_value || "",
+          interval_mileage: program.interval_mileage || "",
+          interval_hours: program.interval_hours || "",
           warning_interval_value: program.warning_interval_value || "",
+          warning_interval_mileage: program.warning_interval_mileage || "",
+          warning_interval_hours: program.warning_interval_hours || "",
           component_names: program.component_names || [],
           linked_task_ids: program.linked_task_ids || [],
         });
@@ -95,7 +103,11 @@ export default function MaintenanceProgramDialog({
     onSave({
       ...form,
       interval_value: Number(form.interval_value),
+      interval_mileage: form.interval_mileage ? Number(form.interval_mileage) : null,
+      interval_hours: form.interval_hours ? Number(form.interval_hours) : null,
       warning_interval_value: form.warning_interval_value ? Number(form.warning_interval_value) : null,
+      warning_interval_mileage: form.warning_interval_mileage ? Number(form.warning_interval_mileage) : null,
+      warning_interval_hours: form.warning_interval_hours ? Number(form.warning_interval_hours) : null,
     });
   };
 
@@ -197,59 +209,118 @@ export default function MaintenanceProgramDialog({
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Intervalo *</Label>
-              <Select value={form.interval_type} onValueChange={(v) => handleChange("interval_type", v)} required>
-                <SelectTrigger className="bg-zinc-900 border-zinc-700">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="mileage">Kilómetros</SelectItem>
-                  <SelectItem value="miles">Millas</SelectItem>
-                  <SelectItem value="hours">Horas</SelectItem>
-                  <SelectItem value="months">Meses</SelectItem>
-                  <SelectItem value="years">Años</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Cada (valor) *</Label>
-              <Input
-                type="number"
-                value={form.interval_value}
-                onChange={(e) => handleChange("interval_value", e.target.value)}
-                className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
-                placeholder="Ej: 10000, 3, 12"
-                required
-              />
+          <div className="space-y-2">
+            <Label>Intervalo Principal *</Label>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-xs text-zinc-400">Tipo</Label>
+                <Select value={form.interval_type} onValueChange={(v) => handleChange("interval_type", v)} required>
+                  <SelectTrigger className="bg-zinc-900 border-zinc-700">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="mileage">Kilómetros</SelectItem>
+                    <SelectItem value="miles">Millas</SelectItem>
+                    <SelectItem value="hours">Horas</SelectItem>
+                    <SelectItem value="months">Meses</SelectItem>
+                    <SelectItem value="years">Años</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs text-zinc-400">Cada (valor) *</Label>
+                <Input
+                  type="number"
+                  value={form.interval_value}
+                  onChange={(e) => handleChange("interval_value", e.target.value)}
+                  className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
+                  placeholder="Ej: 10000, 3, 12"
+                  required
+                />
+              </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Aviso Previo</Label>
-              <Select value={form.warning_interval_type} onValueChange={(v) => handleChange("warning_interval_type", v)}>
-                <SelectTrigger className="bg-zinc-900 border-zinc-700">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="mileage">Kilómetros</SelectItem>
-                  <SelectItem value="miles">Millas</SelectItem>
-                  <SelectItem value="hours">Horas</SelectItem>
-                  <SelectItem value="days">Días</SelectItem>
-                </SelectContent>
-              </Select>
+          <div className="space-y-2">
+            <Label>Intervalos Adicionales (opcional)</Label>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-xs text-zinc-400">Cada (kilómetros)</Label>
+                <Input
+                  type="number"
+                  value={form.interval_mileage}
+                  onChange={(e) => handleChange("interval_mileage", e.target.value)}
+                  className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
+                  placeholder="Ej: 10000"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs text-zinc-400">Cada (horas)</Label>
+                <Input
+                  type="number"
+                  value={form.interval_hours}
+                  onChange={(e) => handleChange("interval_hours", e.target.value)}
+                  className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
+                  placeholder="Ej: 500"
+                />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label>Valor</Label>
-              <Input
-                type="number"
-                value={form.warning_interval_value}
-                onChange={(e) => handleChange("warning_interval_value", e.target.value)}
-                className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
-                placeholder="Ej: 500, 7"
-              />
+            <p className="text-xs text-zinc-500">Se ejecutará el que llegue primero (km o horas)</p>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Aviso Previo Principal (opcional)</Label>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-xs text-zinc-400">Tipo</Label>
+                <Select value={form.warning_interval_type} onValueChange={(v) => handleChange("warning_interval_type", v)}>
+                  <SelectTrigger className="bg-zinc-900 border-zinc-700">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="mileage">Kilómetros</SelectItem>
+                    <SelectItem value="miles">Millas</SelectItem>
+                    <SelectItem value="hours">Horas</SelectItem>
+                    <SelectItem value="days">Días</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs text-zinc-400">Valor</Label>
+                <Input
+                  type="number"
+                  value={form.warning_interval_value}
+                  onChange={(e) => handleChange("warning_interval_value", e.target.value)}
+                  className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
+                  placeholder="Ej: 500, 7"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Avisos Adicionales (opcional)</Label>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-xs text-zinc-400">Antes de (kilómetros)</Label>
+                <Input
+                  type="number"
+                  value={form.warning_interval_mileage}
+                  onChange={(e) => handleChange("warning_interval_mileage", e.target.value)}
+                  className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
+                  placeholder="Ej: 500"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs text-zinc-400">Antes de (horas)</Label>
+                <Input
+                  type="number"
+                  value={form.warning_interval_hours}
+                  onChange={(e) => handleChange("warning_interval_hours", e.target.value)}
+                  className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
+                  placeholder="Ej: 50"
+                />
+              </div>
             </div>
           </div>
 
