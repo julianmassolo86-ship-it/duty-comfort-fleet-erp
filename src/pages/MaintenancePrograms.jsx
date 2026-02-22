@@ -173,10 +173,15 @@ export default function MaintenancePrograms() {
               icon={Settings2}
               title="No hay programas configurados"
               description="Crea tu primer programa de mantenimiento para comenzar"
-              action={{
-                label: "Crear Programa",
-                onClick: () => setDialogOpen(true),
-              }}
+              action={
+                <Button
+                  onClick={() => setDialogOpen(true)}
+                  className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Crear Programa
+                </Button>
+              }
             />
           ) : (
             <>
