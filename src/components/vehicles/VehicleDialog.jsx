@@ -671,6 +671,38 @@ export default function VehicleDialog({
             </TabsContent>
 
             <TabsContent value="service" className="space-y-4">
+              {/* Campos editables de kilometraje y horas */}
+              <div className="grid grid-cols-2 gap-4 p-4 rounded-lg border border-zinc-800 bg-zinc-900/50">
+                <div className="space-y-2">
+                  <Label>Kilómetros Actuales</Label>
+                  <Input
+                    type="number"
+                    value={form.mileage}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value) || 0;
+                      handleChange("mileage", Math.min(val, 999999));
+                    }}
+                    className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
+                    max={999999}
+                    placeholder="0"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Horas Actuales</Label>
+                  <Input
+                    type="number"
+                    value={form.hours}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value) || 0;
+                      handleChange("hours", Math.min(val, 99999));
+                    }}
+                    className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
+                    max={99999}
+                    placeholder="0"
+                  />
+                </div>
+              </div>
+
               <VehicleMaintenanceScheduleManager 
                 vehicleId={vehicle?.id}
                 currentMileage={form.mileage}
