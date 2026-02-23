@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Search, Wrench, AlertCircle, Wind } from "lucide-react";
+import { Plus, Search, Wrench, AlertCircle, Wind, FileStack } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -32,6 +32,7 @@ export default function Maintenance() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [novedadDialogOpen, setNovedadDialogOpen] = useState(false);
   const [acDialogOpen, setAcDialogOpen] = useState(false);
+  const [bulkACDialogOpen, setBulkACDialogOpen] = useState(false);
   const [selectedMaintenance, setSelectedMaintenance] = useState(null);
   const [selectedAcMaintenance, setSelectedAcMaintenance] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
@@ -264,6 +265,17 @@ export default function Maintenance() {
                 <Wind className="w-4 h-4 mr-2" />
                 <span className="hidden sm:inline">Informe A/C</span>
                 <span className="sm:hidden">A/C</span>
+              </Button>
+              <Button 
+                onClick={() => setBulkACDialogOpen(true)}
+                variant="outline"
+                className={cn(
+                  "hidden sm:flex",
+                  theme === 'dark' ? 'border-sky-600 text-sky-400 hover:bg-sky-600/10' : 'border-sky-600 text-sky-600 hover:bg-sky-50'
+                )}
+              >
+                <FileStack className="w-4 h-4 mr-2" />
+                Generación Masiva
               </Button>
               <Button 
                 onClick={() => { setNovedadDialogOpen(true); }}
@@ -564,6 +576,16 @@ export default function Maintenance() {
             queryClient.invalidateQueries({ queryKey: ['ac-maintenances'] });
             setAcDialogOpen(false);
             setSelectedAcMaintenance(null);
+            setActiveTab('ac');
+          }}
+        />
+
+        <BulkACReportDialog
+          open={bulkACDialogOpen}
+          onOpenChange={setBulkACDialogOpen}
+          onSuccess={() => {
+            queryClient.invalidateQueries({ queryKey: ['ac-maintenances'] });
+            setBulkACDialogOpen(false);
             setActiveTab('ac');
           }}
         />

@@ -177,7 +177,8 @@ function LayoutContent({ children, currentPageName }) {
     section: "Mantenimiento",
     items: [
     { name: "Programas", icon: Wrench, page: "MaintenancePrograms" },
-    { name: "Registros", icon: FileText, page: "Maintenance" }]
+    { name: "Registros", icon: FileText, page: "Maintenance" },
+    { name: "Dashboard A/C", icon: Wind, page: "ACDashboard" }]
 
   },
   {
@@ -246,7 +247,8 @@ function LayoutContent({ children, currentPageName }) {
     section: "Mantenimiento",
     items: [
     { name: "Programas", icon: Wrench, page: "MaintenancePrograms" },
-    { name: "Registros", icon: FileText, page: "Maintenance" }]
+    { name: "Registros", icon: FileText, page: "Maintenance" },
+    { name: "Dashboard A/C", icon: Wind, page: "ACDashboard" }]
 
   },
   {
