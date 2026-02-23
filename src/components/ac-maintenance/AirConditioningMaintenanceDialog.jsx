@@ -361,15 +361,27 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
       
       // Convertir strings vacíos a null para campos numéricos
       Object.keys(dataToSave).forEach(key => {
-        if (dataToSave[key] === "" && (
-          key.includes("temperatura") || 
-          key.includes("lp") || 
-          key.includes("hp") ||
-          key.includes("presion_estatica") ||
-          key === "kilometraje" ||
-          key === "horas"
-        )) {
-          dataToSave[key] = null;
+        if (dataToSave[key] === "") {
+          // Lista de campos que deben ser números o null
+          const numericFields = [
+            'ambient_temperature',
+            'kilometraje',
+            'horas',
+            'inspeccion_8_presion_estatica',
+            'inspeccion_10_lp',
+            'inspeccion_10_hp',
+            'inspeccion_11_temperatura',
+            'inspeccion_12_temperatura',
+            'medicion_final_lp',
+            'medicion_final_hp',
+            'medicion_final_temp_frio_corte',
+            'medicion_final_temp_frio_acople',
+            'medicion_final_temp_calefaccion'
+          ];
+          
+          if (numericFields.includes(key)) {
+            dataToSave[key] = null;
+          }
         }
       });
 
