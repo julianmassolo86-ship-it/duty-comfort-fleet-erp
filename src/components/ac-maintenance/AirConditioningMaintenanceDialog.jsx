@@ -432,31 +432,33 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
     const location = locations.find(l => l.id === selectedVehicle?.location_id);
 
     const addHeader = () => {
-      // Banda superior amarilla
+      // Logo Duty Comfort centrado arriba
+      doc.setFillColor(255, 255, 255);
+      doc.setTextColor(0, 0, 0);
+      doc.setFontSize(18);
+      doc.setFont("helvetica", "bold");
+      doc.text("DUTY COMFORT", pageWidth / 2, 10, { align: "center" });
+      
+      // Banda amarilla
       doc.setFillColor(234, 179, 8);
-      doc.rect(0, 0, pageWidth, 12, 'F');
+      doc.rect(0, 15, pageWidth, 10, 'F');
       
       // Título en negro centrado
       doc.setTextColor(0, 0, 0);
-      doc.setFontSize(14);
+      doc.setFontSize(13);
       doc.setFont("helvetica", "bold");
-      doc.text("INFORME DE INSPECCIÓN A/C", pageWidth / 2, 8, { align: "center" });
+      doc.text("INFORME DE INSPECCIÓN A/C", pageWidth / 2, 21, { align: "center" });
       
-      y = 18;
+      y = 30;
       
       // Logo de la empresa (izquierda)
-      if (company?.logo_url) {
-        try {
-          // Placeholder para logo - en producción se cargaría la imagen
-          doc.setFillColor(240, 240, 240);
-          doc.roundedRect(margin, y, 30, 30, 2, 2, 'F');
-          doc.setFontSize(8);
-          doc.setTextColor(150, 150, 150);
-          doc.text("LOGO", margin + 15, y + 18, { align: "center" });
-        } catch (e) {
-          // Si falla cargar logo, continuar
-        }
-      }
+      doc.setFillColor(240, 240, 240);
+      doc.roundedRect(margin, y, 30, 30, 2, 2, 'F');
+      doc.setFontSize(8);
+      doc.setTextColor(150, 150, 150);
+      doc.text("LOGO", margin + 15, y + 12, { align: "center" });
+      doc.setFontSize(7);
+      doc.text("EMPRESA", margin + 15, y + 18, { align: "center" });
       
       // Información del vehículo (izquierda, debajo del logo)
       const vehicleInfoX = margin;
