@@ -521,6 +521,14 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
         }
         if (selectedVehicle.technical_description) {
           doc.text(selectedVehicle.technical_description, vehicleInfoX, vY);
+          vY += 4;
+        }
+        if (formData.kilometraje || formData.horas) {
+          const reading = [
+            formData.kilometraje ? `${formData.kilometraje} km` : '',
+            formData.horas ? `${formData.horas} hs` : ''
+          ].filter(Boolean).join(' / ');
+          doc.text(`Lectura: ${reading}`, vehicleInfoX, vY);
         }
       }
       
@@ -555,15 +563,6 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
       }
       
       doc.text(`Tipo: ${formData.tipo_mantenimiento.toUpperCase()}`, rightX, rightY, { align: "right" });
-      rightY += 4;
-      
-      if (formData.kilometraje || formData.horas) {
-        const reading = [
-          formData.kilometraje ? `${formData.kilometraje} km` : '',
-          formData.horas ? `${formData.horas} hs` : ''
-        ].filter(Boolean).join(' / ');
-        doc.text(`Lectura: ${reading}`, rightX, rightY, { align: "right" });
-      }
       
       // Línea divisoria
       doc.setDrawColor(234, 179, 8);
