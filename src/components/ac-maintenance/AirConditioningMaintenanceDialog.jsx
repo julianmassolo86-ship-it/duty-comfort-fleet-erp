@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Checkbox } from "@/components/ui/checkbox";
 import { AlertCircle, Loader2, Search, X, Check, AlertTriangle, Eye, FileDown, Plus } from "lucide-react";
 import jsPDF from "jspdf";
 import { cn } from "@/lib/utils";
@@ -96,6 +97,7 @@ const initialState = {
   
   estado_final_equipo: "",
   observaciones_finales: "",
+  requiere_seguimiento: false,
   
   mecanico_responsable_name: "",
   planificador_mantenimiento_name: "",
@@ -378,19 +380,13 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
         setGeneratedReportNumber(report_number);
       }
 
-      // Actualizar vehículo si el estado final está definido o si hay kilometraje/horas
+      // Actualizar vehículo si es necesario
       if (formData.vehicle_id) {
         const vehicleUpdates = {};
         
-        // Actualizar estado del vehículo basado en observaciones y estado final
-        if (dataToSave.status === 'completado' || dataToSave.status === 'aprobado') {
-          // Si el informe está completado/aprobado y hay observaciones, marcar como requiere seguimiento
-          if (dataToSave.observaciones_finales && dataToSave.observaciones_finales.trim() !== '') {
-            vehicleUpdates.status = 'requires_followup';
-          } else if (dataToSave.estado_final_equipo) {
-            // Si no hay observaciones pero se definió un estado final, usar ese estado
-            vehicleUpdates.status = dataToSave.estado_final_equipo;
-          }
+        // Actualizar estado del equipo si se definió
+        if (dataToSave.estado_final_equipo) {
+          vehicleUpdates.status = dataToSave.estado_final_equipo;
         }
         
         // Actualizar kilometraje si se ingresó
@@ -1382,6 +1378,24 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
                     className={theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-white' : ''}
                     disabled={isReadOnly}
                   />
+                  
+                  <div className="flex items-center space-x-2 pt-2">
+                    <Checkbox
+                      id="requiere_seguimiento"
+                      checked={formData.requiere_seguimiento}
+                      onCheckedChange={(checked) => setFormData({ ...formData, requiere_seguimiento: checked })}
+                      disabled={isReadOnly}
+                    />
+                    <label
+                      htmlFor="requiere_seguimiento"
+                      className={cn(
+                        "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer",
+                        theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'
+                      )}
+                    >
+                      Requiere seguimiento
+                    </label>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-3 gap-4">

@@ -293,20 +293,24 @@ export default function Dashboard() {
 
   // Obtener vehículos que requieren seguimiento
   const getFollowUpVehicles = () => {
-    const followUpVehicles = accessibleVehicles.filter(v => v.status === 'requires_followup');
+    // Buscar reportes A/C con requiere_seguimiento marcado
+    const reportsRequiringFollowUp = accessibleACReports.filter(r => 
+      r.requiere_seguimiento && (r.status === 'completado' || r.status === 'aprobado')
+    );
     
-    return followUpVehicles.map(vehicle => {
-      // Buscar el último informe A/C de este vehículo con observaciones
-      const vehicleReports = accessibleACReports
-        .filter(r => r.vehicle_id === vehicle.id)
-        .filter(r => (r.status === 'completado' || r.status === 'aprobado') && r.observaciones_finales)
-        .sort((a, b) => new Date(b.inspection_date) - new Date(a.inspection_date));
-      
-      return {
-        vehicle,
-        report: vehicleReports[0] || null
-      };
+    // Agrupar por vehículo y obtener el más reciente
+    const vehicleReportMap = new Map();
+    reportsRequiringFollowUp.forEach(report => {
+      const existing = vehicleReportMap.get(report.vehicle_id);
+      if (!existing || new Date(report.inspection_date) > new Date(existing.inspection_date)) {
+        vehicleReportMap.set(report.vehicle_id, report);
+      }
     });
+    
+    return Array.from(vehicleReportMap.entries()).map(([vehicleId, report]) => {
+      const vehicle = accessibleVehicles.find(v => v.id === vehicleId);
+      return vehicle ? { vehicle, report } : null;
+    }).filter(Boolean);
   };
 
   const followUpVehicles = isLoading ? [] : getFollowUpVehicles();
