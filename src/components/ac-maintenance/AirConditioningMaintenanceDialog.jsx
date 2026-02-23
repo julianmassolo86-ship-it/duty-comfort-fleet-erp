@@ -438,10 +438,16 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
     const company = companies.find(c => c.id === selectedVehicle?.company_id);
     const location = locations.find(l => l.id === selectedVehicle?.location_id);
 
-    const addHeader = () => {
+    const addHeader = async () => {
       // Banda superior amarilla
       doc.setFillColor(234, 179, 8);
       doc.rect(0, 0, pageWidth, 12, 'F');
+      
+      // Logo DUTY COMFORT en la banda amarilla (izquierda)
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "bold");
+      doc.text("DUTY COMFORT", 15, 8);
       
       // Título en negro centrado
       doc.setTextColor(0, 0, 0);
@@ -452,11 +458,50 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
       y = 18;
       
       // Logo de la empresa (izquierda)
-      doc.setFillColor(240, 240, 240);
-      doc.roundedRect(margin, y, 30, 30, 2, 2, 'F');
-      doc.setFontSize(8);
-      doc.setTextColor(150, 150, 150);
-      doc.text("LOGO", margin + 15, y + 18, { align: "center" });
+      if (company?.logo_url) {
+        try {
+          // Intentar cargar el logo de la empresa
+          const img = await new Promise((resolve, reject) => {
+            const image = new Image();
+            image.crossOrigin = 'anonymous';
+            image.onload = () => resolve(image);
+            image.onerror = reject;
+            image.src = company.logo_url;
+          });
+          
+          // Calcular dimensiones manteniendo aspect ratio
+          const maxWidth = 30;
+          const maxHeight = 30;
+          let width = img.width;
+          let height = img.height;
+          
+          if (width > maxWidth || height > maxHeight) {
+            const ratio = Math.min(maxWidth / width, maxHeight / height);
+            width *= ratio;
+            height *= ratio;
+          }
+          
+          const x = margin + (30 - width) / 2;
+          const y_img = y + (30 - height) / 2;
+          
+          doc.addImage(img, 'PNG', x, y_img, width, height);
+        } catch (error) {
+          console.error('Error cargando logo:', error);
+          // Mostrar placeholder si falla
+          doc.setFillColor(240, 240, 240);
+          doc.roundedRect(margin, y, 30, 30, 2, 2, 'F');
+          doc.setFontSize(8);
+          doc.setTextColor(150, 150, 150);
+          doc.text("LOGO", margin + 15, y + 18, { align: "center" });
+        }
+      } else {
+        // Placeholder si no hay logo
+        doc.setFillColor(240, 240, 240);
+        doc.roundedRect(margin, y, 30, 30, 2, 2, 'F');
+        doc.setFontSize(8);
+        doc.setTextColor(150, 150, 150);
+        doc.text("LOGO", margin + 15, y + 18, { align: "center" });
+      }
       
       // Información del vehículo (izquierda, debajo del logo)
       const vehicleInfoX = margin;
