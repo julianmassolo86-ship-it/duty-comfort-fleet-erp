@@ -478,11 +478,15 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
         vY += 4;
         doc.text(`Patente: ${selectedVehicle.plate || 'N/A'}`, vehicleInfoX, vY);
         vY += 4;
-        doc.text(`${selectedVehicle.manufacturer} ${selectedVehicle.model}`, vehicleInfoX, vY);
+        doc.text(`${selectedVehicle.manufacturer || 'N/A'} ${selectedVehicle.model || ''}`, vehicleInfoX, vY);
         vY += 4;
         if (selectedVehicle.category_name || selectedVehicle.type_name) {
           const catType = [selectedVehicle.category_name, selectedVehicle.type_name].filter(Boolean).join(' - ');
           doc.text(catType, vehicleInfoX, vY);
+          vY += 4;
+        }
+        if (selectedVehicle.technical_description) {
+          doc.text(selectedVehicle.technical_description, vehicleInfoX, vY);
         }
       }
       
