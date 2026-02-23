@@ -428,22 +428,109 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
     const margin = 15;
     let y = 20;
 
+    const company = companies.find(c => c.id === selectedVehicle?.company_id);
+    const location = locations.find(l => l.id === selectedVehicle?.location_id);
+
     const addHeader = () => {
       // Banda superior amarilla
       doc.setFillColor(234, 179, 8);
-      doc.rect(0, 0, pageWidth, 25, 'F');
+      doc.rect(0, 0, pageWidth, 12, 'F');
       
-      // Título en blanco
+      // Título en negro centrado
       doc.setTextColor(0, 0, 0);
-      doc.setFontSize(20);
+      doc.setFontSize(14);
       doc.setFont("helvetica", "bold");
-      doc.text("INFORME DE INSPECCIÓN A/C", pageWidth / 2, 16, { align: "center" });
+      doc.text("INFORME DE INSPECCIÓN A/C", pageWidth / 2, 8, { align: "center" });
+      
+      y = 18;
+      
+      // Logo de la empresa (izquierda)
+      if (company?.logo_url) {
+        try {
+          // Placeholder para logo - en producción se cargaría la imagen
+          doc.setFillColor(240, 240, 240);
+          doc.roundedRect(margin, y, 30, 30, 2, 2, 'F');
+          doc.setFontSize(8);
+          doc.setTextColor(150, 150, 150);
+          doc.text("LOGO", margin + 15, y + 18, { align: "center" });
+        } catch (e) {
+          // Si falla cargar logo, continuar
+        }
+      }
+      
+      // Información del vehículo (izquierda, debajo del logo)
+      const vehicleInfoX = margin;
+      const vehicleInfoY = y + 35;
+      
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(0, 0, 0);
+      doc.text("DATOS DEL VEHÍCULO", vehicleInfoX, vehicleInfoY);
+      
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8);
+      let vY = vehicleInfoY + 5;
+      
+      if (selectedVehicle) {
+        doc.text(`Interno: ${selectedVehicle.internal_number || 'N/A'}`, vehicleInfoX, vY);
+        vY += 4;
+        doc.text(`Patente: ${selectedVehicle.plate || 'N/A'}`, vehicleInfoX, vY);
+        vY += 4;
+        doc.text(`${selectedVehicle.manufacturer} ${selectedVehicle.model}`, vehicleInfoX, vY);
+        vY += 4;
+        if (selectedVehicle.category_name || selectedVehicle.type_name) {
+          const catType = [selectedVehicle.category_name, selectedVehicle.type_name].filter(Boolean).join(' - ');
+          doc.text(catType, vehicleInfoX, vY);
+        }
+      }
+      
+      // Información derecha (Empresa, Ubicación, Fecha, Temperatura)
+      const rightX = pageWidth - margin;
+      let rightY = y;
+      
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      if (company?.name) {
+        doc.text(company.name, rightX, rightY, { align: "right" });
+        rightY += 5;
+      }
+      
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8);
+      
+      if (location?.name) {
+        doc.setTextColor(100, 100, 100);
+        doc.text(`Ubicación: ${location.name}`, rightX, rightY, { align: "right" });
+        rightY += 4;
+      }
+      
+      doc.setTextColor(0, 0, 0);
+      const dateStr = formData.inspection_date.split('T')[0].split('-').reverse().join('/');
+      doc.text(`Fecha: ${dateStr}`, rightX, rightY, { align: "right" });
+      rightY += 4;
+      
+      if (formData.ambient_temperature) {
+        doc.text(`Temp. Ambiente: ${formData.ambient_temperature}°C`, rightX, rightY, { align: "right" });
+        rightY += 4;
+      }
+      
+      doc.text(`Tipo: ${formData.tipo_mantenimiento.toUpperCase()}`, rightX, rightY, { align: "right" });
+      rightY += 4;
+      
+      if (formData.kilometraje || formData.horas) {
+        const reading = [
+          formData.kilometraje ? `${formData.kilometraje} km` : '',
+          formData.horas ? `${formData.horas} hs` : ''
+        ].filter(Boolean).join(' / ');
+        doc.text(`Lectura: ${reading}`, rightX, rightY, { align: "right" });
+      }
       
       // Línea divisoria
       doc.setDrawColor(234, 179, 8);
       doc.setLineWidth(0.5);
-      doc.line(margin, 27, pageWidth - margin, 27);
+      doc.line(margin, vehicleInfoY + 22, pageWidth - margin, vehicleInfoY + 22);
       
+      y = vehicleInfoY + 28;
       doc.setTextColor(0, 0, 0);
     };
 
@@ -540,53 +627,6 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
 
     // Página 1: Encabezado
     addHeader();
-    y = 35;
-
-    // Información del Activo
-    const boxHeight = selectedVehicle?.category_name || selectedVehicle?.type_name ? 55 : 45;
-    doc.setFillColor(254, 243, 199);
-    doc.roundedRect(margin, y, pageWidth - 2 * margin, boxHeight, 2, 2, 'F');
-    doc.setFontSize(11);
-    doc.setFont("helvetica", "bold");
-    doc.text("DATOS DEL ACTIVO", margin + 3, y + 6);
-    
-    doc.setFontSize(9);
-    doc.setFont("helvetica", "normal");
-    y += 12;
-    if (selectedVehicle) {
-      doc.text(`Vehículo: ${selectedVehicle.internal_number} - ${selectedVehicle.plate}`, margin + 3, y);
-      y += 5;
-      doc.text(`Marca/Modelo: ${selectedVehicle.manufacturer} ${selectedVehicle.model}`, margin + 3, y);
-      y += 5;
-      if (selectedVehicle.category_name || selectedVehicle.type_name) {
-        const catType = [selectedVehicle.category_name, selectedVehicle.type_name].filter(Boolean).join(' - ');
-        doc.text(`Categoría/Tipo: ${catType}`, margin + 3, y);
-        y += 5;
-      }
-      if (selectedVehicle.company_name) {
-        doc.text(`Empresa: ${selectedVehicle.company_name}`, margin + 3, y);
-        y += 5;
-      }
-      if (selectedVehicle.location_name) {
-        doc.text(`Ubicación: ${selectedVehicle.location_name}`, margin + 3, y);
-        y += 5;
-      }
-    }
-    doc.text(`Fecha de Inspección: ${formData.inspection_date.split('T')[0].split('-').reverse().join('/')}`, margin + 3, y);
-    y += 5;
-    doc.text(`Temperatura Ambiente: ${formData.ambient_temperature}°C`, margin + 3, y);
-    doc.text(`Tipo: ${formData.tipo_mantenimiento.toUpperCase()}`, pageWidth - margin - 3, y, { align: "right" });
-    y += 5;
-    if (formData.kilometraje || formData.horas) {
-      const kmsHrs = [
-        formData.kilometraje ? `${formData.kilometraje} km` : '',
-        formData.horas ? `${formData.horas} hs` : ''
-      ].filter(Boolean).join(' / ');
-      doc.text(`Lectura: ${kmsHrs}`, margin + 3, y);
-      y += 5;
-    }
-    
-    y += 10;
 
     // Inspecciones Iniciales
     addSection("1. INSPECCIONES INICIALES Y MEDICIONES");
@@ -724,7 +764,15 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
       addFooter(i);
     }
 
-    doc.save(`Inspeccion_AC_${selectedVehicle?.plate || 'sin_patente'}_${formData.inspection_date.split('T')[0]}.pdf`);
+    // Generar nombre del archivo
+    const vehicleIdentifier = selectedVehicle 
+      ? `${selectedVehicle.internal_number || ''}_${selectedVehicle.plate || ''}`.replace(/\s+/g, '_')
+      : 'vehiculo';
+    const companyName = company?.name ? `_${company.name.replace(/\s+/g, '_')}` : '';
+    const date = formData.inspection_date.split('T')[0];
+    const fileName = `Inspeccion_AC_${vehicleIdentifier}${companyName}_${date}.pdf`;
+    
+    doc.save(fileName);
   };
 
   return (
