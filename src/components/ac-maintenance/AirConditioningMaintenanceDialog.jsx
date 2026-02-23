@@ -176,29 +176,29 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
   }, []);
 
   useEffect(() => {
-    if (open && user) {
-      // Cargar datos secuencialmente para evitar rate limit
+    if (open && user && !maintenance) {
+      // Solo cargar datos cuando es un nuevo informe (no en modo visualización)
       const loadData = async () => {
         await loadCompanies();
         await loadLocations();
-        if (!maintenance) {
-          await loadVehicles();
-        }
+        await loadVehicles();
         await loadVehicleStatuses();
       };
       loadData();
       
-      if (maintenance) {
-        setFormData({ ...initialState, ...maintenance });
-        setGeneratedReportNumber(maintenance.report_number);
-      } else {
-        setFormData(initialState);
-      }
+      setFormData(initialState);
       setError("");
       setSearchTerm("");
       setCompanyFilter("all");
       setLocationFilter("all");
-      setShowVehicleSelector(!maintenance);
+      setShowVehicleSelector(true);
+    } else if (open && maintenance) {
+      // Solo cargar lo mínimo necesario para visualizar
+      setFormData({ ...initialState, ...maintenance });
+      setGeneratedReportNumber(maintenance.report_number);
+      loadCompanies();
+      loadLocations();
+      loadVehicleStatuses();
     }
   }, [open, maintenance, user]);
 
