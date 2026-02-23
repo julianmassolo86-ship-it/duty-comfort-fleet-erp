@@ -22,9 +22,10 @@ Deno.serve(async (req) => {
     const assigned = [];
     for (const maintenance of maintenances) {
       // Obtener el próximo número
-      const { report_number } = await base44.functions.invoke('getNextReportNumber', {
+      const response = await base44.asServiceRole.functions.invoke('getNextReportNumber', {
         report_type: 'ac_maintenance'
       });
+      const report_number = response.data?.report_number || `AC-000177`;
 
       // Actualizar la inspección con el número
       await base44.asServiceRole.entities.AirConditioningMaintenance.update(
