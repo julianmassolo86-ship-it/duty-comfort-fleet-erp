@@ -270,7 +270,8 @@ export default function Vehicles() {
       v.plate?.toLowerCase().includes(searchTerm) ||
       v.internal_number?.toLowerCase().includes(searchTerm) ||
       v.manufacturer?.toLowerCase().includes(searchTerm) ||
-      v.model?.toLowerCase().includes(searchTerm);
+      v.model?.toLowerCase().includes(searchTerm) ||
+      v.type_name?.toLowerCase().includes(searchTerm);
     const matchesStatus = statusFilter === "all" || v.status === statusFilter;
     const matchesLocation = locationFilter === "all" || v.location_id === locationFilter;
     const matchesCompany = companyFilter === "all" || v.company_id === companyFilter;
@@ -358,7 +359,7 @@ export default function Vehicles() {
           <div className="relative flex-1 min-w-[200px]">
             <Search className={cn("absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4", theme === 'dark' ? 'text-slate-400' : 'text-gray-400')} />
             <Input
-              placeholder="Buscar por interno, matrícula, marca o modelo..."
+              placeholder="Buscar por interno, matrícula, marca, modelo o tipo..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className={cn("pl-10", theme === 'dark' ? 'bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500' : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400')}
