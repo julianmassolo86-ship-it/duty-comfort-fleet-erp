@@ -439,54 +439,63 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
     const location = locations.find(l => l.id === selectedVehicle?.location_id);
 
     const addHeader = () => {
-      // Logo Duty Comfort centrado arriba
-      doc.setFillColor(255, 255, 255);
-      doc.setTextColor(0, 0, 0);
-      doc.setFontSize(18);
+      // Banda negra superior con logo Duty Comfort
+      doc.setFillColor(0, 0, 0);
+      doc.rect(0, 0, pageWidth, 15, 'F');
+      
+      // Logo Duty Comfort (texto estilizado en blanco)
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(16);
       doc.setFont("helvetica", "bold");
       doc.text("DUTY COMFORT", pageWidth / 2, 10, { align: "center" });
       
-      // Banda amarilla
+      // Línea amarilla debajo
       doc.setFillColor(234, 179, 8);
-      doc.rect(0, 15, pageWidth, 10, 'F');
+      doc.rect(0, 15, pageWidth, 2, 'F');
       
-      // Título en negro centrado
-      doc.setTextColor(0, 0, 0);
-      doc.setFontSize(13);
-      doc.setFont("helvetica", "bold");
-      doc.text("INFORME DE INSPECCIÓN A/C", pageWidth / 2, 21, { align: "center" });
+      y = 22;
       
-      y = 30;
-      
-      // Logo de la empresa (izquierda)
-      doc.setFillColor(240, 240, 240);
-      doc.roundedRect(margin, y, 30, 30, 2, 2, 'F');
-      doc.setFontSize(8);
-      doc.setTextColor(150, 150, 150);
-      doc.text("LOGO", margin + 15, y + 12, { align: "center" });
-      doc.setFontSize(7);
-      doc.text("EMPRESA", margin + 15, y + 18, { align: "center" });
+      // Logo de la empresa (izquierda) - mostrar logo real si existe
+      if (company?.logo_url) {
+        // Por ahora, placeholder para logo - en una implementación real cargaría la imagen
+        doc.setFillColor(255, 255, 255);
+        doc.roundedRect(margin, y, 35, 35, 2, 2, 'F');
+        doc.setDrawColor(200, 200, 200);
+        doc.setLineWidth(0.5);
+        doc.roundedRect(margin, y, 35, 35, 2, 2, 'S');
+        doc.setFontSize(7);
+        doc.setTextColor(150, 150, 150);
+        doc.text("Logo Empresa", margin + 17.5, y + 20, { align: "center" });
+      } else {
+        doc.setFillColor(240, 240, 240);
+        doc.roundedRect(margin, y, 35, 35, 2, 2, 'F');
+        doc.setFontSize(8);
+        doc.setTextColor(150, 150, 150);
+        doc.text("LOGO", margin + 17.5, y + 15, { align: "center" });
+        doc.setFontSize(7);
+        doc.text("EMPRESA", margin + 17.5, y + 22, { align: "center" });
+      }
       
       // Información del vehículo (izquierda, debajo del logo)
       const vehicleInfoX = margin;
-      const vehicleInfoY = y + 35;
+      const vehicleInfoY = y + 40;
       
-      doc.setFontSize(9);
+      doc.setFontSize(10);
       doc.setFont("helvetica", "bold");
       doc.setTextColor(0, 0, 0);
       doc.text("DATOS DEL VEHÍCULO", vehicleInfoX, vehicleInfoY);
       
       doc.setFont("helvetica", "normal");
-      doc.setFontSize(8);
-      let vY = vehicleInfoY + 5;
+      doc.setFontSize(9);
+      let vY = vehicleInfoY + 6;
       
       if (selectedVehicle) {
         doc.text(`Interno: ${selectedVehicle.internal_number || 'N/A'}`, vehicleInfoX, vY);
-        vY += 4;
+        vY += 5;
         doc.text(`Patente: ${selectedVehicle.plate || 'N/A'}`, vehicleInfoX, vY);
-        vY += 4;
+        vY += 5;
         doc.text(`${selectedVehicle.manufacturer} ${selectedVehicle.model}`, vehicleInfoX, vY);
-        vY += 4;
+        vY += 5;
         if (selectedVehicle.category_name || selectedVehicle.type_name) {
           const catType = [selectedVehicle.category_name, selectedVehicle.type_name].filter(Boolean).join(' - ');
           doc.text(catType, vehicleInfoX, vY);
@@ -495,36 +504,37 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
       
       // Información derecha (Empresa, Ubicación, Fecha, Temperatura)
       const rightX = pageWidth - margin;
-      let rightY = y;
+      let rightY = y + 5;
       
       doc.setFont("helvetica", "bold");
-      doc.setFontSize(10);
+      doc.setFontSize(12);
       if (company?.name) {
+        doc.setTextColor(0, 0, 0);
         doc.text(company.name, rightX, rightY, { align: "right" });
-        rightY += 5;
+        rightY += 6;
       }
       
       doc.setFont("helvetica", "normal");
-      doc.setFontSize(8);
+      doc.setFontSize(9);
       
       if (location?.name) {
-        doc.setTextColor(100, 100, 100);
+        doc.setTextColor(80, 80, 80);
         doc.text(`Ubicación: ${location.name}`, rightX, rightY, { align: "right" });
-        rightY += 4;
+        rightY += 5;
       }
       
       doc.setTextColor(0, 0, 0);
       const dateStr = formData.inspection_date.split('T')[0].split('-').reverse().join('/');
       doc.text(`Fecha: ${dateStr}`, rightX, rightY, { align: "right" });
-      rightY += 4;
+      rightY += 5;
       
       if (formData.ambient_temperature) {
         doc.text(`Temp. Ambiente: ${formData.ambient_temperature}°C`, rightX, rightY, { align: "right" });
-        rightY += 4;
+        rightY += 5;
       }
       
       doc.text(`Tipo: ${formData.tipo_mantenimiento.toUpperCase()}`, rightX, rightY, { align: "right" });
-      rightY += 4;
+      rightY += 5;
       
       if (formData.kilometraje || formData.horas) {
         const reading = [
@@ -534,12 +544,12 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
         doc.text(`Lectura: ${reading}`, rightX, rightY, { align: "right" });
       }
       
-      // Línea divisoria
+      // Línea divisoria amarilla
       doc.setDrawColor(234, 179, 8);
-      doc.setLineWidth(0.5);
-      doc.line(margin, vehicleInfoY + 22, pageWidth - margin, vehicleInfoY + 22);
+      doc.setLineWidth(1);
+      doc.line(margin, vehicleInfoY + 28, pageWidth - margin, vehicleInfoY + 28);
       
-      y = vehicleInfoY + 28;
+      y = vehicleInfoY + 34;
       doc.setTextColor(0, 0, 0);
     };
 
