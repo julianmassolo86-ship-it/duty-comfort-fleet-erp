@@ -160,7 +160,7 @@ export default function ACMaintenanceHistory({ vehicleId }) {
               ) : (
                 <>
                   <ChevronDown className="w-4 h-4 mr-2" />
-                  Ver todos ({reports.length})
+                  Ver todos
                 </>
               )}
             </Button>
