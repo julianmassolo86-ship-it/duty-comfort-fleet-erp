@@ -165,6 +165,9 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
   const [vehicleStatuses, setVehicleStatuses] = useState([]);
   const [uploadingImage, setUploadingImage] = useState({ 1: false, 2: false, 3: false });
   const [generatedReportNumber, setGeneratedReportNumber] = useState(null);
+  
+  // Modo solo lectura si el informe está completado o aprobado
+  const isReadOnly = maintenance && (formData.status === 'completado' || formData.status === 'aprobado');
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -944,6 +947,7 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
                   onChange={(e) => setFormData({ ...formData, inspection_date: e.target.value })}
                   className={theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-white' : ''}
                   required
+                  disabled={isReadOnly}
                 />
               </div>
 
@@ -956,6 +960,7 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
                   onChange={(e) => setFormData({ ...formData, ambient_temperature: e.target.value })}
                   placeholder="Ej: 25"
                   className={theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-white' : ''}
+                  disabled={isReadOnly}
                 />
               </div>
 
@@ -964,6 +969,7 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
                 <Select
                   value={formData.tipo_mantenimiento}
                   onValueChange={(value) => setFormData({ ...formData, tipo_mantenimiento: value })}
+                  disabled={isReadOnly}
                 >
                   <SelectTrigger className={theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-white' : ''}>
                     <SelectValue />
@@ -987,6 +993,7 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
                   onChange={(e) => setFormData({ ...formData, kilometraje: e.target.value })}
                   placeholder="Km"
                   className={theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-white' : ''}
+                  disabled={isReadOnly}
                 />
               </div>
 
@@ -999,6 +1006,7 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
                   onChange={(e) => setFormData({ ...formData, horas: e.target.value })}
                   placeholder="Hs"
                   className={theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-white' : ''}
+                  disabled={isReadOnly}
                 />
               </div>
             </div>
@@ -1041,6 +1049,7 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
                         <Select
                           value={formData[`inspeccion_${insp.id}_estado`]}
                           onValueChange={(value) => setFormData({ ...formData, [`inspeccion_${insp.id}_estado`]: value })}
+                          disabled={isReadOnly}
                         >
                           <SelectTrigger className={theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-white' : ''}>
                             <SelectValue />
@@ -1059,6 +1068,7 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
                           placeholder="Observaciones..."
                           rows={1}
                           className={theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-white' : ''}
+                          disabled={isReadOnly}
                         />
                       </div>
 
@@ -1071,6 +1081,7 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
                             onChange={(e) => setFormData({ ...formData, inspeccion_8_presion_estatica: e.target.value })}
                             placeholder="Presión estática (PSI)"
                             className={theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-white' : ''}
+                            disabled={isReadOnly}
                           />
                         </div>
                       )}
@@ -1084,6 +1095,7 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
                             onChange={(e) => setFormData({ ...formData, inspeccion_10_lp: e.target.value })}
                             placeholder="Presión LP (PSI)"
                             className={theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-white' : ''}
+                            disabled={isReadOnly}
                           />
                           <Input
                             type="number"
@@ -1092,6 +1104,7 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
                             onChange={(e) => setFormData({ ...formData, inspeccion_10_hp: e.target.value })}
                             placeholder="Presión HP (PSI)"
                             className={theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-white' : ''}
+                            disabled={isReadOnly}
                           />
                         </div>
                       )}
@@ -1105,6 +1118,7 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
                             onChange={(e) => setFormData({ ...formData, [`inspeccion_${insp.id}_temperatura`]: e.target.value })}
                             placeholder="Temperatura (°C)"
                             className={theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-white' : ''}
+                            disabled={isReadOnly}
                           />
                         </div>
                       )}
@@ -1131,6 +1145,7 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
                         <Select
                           value={formData[`componente_${comp.key}_estado`]}
                           onValueChange={(value) => setFormData({ ...formData, [`componente_${comp.key}_estado`]: value })}
+                          disabled={isReadOnly}
                         >
                           <SelectTrigger className={theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-white' : ''}>
                             <SelectValue />
@@ -1149,6 +1164,7 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
                           placeholder="Observaciones..."
                           rows={1}
                           className={theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-white' : ''}
+                          disabled={isReadOnly}
                         />
                       </div>
                     </div>
@@ -1170,6 +1186,7 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
                   placeholder="Describa las acciones realizadas durante el mantenimiento (reparaciones, ajustes, reemplazos, etc.)"
                   rows={4}
                   className={theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-white' : ''}
+                  disabled={isReadOnly}
                 />
               </div>
 
@@ -1187,6 +1204,7 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
                     onChange={(e) => setFormData({ ...formData, medicion_final_lp: e.target.value })}
                     placeholder="LP (PSI)"
                     className={theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-white' : ''}
+                    disabled={isReadOnly}
                   />
                 </div>
 
@@ -1199,6 +1217,7 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
                     onChange={(e) => setFormData({ ...formData, medicion_final_hp: e.target.value })}
                     placeholder="HP (PSI)"
                     className={theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-white' : ''}
+                    disabled={isReadOnly}
                   />
                 </div>
 
@@ -1211,6 +1230,7 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
                     onChange={(e) => setFormData({ ...formData, medicion_final_temp_frio_corte: e.target.value })}
                     placeholder="T° Frío Corte"
                     className={theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-white' : ''}
+                    disabled={isReadOnly}
                   />
                 </div>
 
@@ -1223,6 +1243,7 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
                     onChange={(e) => setFormData({ ...formData, medicion_final_temp_frio_acople: e.target.value })}
                     placeholder="T° Frío Acople"
                     className={theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-white' : ''}
+                    disabled={isReadOnly}
                   />
                 </div>
 
@@ -1235,6 +1256,7 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
                     onChange={(e) => setFormData({ ...formData, medicion_final_temp_calefaccion: e.target.value })}
                     placeholder="T° Calefacción"
                     className={theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-white' : ''}
+                    disabled={isReadOnly}
                   />
                 </div>
               </div>
@@ -1284,7 +1306,7 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
                           accept="image/*"
                           className="hidden"
                           onChange={(e) => handleImageUpload(e.target.files[0], num)}
-                          disabled={uploadingImage[num]}
+                          disabled={uploadingImage[num] || isReadOnly}
                         />
                         {uploadingImage[num] ? (
                           <>
@@ -1319,6 +1341,7 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
                   <Select
                     value={formData.estado_final_equipo}
                     onValueChange={(value) => setFormData({ ...formData, estado_final_equipo: value })}
+                    disabled={isReadOnly}
                   >
                     <SelectTrigger className={theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-white' : ''}>
                       <SelectValue placeholder="Seleccionar estado..." />
@@ -1351,6 +1374,7 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
                     placeholder="Observaciones finales y recomendaciones..."
                     rows={4}
                     className={theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-white' : ''}
+                    disabled={isReadOnly}
                   />
                 </div>
 
@@ -1362,6 +1386,7 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
                       onChange={(e) => setFormData({ ...formData, mecanico_responsable_name: e.target.value })}
                       placeholder="Nombre"
                       className={theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-white' : ''}
+                      disabled={isReadOnly}
                     />
                   </div>
 
@@ -1372,6 +1397,7 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
                       onChange={(e) => setFormData({ ...formData, planificador_mantenimiento_name: e.target.value })}
                       placeholder="Nombre"
                       className={theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-white' : ''}
+                      disabled={isReadOnly}
                     />
                   </div>
 
@@ -1382,6 +1408,7 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
                       onChange={(e) => setFormData({ ...formData, supervisor_mantenimiento_name: e.target.value })}
                       placeholder="Nombre"
                       className={theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-white' : ''}
+                      disabled={isReadOnly}
                     />
                   </div>
                 </div>
@@ -1391,6 +1418,7 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
                   <Select
                     value={formData.status}
                     onValueChange={(value) => setFormData({ ...formData, status: value })}
+                    disabled={isReadOnly}
                   >
                     <SelectTrigger className={theme === 'dark' ? 'bg-zinc-900 border-zinc-700 text-white' : ''}>
                       <SelectValue />
@@ -1408,22 +1436,24 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
 
           <div className="flex justify-between gap-3 pt-4 border-t" style={{ borderColor: theme === 'dark' ? 'rgb(63, 63, 70)' : 'rgb(229, 231, 235)' }}>
             <div className="flex gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => handleSave(false)}
-                disabled={loading}
-                className={theme === 'dark' ? 'border-zinc-700 text-zinc-300 hover:bg-zinc-800' : ''}
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Guardando...
-                  </>
-                ) : (
-                  "Guardar Progreso"
-                )}
-              </Button>
+              {!isReadOnly && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => handleSave(false)}
+                  disabled={loading}
+                  className={theme === 'dark' ? 'border-zinc-700 text-zinc-300 hover:bg-zinc-800' : ''}
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Guardando...
+                    </>
+                  ) : (
+                    "Guardar Progreso"
+                  )}
+                </Button>
+              )}
               {maintenance && (
                 <Button
                   type="button"
@@ -1445,20 +1475,22 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
                 disabled={loading}
                 className={theme === 'dark' ? 'border-zinc-700 text-zinc-300 hover:bg-zinc-800' : ''}
               >
-                Cancelar
+                {isReadOnly ? "Cerrar" : "Cancelar"}
               </Button>
-              <Button
-                type="submit"
-                disabled={loading}
-                className="bg-yellow-500 hover:bg-yellow-600 text-black"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Guardando...
-                  </>
-                ) : maintenance ? "Actualizar y Cerrar" : "Guardar y Cerrar"}
-              </Button>
+              {!isReadOnly && (
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="bg-yellow-500 hover:bg-yellow-600 text-black"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Guardando...
+                    </>
+                  ) : maintenance ? "Actualizar y Cerrar" : "Guardar y Cerrar"}
+                </Button>
+              )}
             </div>
           </div>
         </form>

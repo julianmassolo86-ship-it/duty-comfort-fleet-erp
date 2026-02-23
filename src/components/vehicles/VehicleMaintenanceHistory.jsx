@@ -41,23 +41,22 @@ const typeLabels = {
 export default function VehicleMaintenanceHistory({ vehicleId }) {
   const navigate = useNavigate();
 
-  // Fetch maintenance records
-  const { data: maintenanceRecords = [], isLoading: loadingMaintenance } = useQuery({
-    queryKey: ['maintenance', vehicleId],
-    queryFn: () => base44.entities.Maintenance.filter({ vehicle_id: vehicleId }),
+  // Fetch both maintenance records and AC reports in parallel
+  const { data: historyData, isLoading } = useQuery({
+    queryKey: ['maintenanceHistory', vehicleId],
+    queryFn: async () => {
+      const [maintenanceRecords, acReports] = await Promise.all([
+        base44.entities.Maintenance.filter({ vehicle_id: vehicleId }),
+        base44.entities.AirConditioningMaintenance.filter({ vehicle_id: vehicleId })
+      ]);
+      return { maintenanceRecords, acReports };
+    },
     enabled: !!vehicleId,
-    staleTime: 30000, // Cache por 30 segundos
+    staleTime: 60000, // Cache por 60 segundos
   });
 
-  // Fetch AC maintenance reports
-  const { data: acReports = [], isLoading: loadingAC } = useQuery({
-    queryKey: ['acMaintenance', vehicleId],
-    queryFn: () => base44.entities.AirConditioningMaintenance.filter({ vehicle_id: vehicleId }),
-    enabled: !!vehicleId,
-    staleTime: 30000, // Cache por 30 segundos
-  });
-
-  const isLoading = loadingMaintenance || loadingAC;
+  const maintenanceRecords = historyData?.maintenanceRecords || [];
+  const acReports = historyData?.acReports || [];
 
   // Combine and sort all records by date
   const allRecords = React.useMemo(() => {
