@@ -455,13 +455,28 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
       y = 30;
       
       // Logo de la empresa (izquierda)
-      doc.setFillColor(240, 240, 240);
-      doc.roundedRect(margin, y, 30, 30, 2, 2, 'F');
-      doc.setFontSize(8);
-      doc.setTextColor(150, 150, 150);
-      doc.text("LOGO", margin + 15, y + 12, { align: "center" });
-      doc.setFontSize(7);
-      doc.text("EMPRESA", margin + 15, y + 18, { align: "center" });
+      if (company?.logo_url) {
+        try {
+          doc.addImage(company.logo_url, 'PNG', margin, y, 30, 30);
+        } catch (e) {
+          // Si falla, mostrar el placeholder
+          doc.setFillColor(240, 240, 240);
+          doc.roundedRect(margin, y, 30, 30, 2, 2, 'F');
+          doc.setFontSize(8);
+          doc.setTextColor(150, 150, 150);
+          doc.text("LOGO", margin + 15, y + 12, { align: "center" });
+          doc.setFontSize(7);
+          doc.text("EMPRESA", margin + 15, y + 18, { align: "center" });
+        }
+      } else {
+        doc.setFillColor(240, 240, 240);
+        doc.roundedRect(margin, y, 30, 30, 2, 2, 'F');
+        doc.setFontSize(8);
+        doc.setTextColor(150, 150, 150);
+        doc.text("LOGO", margin + 15, y + 12, { align: "center" });
+        doc.setFontSize(7);
+        doc.text("EMPRESA", margin + 15, y + 18, { align: "center" });
+      }
       
       // Información del vehículo (izquierda, debajo del logo)
       const vehicleInfoX = margin;
