@@ -103,7 +103,7 @@ const initialState = {
   planificador_mantenimiento_name: "",
   supervisor_mantenimiento_name: "",
   
-  status: "en_proceso"
+  status: "pendiente"
 };
 
 const inspecciones = [
@@ -169,8 +169,8 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
   const [generatedReportNumber, setGeneratedReportNumber] = useState(null);
   const [originalStatus, setOriginalStatus] = useState(null);
   
-  // Modo solo lectura si el informe YA ESTABA completado o aprobado (no si lo acabas de cambiar)
-  const isReadOnly = maintenance && (originalStatus === 'completado' || originalStatus === 'aprobado');
+  // Modo solo lectura si el informe está aprobado
+  const isReadOnly = maintenance && originalStatus === 'aprobado';
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -1512,9 +1512,18 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className={theme === 'dark' ? 'bg-zinc-800 border-zinc-700' : ''}>
-                      <SelectItem value="en_proceso" className={theme === 'dark' ? 'text-white focus:bg-zinc-700' : ''}>En Proceso</SelectItem>
-                      <SelectItem value="completado" className={theme === 'dark' ? 'text-white focus:bg-zinc-700' : ''}>Completado</SelectItem>
-                      <SelectItem value="aprobado" className={theme === 'dark' ? 'text-white focus:bg-zinc-700' : ''}>Aprobado</SelectItem>
+                      {formData.tipo_mantenimiento === 'inspeccion' ? (
+                        <>
+                          <SelectItem value="pendiente" className={theme === 'dark' ? 'text-white focus:bg-zinc-700' : ''}>Pendiente</SelectItem>
+                          <SelectItem value="completado" className={theme === 'dark' ? 'text-white focus:bg-zinc-700' : ''}>Completado</SelectItem>
+                          <SelectItem value="aprobado" className={theme === 'dark' ? 'text-white focus:bg-zinc-700' : ''}>Aprobado</SelectItem>
+                        </>
+                      ) : (
+                        <>
+                          <SelectItem value="en_proceso" className={theme === 'dark' ? 'text-white focus:bg-zinc-700' : ''}>En Proceso</SelectItem>
+                          <SelectItem value="completado" className={theme === 'dark' ? 'text-white focus:bg-zinc-700' : ''}>Completado</SelectItem>
+                        </>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
