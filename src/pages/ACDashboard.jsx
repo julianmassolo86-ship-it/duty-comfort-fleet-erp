@@ -18,9 +18,7 @@ import {
   Calendar,
   Thermometer,
   Activity,
-  Filter,
-  Hash,
-  Loader2
+  Filter
 } from "lucide-react";
 import { format } from "date-fns";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
@@ -34,7 +32,6 @@ export default function ACDashboard() {
   const [showDialog, setShowDialog] = useState(false);
   const [companyFilter, setCompanyFilter] = useState("all");
   const [locationFilter, setLocationFilter] = useState("all");
-  const [assigningNumbers, setAssigningNumbers] = useState(false);
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -74,19 +71,6 @@ export default function ACDashboard() {
 
   const handleRefresh = async () => {
     await refetchReports();
-  };
-
-  const handleAssignNumbers = async () => {
-    setAssigningNumbers(true);
-    try {
-      const response = await base44.functions.invoke('assignReportNumbersToExisting', {});
-      alert(`Números asignados exitosamente:\n\nA/C: ${response.data.results.ac_maintenance.updated} actualizados\nNovedades: ${response.data.results.novedad.updated} actualizados\nMantenimiento: ${response.data.results.maintenance.updated} actualizados`);
-      await refetchReports();
-    } catch (error) {
-      alert(`Error al asignar números: ${error.message}`);
-    } finally {
-      setAssigningNumbers(false);
-    }
   };
 
   // Filtrar reportes
@@ -209,27 +193,6 @@ export default function ACDashboard() {
           description="Vista general del estado de los sistemas de aire acondicionado de la flota"
           actions={
             <div className="flex gap-2">
-              {user?.role === 'admin' && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleAssignNumbers}
-                  disabled={assigningNumbers}
-                  className={theme === 'dark' ? 'border-zinc-700 text-zinc-300 hover:bg-zinc-800' : ''}
-                >
-                  {assigningNumbers ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Asignando...
-                    </>
-                  ) : (
-                    <>
-                      <Hash className="w-4 h-4 mr-2" />
-                      Numerar Informes
-                    </>
-                  )}
-                </Button>
-              )}
               {!user?.company_id && (
                 <>
                   <Select value={companyFilter} onValueChange={setCompanyFilter}>
