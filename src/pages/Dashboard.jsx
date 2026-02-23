@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { 
   Car, Users, Wrench, FileText, AlertTriangle, 
-  TrendingUp, Calendar, ArrowRight, Building2, MapPin, BarChart3, Wind, FileWarning, Plus
+  TrendingUp, Calendar, ArrowRight, Building2, MapPin, BarChart3, Wind, FileWarning, Plus, Eye
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from "recharts";
 import { differenceInDays } from "date-fns";
@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import StatCard from "../components/dashboard/StatCard";
 import AlertCard from "../components/dashboard/AlertCard";
 import MaintenanceAlertCard from "../components/dashboard/MaintenanceAlertCard";
+import FollowUpAlertCard from "../components/dashboard/FollowUpAlertCard";
 import PageHeader from "../components/common/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -96,6 +97,11 @@ export default function Dashboard() {
     queryFn: () => base44.entities.MaintenanceTaskDefinition.list(),
   });
 
+  const { data: acReports = [] } = useQuery({
+    queryKey: ['airConditioningReports'],
+    queryFn: () => base44.entities.AirConditioningMaintenance.list('-inspection_date'),
+  });
+
   const isLoading = loadingVehicles || loadingDrivers || loadingMaintenance || loadingDocuments || loadingNovedades;
 
   // Enriquecer vehículos con nombre del tipo y categoría
@@ -133,6 +139,10 @@ export default function Dashboard() {
   const accessibleNovedades = isSuperAdmin 
     ? novedades 
     : novedades.filter(n => n.company_id === currentUser?.company_id);
+
+  const accessibleACReports = isSuperAdmin 
+    ? acReports 
+    : acReports.filter(r => r.company_id === currentUser?.company_id);
 
   // Calculate maintenance alerts
   const getMaintenanceAlerts = () => {
@@ -280,6 +290,26 @@ export default function Dashboard() {
 
   const alerts = isLoading ? [] : getAlerts();
   const maintenanceAlerts = isLoading ? [] : getMaintenanceAlerts();
+
+  // Obtener vehículos que requieren seguimiento
+  const getFollowUpVehicles = () => {
+    const followUpVehicles = accessibleVehicles.filter(v => v.status === 'requires_followup');
+    
+    return followUpVehicles.map(vehicle => {
+      // Buscar el último informe A/C de este vehículo con observaciones
+      const vehicleReports = accessibleACReports
+        .filter(r => r.vehicle_id === vehicle.id)
+        .filter(r => (r.status === 'completado' || r.status === 'aprobado') && r.observaciones_finales)
+        .sort((a, b) => new Date(b.inspection_date) - new Date(a.inspection_date));
+      
+      return {
+        vehicle,
+        report: vehicleReports[0] || null
+      };
+    });
+  };
+
+  const followUpVehicles = isLoading ? [] : getFollowUpVehicles();
   const activeVehicles = accessibleVehicles.filter(v => v.status === 'active').length;
   const activeDrivers = accessibleDrivers.filter(d => d.status === 'active').length;
   const pendingMaintenance = accessibleMaintenances.filter(m => m.status === 'scheduled' || m.status === 'in_progress').length;
@@ -509,6 +539,36 @@ export default function Dashboard() {
                 </div>
               )}
             </div>
+
+            {/* Follow Up Alerts */}
+            {followUpVehicles.length > 0 && (
+              <div className={cn("rounded-2xl border p-6 backdrop-blur-xl shadow-2xl", theme === 'dark' ? 'bg-zinc-900/80 border-zinc-800/50 shadow-black/20' : 'bg-white border-gray-200 shadow-gray-200/50')}>
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="p-3 rounded-xl bg-gradient-to-br from-amber-500/20 to-amber-600/10 border border-amber-500/20 shadow-lg shadow-amber-500/10">
+                      <Eye className="w-6 h-6 text-amber-400" />
+                    </div>
+                    <h2 className={cn("text-xl font-bold", theme === 'dark' ? 'text-white' : 'text-gray-900')}>Requieren Seguimiento</h2>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className={theme === 'dark' ? 'text-slate-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'}
+                    asChild
+                  >
+                    <Link to={createPageUrl("Vehicles")}>
+                      Ver todos <ArrowRight className="w-4 h-4 ml-2" />
+                    </Link>
+                  </Button>
+                </div>
+                
+                <div className="space-y-3">
+                  {followUpVehicles.slice(0, 5).map(({ vehicle, report }) => (
+                    <FollowUpAlertCard key={vehicle.id} vehicle={vehicle} report={report} />
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Maintenance Alerts */}
             <div className={cn("rounded-2xl border p-6 backdrop-blur-xl shadow-2xl", theme === 'dark' ? 'bg-zinc-900/80 border-zinc-800/50 shadow-black/20' : 'bg-white border-gray-200 shadow-gray-200/50')}>

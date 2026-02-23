@@ -382,9 +382,15 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
       if (formData.vehicle_id) {
         const vehicleUpdates = {};
         
-        // Actualizar estado del vehículo si se definió estado final
-        if (dataToSave.estado_final_equipo) {
-          vehicleUpdates.status = dataToSave.estado_final_equipo;
+        // Actualizar estado del vehículo basado en observaciones y estado final
+        if (dataToSave.status === 'completado' || dataToSave.status === 'aprobado') {
+          // Si el informe está completado/aprobado y hay observaciones, marcar como requiere seguimiento
+          if (dataToSave.observaciones_finales && dataToSave.observaciones_finales.trim() !== '') {
+            vehicleUpdates.status = 'requires_followup';
+          } else if (dataToSave.estado_final_equipo) {
+            // Si no hay observaciones pero se definió un estado final, usar ese estado
+            vehicleUpdates.status = dataToSave.estado_final_equipo;
+          }
         }
         
         // Actualizar kilometraje si se ingresó
