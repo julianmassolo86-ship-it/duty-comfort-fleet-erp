@@ -47,7 +47,6 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
-import ACDashboard from './pages/ACDashboard';
 import Companies from './pages/Companies';
 import CompanyAdmins from './pages/CompanyAdmins';
 import Dashboard from './pages/Dashboard';
@@ -64,11 +63,11 @@ import VehicleCategories from './pages/VehicleCategories';
 import VehicleStatuses from './pages/VehicleStatuses';
 import VehicleTypes from './pages/VehicleTypes';
 import Vehicles from './pages/Vehicles';
+import ACDashboard from './pages/ACDashboard';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
-    "ACDashboard": ACDashboard,
     "Companies": Companies,
     "CompanyAdmins": CompanyAdmins,
     "Dashboard": Dashboard,
@@ -85,6 +84,7 @@ export const PAGES = {
     "VehicleStatuses": VehicleStatuses,
     "VehicleTypes": VehicleTypes,
     "Vehicles": Vehicles,
+    "ACDashboard": ACDashboard,
 }
 
 export const pagesConfig = {

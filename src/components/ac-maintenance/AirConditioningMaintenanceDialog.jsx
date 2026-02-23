@@ -176,29 +176,22 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
   }, []);
 
   useEffect(() => {
-    if (open && user && !maintenance) {
-      // Solo cargar datos cuando es un nuevo informe (no en modo visualización)
-      const loadData = async () => {
-        await loadCompanies();
-        await loadLocations();
-        await loadVehicles();
-        await loadVehicleStatuses();
-      };
-      loadData();
-      
-      setFormData(initialState);
+    if (open && user) {
+      loadVehicles();
+      loadCompanies();
+      loadLocations();
+      loadVehicleStatuses();
+      if (maintenance) {
+        setFormData({ ...initialState, ...maintenance });
+        setGeneratedReportNumber(maintenance.report_number);
+      } else {
+        setFormData(initialState);
+      }
       setError("");
       setSearchTerm("");
       setCompanyFilter("all");
       setLocationFilter("all");
-      setShowVehicleSelector(true);
-    } else if (open && maintenance) {
-      // Solo cargar lo mínimo necesario para visualizar
-      setFormData({ ...initialState, ...maintenance });
-      setGeneratedReportNumber(maintenance.report_number);
-      loadCompanies();
-      loadLocations();
-      loadVehicleStatuses();
+      setShowVehicleSelector(!maintenance);
     }
   }, [open, maintenance, user]);
 
@@ -428,7 +421,7 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
     await handleSave(true);
   };
 
-  const handleExportPDF = async () => {
+  const handleExportPDF = () => {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
@@ -438,70 +431,34 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
     const company = companies.find(c => c.id === selectedVehicle?.company_id);
     const location = locations.find(l => l.id === selectedVehicle?.location_id);
 
-    const addHeader = async () => {
-      // Banda superior amarilla
-      doc.setFillColor(234, 179, 8);
-      doc.rect(0, 0, pageWidth, 12, 'F');
-      
-      // Logo DUTY COMFORT en la banda amarilla (izquierda)
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(10);
+    const addHeader = () => {
+      // Logo Duty Comfort centrado arriba
+      doc.setFillColor(255, 255, 255);
+      doc.setTextColor(0, 0, 0);
+      doc.setFontSize(18);
       doc.setFont("helvetica", "bold");
-      doc.text("DUTY COMFORT", 15, 8);
+      doc.text("DUTY COMFORT", pageWidth / 2, 10, { align: "center" });
+      
+      // Banda amarilla
+      doc.setFillColor(234, 179, 8);
+      doc.rect(0, 15, pageWidth, 10, 'F');
       
       // Título en negro centrado
       doc.setTextColor(0, 0, 0);
-      doc.setFontSize(14);
+      doc.setFontSize(13);
       doc.setFont("helvetica", "bold");
-      doc.text("INFORME DE INSPECCIÓN A/C", pageWidth / 2, 8, { align: "center" });
+      doc.text("INFORME DE INSPECCIÓN A/C", pageWidth / 2, 21, { align: "center" });
       
-      y = 18;
+      y = 30;
       
       // Logo de la empresa (izquierda)
-      if (company?.logo_url) {
-        try {
-          // Intentar cargar el logo de la empresa
-          const img = await new Promise((resolve, reject) => {
-            const image = new Image();
-            image.crossOrigin = 'anonymous';
-            image.onload = () => resolve(image);
-            image.onerror = reject;
-            image.src = company.logo_url;
-          });
-          
-          // Calcular dimensiones manteniendo aspect ratio
-          const maxWidth = 30;
-          const maxHeight = 30;
-          let width = img.width;
-          let height = img.height;
-          
-          if (width > maxWidth || height > maxHeight) {
-            const ratio = Math.min(maxWidth / width, maxHeight / height);
-            width *= ratio;
-            height *= ratio;
-          }
-          
-          const x = margin + (30 - width) / 2;
-          const y_img = y + (30 - height) / 2;
-          
-          doc.addImage(img, 'PNG', x, y_img, width, height);
-        } catch (error) {
-          console.error('Error cargando logo:', error);
-          // Mostrar placeholder si falla
-          doc.setFillColor(240, 240, 240);
-          doc.roundedRect(margin, y, 30, 30, 2, 2, 'F');
-          doc.setFontSize(8);
-          doc.setTextColor(150, 150, 150);
-          doc.text("LOGO", margin + 15, y + 18, { align: "center" });
-        }
-      } else {
-        // Placeholder si no hay logo
-        doc.setFillColor(240, 240, 240);
-        doc.roundedRect(margin, y, 30, 30, 2, 2, 'F');
-        doc.setFontSize(8);
-        doc.setTextColor(150, 150, 150);
-        doc.text("LOGO", margin + 15, y + 18, { align: "center" });
-      }
+      doc.setFillColor(240, 240, 240);
+      doc.roundedRect(margin, y, 30, 30, 2, 2, 'F');
+      doc.setFontSize(8);
+      doc.setTextColor(150, 150, 150);
+      doc.text("LOGO", margin + 15, y + 12, { align: "center" });
+      doc.setFontSize(7);
+      doc.text("EMPRESA", margin + 15, y + 18, { align: "center" });
       
       // Información del vehículo (izquierda, debajo del logo)
       const vehicleInfoX = margin;
@@ -586,10 +543,10 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
       doc.text(`Generado: ${new Date().toLocaleDateString('es-AR')} ${new Date().toLocaleTimeString('es-AR')}`, pageWidth - margin, pageHeight - 10, { align: "right" });
     };
 
-    const addSection = async (title, resetY = false) => {
+    const addSection = (title, resetY = false) => {
       if (resetY || y > pageHeight - 40) {
         doc.addPage();
-        await addHeader();
+        addHeader();
         y = 35;
       }
       doc.setFillColor(245, 245, 245);
@@ -601,10 +558,10 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
       y += 12;
     };
 
-    const addStatusBox = async (label, status, obs = "", extraData = null) => {
+    const addStatusBox = (label, status, obs = "", extraData = null) => {
       if (y > pageHeight - 30) {
         doc.addPage();
-        await addHeader();
+        addHeader();
         y = 35;
       }
 
@@ -671,11 +628,11 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
     };
 
     // Página 1: Encabezado
-    await addHeader();
+    addHeader();
 
     // Inspecciones Iniciales
-    await addSection("1. INSPECCIONES INICIALES Y MEDICIONES");
-    for (const insp of inspecciones) {
+    addSection("1. INSPECCIONES INICIALES Y MEDICIONES");
+    inspecciones.forEach((insp) => {
       const estado = formData[`inspeccion_${insp.id}_estado`] || "pendiente";
       const obs = formData[`inspeccion_${insp.id}_observacion`] || "";
       let extraData = null;
@@ -690,19 +647,19 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
         extraData = `• Temperatura: ${formData[`inspeccion_${insp.id}_temperatura`]}°C`;
       }
       
-      await addStatusBox(`${insp.num}. ${insp.label}`, estado, obs, extraData);
-    }
+      addStatusBox(`${insp.num}. ${insp.label}`, estado, obs, extraData);
+    });
 
     // Componentes
-    await addSection("2. ESTADO DE COMPONENTES", true);
-    for (const comp of componentes) {
+    addSection("2. ESTADO DE COMPONENTES", true);
+    componentes.forEach((comp) => {
       const estado = formData[`componente_${comp.key}_estado`] || "pendiente";
       const obs = formData[`componente_${comp.key}_observacion`] || "";
-      await addStatusBox(comp.label, estado, obs);
-    }
+      addStatusBox(comp.label, estado, obs);
+    });
 
     // Acciones y Mediciones
-    await addSection("3. ACCIONES Y MEDICIONES FINALES", true);
+    addSection("3. ACCIONES Y MEDICIONES FINALES", true);
     
     if (formData.acciones_realizadas) {
       doc.setFontSize(9);
@@ -729,10 +686,10 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
       { label: "Temp. Calefacción", value: formData.medicion_final_temp_calefaccion ? `${formData.medicion_final_temp_calefaccion}°C` : 'N/A' },
     ];
 
-    for (const [idx, med] of mediciones.entries()) {
+    mediciones.forEach((med, idx) => {
       if (y > pageHeight - 20) {
         doc.addPage();
-        await addHeader();
+        addHeader();
         y = 35;
       }
       doc.setFillColor(idx % 2 === 0 ? 250 : 255, idx % 2 === 0 ? 250 : 255, idx % 2 === 0 ? 250 : 255);
@@ -743,12 +700,12 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
       doc.setFont("helvetica", "bold");
       doc.text(med.value, pageWidth - margin - 2, y + 4.5, { align: "right" });
       y += 7;
-    }
+    });
 
     y += 8;
 
     // Información Final
-    await addSection("4. INFORMACIÓN FINAL");
+    addSection("4. INFORMACIÓN FINAL");
     
     if (formData.estado_final_equipo) {
       doc.setFontSize(9);
@@ -775,7 +732,7 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
     y += 5;
     if (y > pageHeight - 50) {
       doc.addPage();
-      await addHeader();
+      addHeader();
       y = 35;
     }
     
@@ -809,11 +766,13 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
       addFooter(i);
     }
 
-    // Generar nombre del archivo: Interno_Tipo_Empresa
-    const interno = selectedVehicle?.internal_number || 'SN';
-    const tipo = selectedVehicle?.type_name || selectedVehicle?.category_name || 'Vehiculo';
-    const empresa = company?.name || 'Empresa';
-    const fileName = `${interno}_${tipo}_${empresa}.pdf`.replace(/\s+/g, '_');
+    // Generar nombre del archivo
+    const vehicleIdentifier = selectedVehicle 
+      ? `${selectedVehicle.internal_number || ''}_${selectedVehicle.plate || ''}`.replace(/\s+/g, '_')
+      : 'vehiculo';
+    const companyName = company?.name ? `_${company.name.replace(/\s+/g, '_')}` : '';
+    const date = formData.inspection_date.split('T')[0];
+    const fileName = `Inspeccion_AC_${vehicleIdentifier}${companyName}_${date}.pdf`;
     
     doc.save(fileName);
   };
