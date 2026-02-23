@@ -16,7 +16,7 @@ export default function ACMaintenanceHistory({ vehicleId }) {
   const [showDialog, setShowDialog] = useState(false);
   const [expanded, setExpanded] = useState(false);
 
-  const { data: reports = [], isLoading } = useQuery({
+  const { data: reports = [], isLoading, error } = useQuery({
     queryKey: ['ac-maintenance-history', vehicleId],
     queryFn: async () => {
       const allReports = await base44.entities.AirConditioningMaintenance.filter({ 
@@ -24,7 +24,10 @@ export default function ACMaintenanceHistory({ vehicleId }) {
       });
       return allReports.sort((a, b) => new Date(b.inspection_date) - new Date(a.inspection_date));
     },
-    enabled: !!vehicleId
+    enabled: !!vehicleId,
+    retry: 3,
+    retryDelay: 1000,
+    staleTime: 30000
   });
 
   const handleViewReport = async (report) => {
@@ -55,9 +58,40 @@ export default function ACMaintenanceHistory({ vehicleId }) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className={cn("text-sm", theme === 'dark' ? 'text-zinc-400' : 'text-gray-500')}>
-            Cargando historial...
-          </p>
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-yellow-500"></div>
+              <p className={cn("text-sm", theme === 'dark' ? 'text-zinc-400' : 'text-gray-500')}>
+                Cargando historial de inspecciones...
+              </p>
+            </div>
+            {/* Skeleton loaders */}
+            {[1, 2, 3].map((i) => (
+              <div key={i} className={cn("p-3 rounded-lg border animate-pulse", theme === 'dark' ? 'bg-zinc-800/30 border-zinc-700' : 'bg-gray-100 border-gray-200')}>
+                <div className={cn("h-4 rounded w-1/3 mb-2", theme === 'dark' ? 'bg-zinc-700' : 'bg-gray-300')}></div>
+                <div className={cn("h-3 rounded w-2/3", theme === 'dark' ? 'bg-zinc-700' : 'bg-gray-300')}></div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card className={theme === 'dark' ? 'bg-zinc-900 border-zinc-700' : ''}>
+        <CardHeader>
+          <CardTitle className={cn("text-sm flex items-center gap-2", theme === 'dark' ? 'text-white' : 'text-gray-900')}>
+            <FileText className="w-4 h-4" />
+            Historial de Inspecciones A/C
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-2 text-red-600">
+            <AlertTriangle className="w-4 h-4" />
+            <p className="text-sm">Error al cargar el historial</p>
+          </div>
         </CardContent>
       </Card>
     );
