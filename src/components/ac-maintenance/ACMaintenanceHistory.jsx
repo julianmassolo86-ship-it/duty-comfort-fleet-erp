@@ -24,7 +24,10 @@ export default function ACMaintenanceHistory({ vehicleId }) {
       });
       return allReports.sort((a, b) => new Date(b.inspection_date) - new Date(a.inspection_date));
     },
-    enabled: !!vehicleId
+    enabled: !!vehicleId,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    staleTime: 5 * 60 * 1000
   });
 
   const handleViewReport = (report) => {
