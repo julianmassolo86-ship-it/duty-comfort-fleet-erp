@@ -547,7 +547,6 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
       if (resetY || y > pageHeight - 40) {
         doc.addPage();
         addHeader();
-        y = 35;
       }
       doc.setFillColor(245, 245, 245);
       doc.rect(margin, y - 5, pageWidth - 2 * margin, 10, 'F');
@@ -562,7 +561,6 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
       if (y > pageHeight - 30) {
         doc.addPage();
         addHeader();
-        y = 35;
       }
 
       // Color según estado
@@ -690,7 +688,6 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
       if (y > pageHeight - 20) {
         doc.addPage();
         addHeader();
-        y = 35;
       }
       doc.setFillColor(idx % 2 === 0 ? 250 : 255, idx % 2 === 0 ? 250 : 255, idx % 2 === 0 ? 250 : 255);
       doc.rect(margin, y, pageWidth - 2 * margin, 7, 'F');
@@ -733,7 +730,6 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
     if (y > pageHeight - 50) {
       doc.addPage();
       addHeader();
-      y = 35;
     }
     
     doc.setFontSize(10);
