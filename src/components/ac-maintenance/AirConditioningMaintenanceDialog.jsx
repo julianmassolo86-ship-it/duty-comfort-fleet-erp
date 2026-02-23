@@ -177,10 +177,17 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
 
   useEffect(() => {
     if (open && user) {
-      loadVehicles();
-      loadCompanies();
-      loadLocations();
-      loadVehicleStatuses();
+      // Cargar datos secuencialmente para evitar rate limit
+      const loadData = async () => {
+        await loadCompanies();
+        await loadLocations();
+        if (!maintenance) {
+          await loadVehicles();
+        }
+        await loadVehicleStatuses();
+      };
+      loadData();
+      
       if (maintenance) {
         setFormData({ ...initialState, ...maintenance });
         setGeneratedReportNumber(maintenance.report_number);

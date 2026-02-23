@@ -27,7 +27,7 @@ export default function ACMaintenanceHistory({ vehicleId }) {
     enabled: !!vehicleId
   });
 
-  const handleViewReport = (report) => {
+  const handleViewReport = async (report) => {
     setSelectedReport(report);
     setShowDialog(true);
   };
@@ -168,10 +168,15 @@ export default function ACMaintenanceHistory({ vehicleId }) {
         </CardContent>
       </Card>
 
-      {showDialog && (
+      {showDialog && selectedReport && (
         <AirConditioningMaintenanceDialog
           open={showDialog}
-          onOpenChange={setShowDialog}
+          onOpenChange={(isOpen) => {
+            setShowDialog(isOpen);
+            if (!isOpen) {
+              setSelectedReport(null);
+            }
+          }}
           maintenance={selectedReport}
           onSuccess={() => {}}
         />
