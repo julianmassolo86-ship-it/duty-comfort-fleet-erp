@@ -428,7 +428,7 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
     await handleSave(true);
   };
 
-  const handleExportPDF = () => {
+  const handleExportPDF = async () => {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
@@ -586,10 +586,10 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
       doc.text(`Generado: ${new Date().toLocaleDateString('es-AR')} ${new Date().toLocaleTimeString('es-AR')}`, pageWidth - margin, pageHeight - 10, { align: "right" });
     };
 
-    const addSection = (title, resetY = false) => {
+    const addSection = async (title, resetY = false) => {
       if (resetY || y > pageHeight - 40) {
         doc.addPage();
-        addHeader();
+        await addHeader();
         y = 35;
       }
       doc.setFillColor(245, 245, 245);
@@ -601,10 +601,10 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
       y += 12;
     };
 
-    const addStatusBox = (label, status, obs = "", extraData = null) => {
+    const addStatusBox = async (label, status, obs = "", extraData = null) => {
       if (y > pageHeight - 30) {
         doc.addPage();
-        addHeader();
+        await addHeader();
         y = 35;
       }
 
@@ -671,11 +671,11 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
     };
 
     // Página 1: Encabezado
-    addHeader();
+    await addHeader();
 
     // Inspecciones Iniciales
-    addSection("1. INSPECCIONES INICIALES Y MEDICIONES");
-    inspecciones.forEach((insp) => {
+    await addSection("1. INSPECCIONES INICIALES Y MEDICIONES");
+    for (const insp of inspecciones) {
       const estado = formData[`inspeccion_${insp.id}_estado`] || "pendiente";
       const obs = formData[`inspeccion_${insp.id}_observacion`] || "";
       let extraData = null;
@@ -690,19 +690,19 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
         extraData = `• Temperatura: ${formData[`inspeccion_${insp.id}_temperatura`]}°C`;
       }
       
-      addStatusBox(`${insp.num}. ${insp.label}`, estado, obs, extraData);
-    });
+      await addStatusBox(`${insp.num}. ${insp.label}`, estado, obs, extraData);
+    }
 
     // Componentes
-    addSection("2. ESTADO DE COMPONENTES", true);
-    componentes.forEach((comp) => {
+    await addSection("2. ESTADO DE COMPONENTES", true);
+    for (const comp of componentes) {
       const estado = formData[`componente_${comp.key}_estado`] || "pendiente";
       const obs = formData[`componente_${comp.key}_observacion`] || "";
-      addStatusBox(comp.label, estado, obs);
-    });
+      await addStatusBox(comp.label, estado, obs);
+    }
 
     // Acciones y Mediciones
-    addSection("3. ACCIONES Y MEDICIONES FINALES", true);
+    await addSection("3. ACCIONES Y MEDICIONES FINALES", true);
     
     if (formData.acciones_realizadas) {
       doc.setFontSize(9);
@@ -729,10 +729,10 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
       { label: "Temp. Calefacción", value: formData.medicion_final_temp_calefaccion ? `${formData.medicion_final_temp_calefaccion}°C` : 'N/A' },
     ];
 
-    mediciones.forEach((med, idx) => {
+    for (const [idx, med] of mediciones.entries()) {
       if (y > pageHeight - 20) {
         doc.addPage();
-        addHeader();
+        await addHeader();
         y = 35;
       }
       doc.setFillColor(idx % 2 === 0 ? 250 : 255, idx % 2 === 0 ? 250 : 255, idx % 2 === 0 ? 250 : 255);
@@ -743,12 +743,12 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
       doc.setFont("helvetica", "bold");
       doc.text(med.value, pageWidth - margin - 2, y + 4.5, { align: "right" });
       y += 7;
-    });
+    }
 
     y += 8;
 
     // Información Final
-    addSection("4. INFORMACIÓN FINAL");
+    await addSection("4. INFORMACIÓN FINAL");
     
     if (formData.estado_final_equipo) {
       doc.setFontSize(9);
@@ -775,7 +775,7 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
     y += 5;
     if (y > pageHeight - 50) {
       doc.addPage();
-      addHeader();
+      await addHeader();
       y = 35;
     }
     
