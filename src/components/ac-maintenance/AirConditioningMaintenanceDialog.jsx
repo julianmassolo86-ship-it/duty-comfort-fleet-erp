@@ -167,9 +167,10 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
   const [vehicleStatuses, setVehicleStatuses] = useState([]);
   const [uploadingImage, setUploadingImage] = useState({ 1: false, 2: false, 3: false });
   const [generatedReportNumber, setGeneratedReportNumber] = useState(null);
+  const [originalStatus, setOriginalStatus] = useState(null);
   
-  // Modo solo lectura si el informe está completado o aprobado
-  const isReadOnly = maintenance && (formData.status === 'completado' || formData.status === 'aprobado');
+  // Modo solo lectura si el informe YA ESTABA completado o aprobado (no si lo acabas de cambiar)
+  const isReadOnly = maintenance && (originalStatus === 'completado' || originalStatus === 'aprobado');
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -184,8 +185,10 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
       if (maintenance) {
         setFormData({ ...initialState, ...maintenance });
         setGeneratedReportNumber(maintenance.report_number);
+        setOriginalStatus(maintenance.status);
       } else {
         setFormData(initialState);
+        setOriginalStatus(null);
       }
       setError("");
       setSearchTerm("");
