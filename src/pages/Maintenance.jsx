@@ -13,6 +13,7 @@ import EmptyState from "../components/common/EmptyState";
 import MaintenanceCard from "../components/maintenance/MaintenanceCard";
 import MaintenanceDialog from "../components/maintenance/MaintenanceDialog";
 import NovedadDialog from "../components/novedades/NovedadDialog";
+import BulkACReportDialog from "../components/ac-maintenance/BulkACReportDialog";
 import NovedadCard from "../components/novedades/NovedadCard";
 import AirConditioningMaintenanceDialog from "../components/ac-maintenance/AirConditioningMaintenanceDialog";
 import { useTheme } from "../components/common/ThemeWrapper";

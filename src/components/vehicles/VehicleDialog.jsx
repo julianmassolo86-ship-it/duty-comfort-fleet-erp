@@ -17,6 +17,7 @@ import DocumentCard from "./DocumentCard";
 import VehicleCardDocument from "./VehicleCardDocument";
 import VehicleMaintenanceHistory from "./VehicleMaintenanceHistory";
 import VehicleMaintenanceScheduleManager from "./VehicleMaintenanceScheduleManager";
+import ACMaintenanceHistory from "../ac-maintenance/ACMaintenanceHistory";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
