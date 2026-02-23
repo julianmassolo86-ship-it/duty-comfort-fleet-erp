@@ -346,11 +346,15 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
       if (!formData.vehicle_id) {
         throw new Error("Debe seleccionar un vehículo");
       }
-      if (!formData.inspection_date) {
-        throw new Error("Debe ingresar la fecha de inspección");
-      }
-      if (!formData.tipo_mantenimiento) {
-        throw new Error("Debe seleccionar el tipo de mantenimiento");
+      
+      // Solo validar fecha y tipo cuando se cierra (guardado final)
+      if (closeAfterSave) {
+        if (!formData.inspection_date) {
+          throw new Error("Debe ingresar la fecha de inspección");
+        }
+        if (!formData.tipo_mantenimiento) {
+          throw new Error("Debe seleccionar el tipo de mantenimiento");
+        }
       }
 
       const dataToSave = { ...formData };
