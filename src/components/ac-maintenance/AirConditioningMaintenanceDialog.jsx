@@ -389,14 +389,25 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
         await base44.entities.AirConditioningMaintenance.update(maintenance.id, dataToSave);
       } else {
         // Generar el número de reporte justo antes de crear
-        const { report_number } = await base44.functions.invoke('getNextReportNumber', {
-          report_type: 'ac_maintenance'
-        });
-        dataToSave.report_number = report_number;
+        let reportNumber = null;
+        try {
+          const response = await base44.functions.invoke('getNextReportNumber', {
+            report_type: 'ac_maintenance'
+          });
+          reportNumber = response.data?.report_number;
+          if (!reportNumber) {
+            throw new Error('No se generó número de reporte');
+          }
+        } catch (err) {
+          console.error('Error generando número de reporte:', err);
+          throw new Error(`Error al generar número de reporte: ${err.message}`);
+        }
+        
+        dataToSave.report_number = reportNumber;
         const created = await base44.entities.AirConditioningMaintenance.create(dataToSave);
         // Actualizar formData con el ID y el número para futuras actualizaciones
         setFormData({ ...dataToSave, id: created.id });
-        setGeneratedReportNumber(report_number);
+        setGeneratedReportNumber(reportNumber);
       }
 
       // Actualizar vehículo si es necesario
