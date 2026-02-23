@@ -87,6 +87,7 @@ export default function VehicleDialog({
   const [uploading, setUploading] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [activeTab, setActiveTab] = useState("general");
 
 
   const { data: vehicleStatuses = [] } = useQuery({
@@ -343,7 +344,7 @@ export default function VehicleDialog({
             </Button>
           </div>
 
-          <Tabs defaultValue="general" className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="bg-zinc-900 border-zinc-800 mb-4 w-full justify-start">
               <TabsTrigger value="general" className="data-[state=active]:bg-yellow-500/10 data-[state=active]:text-yellow-400 data-[state=active]:border-yellow-500/30">General</TabsTrigger>
               <TabsTrigger value="service" className="data-[state=active]:bg-yellow-500/10 data-[state=active]:text-yellow-400 data-[state=active]:border-yellow-500/30">Servicio</TabsTrigger>
@@ -704,11 +705,13 @@ export default function VehicleDialog({
                 </div>
               </div>
 
-              <VehicleMaintenanceScheduleManager 
-                vehicleId={vehicle?.id}
-                currentMileage={form.mileage}
-                currentHours={form.hours}
-              />
+              {activeTab === "service" && vehicle && (
+                <VehicleMaintenanceScheduleManager 
+                  vehicleId={vehicle?.id}
+                  currentMileage={form.mileage}
+                  currentHours={form.hours}
+                />
+              )}
             </TabsContent>
 
             <TabsContent value="documents" className="space-y-4">
@@ -835,7 +838,12 @@ export default function VehicleDialog({
             </TabsContent>
 
             <TabsContent value="history" className="space-y-4">
-              {vehicle && <VehicleMaintenanceHistory vehicleId={vehicle.id} />}
+              {activeTab === "history" && vehicle && (
+                <>
+                  <ACMaintenanceHistory vehicleId={vehicle.id} />
+                  <VehicleMaintenanceHistory vehicleId={vehicle.id} />
+                </>
+              )}
               {!vehicle && (
                 <div className="p-8 text-center">
                   <p className="text-zinc-500">Guarde el vehículo para ver el historial de mantenimiento.</p>
