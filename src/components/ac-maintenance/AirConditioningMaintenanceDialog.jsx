@@ -748,7 +748,8 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
       doc.text("Estado Final del Equipo:", margin, y);
       y += 5;
       doc.setFont("helvetica", "normal");
-      doc.text(formData.estado_final_equipo, margin, y);
+      const statusObj = vehicleStatuses.find(s => s.code === formData.estado_final_equipo);
+      doc.text(statusObj?.name || formData.estado_final_equipo, margin, y);
       y += 8;
     }
 
