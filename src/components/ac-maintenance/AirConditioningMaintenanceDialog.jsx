@@ -1604,7 +1604,12 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => onOpenChange(false)}
+                onClick={() => {
+                  setFormData(initialState);
+                  setSelectedVehicle(null);
+                  setGeneratedReportNumber(null);
+                  onOpenChange(false);
+                }}
                 disabled={loading}
                 className={theme === 'dark' ? 'border-zinc-700 text-zinc-300 hover:bg-zinc-800' : ''}
               >
