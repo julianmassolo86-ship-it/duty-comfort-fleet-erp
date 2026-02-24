@@ -828,6 +828,9 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
         className={cn("max-w-5xl max-h-[90vh] overflow-y-auto", theme === 'dark' ? 'bg-zinc-900 border-zinc-700' : 'bg-white')}
         onInteractOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onTouchStart={(e) => e.stopPropagation()}
+        onWheel={(e) => e.stopPropagation()}
       >
         <DialogHeader>
           <DialogTitle className={cn("flex items-center gap-3", theme === 'dark' ? 'text-white' : 'text-gray-900')}>
