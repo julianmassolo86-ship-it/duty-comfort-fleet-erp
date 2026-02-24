@@ -822,8 +822,15 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
     doc.save(fileName);
   };
 
+  const handleOpenChange = (newOpen) => {
+    // Solo permitir cerrar con el botón X o cancelar, nunca por scroll
+    if (!newOpen) {
+      return;
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} modal={true}>
+    <Dialog open={open} onOpenChange={handleOpenChange} modal={true}>
       <DialogContent 
         className={cn("max-w-5xl max-h-[90vh] overflow-y-auto", theme === 'dark' ? 'bg-zinc-900 border-zinc-700' : 'bg-white')}
         onInteractOutside={(e) => e.preventDefault()}
