@@ -388,20 +388,32 @@ export default function AirConditioningMaintenanceDialog({ open, onOpenChange, m
       if (maintenance) {
         await base44.entities.AirConditioningMaintenance.update(maintenance.id, dataToSave);
       } else {
-        // Generar el número de reporte justo antes de crear
+        // Generar el número de reporte client-side usando ReportCounter
+        const companyId = dataToSave.company_id || selectedVehicle?.company_id || 'global';
         let reportNumber = null;
-        try {
-          const response = await base44.functions.invoke('getNextReportNumber', {
-            report_type: 'ac_maintenance'
+        
+        const counters = await base44.entities.ReportCounter.filter({ 
+          report_type: 'ac_maintenance', 
+          company_id: companyId 
+        });
+        
+        let counter = counters[0];
+        let nextNum;
+        
+        if (counter) {
+          nextNum = (counter.last_number || 0) + 1;
+          await base44.entities.ReportCounter.update(counter.id, { last_number: nextNum });
+        } else {
+          nextNum = 1;
+          await base44.entities.ReportCounter.create({ 
+            report_type: 'ac_maintenance', 
+            company_id: companyId, 
+            last_number: 1 
           });
-          reportNumber = response.data?.report_number;
-          if (!reportNumber) {
-            throw new Error('No se generó número de reporte');
-          }
-        } catch (err) {
-          console.error('Error generando número de reporte:', err);
-          throw new Error(`Error al generar número de reporte: ${err.message}`);
         }
+        
+        const year = new Date().getFullYear();
+        reportNumber = `AC-${year}-${String(nextNum).padStart(4, '0')}`;
         
         dataToSave.report_number = reportNumber;
         const created = await base44.entities.AirConditioningMaintenance.create(dataToSave);
