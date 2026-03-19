@@ -4,6 +4,7 @@ import { createPageUrl } from '@/utils';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Car, BarChart3, Shield, Clock, ArrowRight, CheckCircle2, Zap, TrendingUp, Users, Wrench, FileText, MapPin } from 'lucide-react';
+import MassLogo from '@/components/common/MassLogo';
 
 export default function LandingPage() {
   const [checkingAuth, setCheckingAuth] = useState(true);
