@@ -38,16 +38,8 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <div className="flex items-center gap-3">
-              <img 
-                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/698ba23f75eb60d9d1b501ef/48afb028d_1.png" 
-                alt="Duty Comfort Logo" 
-                className="w-12 h-12 object-contain"
-              />
-              <div>
-                <span className="text-xl font-bold text-gray-900">Duty Comfort</span>
-                <p className="text-xs text-gray-500">Gestión de Flotas</p>
-              </div>
+            <div className="flex items-center">
+              <MassLogo size="sm" />
             </div>
 
             {/* Login Button */}
