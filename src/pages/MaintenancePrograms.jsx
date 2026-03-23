@@ -3,20 +3,30 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, Loader2, Settings2, CheckCircle2 } from "lucide-react";
+import { Plus, Search, Loader2, Settings2, CheckCircle2, Wrench, Package, Zap } from "lucide-react";
 import PageHeader from "@/components/common/PageHeader";
 import EmptyState from "@/components/common/EmptyState";
 import PullToRefresh from "@/components/common/PullToRefresh";
 import MaintenanceProgramDialog from "@/components/maintenance-programs/MaintenanceProgramDialog";
 import MaintenanceProgramCard from "@/components/maintenance-programs/MaintenanceProgramCard";
 import BulkAssignDialog from "@/components/maintenance-programs/BulkAssignDialog";
+import { cn } from "@/lib/utils";
+
+const TABS = [
+  { key: "all", label: "Todos", icon: Settings2 },
+  { key: "program", label: "Programas", icon: Package },
+  { key: "action", label: "Acciones", icon: Zap },
+  { key: "item", label: "Ítems / Componentes", icon: Wrench },
+];
 
 export default function MaintenancePrograms() {
   const [user, setUser] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [activeTab, setActiveTab] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [bulkAssignOpen, setBulkAssignOpen] = useState(false);
   const [selectedProgram, setSelectedProgram] = useState(null);
+  const [defaultType, setDefaultType] = useState("item");
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -79,7 +89,6 @@ export default function MaintenancePrograms() {
       ...data,
       company_id: isSuperAdmin ? data.company_id : userCompanyId,
     };
-
     if (selectedProgram) {
       updateMutation.mutate({ id: selectedProgram.id, data: finalData });
     } else {
@@ -88,9 +97,7 @@ export default function MaintenancePrograms() {
   };
 
   const handleDelete = () => {
-    if (selectedProgram) {
-      deleteMutation.mutate(selectedProgram.id);
-    }
+    if (selectedProgram) deleteMutation.mutate(selectedProgram.id);
   };
 
   const handleEdit = (program) => {
@@ -98,19 +105,42 @@ export default function MaintenancePrograms() {
     setDialogOpen(true);
   };
 
+  const handleNew = (type) => {
+    setSelectedProgram(null);
+    setDefaultType(type);
+    setDialogOpen(true);
+  };
+
   const handleRefresh = async () => {
     await queryClient.invalidateQueries({ queryKey: ['maintenanceTaskDefinitions'] });
   };
 
-  const filteredPrograms = useMemo(() => {
-    return programs.filter(program =>
-      program.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      program.description?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [programs, searchTerm]);
+  // Normaliza el tipo para compatibilidad con registros viejos
+  const getTaskType = (p) => {
+    if (p.task_type) return p.task_type;
+    if (p.is_program_group) return "program";
+    return "item";
+  };
 
-  const activePrograms = filteredPrograms.filter(p => p.is_active !== false);
-  const inactivePrograms = filteredPrograms.filter(p => p.is_active === false);
+  const filteredPrograms = useMemo(() => {
+    return programs
+      .filter(p => p.is_active !== false)
+      .filter(p => {
+        if (activeTab !== "all") return getTaskType(p) === activeTab;
+        return true;
+      })
+      .filter(p =>
+        p.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        p.description?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+  }, [programs, searchTerm, activeTab]);
+
+  const counts = useMemo(() => ({
+    all: programs.filter(p => p.is_active !== false).length,
+    program: programs.filter(p => p.is_active !== false && getTaskType(p) === "program").length,
+    action: programs.filter(p => p.is_active !== false && getTaskType(p) === "action").length,
+    item: programs.filter(p => p.is_active !== false && getTaskType(p) === "item").length,
+  }), [programs]);
 
   if (!user) {
     return (
@@ -120,111 +150,124 @@ export default function MaintenancePrograms() {
     );
   }
 
+  const activePrograms = programs.filter(p => p.is_active !== false && getTaskType(p) === "program");
+
   return (
     <PullToRefresh onRefresh={handleRefresh}>
       <div className="min-h-screen bg-black pb-20 lg:pb-8">
         <PageHeader
           title="Programas de Mantenimiento"
-          subtitle="Configura los servicios de mantenimiento para tu flota"
+          subtitle="Gestiona ítems, acciones y programas de mantenimiento"
           icon={Settings2}
         />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-          {/* Header Actions */}
+
+          {/* Acciones rápidas */}
+          <div className="grid grid-cols-3 gap-3">
+            <button
+              onClick={() => handleNew("item")}
+              className="flex items-center gap-3 p-4 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-yellow-500/30 hover:bg-zinc-800 transition-all text-left"
+            >
+              <div className="p-2 rounded-lg bg-blue-500/10 border border-blue-500/20">
+                <Wrench className="w-5 h-5 text-blue-400" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-white">Nuevo Ítem</p>
+                <p className="text-xs text-zinc-500">Filtro, aceite, etc.</p>
+              </div>
+            </button>
+            <button
+              onClick={() => handleNew("action")}
+              className="flex items-center gap-3 p-4 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-yellow-500/30 hover:bg-zinc-800 transition-all text-left"
+            >
+              <div className="p-2 rounded-lg bg-green-500/10 border border-green-500/20">
+                <Zap className="w-5 h-5 text-green-400" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-white">Nueva Acción</p>
+                <p className="text-xs text-zinc-500">Engrase, purga, etc.</p>
+              </div>
+            </button>
+            <button
+              onClick={() => handleNew("program")}
+              className="flex items-center gap-3 p-4 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-yellow-500/30 hover:bg-zinc-800 transition-all text-left"
+            >
+              <div className="p-2 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+                <Package className="w-5 h-5 text-yellow-400" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-white">Nuevo Programa</p>
+                <p className="text-xs text-zinc-500">Agrupa ítems y acciones</p>
+              </div>
+            </button>
+          </div>
+
+          {/* Buscador y asignar */}
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
               <Input
-                placeholder="Buscar programas..."
+                placeholder="Buscar..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 bg-zinc-900 border-zinc-800 focus:border-yellow-500/50"
               />
             </div>
-            <div className="flex gap-2">
-              <Button
-                onClick={() => setBulkAssignOpen(true)}
-                variant="outline"
-                className="border-yellow-500/30 text-yellow-400 hover:bg-yellow-500/10"
-              >
-                <CheckCircle2 className="w-4 h-4 mr-2" />
-                Asignar a Vehículos
-              </Button>
-              <Button
-                onClick={() => {
-                  setSelectedProgram(null);
-                  setDialogOpen(true);
-                }}
-                className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Nuevo Programa
-              </Button>
-            </div>
+            <Button
+              onClick={() => setBulkAssignOpen(true)}
+              variant="outline"
+              className="border-yellow-500/30 text-yellow-400 hover:bg-yellow-500/10"
+            >
+              <CheckCircle2 className="w-4 h-4 mr-2" />
+              Asignar a Vehículos
+            </Button>
           </div>
 
-          {/* Programs Grid */}
+          {/* Tabs */}
+          <div className="flex gap-1 bg-zinc-900 p-1 rounded-xl border border-zinc-800">
+            {TABS.map(tab => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={cn(
+                  "flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-medium transition-all",
+                  activeTab === tab.key
+                    ? "bg-yellow-500 text-black"
+                    : "text-zinc-400 hover:text-white"
+                )}
+              >
+                <tab.icon className="w-4 h-4" />
+                <span className="hidden sm:inline">{tab.label}</span>
+                <span className="text-xs opacity-60">({counts[tab.key]})</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Listado */}
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="w-8 h-8 animate-spin text-yellow-400" />
             </div>
-          ) : activePrograms.length === 0 && inactivePrograms.length === 0 ? (
+          ) : filteredPrograms.length === 0 ? (
             <EmptyState
               icon={Settings2}
-              title="No hay programas configurados"
-              description="Crea tu primer programa de mantenimiento para comenzar"
-              action={
-                <Button
-                  onClick={() => setDialogOpen(true)}
-                  className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Crear Programa
-                </Button>
-              }
+              title="No hay registros"
+              description="Crea ítems, acciones o programas usando los botones de arriba"
             />
           ) : (
-            <>
-              {activePrograms.length > 0 && (
-                <div>
-                  <h3 className="text-sm font-semibold text-zinc-400 mb-3 uppercase tracking-wider">
-                    Programas Activos ({activePrograms.length})
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {activePrograms.map((program) => (
-                      <MaintenanceProgramCard
-                        key={program.id}
-                        program={program}
-                        manufacturers={manufacturers}
-                        vehicleTypes={vehicleTypes}
-                        allPrograms={programs}
-                        onEdit={handleEdit}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {inactivePrograms.length > 0 && (
-                <div className="mt-8">
-                  <h3 className="text-sm font-semibold text-zinc-600 mb-3 uppercase tracking-wider">
-                    Programas Inactivos ({inactivePrograms.length})
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {inactivePrograms.map((program) => (
-                      <MaintenanceProgramCard
-                        key={program.id}
-                        program={program}
-                        manufacturers={manufacturers}
-                        vehicleTypes={vehicleTypes}
-                        allPrograms={programs}
-                        onEdit={handleEdit}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-            </>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredPrograms.map((program) => (
+                <MaintenanceProgramCard
+                  key={program.id}
+                  program={program}
+                  manufacturers={manufacturers}
+                  vehicleTypes={vehicleTypes}
+                  allPrograms={programs}
+                  onEdit={handleEdit}
+                />
+              ))}
+            </div>
           )}
         </div>
 
@@ -237,6 +280,7 @@ export default function MaintenancePrograms() {
           allPrograms={programs}
           isSuperAdmin={isSuperAdmin}
           currentUser={user}
+          defaultType={defaultType}
           onSave={handleSave}
           onDelete={handleDelete}
           isLoading={createMutation.isPending || updateMutation.isPending}

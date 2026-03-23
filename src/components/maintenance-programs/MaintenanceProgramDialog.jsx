@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Trash2, Plus, X } from "lucide-react";
+import { Loader2, Trash2, Plus, X, Wrench, Zap, Package } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -27,10 +27,39 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { cn } from "@/lib/utils";
+
+const TASK_TYPES = [
+  {
+    key: "item",
+    label: "Ítem / Componente",
+    description: "Un insumo o repuesto (Filtro de aceite, Aceite motor, Filtro de cabina...)",
+    icon: Wrench,
+    color: "border-blue-500/50 bg-blue-500/10 text-blue-400",
+    activeColor: "border-blue-500 bg-blue-500/20 text-blue-300",
+  },
+  {
+    key: "action",
+    label: "Acción / Procedimiento",
+    description: "Una tarea de mantenimiento (Engrase de chasis, Purga de tanques de aire, Regulación de frenos...)",
+    icon: Zap,
+    color: "border-green-500/50 bg-green-500/10 text-green-400",
+    activeColor: "border-green-500 bg-green-500/20 text-green-300",
+  },
+  {
+    key: "program",
+    label: "Programa de Servicio",
+    description: "Agrupa múltiples ítems y acciones (Inspección S, PM2, Servicio Scania A...)",
+    icon: Package,
+    color: "border-yellow-500/50 bg-yellow-500/10 text-yellow-400",
+    activeColor: "border-yellow-500 bg-yellow-500/20 text-yellow-300",
+  },
+];
 
 const initialState = {
   name: "",
   description: "",
+  task_type: "item",
   interval_type: "mileage",
   interval_value: "",
   interval_mileage: "",
@@ -57,6 +86,7 @@ export default function MaintenanceProgramDialog({
   allPrograms,
   isSuperAdmin,
   currentUser,
+  defaultType = "item",
   onSave,
   onDelete,
   isLoading,
@@ -74,8 +104,10 @@ export default function MaintenanceProgramDialog({
   useEffect(() => {
     if (open) {
       if (program) {
+        const taskType = program.task_type || (program.is_program_group ? "program" : "item");
         setForm({
           ...program,
+          task_type: taskType,
           interval_value: program.interval_value || "",
           interval_mileage: program.interval_mileage || "",
           interval_hours: program.interval_hours || "",
@@ -88,21 +120,31 @@ export default function MaintenanceProgramDialog({
       } else {
         setForm({
           ...initialState,
+          task_type: defaultType,
+          is_program_group: defaultType === "program",
           company_id: isSuperAdmin ? "" : currentUser?.company_id,
         });
       }
+      setComponentInput("");
     }
-  }, [program, open, isSuperAdmin, currentUser]);
+  }, [program, open, isSuperAdmin, currentUser, defaultType]);
 
   const handleChange = (field, value) => {
-    setForm(prev => ({ ...prev, [field]: value }));
+    setForm(prev => {
+      const updated = { ...prev, [field]: value };
+      if (field === "task_type") {
+        updated.is_program_group = value === "program";
+      }
+      return updated;
+    });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     onSave({
       ...form,
-      interval_value: Number(form.interval_value),
+      is_program_group: form.task_type === "program",
+      interval_value: form.interval_value ? Number(form.interval_value) : null,
       interval_mileage: form.interval_mileage ? Number(form.interval_mileage) : null,
       interval_hours: form.interval_hours ? Number(form.interval_hours) : null,
       warning_interval_value: form.warning_interval_value ? Number(form.warning_interval_value) : null,
@@ -130,16 +172,59 @@ export default function MaintenanceProgramDialog({
     }
   };
 
-  const availableTasks = allPrograms.filter(p => !p.is_program_group && p.id !== program?.id);
+  // Para programas, los candidatos a incluir son ítems y acciones
+  const availableItemsAndActions = allPrograms.filter(p =>
+    p.id !== program?.id &&
+    (p.task_type === "item" || p.task_type === "action" || (!p.task_type && !p.is_program_group))
+  );
+
+  const currentTaskTypeInfo = TASK_TYPES.find(t => t.key === form.task_type);
+  const isProgram = form.task_type === "program";
+
+  const dialogTitle = program
+    ? `Editar: ${program.name}`
+    : form.task_type === "item" ? "Nuevo Ítem / Componente"
+    : form.task_type === "action" ? "Nueva Acción"
+    : "Nuevo Programa de Servicio";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl bg-zinc-950 border-zinc-800 text-white max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{program ? "Editar Programa" : "Nuevo Programa"}</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            {currentTaskTypeInfo && <currentTaskTypeInfo.icon className="w-5 h-5" />}
+            {dialogTitle}
+          </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Tipo */}
+          <div className="space-y-2">
+            <Label>Tipo *</Label>
+            <div className="grid grid-cols-3 gap-2">
+              {TASK_TYPES.map(type => (
+                <button
+                  key={type.key}
+                  type="button"
+                  onClick={() => handleChange("task_type", type.key)}
+                  className={cn(
+                    "flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all text-center",
+                    form.task_type === type.key
+                      ? type.activeColor + " border-2"
+                      : "border-zinc-800 bg-zinc-900 text-zinc-500 hover:border-zinc-700"
+                  )}
+                >
+                  <type.icon className="w-5 h-5" />
+                  <span className="text-xs font-semibold leading-tight">{type.label.split(" / ")[0].split(" de ")[0]}</span>
+                </button>
+              ))}
+            </div>
+            {currentTaskTypeInfo && (
+              <p className="text-xs text-zinc-500 mt-1">{currentTaskTypeInfo.description}</p>
+            )}
+          </div>
+
+          {/* Empresa (solo super admin) */}
           {isSuperAdmin && (
             <div className="space-y-2">
               <Label>Empresa *</Label>
@@ -156,219 +241,178 @@ export default function MaintenanceProgramDialog({
             </div>
           )}
 
+          {/* Nombre */}
           <div className="space-y-2">
             <Label>Nombre *</Label>
             <Input
               value={form.name}
               onChange={(e) => handleChange("name", e.target.value)}
               className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
-              placeholder="Ej: Servicio Scania A, Cambio de Aceite"
+              placeholder={
+                isProgram ? "Ej: Inspección S, PM2, Servicio Scania A"
+                : form.task_type === "action" ? "Ej: Engrase de chasis, Purga de tanques de aire"
+                : "Ej: Filtro de aceite motor, Aceite SAE 15W40"
+              }
               required
             />
           </div>
 
+          {/* Descripción */}
           <div className="space-y-2">
             <Label>Descripción</Label>
             <Textarea
               value={form.description}
               onChange={(e) => handleChange("description", e.target.value)}
               className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
-              placeholder="Descripción del programa o tarea"
-              rows={3}
+              placeholder="Descripción detallada..."
+              rows={2}
             />
           </div>
 
-          <div className="flex items-center gap-2 p-3 rounded-lg bg-zinc-900">
-            <Switch
-              checked={form.is_program_group}
-              onCheckedChange={(checked) => handleChange("is_program_group", checked)}
-            />
-            <Label className="cursor-pointer">Es un grupo de tareas (programa completo)</Label>
-          </div>
-
-          {form.is_program_group && (
-            <div className="space-y-2 p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
-              <Label>Tareas incluidas en este programa</Label>
-              <div className="space-y-2 max-h-48 overflow-y-auto">
-                {availableTasks.length === 0 ? (
-                  <p className="text-sm text-zinc-500">No hay tareas individuales disponibles</p>
-                ) : (
-                  availableTasks.map(task => (
-                    <label key={task.id} className="flex items-center gap-2 p-2 rounded hover:bg-zinc-800 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={form.linked_task_ids.includes(task.id)}
-                        onChange={() => toggleLinkedTask(task.id)}
-                        className="w-4 h-4"
-                      />
-                      <span className="text-sm text-white">{task.name}</span>
-                    </label>
-                  ))
-                )}
-              </div>
+          {/* Si es programa: selector de ítems y acciones */}
+          {isProgram && (
+            <div className="space-y-2 p-4 rounded-xl bg-zinc-900/50 border border-yellow-500/20">
+              <Label className="text-yellow-400">Ítems y Acciones incluidos en este programa</Label>
+              {availableItemsAndActions.length === 0 ? (
+                <p className="text-sm text-zinc-500">No hay ítems ni acciones disponibles. Créalos primero.</p>
+              ) : (
+                <div className="space-y-1 max-h-52 overflow-y-auto pr-1">
+                  {availableItemsAndActions.map(task => {
+                    const ttype = task.task_type || (task.is_program_group ? "program" : "item");
+                    return (
+                      <label key={task.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-zinc-800 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={form.linked_task_ids.includes(task.id)}
+                          onChange={() => toggleLinkedTask(task.id)}
+                          className="w-4 h-4 accent-yellow-500"
+                        />
+                        <span className={cn("text-xs px-2 py-0.5 rounded-full border",
+                          ttype === "action" ? "border-green-500/40 text-green-400" : "border-blue-500/40 text-blue-400"
+                        )}>
+                          {ttype === "action" ? "Acción" : "Ítem"}
+                        </span>
+                        <span className="text-sm text-white">{task.name}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              )}
+              {form.linked_task_ids.length > 0 && (
+                <p className="text-xs text-yellow-500">{form.linked_task_ids.length} elemento(s) seleccionado(s)</p>
+              )}
             </div>
           )}
 
+          {/* Intervalo Principal */}
           <div className="space-y-2">
-            <Label>Intervalo Principal *</Label>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
+            <Label>Intervalo Principal {!isProgram && "*"}</Label>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
                 <Label className="text-xs text-zinc-400">Tipo</Label>
-                <Select value={form.interval_type} onValueChange={(v) => handleChange("interval_type", v)} required>
+                <Select value={form.interval_type} onValueChange={(v) => handleChange("interval_type", v)}>
                   <SelectTrigger className="bg-zinc-900 border-zinc-700">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="mileage">Kilómetros</SelectItem>
-                    <SelectItem value="miles">Millas</SelectItem>
                     <SelectItem value="hours">Horas</SelectItem>
                     <SelectItem value="months">Meses</SelectItem>
                     <SelectItem value="years">Años</SelectItem>
+                    <SelectItem value="days">Días</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
-                <Label className="text-xs text-zinc-400">Cada (valor) *</Label>
+              <div className="space-y-1">
+                <Label className="text-xs text-zinc-400">Cada (valor)</Label>
                 <Input
                   type="number"
                   value={form.interval_value}
                   onChange={(e) => handleChange("interval_value", e.target.value)}
                   className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
-                  placeholder="Ej: 10000, 3, 12"
-                  required
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Intervalos Adicionales (opcional)</Label>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="text-xs text-zinc-400">Cada (kilómetros)</Label>
-                <Input
-                  type="number"
-                  value={form.interval_mileage}
-                  onChange={(e) => handleChange("interval_mileage", e.target.value)}
-                  className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
                   placeholder="Ej: 10000"
                 />
               </div>
-              <div className="space-y-2">
-                <Label className="text-xs text-zinc-400">Cada (horas)</Label>
-                <Input
-                  type="number"
-                  value={form.interval_hours}
-                  onChange={(e) => handleChange("interval_hours", e.target.value)}
-                  className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
-                  placeholder="Ej: 500"
-                />
-              </div>
             </div>
-            <p className="text-xs text-zinc-500">Se ejecutará el que llegue primero (km o horas)</p>
           </div>
 
+          {/* Intervalos adicionales */}
           <div className="space-y-2">
-            <Label>Aviso Previo Principal (opcional)</Label>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
+            <Label>Intervalos Adicionales <span className="text-zinc-500 font-normal text-xs">(se ejecuta el que llegue primero)</span></Label>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs text-zinc-400">Cada (km)</Label>
+                <Input type="number" value={form.interval_mileage} onChange={(e) => handleChange("interval_mileage", e.target.value)}
+                  className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50" placeholder="Ej: 10000" />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs text-zinc-400">Cada (horas)</Label>
+                <Input type="number" value={form.interval_hours} onChange={(e) => handleChange("interval_hours", e.target.value)}
+                  className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50" placeholder="Ej: 500" />
+              </div>
+            </div>
+          </div>
+
+          {/* Aviso previo */}
+          <div className="space-y-2">
+            <Label>Aviso Previo <span className="text-zinc-500 font-normal text-xs">(opcional)</span></Label>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
                 <Label className="text-xs text-zinc-400">Tipo</Label>
                 <Select value={form.warning_interval_type} onValueChange={(v) => handleChange("warning_interval_type", v)}>
-                  <SelectTrigger className="bg-zinc-900 border-zinc-700">
-                    <SelectValue />
-                  </SelectTrigger>
+                  <SelectTrigger className="bg-zinc-900 border-zinc-700"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="mileage">Kilómetros</SelectItem>
-                    <SelectItem value="miles">Millas</SelectItem>
                     <SelectItem value="hours">Horas</SelectItem>
                     <SelectItem value="days">Días</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <Label className="text-xs text-zinc-400">Valor</Label>
-                <Input
-                  type="number"
-                  value={form.warning_interval_value}
-                  onChange={(e) => handleChange("warning_interval_value", e.target.value)}
-                  className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
-                  placeholder="Ej: 500, 7"
-                />
+                <Input type="number" value={form.warning_interval_value} onChange={(e) => handleChange("warning_interval_value", e.target.value)}
+                  className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50" placeholder="Ej: 500" />
               </div>
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label>Avisos Adicionales (opcional)</Label>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="text-xs text-zinc-400">Antes de (kilómetros)</Label>
-                <Input
-                  type="number"
-                  value={form.warning_interval_mileage}
-                  onChange={(e) => handleChange("warning_interval_mileage", e.target.value)}
-                  className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
-                  placeholder="Ej: 500"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs text-zinc-400">Antes de (horas)</Label>
-                <Input
-                  type="number"
-                  value={form.warning_interval_hours}
-                  onChange={(e) => handleChange("warning_interval_hours", e.target.value)}
-                  className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
-                  placeholder="Ej: 50"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Fabricante</Label>
+          {/* Fabricante y Tipo de Vehículo */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label className="text-xs">Fabricante</Label>
               <Select value={form.applies_to_manufacturer_id || ""} onValueChange={(v) => handleChange("applies_to_manufacturer_id", v || "")}>
-                <SelectTrigger className="bg-zinc-900 border-zinc-700">
-                  <SelectValue placeholder="Todos los fabricantes" />
-                </SelectTrigger>
+                <SelectTrigger className="bg-zinc-900 border-zinc-700"><SelectValue placeholder="Todos" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={null}>Todos</SelectItem>
-                  {manufacturers.map(m => (
-                    <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>
-                  ))}
+                  <SelectItem value={null}>Todos los fabricantes</SelectItem>
+                  {manufacturers.map(m => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <Label>Tipo de Vehículo</Label>
+            <div className="space-y-1">
+              <Label className="text-xs">Tipo de Vehículo</Label>
               <Select value={form.applies_to_vehicle_type_id || ""} onValueChange={(v) => handleChange("applies_to_vehicle_type_id", v || "")}>
-                <SelectTrigger className="bg-zinc-900 border-zinc-700">
-                  <SelectValue placeholder="Todos los tipos" />
-                </SelectTrigger>
+                <SelectTrigger className="bg-zinc-900 border-zinc-700"><SelectValue placeholder="Todos" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={null}>Todos</SelectItem>
-                  {vehicleTypes.map(vt => (
-                    <SelectItem key={vt.id} value={vt.id}>{vt.name}</SelectItem>
-                  ))}
+                  <SelectItem value={null}>Todos los tipos</SelectItem>
+                  {vehicleTypes.map(vt => <SelectItem key={vt.id} value={vt.id}>{vt.name}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
           </div>
 
+          {/* Componentes / insumos */}
           <div className="space-y-2">
-            <Label>Componentes</Label>
+            <Label>
+              {form.task_type === "item" ? "Especificaciones del ítem" : "Componentes / insumos relacionados"}
+              <span className="text-zinc-500 font-normal text-xs ml-1">(opcional)</span>
+            </Label>
             <div className="flex gap-2">
               <Input
                 value={componentInput}
                 onChange={(e) => setComponentInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    addComponent();
-                  }
-                }}
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addComponent(); } }}
                 className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
-                placeholder="Ej: Filtro de aceite"
+                placeholder={form.task_type === "item" ? "Ej: SAE 15W40, Capacidad 18L" : "Ej: Grasa Mobilux EP2"}
               />
               <Button type="button" onClick={addComponent} variant="outline" className="border-zinc-700">
                 <Plus className="w-4 h-4" />
@@ -388,12 +432,10 @@ export default function MaintenanceProgramDialog({
             )}
           </div>
 
+          {/* Activo */}
           <div className="flex items-center gap-2 p-3 rounded-lg bg-zinc-900">
-            <Switch
-              checked={form.is_active}
-              onCheckedChange={(checked) => handleChange("is_active", checked)}
-            />
-            <Label className="cursor-pointer">Programa activo</Label>
+            <Switch checked={form.is_active} onCheckedChange={(checked) => handleChange("is_active", checked)} />
+            <Label className="cursor-pointer">Activo</Label>
           </div>
 
           <DialogFooter className="gap-2">
@@ -407,9 +449,9 @@ export default function MaintenanceProgramDialog({
                 </AlertDialogTrigger>
                 <AlertDialogContent className="bg-zinc-950 border-zinc-800">
                   <AlertDialogHeader>
-                    <AlertDialogTitle className="text-white">¿Eliminar programa?</AlertDialogTitle>
+                    <AlertDialogTitle className="text-white">¿Eliminar?</AlertDialogTitle>
                     <AlertDialogDescription>
-                      Esta acción no se puede deshacer. Se eliminará permanentemente el programa "{program.name}".
+                      Se eliminará permanentemente "{program.name}".
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
