@@ -165,7 +165,18 @@ export default function Maintenance() {
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Maintenance.create(data),
-    onSuccess: () => {
+    onMutate: async (newData) => {
+      await queryClient.cancelQueries({ queryKey: ['maintenances'] });
+      const previous = queryClient.getQueryData(['maintenances', currentUser?.company_id]);
+      queryClient.setQueryData(['maintenances', currentUser?.company_id], (old = []) => [
+        { ...newData, id: `temp-${Date.now()}`, _optimistic: true }, ...old
+      ]);
+      return { previous };
+    },
+    onError: (_err, _data, ctx) => {
+      if (ctx?.previous) queryClient.setQueryData(['maintenances', currentUser?.company_id], ctx.previous);
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['maintenances'] });
       setDialogOpen(false);
     },
@@ -173,7 +184,18 @@ export default function Maintenance() {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Maintenance.update(id, data),
-    onSuccess: () => {
+    onMutate: async ({ id, data }) => {
+      await queryClient.cancelQueries({ queryKey: ['maintenances'] });
+      const previous = queryClient.getQueryData(['maintenances', currentUser?.company_id]);
+      queryClient.setQueryData(['maintenances', currentUser?.company_id], (old = []) =>
+        old.map(m => m.id === id ? { ...m, ...data } : m)
+      );
+      return { previous };
+    },
+    onError: (_err, _data, ctx) => {
+      if (ctx?.previous) queryClient.setQueryData(['maintenances', currentUser?.company_id], ctx.previous);
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['maintenances'] });
       setDialogOpen(false);
       setSelectedMaintenance(null);
@@ -182,7 +204,18 @@ export default function Maintenance() {
 
   const deleteMutation = useMutation({
     mutationFn: (id) => base44.entities.Maintenance.delete(id),
-    onSuccess: () => {
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ['maintenances'] });
+      const previous = queryClient.getQueryData(['maintenances', currentUser?.company_id]);
+      queryClient.setQueryData(['maintenances', currentUser?.company_id], (old = []) =>
+        old.filter(m => m.id !== id)
+      );
+      return { previous };
+    },
+    onError: (_err, _id, ctx) => {
+      if (ctx?.previous) queryClient.setQueryData(['maintenances', currentUser?.company_id], ctx.previous);
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['maintenances'] });
       setDialogOpen(false);
       setSelectedMaintenance(null);
@@ -191,7 +224,18 @@ export default function Maintenance() {
 
   const updateNovedadMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Novedad.update(id, data),
-    onSuccess: () => {
+    onMutate: async ({ id, data }) => {
+      await queryClient.cancelQueries({ queryKey: ['novedades'] });
+      const previous = queryClient.getQueryData(['novedades', currentUser?.company_id]);
+      queryClient.setQueryData(['novedades', currentUser?.company_id], (old = []) =>
+        old.map(n => n.id === id ? { ...n, ...data } : n)
+      );
+      return { previous };
+    },
+    onError: (_err, _data, ctx) => {
+      if (ctx?.previous) queryClient.setQueryData(['novedades', currentUser?.company_id], ctx.previous);
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['novedades'] });
     },
   });
@@ -325,47 +369,38 @@ export default function Maintenance() {
               )}
             />
           </div>
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className={cn(
-              "w-full sm:w-40",
-              theme === 'dark' ? 'bg-zinc-900/50 border-zinc-800 text-white' : 'bg-white border-gray-200'
-            )}>
-              <SelectValue placeholder="Estado" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos</SelectItem>
-              {activeTab === 'mantenimientos' ? (
-                <>
-                  <SelectItem value="scheduled">Programado</SelectItem>
-                  <SelectItem value="in_progress">En progreso</SelectItem>
-                  <SelectItem value="completed">Completado</SelectItem>
-                  <SelectItem value="cancelled">Cancelado</SelectItem>
-                </>
-              ) : (
-                <>
-                  <SelectItem value="pendiente">Pendiente</SelectItem>
-                  <SelectItem value="en_proceso">En Proceso</SelectItem>
-                  <SelectItem value="resuelto">Resuelto</SelectItem>
-                  <SelectItem value="cerrado">Cerrado</SelectItem>
-                </>
-              )}
-            </SelectContent>
-          </Select>
+          <MobileSelect
+            value={statusFilter}
+            onValueChange={setStatusFilter}
+            placeholder="Estado"
+            options={activeTab === 'mantenimientos' ? [
+              { value: "all", label: "Todos" },
+              { value: "scheduled", label: "Programado" },
+              { value: "in_progress", label: "En progreso" },
+              { value: "completed", label: "Completado" },
+              { value: "cancelled", label: "Cancelado" },
+            ] : [
+              { value: "all", label: "Todos" },
+              { value: "pendiente", label: "Pendiente" },
+              { value: "en_proceso", label: "En Proceso" },
+              { value: "resuelto", label: "Resuelto" },
+              { value: "cerrado", label: "Cerrado" },
+            ]}
+            triggerClassName={cn("w-full sm:w-40", theme === 'dark' ? 'bg-zinc-900/50 border-zinc-800 text-white' : 'bg-white border-gray-200')}
+          />
           {activeTab === 'mantenimientos' && (
-            <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger className={cn(
-                "w-full sm:w-40",
-                theme === 'dark' ? 'bg-zinc-900/50 border-zinc-800 text-white' : 'bg-white border-gray-200'
-              )}>
-                <SelectValue placeholder="Tipo" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos</SelectItem>
-                <SelectItem value="preventive">Preventivo</SelectItem>
-                <SelectItem value="corrective">Correctivo</SelectItem>
-                <SelectItem value="inspection">Inspección</SelectItem>
-              </SelectContent>
-            </Select>
+            <MobileSelect
+              value={typeFilter}
+              onValueChange={setTypeFilter}
+              placeholder="Tipo"
+              options={[
+                { value: "all", label: "Todos" },
+                { value: "preventive", label: "Preventivo" },
+                { value: "corrective", label: "Correctivo" },
+                { value: "inspection", label: "Inspección" },
+              ]}
+              triggerClassName={cn("w-full sm:w-40", theme === 'dark' ? 'bg-zinc-900/50 border-zinc-800 text-white' : 'bg-white border-gray-200')}
+            />
           )}
         </div>
 
