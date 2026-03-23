@@ -84,7 +84,6 @@ function LayoutContent({ children, currentPageName }) {
   const [user, setUser] = useState(null);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [configOpen, setConfigOpen] = useState(false);
-  const [pageDirection, setPageDirection] = useState(0);
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
