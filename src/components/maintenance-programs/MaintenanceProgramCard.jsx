@@ -153,42 +153,62 @@ export default function MaintenanceProgramCard({ program, manufacturers, vehicle
 
         {/* Contenido del programa (programas, ítems y acciones vinculados) */}
         {taskType === "program" && linkedTasks.length > 0 && (
-          <div className="space-y-1.5 pt-1 border-t border-zinc-800">
-            {linkedPrograms.length > 0 && (
-              <div>
-                <p className="text-xs text-zinc-500 mb-1 flex items-center gap-1">
-                  <Package className="w-3 h-3" /> {linkedPrograms.length} programa(s) incluido(s)
-                </p>
-                <div className="flex flex-wrap gap-1">
-                  {linkedPrograms.map(t => (
-                    <span key={t.id} className="text-xs text-yellow-400 bg-yellow-500/10 px-1.5 py-0.5 rounded">{t.name}</span>
-                  ))}
+          <div className="space-y-2 pt-1 border-t border-zinc-800">
+            {/* Programas incluidos con sus propios ítems/acciones expandidos */}
+            {linkedPrograms.map(subProg => {
+              const subTasks = (subProg.linked_task_ids || [])
+                .map(id => allPrograms.find(p => p.id === id))
+                .filter(Boolean);
+              const subItems = subTasks.filter(t => !t.task_type || t.task_type === "item");
+              const subActions = subTasks.filter(t => t.task_type === "action");
+              return (
+                <div key={subProg.id} className="rounded-lg border border-yellow-500/20 bg-yellow-500/5 p-2 space-y-1">
+                  <p className="text-xs text-yellow-400 font-medium flex items-center gap-1">
+                    <Package className="w-3 h-3" /> {subProg.name}
+                  </p>
+                  {subItems.length > 0 && (
+                    <div className="flex flex-wrap gap-1 pl-4">
+                      {subItems.map(t => (
+                        <span key={t.id} className="text-xs text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded">{t.name}</span>
+                      ))}
+                    </div>
+                  )}
+                  {subActions.length > 0 && (
+                    <div className="flex flex-wrap gap-1 pl-4">
+                      {subActions.map(t => (
+                        <span key={t.id} className="text-xs text-green-400 bg-green-500/10 px-1.5 py-0.5 rounded">{t.name}</span>
+                      ))}
+                    </div>
+                  )}
+                  {subTasks.length === 0 && (
+                    <p className="text-xs text-zinc-600 pl-4">Sin ítems ni acciones</p>
+                  )}
                 </div>
-              </div>
-            )}
+              );
+            })}
+            {/* Ítems directos */}
             {linkedItems.length > 0 && (
               <div>
                 <p className="text-xs text-zinc-500 mb-1 flex items-center gap-1">
                   <Wrench className="w-3 h-3" /> {linkedItems.length} ítem(s)
                 </p>
                 <div className="flex flex-wrap gap-1">
-                  {linkedItems.slice(0, 5).map(t => (
+                  {linkedItems.map(t => (
                     <span key={t.id} className="text-xs text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded">{t.name}</span>
                   ))}
-                  {linkedItems.length > 5 && <span className="text-xs text-zinc-500">+{linkedItems.length - 5}</span>}
                 </div>
               </div>
             )}
+            {/* Acciones directas */}
             {linkedActions.length > 0 && (
               <div>
                 <p className="text-xs text-zinc-500 mb-1 flex items-center gap-1">
                   <Zap className="w-3 h-3" /> {linkedActions.length} acción(es)
                 </p>
                 <div className="flex flex-wrap gap-1">
-                  {linkedActions.slice(0, 5).map(t => (
+                  {linkedActions.map(t => (
                     <span key={t.id} className="text-xs text-green-400 bg-green-500/10 px-1.5 py-0.5 rounded">{t.name}</span>
                   ))}
-                  {linkedActions.length > 5 && <span className="text-xs text-zinc-500">+{linkedActions.length - 5}</span>}
                 </div>
               </div>
             )}
