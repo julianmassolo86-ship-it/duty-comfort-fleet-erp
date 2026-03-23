@@ -143,8 +143,8 @@ export default function LandingPage() {
             <div className="group relative">
               <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 to-transparent rounded-2xl transform group-hover:scale-105 transition-transform" />
               <div className="relative p-8 bg-white border border-gray-200 rounded-2xl hover:border-yellow-500/50 hover:shadow-2xl transition-all h-full">
-                <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-yellow-500 to-yellow-600 flex items-center justify-center mb-6 shadow-lg shadow-yellow-500/30">
-                  <Car className="w-8 h-8 text-black" />
+                <div className="w-16 h-16 rounded-xl border-2 border-yellow-500/30 flex items-center justify-center mb-6 overflow-hidden">
+                  <img src="https://media.base44.com/images/public/698ba23f75eb60d9d1b501ef/6839e6826_generated_image.png" alt="Vehículos" className="w-full h-full object-contain" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-3">Gestión de Vehículos</h3>
                 <p className="text-gray-600 leading-relaxed">
@@ -155,42 +155,42 @@ export default function LandingPage() {
 
             {/* Benefit 2 */}
             <div className="group relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent rounded-2xl transform group-hover:scale-105 transition-transform" />
-              <div className="relative p-8 bg-white border border-gray-200 rounded-2xl hover:border-blue-500/50 hover:shadow-2xl transition-all h-full">
-                <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mb-6 shadow-lg shadow-blue-500/30">
-                  <Users className="w-8 h-8 text-white" />
+              <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 to-transparent rounded-2xl transform group-hover:scale-105 transition-transform" />
+              <div className="relative p-8 bg-white border border-gray-200 rounded-2xl hover:border-yellow-500/50 hover:shadow-2xl transition-all h-full">
+                <div className="w-16 h-16 rounded-xl border-2 border-yellow-500/30 flex items-center justify-center mb-6 overflow-hidden">
+                  <img src="https://media.base44.com/images/public/698ba23f75eb60d9d1b501ef/bbfc850c2_generated_image.png" alt="Reportes" className="w-full h-full object-contain" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Control de Conductores</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Reportes y Análisis</h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Administra licencias, vencimientos y asignaciones de conductores con alertas automáticas.
+                  Toma decisiones basadas en datos con reportes detallados de operación y rendimiento.
                 </p>
               </div>
             </div>
 
             {/* Benefit 3 */}
             <div className="group relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-transparent rounded-2xl transform group-hover:scale-105 transition-transform" />
-              <div className="relative p-8 bg-white border border-gray-200 rounded-2xl hover:border-orange-500/50 hover:shadow-2xl transition-all h-full">
-                <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center mb-6 shadow-lg shadow-orange-500/30">
-                  <Wrench className="w-8 h-8 text-white" />
+              <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 to-transparent rounded-2xl transform group-hover:scale-105 transition-transform" />
+              <div className="relative p-8 bg-white border border-gray-200 rounded-2xl hover:border-yellow-500/50 hover:shadow-2xl transition-all h-full">
+                <div className="w-16 h-16 rounded-xl border-2 border-yellow-500/30 flex items-center justify-center mb-6 overflow-hidden">
+                  <img src="https://media.base44.com/images/public/698ba23f75eb60d9d1b501ef/350feeecb_generated_image.png" alt="Monitoreo" className="w-full h-full object-contain" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Mantenimiento Preventivo</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Monitoreo Digital</h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Planifica servicios, registra inspecciones y evita paradas imprevistas con seguimiento continuo.
+                  Visualizá el estado de toda tu flota desde un panel centralizado con control total en tiempo real.
                 </p>
               </div>
             </div>
 
             {/* Benefit 4 */}
             <div className="group relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-transparent rounded-2xl transform group-hover:scale-105 transition-transform" />
-              <div className="relative p-8 bg-white border border-gray-200 rounded-2xl hover:border-green-500/50 hover:shadow-2xl transition-all h-full">
-                <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center mb-6 shadow-lg shadow-green-500/30">
-                  <BarChart3 className="w-8 h-8 text-white" />
+              <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 to-transparent rounded-2xl transform group-hover:scale-105 transition-transform" />
+              <div className="relative p-8 bg-white border border-gray-200 rounded-2xl hover:border-yellow-500/50 hover:shadow-2xl transition-all h-full">
+                <div className="w-16 h-16 rounded-xl border-2 border-yellow-500/30 flex items-center justify-center mb-6 overflow-hidden">
+                  <img src="https://media.base44.com/images/public/698ba23f75eb60d9d1b501ef/b15317067_generated_image.png" alt="Mantenimiento" className="w-full h-full object-contain" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Reportes y Análisis</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Mantenimiento Preventivo</h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Toma decisiones basadas en datos con reportes detallados de operación y rendimiento.
+                  Planifica servicios, registra inspecciones y evita paradas imprevistas con seguimiento continuo.
                 </p>
               </div>
             </div>
