@@ -643,10 +643,10 @@ function LayoutContent({ children, currentPageName }) {
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={currentPageName}
-            initial={{ opacity: 0, x: pageDirection > 0 ? 300 : -300 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: pageDirection > 0 ? -300 : 300 }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.18, ease: "easeOut" }}
           >
             {children}
           </motion.div>

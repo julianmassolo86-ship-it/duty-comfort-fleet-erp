@@ -239,17 +239,18 @@ export default function Drivers() {
               className={cn("pl-10", theme === 'dark' ? 'bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500' : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400')}
             />
           </div>
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className={cn("w-full sm:w-40", theme === 'dark' ? 'bg-slate-800/50 border-slate-700 text-white' : 'bg-white border-gray-300 text-gray-900')}>
-              <SelectValue placeholder="Estado" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos</SelectItem>
-              <SelectItem value="active">Activo</SelectItem>
-              <SelectItem value="inactive">Inactivo</SelectItem>
-              <SelectItem value="on_leave">De baja</SelectItem>
-            </SelectContent>
-          </Select>
+          <MobileSelect
+            value={statusFilter}
+            onValueChange={setStatusFilter}
+            placeholder="Estado"
+            options={[
+              { value: "all", label: "Todos" },
+              { value: "active", label: "Activo" },
+              { value: "inactive", label: "Inactivo" },
+              { value: "on_leave", label: "De baja" },
+            ]}
+            triggerClassName={cn("w-full sm:w-40", theme === 'dark' ? 'bg-slate-800/50 border-slate-700 text-white' : 'bg-white border-gray-300 text-gray-900')}
+          />
         </div>
 
         {/* Drivers Grid */}
