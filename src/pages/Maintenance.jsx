@@ -36,48 +36,18 @@ export default function Maintenance() {
   const [selectedMaintenance, setSelectedMaintenance] = useState(null);
   const [selectedAcMaintenance, setSelectedAcMaintenance] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const { theme } = useTheme();
 
   const queryClient = useQueryClient();
 
-  // Pull to refresh handler
   const handleRefresh = async () => {
-    setIsRefreshing(true);
-    await queryClient.invalidateQueries({ queryKey: ['maintenances'] });
-    await queryClient.invalidateQueries({ queryKey: ['vehicles'] });
-    await queryClient.invalidateQueries({ queryKey: ['novedades'] });
-    await queryClient.invalidateQueries({ queryKey: ['ac-maintenances'] });
-    setTimeout(() => setIsRefreshing(false), 500);
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['maintenances'] }),
+      queryClient.invalidateQueries({ queryKey: ['vehicles'] }),
+      queryClient.invalidateQueries({ queryKey: ['novedades'] }),
+      queryClient.invalidateQueries({ queryKey: ['ac-maintenances'] }),
+    ]);
   };
-
-  // Pull to refresh gesture
-  useEffect(() => {
-    let startY = 0;
-    let scrollTop = 0;
-
-    const handleTouchStart = (e) => {
-      startY = e.touches[0].clientY;
-      scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-    };
-
-    const handleTouchMove = (e) => {
-      const currentY = e.touches[0].clientY;
-      const pullDistance = currentY - startY;
-
-      if (scrollTop === 0 && pullDistance > 100 && !isRefreshing) {
-        handleRefresh();
-      }
-    };
-
-    document.addEventListener('touchstart', handleTouchStart);
-    document.addEventListener('touchmove', handleTouchMove);
-
-    return () => {
-      document.removeEventListener('touchstart', handleTouchStart);
-      document.removeEventListener('touchmove', handleTouchMove);
-    };
-  }, [isRefreshing]);
 
   useEffect(() => {
     base44.auth.me().then(setCurrentUser).catch(() => {});
