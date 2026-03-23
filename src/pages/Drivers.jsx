@@ -11,7 +11,7 @@ import PageHeader from "../components/common/PageHeader";
 import EmptyState from "../components/common/EmptyState";
 import DriverCard from "../components/drivers/DriverCard";
 import DriverDialog from "../components/drivers/DriverDialog";
-import PullToRefresh from "../components/common/PullToRefresh";
+import PageWrapper from "../components/common/PageWrapper";
 import { useTheme } from "../components/common/ThemeWrapper";
 
 export default function Drivers() {

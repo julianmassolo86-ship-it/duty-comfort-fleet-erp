@@ -12,7 +12,7 @@ import VehicleCard from "../components/vehicles/VehicleCard";
 import VehicleTable from "../components/vehicles/VehicleTable";
 import VehicleDialog from "../components/vehicles/VehicleDialog";
 import QuickVehicleCapture from "../components/vehicles/QuickVehicleCapture";
-import PullToRefresh from "../components/common/PullToRefresh";
+import PageWrapper from "../components/common/PageWrapper";
 import MobileSelect from "../components/common/MobileSelect";
 import { useTheme } from "../components/common/ThemeWrapper";
 

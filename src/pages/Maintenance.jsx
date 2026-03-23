@@ -6,18 +6,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import MobileSelect from "../components/common/MobileSelect";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import PageHeader from "../components/common/PageHeader";
 import EmptyState from "../components/common/EmptyState";
 import MaintenanceCard from "../components/maintenance/MaintenanceCard";
 import MaintenanceDialog from "../components/maintenance/MaintenanceDialog";
 import NovedadDialog from "../components/novedades/NovedadDialog";
-
 import NovedadCard from "../components/novedades/NovedadCard";
 import AirConditioningMaintenanceDialog from "../components/ac-maintenance/AirConditioningMaintenanceDialog";
 import { useTheme } from "../components/common/ThemeWrapper";
 import { useLocation, useNavigate } from "react-router-dom";
+import PageWrapper from "../components/common/PageWrapper";
 
 export default function Maintenance() {
   const location = useLocation();
