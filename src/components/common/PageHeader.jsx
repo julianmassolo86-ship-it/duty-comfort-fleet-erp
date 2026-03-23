@@ -13,7 +13,7 @@ export default function PageHeader({ title, description, actions, className }) {
         )}
       </div>
       {actions && (
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 flex-wrap [&_button]:min-h-[44px] [&_a]:min-h-[44px]">
           {actions}
         </div>
       )}

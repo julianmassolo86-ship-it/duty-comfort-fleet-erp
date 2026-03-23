@@ -227,6 +227,7 @@ export default function VehicleTable({ vehicles, locations, companies, drivers, 
             {sortedVehicles.map(vehicle => (
               <TableRow 
                 key={vehicle.id}
+                style={{ minHeight: "44px" }}
                 className={cn(
                   "cursor-pointer transition-colors",
                   theme === 'dark'
@@ -275,7 +276,7 @@ export default function VehicleTable({ vehicles, locations, companies, drivers, 
                         onEdit(vehicle);
                       }}
                       className={cn(
-                        "h-8 w-8",
+                        "h-11 w-11",
                         theme === 'dark' ? 'text-zinc-400 hover:text-white hover:bg-zinc-800' : 'text-gray-400 hover:text-gray-900 hover:bg-gray-100'
                       )}
                     >
@@ -288,7 +289,7 @@ export default function VehicleTable({ vehicles, locations, companies, drivers, 
                         e.stopPropagation();
                         setDeleteVehicle(vehicle);
                       }}
-                      className="h-8 w-8 text-red-400 hover:text-red-500 hover:bg-red-500/10"
+                      className="h-11 w-11 text-red-400 hover:text-red-500 hover:bg-red-500/10"
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>
