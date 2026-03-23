@@ -248,6 +248,18 @@ export default function MaintenanceProgramDialog({
               <Label className="text-blue-400 flex items-center gap-2">
                 <Hash className="w-4 h-4" /> Identificación del Componente
               </Label>
+              <div className="space-y-1">
+                <Label className="text-xs text-zinc-400">Fabricante / Marca</Label>
+                <Select value={form.applies_to_manufacturer_id || ""} onValueChange={(v) => set("applies_to_manufacturer_id", v)}>
+                  <SelectTrigger className="bg-zinc-900 border-zinc-700 focus:border-blue-500/50">
+                    <SelectValue placeholder="Seleccionar fabricante (opcional)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={null}>Sin especificar</SelectItem>
+                    {manufacturers.map(m => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <Label className="text-xs text-zinc-400">Número de Pieza (OEM)</Label>
