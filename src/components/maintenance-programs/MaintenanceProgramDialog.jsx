@@ -151,8 +151,7 @@ export default function MaintenanceProgramDialog({
   };
 
   const availableItemsAndActions = allPrograms.filter(p =>
-    p.id !== program?.id &&
-    (p.task_type === "item" || p.task_type === "action" || (!p.task_type && !p.is_program_group))
+    p.id !== program?.id
   );
 
   const typeInfo = TASK_TYPES.find(t => t.key === form.task_type);
@@ -321,6 +320,8 @@ export default function MaintenanceProgramDialog({
                     {availableItemsAndActions.map(task => {
                       const ttype = task.task_type || "item";
                       const manufacturerName = manufacturers.find(m => m.id === task.applies_to_manufacturer_id)?.name;
+                      const typeLabel = ttype === "action" ? "Acción" : ttype === "program" ? "Programa" : "Ítem";
+                      const typeColor = ttype === "action" ? "border-green-500/40 text-green-400" : ttype === "program" ? "border-yellow-500/40 text-yellow-400" : "border-blue-500/40 text-blue-400";
                       return (
                         <label key={task.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-zinc-800 cursor-pointer">
                           <input
@@ -329,10 +330,8 @@ export default function MaintenanceProgramDialog({
                             onChange={() => toggleLinkedTask(task.id)}
                             className="w-4 h-4 accent-yellow-500 shrink-0"
                           />
-                          <span className={cn("text-xs px-2 py-0.5 rounded-full border shrink-0",
-                            ttype === "action" ? "border-green-500/40 text-green-400" : "border-blue-500/40 text-blue-400"
-                          )}>
-                            {ttype === "action" ? "Acción" : "Ítem"}
+                          <span className={cn("text-xs px-2 py-0.5 rounded-full border shrink-0", typeColor)}>
+                            {typeLabel}
                           </span>
                           <div className="flex flex-col min-w-0">
                             <span className="text-sm text-white truncate">{task.name}</span>
