@@ -119,14 +119,12 @@ export default function MaintenanceProgramDialog({
     onSave({
       ...form,
       is_program_group: isProgram,
-      // Convertir a número o null
       interval_mileage: form.interval_mileage ? Number(form.interval_mileage) : null,
       interval_hours: form.interval_hours ? Number(form.interval_hours) : null,
       interval_months: form.interval_months ? Number(form.interval_months) : null,
       warning_mileage: form.warning_mileage ? Number(form.warning_mileage) : null,
       warning_hours: form.warning_hours ? Number(form.warning_hours) : null,
       warning_days: form.warning_days ? Number(form.warning_days) : null,
-      // Limpiar campos que no aplican
       part_number: !isProgram ? form.part_number : null,
       alternative_part_number: !isProgram ? form.alternative_part_number : null,
       linked_task_ids: isProgram ? form.linked_task_ids : [],
@@ -201,8 +199,8 @@ export default function MaintenanceProgramDialog({
             {typeInfo && <p className="text-xs text-zinc-500">{typeInfo.description}</p>}
           </div>
 
-          {/* Empresa (solo super admin) */}
-          {isSuperAdmin && (
+          {/* Empresa (solo super admin y solo para programas) */}
+          {isSuperAdmin && isProgram && (
             <div className="space-y-2">
               <Label>Empresa *</Label>
               <Select value={form.company_id} onValueChange={(v) => set("company_id", v)} required>
@@ -276,6 +274,30 @@ export default function MaintenanceProgramDialog({
           {/* === CAMPOS SOLO PARA PROGRAMAS === */}
           {isProgram && (
             <>
+              {/* Fabricante y Tipo de Vehículo — solo programas */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label className="text-xs">Fabricante</Label>
+                  <Select value={form.applies_to_manufacturer_id || ""} onValueChange={(v) => set("applies_to_manufacturer_id", v)}>
+                    <SelectTrigger className="bg-zinc-900 border-zinc-700"><SelectValue placeholder="Todos" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={null}>Todos los fabricantes</SelectItem>
+                      {manufacturers.map(m => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Tipo de Vehículo</Label>
+                  <Select value={form.applies_to_vehicle_type_id || ""} onValueChange={(v) => set("applies_to_vehicle_type_id", v)}>
+                    <SelectTrigger className="bg-zinc-900 border-zinc-700"><SelectValue placeholder="Todos" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={null}>Todos los tipos</SelectItem>
+                      {vehicleTypes.map(vt => <SelectItem key={vt.id} value={vt.id}>{vt.name}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
               {/* Selector de ítems y acciones */}
               <div className="p-4 rounded-xl bg-zinc-900/50 border border-yellow-500/20 space-y-2">
                 <Label className="text-yellow-400">Ítems y Acciones del Programa</Label>
@@ -286,6 +308,7 @@ export default function MaintenanceProgramDialog({
                   <div className="space-y-1 max-h-48 overflow-y-auto pr-1">
                     {availableItemsAndActions.map(task => {
                       const ttype = task.task_type || "item";
+                      const manufacturerName = manufacturers.find(m => m.id === task.applies_to_manufacturer_id)?.name;
                       return (
                         <label key={task.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-zinc-800 cursor-pointer">
                           <input
@@ -299,7 +322,16 @@ export default function MaintenanceProgramDialog({
                           )}>
                             {ttype === "action" ? "Acción" : "Ítem"}
                           </span>
-                          <span className="text-sm text-white">{task.name}</span>
+                          <div className="flex flex-col min-w-0">
+                            <span className="text-sm text-white truncate">{task.name}</span>
+                            {(task.part_number || manufacturerName) && (
+                              <span className="text-xs text-zinc-500">
+                                {task.part_number && `N/P: ${task.part_number}`}
+                                {task.part_number && manufacturerName && " · "}
+                                {manufacturerName && `Fab: ${manufacturerName}`}
+                              </span>
+                            )}
+                          </div>
                         </label>
                       );
                     })}
@@ -424,30 +456,6 @@ export default function MaintenanceProgramDialog({
                 ))}
               </div>
             )}
-          </div>
-
-          {/* Fabricante y Tipo de Vehículo */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <Label className="text-xs">Fabricante</Label>
-              <Select value={form.applies_to_manufacturer_id || ""} onValueChange={(v) => set("applies_to_manufacturer_id", v)}>
-                <SelectTrigger className="bg-zinc-900 border-zinc-700"><SelectValue placeholder="Todos" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={null}>Todos los fabricantes</SelectItem>
-                  {manufacturers.map(m => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1">
-              <Label className="text-xs">Tipo de Vehículo</Label>
-              <Select value={form.applies_to_vehicle_type_id || ""} onValueChange={(v) => set("applies_to_vehicle_type_id", v)}>
-                <SelectTrigger className="bg-zinc-900 border-zinc-700"><SelectValue placeholder="Todos" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={null}>Todos los tipos</SelectItem>
-                  {vehicleTypes.map(vt => <SelectItem key={vt.id} value={vt.id}>{vt.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
           </div>
 
           {/* Activo */}
