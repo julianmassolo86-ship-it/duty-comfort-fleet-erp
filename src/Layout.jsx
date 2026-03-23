@@ -23,6 +23,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { motion, AnimatePresence } from "framer-motion";
 
 import { ThemeContextValue } from "@/components/common/ThemeWrapper";
+import MobileBottomNav from "@/components/common/MobileBottomNav";
 
 const useTheme = () => {
   const context = useContext(ThemeContextValue);
