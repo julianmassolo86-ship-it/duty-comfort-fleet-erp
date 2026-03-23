@@ -389,7 +389,7 @@ function LayoutContent({ children, currentPageName }) {
                   </div>
                 }
                 <span className={cn("text-lg font-bold", theme === 'dark' ? 'text-white' : 'text-gray-900')}>
-                  Duty Comfort
+                  Mass Soluciones
                 </span>
               </>
             )}
