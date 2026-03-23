@@ -20,17 +20,16 @@ export default function Drivers() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedDriver, setSelectedDriver] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const { theme } = useTheme();
 
   const queryClient = useQueryClient();
 
   const handleRefresh = async () => {
-    setIsRefreshing(true);
-    await queryClient.invalidateQueries({ queryKey: ['drivers'] });
-    await queryClient.invalidateQueries({ queryKey: ['locations'] });
-    await queryClient.invalidateQueries({ queryKey: ['vehicles'] });
-    setTimeout(() => setIsRefreshing(false), 500);
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['drivers'] }),
+      queryClient.invalidateQueries({ queryKey: ['locations'] }),
+      queryClient.invalidateQueries({ queryKey: ['vehicles'] }),
+    ]);
   };
 
   useEffect(() => {

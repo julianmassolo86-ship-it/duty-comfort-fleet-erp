@@ -25,7 +25,6 @@ export default function Vehicles() {
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [viewMode, setViewMode] = useState("grid"); // "grid" o "table"
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const [captureDialogOpen, setCaptureDialogOpen] = useState(false);
   const [prefilledData, setPrefilledData] = useState(null);
   const [isExporting, setIsExporting] = useState(false);
@@ -34,11 +33,11 @@ export default function Vehicles() {
   const queryClient = useQueryClient();
 
   const handleRefresh = async () => {
-    setIsRefreshing(true);
-    await queryClient.invalidateQueries({ queryKey: ['vehicles'] });
-    await queryClient.invalidateQueries({ queryKey: ['drivers'] });
-    await queryClient.invalidateQueries({ queryKey: ['locations'] });
-    setTimeout(() => setIsRefreshing(false), 500);
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['vehicles'] }),
+      queryClient.invalidateQueries({ queryKey: ['drivers'] }),
+      queryClient.invalidateQueries({ queryKey: ['locations'] }),
+    ]);
   };
 
   const handleExport = async () => {
