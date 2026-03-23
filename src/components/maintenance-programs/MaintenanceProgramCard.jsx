@@ -2,17 +2,8 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Gauge, Clock, Edit, Package, Factory, Wrench, Zap } from "lucide-react";
+import { Gauge, Clock, Calendar, Edit, Package, Factory, Wrench, Zap, Hash, BellRing } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const intervalTypeLabels = {
-  mileage: { label: "km", icon: Gauge },
-  miles: { label: "mi", icon: Gauge },
-  hours: { label: "hs", icon: Clock },
-  months: { label: "meses", icon: Calendar },
-  years: { label: "años", icon: Calendar },
-  days: { label: "días", icon: Calendar },
-};
 
 const TYPE_CONFIG = {
   item: {
@@ -46,22 +37,20 @@ export default function MaintenanceProgramCard({ program, manufacturers, vehicle
   const config = TYPE_CONFIG[taskType] || TYPE_CONFIG.item;
   const TypeIcon = config.icon;
 
-  const IntervalIcon = intervalTypeLabels[program.interval_type]?.icon || Gauge;
-  const intervalLabel = intervalTypeLabels[program.interval_type]?.label || program.interval_type;
-
   const manufacturer = manufacturers.find(m => m.id === program.applies_to_manufacturer_id);
   const vehicleType = vehicleTypes.find(vt => vt.id === program.applies_to_vehicle_type_id);
 
   const linkedTasks = (program.linked_task_ids || [])
     .map(id => allPrograms.find(p => p.id === id))
     .filter(Boolean);
-
-  // Separar ítems de acciones en el programa
   const linkedItems = linkedTasks.filter(t => !t.task_type || t.task_type === "item");
   const linkedActions = linkedTasks.filter(t => t.task_type === "action");
 
+  const hasIntervals = program.interval_mileage || program.interval_hours || program.interval_months;
+  const hasWarnings = program.warning_mileage || program.warning_hours || program.warning_days;
+
   return (
-    <Card className={cn("bg-zinc-900 border-zinc-800 transition-all cursor-pointer group", config.borderClass)}>
+    <Card className={cn("bg-zinc-900 border-zinc-800 transition-all group", config.borderClass)}>
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-start gap-3 flex-1">
@@ -84,8 +73,7 @@ export default function MaintenanceProgramCard({ program, manufacturers, vehicle
             </div>
           </div>
           <Button
-            size="icon"
-            variant="ghost"
+            size="icon" variant="ghost"
             onClick={() => onEdit(program)}
             className="text-zinc-500 hover:text-yellow-400 hover:bg-yellow-500/10 shrink-0 w-8 h-8"
           >
@@ -95,39 +83,60 @@ export default function MaintenanceProgramCard({ program, manufacturers, vehicle
       </CardHeader>
 
       <CardContent className="space-y-3 pt-0">
-        {/* Intervalo */}
-        {(program.interval_value || program.interval_mileage || program.interval_hours) && (
+
+        {/* Números de pieza (solo ítems) */}
+        {taskType === "item" && (program.part_number || program.alternative_part_number) && (
           <div className="flex flex-wrap gap-2">
-            {program.interval_value && (
-              <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-zinc-800/50 text-xs">
-                <IntervalIcon className="w-3.5 h-3.5 text-zinc-400" />
-                <span className="text-white font-medium">c/ {program.interval_value.toLocaleString()} {intervalLabel}</span>
+            {program.part_number && (
+              <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-blue-500/10 border border-blue-500/20 text-xs">
+                <Hash className="w-3 h-3 text-blue-400" />
+                <span className="text-blue-300 font-mono">{program.part_number}</span>
               </div>
             )}
+            {program.alternative_part_number && (
+              <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-zinc-800 border border-zinc-700 text-xs">
+                <Hash className="w-3 h-3 text-zinc-400" />
+                <span className="text-zinc-400 font-mono">{program.alternative_part_number}</span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Intervalos (solo programas) */}
+        {taskType === "program" && hasIntervals && (
+          <div className="flex flex-wrap gap-2">
             {program.interval_mileage && (
-              <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-zinc-800/50 text-xs">
+              <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-zinc-800/80 text-xs">
                 <Gauge className="w-3.5 h-3.5 text-zinc-400" />
                 <span className="text-white font-medium">c/ {program.interval_mileage.toLocaleString()} km</span>
               </div>
             )}
             {program.interval_hours && (
-              <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-zinc-800/50 text-xs">
+              <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-zinc-800/80 text-xs">
                 <Clock className="w-3.5 h-3.5 text-zinc-400" />
                 <span className="text-white font-medium">c/ {program.interval_hours.toLocaleString()} hs</span>
+              </div>
+            )}
+            {program.interval_months && (
+              <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-zinc-800/80 text-xs">
+                <Calendar className="w-3.5 h-3.5 text-zinc-400" />
+                <span className="text-white font-medium">c/ {program.interval_months} meses</span>
               </div>
             )}
           </div>
         )}
 
-        {/* Aviso previo */}
-        {program.warning_interval_value && (
-          <div className="flex items-center gap-1.5 text-xs text-cyan-400">
-            <Calendar className="w-3.5 h-3.5" />
-            <span>Aviso: {program.warning_interval_value} {intervalTypeLabels[program.warning_interval_type]?.label} antes</span>
+        {/* Avisos previos (solo programas) */}
+        {taskType === "program" && hasWarnings && (
+          <div className="flex flex-wrap gap-1.5">
+            <BellRing className="w-3 h-3 text-cyan-400 shrink-0 mt-0.5" />
+            {program.warning_mileage && <span className="text-xs text-cyan-400">-{program.warning_mileage.toLocaleString()} km</span>}
+            {program.warning_hours && <span className="text-xs text-cyan-400">-{program.warning_hours} hs</span>}
+            {program.warning_days && <span className="text-xs text-cyan-400">-{program.warning_days} días</span>}
           </div>
         )}
 
-        {/* Aplicable a */}
+        {/* Fabricante / Tipo de vehículo */}
         {(manufacturer || vehicleType) && (
           <div className="flex flex-wrap gap-1.5">
             {manufacturer && (
@@ -136,14 +145,12 @@ export default function MaintenanceProgramCard({ program, manufacturers, vehicle
               </Badge>
             )}
             {vehicleType && (
-              <Badge variant="outline" className="border-zinc-700 text-zinc-400 text-xs">
-                {vehicleType.name}
-              </Badge>
+              <Badge variant="outline" className="border-zinc-700 text-zinc-400 text-xs">{vehicleType.name}</Badge>
             )}
           </div>
         )}
 
-        {/* Contenido del programa */}
+        {/* Contenido del programa (ítems y acciones vinculados) */}
         {taskType === "program" && linkedTasks.length > 0 && (
           <div className="space-y-1.5 pt-1 border-t border-zinc-800">
             {linkedItems.length > 0 && (
@@ -152,10 +159,10 @@ export default function MaintenanceProgramCard({ program, manufacturers, vehicle
                   <Wrench className="w-3 h-3" /> {linkedItems.length} ítem(s)
                 </p>
                 <div className="flex flex-wrap gap-1">
-                  {linkedItems.slice(0, 3).map(t => (
+                  {linkedItems.slice(0, 4).map(t => (
                     <span key={t.id} className="text-xs text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded">{t.name}</span>
                   ))}
-                  {linkedItems.length > 3 && <span className="text-xs text-zinc-500">+{linkedItems.length - 3}</span>}
+                  {linkedItems.length > 4 && <span className="text-xs text-zinc-500">+{linkedItems.length - 4}</span>}
                 </div>
               </div>
             )}
@@ -165,18 +172,18 @@ export default function MaintenanceProgramCard({ program, manufacturers, vehicle
                   <Zap className="w-3 h-3" /> {linkedActions.length} acción(es)
                 </p>
                 <div className="flex flex-wrap gap-1">
-                  {linkedActions.slice(0, 3).map(t => (
+                  {linkedActions.slice(0, 4).map(t => (
                     <span key={t.id} className="text-xs text-green-400 bg-green-500/10 px-1.5 py-0.5 rounded">{t.name}</span>
                   ))}
-                  {linkedActions.length > 3 && <span className="text-xs text-zinc-500">+{linkedActions.length - 3}</span>}
+                  {linkedActions.length > 4 && <span className="text-xs text-zinc-500">+{linkedActions.length - 4}</span>}
                 </div>
               </div>
             )}
           </div>
         )}
 
-        {/* Especificaciones del ítem */}
-        {taskType !== "program" && program.component_names && program.component_names.length > 0 && (
+        {/* Especificaciones (para ítems y acciones) */}
+        {taskType !== "program" && program.component_names?.length > 0 && (
           <div className="flex flex-wrap gap-1 pt-1 border-t border-zinc-800">
             {program.component_names.slice(0, 3).map((c, idx) => (
               <Badge key={idx} variant="outline" className="border-zinc-700 text-zinc-400 text-xs">{c}</Badge>
