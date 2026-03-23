@@ -377,20 +377,13 @@ function LayoutContent({ children, currentPageName }) {
               </Button>
             ) : (
               <>
-                {user?.logo_url ?
                 <img
-                  src={user.logo_url}
-                  alt="Logo"
-                  className="w-8 h-8 rounded-lg object-contain" /> :
-
-
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-yellow-500 to-yellow-600 flex items-center justify-center">
-                    <Car className="w-5 h-5 text-black" />
-                  </div>
-                }
-                <span className={cn("text-lg font-bold", theme === 'dark' ? 'text-white' : 'text-gray-900')}>
-                  Mass Soluciones
-                </span>
+                  src={theme === 'dark'
+                    ? "https://media.base44.com/images/public/698ba23f75eb60d9d1b501ef/ee47f0827_8b56e61b1_generated_image.png"
+                    : "https://media.base44.com/images/public/698ba23f75eb60d9d1b501ef/eed77ca4f_Diseosinttulo20.png"}
+                  alt="Mass Soluciones"
+                  style={{ height: '32px', width: 'auto', objectFit: 'contain' }}
+                />
               </>
             )}
           </div>
