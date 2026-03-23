@@ -431,23 +431,14 @@ function LayoutContent({ children, currentPageName }) {
           <div className="h-16 flex items-center gap-3 px-6 border-b" style={{
             borderColor: theme === 'dark' ? 'rgb(39, 39, 42)' : 'rgb(229, 231, 235)'
           }}>
-            {user?.logo_url ?
             <img
-              src={user.logo_url}
-              alt="Logo"
-              className="w-10 h-10 rounded-xl object-contain" /> :
-
-
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-500 to-yellow-600 flex items-center justify-center shadow-lg shadow-yellow-500/20">
-                <Car className="w-6 h-6 text-black" />
-              </div>
-            }
-            <div>
-              <span className="text-lg font-bold text-white">Mass Soluciones</span>
-              <p className={cn("text-xs", theme === 'dark' ? 'text-zinc-500' : 'text-gray-500')}>
-                {isSuperAdmin ? "Super Admin" : "Gestión de Flotas"}
-              </p>
-            </div>
+              src="https://media.base44.com/images/public/698ba23f75eb60d9d1b501ef/ee47f0827_8b56e61b1_generated_image.png"
+              alt="Mass Soluciones"
+              style={{ height: '36px', width: 'auto', objectFit: 'contain' }}
+            />
+            <p className={cn("text-xs", theme === 'dark' ? 'text-zinc-500' : 'text-gray-500')}>
+              {isSuperAdmin ? "Super Admin" : "Gestión de Flotas"}
+            </p>
           </div>
 
           {/* Navigation */}
