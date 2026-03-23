@@ -309,9 +309,7 @@ export default function Vehicles() {
   });
 
   return (
-    <PullToRefresh onRefresh={handleRefresh} isRefreshing={isRefreshing}>
-      <div className={cn("min-h-screen p-4 sm:p-6 lg:p-8", theme === 'dark' ? 'bg-black' : 'bg-gray-50')}>
-        <div className="max-w-7xl mx-auto">
+    <PageWrapper onRefresh={handleRefresh}>
         <PageHeader 
           title="Vehículos" 
           description="Gestiona tu flota de vehículos"
@@ -512,8 +510,6 @@ export default function Vehicles() {
           onVehicleNotFound={handleVehicleNotFound}
           theme={theme}
         />
-        </div>
-      </div>
-    </PullToRefresh>
+    </PageWrapper>
   );
 }
