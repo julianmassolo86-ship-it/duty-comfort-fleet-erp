@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useTheme } from "@/components/common/ThemeWrapper";
+import { useTheme } from "./ThemeWrapper";
 
 /**
  * Native-feeling Bottom Sheet for mobile.
