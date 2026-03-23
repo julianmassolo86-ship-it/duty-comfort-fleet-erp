@@ -653,85 +653,12 @@ function LayoutContent({ children, currentPageName }) {
       </main>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 border-t"
-        style={{
-          backgroundColor: theme === 'dark' ? 'rgba(0, 0, 0, 0.8)' : 'rgba(255, 255, 255, 0.8)',
-          backdropFilter: 'blur(12px)',
-          WebkitBackdropFilter: 'blur(12px)',
-          borderColor: theme === 'dark' ? 'rgb(39, 39, 42)' : 'rgb(229, 231, 235)',
-          paddingBottom: 'env(safe-area-inset-bottom)'
-        }}>
-        <div className="flex items-center justify-around h-16 px-2">
-          <button
-            onClick={() => {
-              if (currentPageName === "Dashboard") {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              } else {
-                navigate(createPageUrl("Dashboard"));
-              }
-            }}
-            className={cn(
-              "flex flex-col items-center justify-center flex-1 h-full gap-1 transition-colors",
-              currentPageName === "Dashboard"
-                ? theme === 'dark' ? 'text-yellow-400' : 'text-yellow-600'
-                : theme === 'dark' ? 'text-zinc-500' : 'text-gray-500'
-            )}>
-            <LayoutDashboard className="w-5 h-5" />
-            <span className="text-xs font-medium">Inicio</span>
-          </button>
-          <button
-            onClick={() => {
-              if (currentPageName === "Vehicles") {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              } else {
-                navigate(createPageUrl("Vehicles"));
-              }
-            }}
-            className={cn(
-              "flex flex-col items-center justify-center flex-1 h-full gap-1 transition-colors",
-              currentPageName === "Vehicles"
-                ? theme === 'dark' ? 'text-yellow-400' : 'text-yellow-600'
-                : theme === 'dark' ? 'text-zinc-500' : 'text-gray-500'
-            )}>
-            <Car className="w-5 h-5" />
-            <span className="text-xs font-medium">Vehículos</span>
-          </button>
-          <button
-            onClick={() => {
-              if (currentPageName === "Drivers") {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              } else {
-                navigate(createPageUrl("Drivers"));
-              }
-            }}
-            className={cn(
-              "flex flex-col items-center justify-center flex-1 h-full gap-1 transition-colors",
-              currentPageName === "Drivers"
-                ? theme === 'dark' ? 'text-yellow-400' : 'text-yellow-600'
-                : theme === 'dark' ? 'text-zinc-500' : 'text-gray-500'
-            )}>
-            <Users className="w-5 h-5" />
-            <span className="text-xs font-medium">Conductores</span>
-          </button>
-          <button
-            onClick={() => {
-              if (currentPageName === "Maintenance") {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              } else {
-                navigate(createPageUrl("Maintenance"));
-              }
-            }}
-            className={cn(
-              "flex flex-col items-center justify-center flex-1 h-full gap-1 transition-colors",
-              currentPageName === "Maintenance"
-                ? theme === 'dark' ? 'text-yellow-400' : 'text-yellow-600'
-                : theme === 'dark' ? 'text-zinc-500' : 'text-gray-500'
-            )}>
-            <Wrench className="w-5 h-5" />
-            <span className="text-xs font-medium">Mantenimiento</span>
-          </button>
-        </div>
-      </nav>
+      <MobileBottomNav
+        currentPageName={currentPageName}
+        theme={theme}
+        navigate={navigate}
+        isSuperAdmin={isSuperAdmin}
+      />
     </div>);
 
 }
