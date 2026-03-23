@@ -396,45 +396,34 @@ export default function Vehicles() {
             />
           </div>
           {isSuperAdmin && (
-            <Select value={companyFilter} onValueChange={setCompanyFilter}>
-              <SelectTrigger className={cn("w-full sm:w-44", theme === 'dark' ? 'bg-slate-800/50 border-slate-700 text-white' : 'bg-white border-gray-300 text-gray-900')}>
-                <SelectValue placeholder="Empresa" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas</SelectItem>
-                {companies.map(c => (
-                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <MobileSelect
+              value={companyFilter}
+              onValueChange={setCompanyFilter}
+              placeholder="Empresa"
+              options={[{ value: "all", label: "Todas" }, ...companies.map(c => ({ value: c.id, label: c.name }))]}
+              triggerClassName={cn("w-full sm:w-44", theme === 'dark' ? 'bg-slate-800/50 border-slate-700 text-white' : 'bg-white border-gray-300 text-gray-900')}
+            />
           )}
-          <Select value={locationFilter} onValueChange={setLocationFilter}>
-            <SelectTrigger className={cn("w-full sm:w-44", theme === 'dark' ? 'bg-slate-800/50 border-slate-700 text-white' : 'bg-white border-gray-300 text-gray-900')}>
-              <SelectValue placeholder="Locación" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todas</SelectItem>
-              {accessibleLocations.map(l => (
-                <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className={cn("w-full sm:w-40", theme === 'dark' ? 'bg-slate-800/50 border-slate-700 text-white' : 'bg-white border-gray-300 text-gray-900')}>
-              <SelectValue placeholder="Estado" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos</SelectItem>
-              {vehicleStatuses
+          <MobileSelect
+            value={locationFilter}
+            onValueChange={setLocationFilter}
+            placeholder="Locación"
+            options={[{ value: "all", label: "Todas" }, ...accessibleLocations.map(l => ({ value: l.id, label: l.name }))]}
+            triggerClassName={cn("w-full sm:w-44", theme === 'dark' ? 'bg-slate-800/50 border-slate-700 text-white' : 'bg-white border-gray-300 text-gray-900')}
+          />
+          <MobileSelect
+            value={statusFilter}
+            onValueChange={setStatusFilter}
+            placeholder="Estado"
+            options={[
+              { value: "all", label: "Todos" },
+              ...vehicleStatuses
                 .filter(s => s.is_active)
                 .sort((a, b) => (a.order || 0) - (b.order || 0))
-                .map(status => (
-                  <SelectItem key={status.id} value={status.code}>
-                    {status.name}
-                  </SelectItem>
-                ))}
-            </SelectContent>
-          </Select>
+                .map(s => ({ value: s.code, label: s.name }))
+            ]}
+            triggerClassName={cn("w-full sm:w-40", theme === 'dark' ? 'bg-slate-800/50 border-slate-700 text-white' : 'bg-white border-gray-300 text-gray-900')}
+          />
         </div>
 
         {/* Vehicle Grid/Table */}
