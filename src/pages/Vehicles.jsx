@@ -4,7 +4,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Search, Car, Building2, MapPin, Grid3x3, List, Camera, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import PageHeader from "../components/common/PageHeader";
@@ -14,6 +13,7 @@ import VehicleTable from "../components/vehicles/VehicleTable";
 import VehicleDialog from "../components/vehicles/VehicleDialog";
 import QuickVehicleCapture from "../components/vehicles/QuickVehicleCapture";
 import PullToRefresh from "../components/common/PullToRefresh";
+import MobileSelect from "../components/common/MobileSelect";
 import { useTheme } from "../components/common/ThemeWrapper";
 
 export default function Vehicles() {
@@ -154,7 +154,17 @@ export default function Vehicles() {
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Vehicle.create(data),
-    onSuccess: () => {
+    onMutate: async (newData) => {
+      await queryClient.cancelQueries({ queryKey: ['vehicles'] });
+      const previous = queryClient.getQueryData(['vehicles', currentUser?.company_id]);
+      const tempVehicle = { ...newData, id: `temp-${Date.now()}`, _optimistic: true };
+      queryClient.setQueryData(['vehicles', currentUser?.company_id], (old = []) => [...old, tempVehicle]);
+      return { previous };
+    },
+    onError: (_err, _data, ctx) => {
+      if (ctx?.previous) queryClient.setQueryData(['vehicles', currentUser?.company_id], ctx.previous);
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['vehicles'] });
       setDialogOpen(false);
     },
@@ -162,7 +172,18 @@ export default function Vehicles() {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Vehicle.update(id, data),
-    onSuccess: () => {
+    onMutate: async ({ id, data }) => {
+      await queryClient.cancelQueries({ queryKey: ['vehicles'] });
+      const previous = queryClient.getQueryData(['vehicles', currentUser?.company_id]);
+      queryClient.setQueryData(['vehicles', currentUser?.company_id], (old = []) =>
+        old.map(v => v.id === id ? { ...v, ...data } : v)
+      );
+      return { previous };
+    },
+    onError: (_err, _data, ctx) => {
+      if (ctx?.previous) queryClient.setQueryData(['vehicles', currentUser?.company_id], ctx.previous);
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['vehicles'] });
       setDialogOpen(false);
       setSelectedVehicle(null);
@@ -171,7 +192,16 @@ export default function Vehicles() {
 
   const deleteMutation = useMutation({
     mutationFn: (id) => base44.entities.Vehicle.delete(id),
-    onSuccess: () => {
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ['vehicles'] });
+      const previous = queryClient.getQueryData(['vehicles', currentUser?.company_id]);
+      queryClient.setQueryData(['vehicles', currentUser?.company_id], (old = []) => old.filter(v => v.id !== id));
+      return { previous };
+    },
+    onError: (_err, _id, ctx) => {
+      if (ctx?.previous) queryClient.setQueryData(['vehicles', currentUser?.company_id], ctx.previous);
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['vehicles'] });
       setDialogOpen(false);
       setSelectedVehicle(null);
