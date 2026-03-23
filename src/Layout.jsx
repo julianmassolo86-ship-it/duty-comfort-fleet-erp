@@ -103,17 +103,7 @@ function LayoutContent({ children, currentPageName }) {
     return () => window.removeEventListener('userProfileUpdated', handleProfileUpdate);
   }, [currentPageName]);
 
-  // Track page changes for transitions
-  const prevPageRef = React.useRef(currentPageName);
-  useEffect(() => {
-    if (prevPageRef.current !== currentPageName) {
-      const pageOrder = ['Dashboard', 'Vehicles', 'Drivers', 'Companies', 'Locations', 'Manufacturers', 'VehicleTypes', 'VehicleStatuses', 'Maintenance', 'Documents', 'Reports', 'CompanyAdmins'];
-      const prevIndex = pageOrder.indexOf(prevPageRef.current);
-      const currentIndex = pageOrder.indexOf(currentPageName);
-      setPageDirection(currentIndex > prevIndex ? 1 : -1);
-      prevPageRef.current = currentPageName;
-    }
-  }, [currentPageName]);
+
 
   const handleLogout = () => {
     base44.auth.logout(window.location.origin + createPageUrl("LandingPage"));
