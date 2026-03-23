@@ -45,6 +45,7 @@ export default function MaintenanceProgramCard({ program, manufacturers, vehicle
     .filter(Boolean);
   const linkedItems = linkedTasks.filter(t => !t.task_type || t.task_type === "item");
   const linkedActions = linkedTasks.filter(t => t.task_type === "action");
+  const linkedPrograms = linkedTasks.filter(t => t.task_type === "program");
 
   const hasIntervals = program.interval_mileage || program.interval_hours || program.interval_months;
   const hasWarnings = program.warning_mileage || program.warning_hours || program.warning_days;
@@ -150,19 +151,31 @@ export default function MaintenanceProgramCard({ program, manufacturers, vehicle
           </div>
         )}
 
-        {/* Contenido del programa (ítems y acciones vinculados) */}
+        {/* Contenido del programa (programas, ítems y acciones vinculados) */}
         {taskType === "program" && linkedTasks.length > 0 && (
           <div className="space-y-1.5 pt-1 border-t border-zinc-800">
+            {linkedPrograms.length > 0 && (
+              <div>
+                <p className="text-xs text-zinc-500 mb-1 flex items-center gap-1">
+                  <Package className="w-3 h-3" /> {linkedPrograms.length} programa(s) incluido(s)
+                </p>
+                <div className="flex flex-wrap gap-1">
+                  {linkedPrograms.map(t => (
+                    <span key={t.id} className="text-xs text-yellow-400 bg-yellow-500/10 px-1.5 py-0.5 rounded">{t.name}</span>
+                  ))}
+                </div>
+              </div>
+            )}
             {linkedItems.length > 0 && (
               <div>
                 <p className="text-xs text-zinc-500 mb-1 flex items-center gap-1">
                   <Wrench className="w-3 h-3" /> {linkedItems.length} ítem(s)
                 </p>
                 <div className="flex flex-wrap gap-1">
-                  {linkedItems.slice(0, 4).map(t => (
+                  {linkedItems.slice(0, 5).map(t => (
                     <span key={t.id} className="text-xs text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded">{t.name}</span>
                   ))}
-                  {linkedItems.length > 4 && <span className="text-xs text-zinc-500">+{linkedItems.length - 4}</span>}
+                  {linkedItems.length > 5 && <span className="text-xs text-zinc-500">+{linkedItems.length - 5}</span>}
                 </div>
               </div>
             )}
@@ -172,10 +185,10 @@ export default function MaintenanceProgramCard({ program, manufacturers, vehicle
                   <Zap className="w-3 h-3" /> {linkedActions.length} acción(es)
                 </p>
                 <div className="flex flex-wrap gap-1">
-                  {linkedActions.slice(0, 4).map(t => (
+                  {linkedActions.slice(0, 5).map(t => (
                     <span key={t.id} className="text-xs text-green-400 bg-green-500/10 px-1.5 py-0.5 rounded">{t.name}</span>
                   ))}
-                  {linkedActions.length > 4 && <span className="text-xs text-zinc-500">+{linkedActions.length - 4}</span>}
+                  {linkedActions.length > 5 && <span className="text-xs text-zinc-500">+{linkedActions.length - 5}</span>}
                 </div>
               </div>
             )}
