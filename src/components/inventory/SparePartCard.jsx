@@ -74,14 +74,28 @@ export default function SparePartCard({ sparePart, onEdit, onDelete }) {
 
       {/* Stock Info */}
       <div className={cn("flex items-center justify-between pt-2 border-t", isDark ? "border-zinc-800" : "border-gray-100")}>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           {isLowStock && !isOutOfStock && <AlertTriangle className="w-3.5 h-3.5 text-yellow-500" />}
-          <span className={cn("text-lg font-bold", isOutOfStock ? "text-red-500" : isLowStock ? "text-yellow-500" : isDark ? "text-white" : "text-gray-900")}>
-            {sparePart.stock_quantity ?? 0}
-          </span>
-          <span className={cn("text-xs", isDark ? "text-zinc-500" : "text-gray-400")}>
-            {sparePart.unit_of_measure}
-          </span>
+          <div>
+            <div className="flex items-baseline gap-1">
+              <span className={cn("text-lg font-bold", isOutOfStock ? "text-red-500" : isLowStock ? "text-yellow-500" : isDark ? "text-white" : "text-gray-900")}>
+                {sparePart.stock_quantity ?? 0}
+              </span>
+              <span className={cn("text-xs", isDark ? "text-zinc-500" : "text-gray-400")}>
+                stock
+              </span>
+            </div>
+            {sparePart.quantity_per_unit && (
+              <span className={cn("text-xs", isDark ? "text-zinc-400" : "text-gray-500")}>
+                {sparePart.quantity_per_unit} {sparePart.unit_of_measure?.toLowerCase()} c/u
+              </span>
+            )}
+            {!sparePart.quantity_per_unit && (
+              <span className={cn("text-xs", isDark ? "text-zinc-500" : "text-gray-400")}>
+                {sparePart.unit_of_measure}
+              </span>
+            )}
+          </div>
         </div>
         <Badge variant="outline" className={cn("text-xs border", stockStatus.color)}>
           {stockStatus.label}
