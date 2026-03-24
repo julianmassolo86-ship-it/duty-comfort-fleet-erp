@@ -174,6 +174,12 @@ function LayoutContent({ children, currentPageName }) {
 
   },
   {
+    section: "Inventario",
+    items: [
+    { name: "Repuestos", icon: Package, page: "Inventory" }]
+
+  },
+  {
     section: "Operaciones",
     items: [
     { name: "Documentos", icon: FileText, page: "Documents" },
