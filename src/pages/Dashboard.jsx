@@ -25,6 +25,7 @@ import VehiclesByCompanyChart from "../components/dashboard/VehiclesByCompanyCha
 import MaintenanceDialog from "../components/maintenance/MaintenanceDialog";
 import NovedadDialog from "../components/novedades/NovedadDialog";
 import AirConditioningMaintenanceDialog from "../components/ac-maintenance/AirConditioningMaintenanceDialog";
+import NovedadesSummaryCard from "../components/dashboard/NovedadesSummaryCard";
 
 export default function Dashboard() {
   const [currentUser, setCurrentUser] = useState(null);
