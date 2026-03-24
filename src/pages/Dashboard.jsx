@@ -42,65 +42,83 @@ export default function Dashboard() {
   // Si el usuario no tiene company_id, es super admin
   const isSuperAdmin = !currentUser?.company_id;
 
+  const queryOptions = {
+    staleTime: 2 * 60 * 1000, // 2 minutos de cache
+    retry: 2,
+    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10000),
+  };
+
   const { data: vehicles = [], isLoading: loadingVehicles } = useQuery({
     queryKey: ['vehicles'],
     queryFn: () => base44.entities.Vehicle.list(),
+    ...queryOptions,
   });
 
   const { data: drivers = [], isLoading: loadingDrivers } = useQuery({
     queryKey: ['drivers'],
     queryFn: () => base44.entities.Driver.list(),
+    ...queryOptions,
   });
 
   const { data: maintenances = [], isLoading: loadingMaintenance } = useQuery({
     queryKey: ['maintenances'],
     queryFn: () => base44.entities.Maintenance.list(),
+    ...queryOptions,
   });
 
   const { data: documents = [], isLoading: loadingDocuments } = useQuery({
     queryKey: ['documents'],
     queryFn: () => base44.entities.Document.list(),
+    ...queryOptions,
   });
 
   const { data: vehicleTypes = [] } = useQuery({
     queryKey: ['vehicleTypes'],
     queryFn: () => base44.entities.VehicleType.list(),
+    ...queryOptions,
   });
 
   const { data: vehicleCategories = [] } = useQuery({
     queryKey: ['vehicleCategories'],
     queryFn: () => base44.entities.VehicleCategory.list(),
+    ...queryOptions,
   });
 
   const { data: companies = [] } = useQuery({
     queryKey: ['companies'],
     queryFn: () => base44.entities.Company.list(),
     enabled: isSuperAdmin,
+    ...queryOptions,
   });
 
   const { data: locations = [] } = useQuery({
     queryKey: ['locations'],
     queryFn: () => base44.entities.Location.list(),
+    ...queryOptions,
   });
 
   const { data: novedades = [], isLoading: loadingNovedades } = useQuery({
     queryKey: ['novedades'],
     queryFn: () => base44.entities.Novedad.list('-fecha_reporte'),
+    ...queryOptions,
   });
 
   const { data: maintenanceSchedules = [] } = useQuery({
     queryKey: ['vehicleMaintenanceSchedules'],
     queryFn: () => base44.entities.VehicleMaintenanceSchedule.list(),
+    ...queryOptions,
   });
 
   const { data: maintenanceTaskDefinitions = [] } = useQuery({
     queryKey: ['maintenanceTaskDefinitions'],
     queryFn: () => base44.entities.MaintenanceTaskDefinition.list(),
+    ...queryOptions,
   });
 
   const { data: acReports = [] } = useQuery({
     queryKey: ['airConditioningReports'],
     queryFn: () => base44.entities.AirConditioningMaintenance.list('-inspection_date'),
+    ...queryOptions,
   });
 
   const isLoading = loadingVehicles || loadingDrivers || loadingMaintenance || loadingDocuments || loadingNovedades;
