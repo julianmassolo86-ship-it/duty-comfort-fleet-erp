@@ -112,19 +112,28 @@ export default function SparePartDialog({ open, onClose, sparePart, companyId })
             <Input className={inputClass} value={form.specifications} onChange={(e) => set("specifications", e.target.value)} placeholder="ej: SAE 15W40, Capacidad 18L" />
           </div>
 
-          {/* Unidad de Medida */}
+          {/* Unidad de Medida + Cantidad por unidad */}
           <div className="space-y-1">
             <Label className={labelClass}>Unidad de Medida *</Label>
-            <Select value={form.unit_of_measure} onValueChange={(v) => set("unit_of_measure", v)}>
-              <SelectTrigger className={cn("h-9", isDark ? "bg-zinc-800 border-zinc-700 text-white" : "")}>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className={isDark ? "bg-zinc-800 border-zinc-700" : ""}>
-                <SelectItem value="UNID">UNID</SelectItem>
-                <SelectItem value="LITROS">LITROS</SelectItem>
-                <SelectItem value="METROS">METROS</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="flex gap-2">
+              <Select value={form.unit_of_measure} onValueChange={(v) => set("unit_of_measure", v)}>
+                <SelectTrigger className={cn("h-9 flex-1", isDark ? "bg-zinc-800 border-zinc-700 text-white" : "")}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className={isDark ? "bg-zinc-800 border-zinc-700" : ""}>
+                  <SelectItem value="UNID">UNID</SelectItem>
+                  <SelectItem value="LITROS">LITROS</SelectItem>
+                  <SelectItem value="METROS">METROS</SelectItem>
+                </SelectContent>
+              </Select>
+              <Input
+                className={cn("h-9 w-24", isDark ? "bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500" : "")}
+                type="number"
+                value={form.quantity_per_unit}
+                onChange={(e) => set("quantity_per_unit", parseFloat(e.target.value) || "")}
+                placeholder="Cant."
+              />
+            </div>
           </div>
 
           {/* Costo Unitario */}
