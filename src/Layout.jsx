@@ -168,6 +168,8 @@ function LayoutContent({ children, currentPageName }) {
     items: [
     { name: "Programas", icon: Wrench, page: "MaintenancePrograms" },
     { name: "Registros", icon: FileText, page: "Maintenance" },
+    { name: "Formularios", icon: ClipboardList, page: "MantenimientoForms" },
+    { name: "Novedades", icon: AlertTriangle, page: "Novedades" },
     { name: "Dashboard A/C", icon: Wind, page: "ACDashboard" }]
 
   },
@@ -238,6 +240,8 @@ function LayoutContent({ children, currentPageName }) {
     items: [
     { name: "Programas", icon: Wrench, page: "MaintenancePrograms" },
     { name: "Registros", icon: FileText, page: "Maintenance" },
+    { name: "Formularios", icon: ClipboardList, page: "MantenimientoForms" },
+    { name: "Novedades", icon: AlertTriangle, page: "Novedades" },
     { name: "Dashboard A/C", icon: Wind, page: "ACDashboard" }]
 
   },
