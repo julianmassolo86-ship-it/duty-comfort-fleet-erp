@@ -159,59 +159,52 @@ export default function Dashboard() {
       let status = 'on_track';
       let dueInfo = '';
       
-      // Calcular estado según el tipo de intervalo
-      if (taskDef.interval_type === 'mileage' || taskDef.interval_type === 'miles') {
-        if (schedule.next_due_mileage && vehicle.mileage) {
-          const remaining = schedule.next_due_mileage - vehicle.mileage;
-          const warningThreshold = taskDef.warning_interval_type === 'mileage' || taskDef.warning_interval_type === 'miles' 
-            ? taskDef.warning_interval_value || 500 
-            : 500;
-          
-          if (remaining <= 0) {
-            status = 'overdue';
-            dueInfo = `Vencido (${Math.abs(remaining)} km pasados)`;
-          } else if (remaining <= warningThreshold) {
-            status = 'due_soon';
-            dueInfo = `Faltan ${remaining} km`;
-          } else {
-            return; // No mostrar si está muy lejos
-          }
-        }
-      } else if (taskDef.interval_type === 'hours') {
-        if (schedule.next_due_hours && vehicle.hours) {
-          const remaining = schedule.next_due_hours - vehicle.hours;
-          const warningThreshold = taskDef.warning_interval_type === 'hours' 
-            ? taskDef.warning_interval_value || 50 
-            : 50;
-          
-          if (remaining <= 0) {
-            status = 'overdue';
-            dueInfo = `Vencido (${Math.abs(remaining)} hs pasadas)`;
-          } else if (remaining <= warningThreshold) {
-            status = 'due_soon';
-            dueInfo = `Faltan ${remaining} hs`;
-          } else {
-            return;
-          }
-        }
-      } else if (taskDef.interval_type === 'months' || taskDef.interval_type === 'years') {
-        if (schedule.next_due_date) {
-          const daysRemaining = differenceInDays(new Date(schedule.next_due_date), new Date());
-          const warningThreshold = taskDef.warning_interval_type === 'days' 
-            ? taskDef.warning_interval_value || 7 
-            : 7;
-          
-          if (daysRemaining < 0) {
-            status = 'overdue';
-            dueInfo = `Vencido hace ${Math.abs(daysRemaining)} días`;
-          } else if (daysRemaining <= warningThreshold) {
-            status = 'due_soon';
-            dueInfo = daysRemaining === 0 ? 'Vence hoy' : `Vence en ${daysRemaining} días`;
-          } else {
-            return;
-          }
+      // Calcular estado según los campos reales del schema
+      let hasAlert = false;
+
+      if (taskDef.interval_mileage && schedule.next_due_mileage) {
+        const remaining = schedule.next_due_mileage - (vehicle.mileage || 0);
+        const warning = taskDef.warning_mileage || (taskDef.interval_mileage * 0.05);
+        if (remaining <= 0) {
+          status = 'overdue';
+          dueInfo = `Vencido (${Math.abs(remaining).toLocaleString()} km pasados)`;
+          hasAlert = true;
+        } else if (remaining <= warning) {
+          status = 'due_soon';
+          dueInfo = `Faltan ${remaining.toLocaleString()} km`;
+          hasAlert = true;
         }
       }
+
+      if (taskDef.interval_hours && schedule.next_due_hours && status !== 'overdue') {
+        const remaining = schedule.next_due_hours - (vehicle.hours || 0);
+        const warning = taskDef.warning_hours || (taskDef.interval_hours * 0.05);
+        if (remaining <= 0) {
+          status = 'overdue';
+          dueInfo = `Vencido (${Math.abs(remaining).toLocaleString()} hs pasadas)`;
+          hasAlert = true;
+        } else if (remaining <= warning && !hasAlert) {
+          status = 'due_soon';
+          dueInfo = `Faltan ${remaining.toLocaleString()} hs`;
+          hasAlert = true;
+        }
+      }
+
+      if (taskDef.interval_months && schedule.next_due_date && status !== 'overdue') {
+        const daysRemaining = differenceInDays(new Date(schedule.next_due_date), new Date());
+        const warningDays = taskDef.warning_days || 7;
+        if (daysRemaining < 0) {
+          status = 'overdue';
+          dueInfo = `Vencido hace ${Math.abs(daysRemaining)} días`;
+          hasAlert = true;
+        } else if (daysRemaining <= warningDays && !hasAlert) {
+          status = 'due_soon';
+          dueInfo = daysRemaining === 0 ? 'Vence hoy' : `Vence en ${daysRemaining} días`;
+          hasAlert = true;
+        }
+      }
+
+      if (!hasAlert) return; // No mostrar si está al día
 
       alerts.push({
         id: schedule.id,
