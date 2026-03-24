@@ -163,11 +163,16 @@ export default function Dashboard() {
     ? acReports 
     : acReports.filter(r => r.company_id === currentUser?.company_id);
 
+  // Filtrar schedules solo para vehículos accesibles
+  const accessibleSchedules = maintenanceSchedules.filter(s =>
+    accessibleVehicles.some(v => v.id === s.vehicle_id)
+  );
+
   // Calculate maintenance alerts
   const getMaintenanceAlerts = () => {
     const alerts = [];
     
-    maintenanceSchedules.forEach(schedule => {
+    accessibleSchedules.forEach(schedule => {
       const vehicle = accessibleVehicles.find(v => v.id === schedule.vehicle_id);
       if (!vehicle) return;
       
