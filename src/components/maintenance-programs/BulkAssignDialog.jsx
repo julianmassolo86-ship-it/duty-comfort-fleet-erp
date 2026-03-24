@@ -53,24 +53,19 @@ export default function BulkAssignDialog({ open, onOpenChange, programs, isSuper
           vehicle_id: vehicleId,
           maintenance_task_definition_id: programId,
           company_id: vehicle.company_id,
-          last_completed_mileage: vehicle.mileage || 0,
-          last_completed_hours: vehicle.hours || 0,
-          last_completed_date: new Date().toISOString().split('T')[0],
           status: "on_track",
         };
 
-        // Calcular próximo vencimiento según tipo de intervalo
-        if (program.interval_type === "mileage") {
-          scheduleData.next_due_mileage = (vehicle.mileage || 0) + program.interval_value;
-        } else if (program.interval_type === "hours") {
-          scheduleData.next_due_hours = (vehicle.hours || 0) + program.interval_value;
-        } else if (program.interval_type === "months") {
+        // Calcular próximo vencimiento según los intervalos definidos en el programa
+        if (program.interval_mileage) {
+          scheduleData.next_due_mileage = (vehicle.mileage || 0) + program.interval_mileage;
+        }
+        if (program.interval_hours) {
+          scheduleData.next_due_hours = (vehicle.hours || 0) + program.interval_hours;
+        }
+        if (program.interval_months) {
           const nextDate = new Date();
-          nextDate.setMonth(nextDate.getMonth() + program.interval_value);
-          scheduleData.next_due_date = nextDate.toISOString().split('T')[0];
-        } else if (program.interval_type === "years") {
-          const nextDate = new Date();
-          nextDate.setFullYear(nextDate.getFullYear() + program.interval_value);
+          nextDate.setMonth(nextDate.getMonth() + program.interval_months);
           scheduleData.next_due_date = nextDate.toISOString().split('T')[0];
         }
 
