@@ -4,7 +4,7 @@ import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import {
   LayoutDashboard, Car, Users, Wrench, FileText,
-  BarChart3, Menu, X, LogOut, ChevronRight, ChevronDown, Building2, MapPin, UserCog, Sun, Moon, Upload, Settings, Factory, MapPinned, Cog, ArrowLeft, Wind } from
+  BarChart3, Menu, X, LogOut, ChevronRight, ChevronDown, Building2, MapPin, UserCog, Sun, Moon, Upload, Settings, Factory, MapPinned, Cog, ArrowLeft, Wind, ClipboardList, AlertTriangle } from
 "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
