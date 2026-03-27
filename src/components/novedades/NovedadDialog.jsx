@@ -15,7 +15,7 @@ import { useTheme } from "../common/ThemeWrapper";
 const initialState = {
   vehicle_id: "",
   descripcion: "",
-  prioridad: "media",
+  prioridad: "",
   kilometraje: "",
   millas: "",
   horas: "",
@@ -222,7 +222,7 @@ export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess }
         company_id: selectedVehicle.company_id,
         location_id: selectedVehicle.location_id,
         descripcion: formData.descripcion,
-        prioridad: formData.prioridad,
+        ...(formData.prioridad ? { prioridad: formData.prioridad } : {}),
         fecha_reporte: fechaReporte,
         estado: "pendiente",
         kilometraje_reportado: formData.kilometraje ? newKm : (formData.millas ? Math.round(newMillas * 1.60934) : null),
@@ -542,16 +542,38 @@ export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess }
           </div>
 
           {formData.tieneNovedad && (
-            <div className="space-y-2">
-              <Label className={theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}>Descripción de la Novedad *</Label>
-              <Textarea
-                value={formData.descripcion}
-                onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
-                placeholder="Ej: Lámpara trasera derecha quemada"
-                rows={3}
-                className={theme === 'dark' ? 'bg-zinc-800 border-zinc-700 text-white' : ''}
-                autoFocus
-              />
+            <div className="space-y-3">
+              <div className="space-y-2">
+                <Label className={theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}>Descripción de la Novedad *</Label>
+                <Textarea
+                  value={formData.descripcion}
+                  onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
+                  placeholder="Ej: Lámpara trasera derecha quemada"
+                  rows={3}
+                  className={theme === 'dark' ? 'bg-zinc-800 border-zinc-700 text-white' : ''}
+                  autoFocus
+                />
+              </div>
+
+              {novedad && (
+                <div className="space-y-2">
+                  <Label className={theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}>Prioridad</Label>
+                  <Select
+                    value={formData.prioridad}
+                    onValueChange={(val) => setFormData({ ...formData, prioridad: val })}
+                  >
+                    <SelectTrigger className={theme === 'dark' ? 'bg-zinc-800 border-zinc-700 text-white' : ''}>
+                      <SelectValue placeholder="Sin prioridad asignada" />
+                    </SelectTrigger>
+                    <SelectContent className={theme === 'dark' ? 'bg-zinc-800 border-zinc-700' : ''}>
+                      <SelectItem value="baja" className={theme === 'dark' ? 'text-white focus:bg-zinc-700' : ''}>Baja</SelectItem>
+                      <SelectItem value="media" className={theme === 'dark' ? 'text-white focus:bg-zinc-700' : ''}>Media</SelectItem>
+                      <SelectItem value="alta" className={theme === 'dark' ? 'text-white focus:bg-zinc-700' : ''}>Alta</SelectItem>
+                      <SelectItem value="critica" className={theme === 'dark' ? 'text-white focus:bg-zinc-700' : ''}>Crítica</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
           )}
 
