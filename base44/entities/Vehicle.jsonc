@@ -1,0 +1,259 @@
+{
+  "name": "Vehicle",
+  "type": "object",
+  "properties": {
+    "internal_number": {
+      "type": "string",
+      "description": "N\u00famero interno del veh\u00edculo (calco identificatorio)",
+      "maxLength": 10
+    },
+    "plate": {
+      "type": "string",
+      "description": "Matr\u00edcula del veh\u00edculo",
+      "maxLength": 10
+    },
+    "company_id": {
+      "type": "string",
+      "description": "ID de la empresa"
+    },
+    "location_id": {
+      "type": "string",
+      "description": "ID de la locaci\u00f3n donde est\u00e1 asignado"
+    },
+    "manufacturer": {
+      "type": "string",
+      "description": "Fabricante del veh\u00edculo",
+      "maxLength": 30
+    },
+    "brand": {
+      "type": "string",
+      "description": "Marca del veh\u00edculo (legacy)"
+    },
+    "model": {
+      "type": "string",
+      "description": "Modelo del veh\u00edculo"
+    },
+    "year": {
+      "type": "number",
+      "description": "A\u00f1o de fabricaci\u00f3n",
+      "minimum": 1900,
+      "maximum": 2050
+    },
+    "chassis_number": {
+      "type": "string",
+      "description": "N\u00famero de chasis",
+      "maxLength": 20
+    },
+    "engine_number": {
+      "type": "string",
+      "description": "N\u00famero de motor",
+      "maxLength": 20
+    },
+    "vin": {
+      "type": "string",
+      "description": "N\u00famero de identificaci\u00f3n del veh\u00edculo"
+    },
+    "category_id": {
+      "type": "string",
+      "description": "ID de la categor\u00eda del veh\u00edculo"
+    },
+    "type_id": {
+      "type": "string",
+      "description": "ID del tipo de veh\u00edculo"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "car",
+        "truck",
+        "van",
+        "bus",
+        "motorcycle",
+        "machinery",
+        "trailer",
+        "pickup",
+        "semi_truck",
+        "crane",
+        "excavator",
+        "loader",
+        "grader",
+        "roller",
+        "tractor"
+      ],
+      "description": "Tipo de veh\u00edculo (legacy - usar type_id)"
+    },
+    "technical_description": {
+      "type": "string",
+      "description": "Descripci\u00f3n t\u00e9cnica del veh\u00edculo",
+      "maxLength": 50
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "available",
+        "in_use",
+        "maintenance",
+        "reserved",
+        "in_transit",
+        "retired"
+      ],
+      "default": "active"
+    },
+    "fuel_type": {
+      "type": "string",
+      "enum": [
+        "gasoline",
+        "diesel",
+        "electric",
+        "hybrid",
+        "gnc",
+        "gnv",
+        "biodiesel",
+        "ethanol"
+      ],
+      "description": "Tipo de combustible"
+    },
+    "mileage": {
+      "type": "number",
+      "description": "Kilometraje actual",
+      "maximum": 999999
+    },
+    "miles": {
+      "type": "number",
+      "description": "Millas actuales"
+    },
+    "hours": {
+      "type": "number",
+      "description": "Horas de uso",
+      "maximum": 99999
+    },
+    "assigned_driver_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs de los conductores asignados (m\u00e1ximo 3)",
+      "maxItems": 3
+    },
+    "assigned_driver_id": {
+      "type": "string",
+      "description": "ID del conductor asignado (legacy - usar assigned_driver_ids)"
+    },
+    "last_service_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha del \u00faltimo servicio"
+    },
+    "last_service_mileage": {
+      "type": "number",
+      "description": "Kilometraje del \u00faltimo servicio"
+    },
+    "last_service_hours": {
+      "type": "number",
+      "description": "Horas del \u00faltimo servicio"
+    },
+    "next_service_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha del pr\u00f3ximo servicio"
+    },
+    "next_service_mileage": {
+      "type": "number",
+      "description": "Kilometraje del pr\u00f3ximo servicio"
+    },
+    "next_service_hours": {
+      "type": "number",
+      "description": "Horas del pr\u00f3ximo servicio"
+    },
+    "insurance_expiry": {
+      "type": "string",
+      "format": "date"
+    },
+    "insurance_url": {
+      "type": "string",
+      "description": "URL del documento de seguro"
+    },
+    "technical_inspection_expiry": {
+      "type": "string",
+      "format": "date"
+    },
+    "technical_inspection_url": {
+      "type": "string",
+      "description": "URL del documento de VTV"
+    },
+    "circulation_permit_expiry": {
+      "type": "string",
+      "format": "date"
+    },
+    "circulation_permit_url": {
+      "type": "string",
+      "description": "URL de credencial de circulaci\u00f3n"
+    },
+    "vehicle_card_front_url": {
+      "type": "string",
+      "description": "URL de c\u00e9dula veh\u00edculo lado A"
+    },
+    "vehicle_card_front_expiry": {
+      "type": "string",
+      "format": "date",
+      "description": "Vencimiento c\u00e9dula"
+    },
+    "vehicle_card_back_url": {
+      "type": "string",
+      "description": "URL de c\u00e9dula veh\u00edculo lado B"
+    },
+    "title_url": {
+      "type": "string",
+      "description": "URL del t\u00edtulo automotor"
+    },
+    "title_expiry": {
+      "type": "string",
+      "format": "date",
+      "description": "Vencimiento t\u00edtulo automotor"
+    },
+    "license_plate_url": {
+      "type": "string",
+      "description": "URL del documento de patente"
+    },
+    "license_plate_expiry": {
+      "type": "string",
+      "format": "date",
+      "description": "Vencimiento de patente"
+    },
+    "parts_engraving_url": {
+      "type": "string",
+      "description": "URL del grabado de autopartes"
+    },
+    "parts_engraving_expiry": {
+      "type": "string",
+      "format": "date",
+      "description": "Vencimiento grabado de autopartes"
+    },
+    "fire_extinguisher_url": {
+      "type": "string",
+      "description": "URL del certificado de extintor"
+    },
+    "fire_extinguisher_expiry": {
+      "type": "string",
+      "format": "date",
+      "description": "Vencimiento del extintor"
+    },
+    "image_url": {
+      "type": "string"
+    },
+    "manufacturer_logo_url": {
+      "type": "string",
+      "description": "Logo del fabricante"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "manufacturer",
+    "model",
+    "company_id",
+    "location_id"
+  ]
+}

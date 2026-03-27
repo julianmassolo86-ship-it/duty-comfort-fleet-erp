@@ -42,6 +42,7 @@ const initialState = {
   status: "active",
   fuel_type: "diesel",
   mileage: 0,
+  miles: 0,
   hours: 0,
   assigned_driver_ids: [],
   circulation_permit_url: "",
@@ -124,6 +125,7 @@ export default function VehicleDialog({
           // Asegurar que campos numéricos no sean null/undefined
           year: vehicle.year || "",
           mileage: vehicle.mileage || 0,
+          miles: vehicle.miles || 0,
           hours: vehicle.hours || 0,
         }));
       } else {
@@ -677,8 +679,8 @@ export default function VehicleDialog({
             </TabsContent>
 
             <TabsContent value="service" className="space-y-4">
-              {/* Campos editables de kilometraje y horas */}
-              <div className="grid grid-cols-2 gap-4 p-4 rounded-lg border border-zinc-800 bg-zinc-900/50">
+              {/* Campos editables de kilometraje, millas y horas */}
+              <div className="grid grid-cols-3 gap-4 p-4 rounded-lg border border-zinc-800 bg-zinc-900/50">
                 <div className="space-y-2">
                   <Label>Kilómetros Actuales</Label>
                   <Input
@@ -690,6 +692,19 @@ export default function VehicleDialog({
                     }}
                     className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
                     max={999999}
+                    placeholder="0"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Millas Actuales</Label>
+                  <Input
+                    type="number"
+                    value={form.miles || ""}
+                    onChange={(e) => {
+                      const val = parseFloat(e.target.value) || 0;
+                      handleChange("miles", val);
+                    }}
+                    className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
                     placeholder="0"
                   />
                 </div>
