@@ -174,6 +174,12 @@ function LayoutContent({ children, currentPageName }) {
 
   },
   {
+    section: "Combustible",
+    items: [
+    { name: "Cargas de Combustible", icon: Fuel, page: "FuelUps" }]
+
+  },
+  {
     section: "Inventario",
     items: [
     { name: "Repuestos", icon: Package, page: "Inventory" }]
