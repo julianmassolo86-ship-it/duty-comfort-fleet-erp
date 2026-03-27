@@ -18,6 +18,7 @@ import VehicleCardDocument from "./VehicleCardDocument";
 import VehicleMaintenanceHistory from "./VehicleMaintenanceHistory";
 import VehicleMaintenanceScheduleManager from "./VehicleMaintenanceScheduleManager";
 import ACMaintenanceHistory from "../ac-maintenance/ACMaintenanceHistory";
+import VehicleFuelHistory from "../fuel/VehicleFuelHistory";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -350,6 +351,7 @@ export default function VehicleDialog({
               <TabsTrigger value="service" className="data-[state=active]:bg-yellow-500/10 data-[state=active]:text-yellow-400 data-[state=active]:border-yellow-500/30">Servicio</TabsTrigger>
               <TabsTrigger value="documents" className="data-[state=active]:bg-yellow-500/10 data-[state=active]:text-yellow-400 data-[state=active]:border-yellow-500/30">Documentos</TabsTrigger>
               <TabsTrigger value="history" className="data-[state=active]:bg-yellow-500/10 data-[state=active]:text-yellow-400 data-[state=active]:border-yellow-500/30">Historial</TabsTrigger>
+              <TabsTrigger value="fuel" className="data-[state=active]:bg-yellow-500/10 data-[state=active]:text-yellow-400 data-[state=active]:border-yellow-500/30">Combustible</TabsTrigger>
               <TabsTrigger value="other" className="data-[state=active]:bg-yellow-500/10 data-[state=active]:text-yellow-400 data-[state=active]:border-yellow-500/30">Otros</TabsTrigger>
             </TabsList>
 
@@ -849,6 +851,21 @@ export default function VehicleDialog({
                   <p className="text-zinc-500">Guarde el vehículo para ver el historial de mantenimiento.</p>
                 </div>
               )}
+            </TabsContent>
+
+            <TabsContent value="fuel" className="space-y-4">
+              {activeTab === "fuel" && vehicle ? (
+                <VehicleFuelHistory
+                  vehicleId={vehicle.id}
+                  companyId={vehicle.company_id}
+                  locationId={vehicle.location_id}
+                  vehicle={vehicle}
+                />
+              ) : !vehicle ? (
+                <div className="p-8 text-center">
+                  <p className="text-zinc-500">Guarde el vehículo para registrar cargas de combustible.</p>
+                </div>
+              ) : null}
             </TabsContent>
 
             <TabsContent value="other" className="space-y-4">

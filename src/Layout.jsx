@@ -4,7 +4,7 @@ import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import {
   LayoutDashboard, Car, Users, Wrench, FileText,
-  BarChart3, Menu, X, LogOut, ChevronRight, ChevronDown, Building2, MapPin, UserCog, Sun, Moon, Upload, Settings, Factory, MapPinned, Cog, ArrowLeft, Wind, ClipboardList, AlertTriangle, Package } from
+  BarChart3, Menu, X, LogOut, ChevronRight, ChevronDown, Building2, MapPin, UserCog, Sun, Moon, Upload, Settings, Factory, MapPinned, Cog, ArrowLeft, Wind, ClipboardList, AlertTriangle, Package, Fuel } from
 "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -249,6 +249,12 @@ function LayoutContent({ children, currentPageName }) {
     { name: "Formularios", icon: ClipboardList, page: "MantenimientoForms" },
     { name: "Novedades", icon: AlertTriangle, page: "Novedades" },
     { name: "Dashboard A/C", icon: Wind, page: "ACDashboard" }]
+
+  },
+  {
+    section: "Combustible",
+    items: [
+    { name: "Cargas de Combustible", icon: Fuel, page: "FuelUps" }]
 
   },
   {

@@ -1,0 +1,77 @@
+{
+  "name": "FuelUp",
+  "type": "object",
+  "properties": {
+    "vehicle_id": {
+      "type": "string",
+      "description": "ID del veh\u00edculo al que se le carg\u00f3 combustible"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "ID de la empresa"
+    },
+    "location_id": {
+      "type": "string",
+      "description": "ID de la locaci\u00f3n"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha de la carga de combustible"
+    },
+    "mileage": {
+      "type": "number",
+      "description": "Kilometraje al momento de la carga"
+    },
+    "hours": {
+      "type": "number",
+      "description": "Horas de uso al momento de la carga"
+    },
+    "fuel_quantity": {
+      "type": "number",
+      "description": "Cantidad de combustible cargado (litros)"
+    },
+    "price_per_unit": {
+      "type": "number",
+      "description": "Precio por litro/unidad"
+    },
+    "total_price": {
+      "type": "number",
+      "description": "Precio total de la carga"
+    },
+    "is_full_tank": {
+      "type": "boolean",
+      "description": "\u00bfFue carga de tanque lleno?",
+      "default": false
+    },
+    "fuel_type": {
+      "type": "string",
+      "enum": [
+        "gasoline",
+        "diesel",
+        "electric",
+        "gnc",
+        "gnv",
+        "biodiesel",
+        "ethanol",
+        "otro"
+      ],
+      "description": "Tipo de combustible"
+    },
+    "ticket_photo_url": {
+      "type": "string",
+      "description": "URL de la foto del ticket"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Observaciones adicionales"
+    }
+  },
+  "required": [
+    "vehicle_id",
+    "company_id",
+    "date",
+    "fuel_quantity",
+    "total_price"
+  ]
+}
