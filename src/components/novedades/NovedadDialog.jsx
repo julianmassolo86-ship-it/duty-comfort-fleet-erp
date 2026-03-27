@@ -53,9 +53,9 @@ export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess }
           descripcion: novedad.descripcion || "",
           prioridad: novedad.prioridad || "media",
           estado: novedad.estado || "pendiente",
-          kilometraje: "",
+          kilometraje: novedad.kilometraje_reportado || "",
           millas: "",
-          horas: "",
+          horas: novedad.horas_reportadas || "",
           tieneNovedad: !!novedad.descripcion,
         });
         setGeneratedReportNumber(novedad.report_number);
@@ -188,7 +188,7 @@ export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess }
       const newMillas = parseFloat(formData.millas);
       const newHours = parseFloat(formData.horas);
 
-      if (selectedVehicle) {
+      if (selectedVehicle && !novedad) {
         if (formData.kilometraje && newKm < (selectedVehicle.mileage || 0)) {
           throw new Error(`El kilometraje no puede ser menor al actual (${selectedVehicle.mileage || 0} km)`);
         }
