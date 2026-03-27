@@ -62,6 +62,11 @@ export default function Novedades() {
     enabled: isSuperAdmin,
   });
 
+  const { data: vehicleTypes = [] } = useQuery({
+    queryKey: ["vehicleTypes"],
+    queryFn: () => base44.entities.VehicleType.list(),
+  });
+
   const accessibleNovedades = isSuperAdmin
     ? novedades
     : novedades.filter(n => n.company_id === currentUser?.company_id);
@@ -82,6 +87,7 @@ export default function Novedades() {
   const getVehicle = (id) => vehicles.find(v => v.id === id);
   const getLocation = (id) => locations.find(l => l.id === id);
   const getCompany = (id) => companies.find(c => c.id === id);
+  const getVehicleType = (id) => vehicleTypes.find(t => t.id === id);
 
   const handleSave = async (data) => {
     if (selectedNovedad) {
@@ -165,6 +171,8 @@ export default function Novedades() {
               const prioridad = PRIORIDAD_CONFIG[n.prioridad] || PRIORIDAD_CONFIG.media;
               const estado = ESTADO_CONFIG[n.estado] || ESTADO_CONFIG.pendiente;
 
+              const vehicleType = vehicle ? getVehicleType(vehicle.type_id) : null;
+
               return (
                 <div
                   key={n.id}
@@ -176,45 +184,85 @@ export default function Novedades() {
                       : "bg-white border-gray-200 hover:border-gray-300 hover:shadow-sm"
                   )}
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <p className={cn("font-medium flex-1", theme === "dark" ? "text-white" : "text-gray-900")}>
-                      {n.descripcion}
-                    </p>
-                    <div className="flex gap-2 shrink-0">
-                      <span className={cn("text-xs px-2 py-0.5 rounded-full font-medium", prioridad.cls)}>{prioridad.label}</span>
-                      <span className={cn("text-xs px-2 py-0.5 rounded-full font-medium", estado.cls)}>{estado.label}</span>
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2">
-                    {company && (
-                      <span className={cn("flex items-center gap-1 text-xs", theme === "dark" ? "text-zinc-400" : "text-gray-500")}>
-                        <Building2 className="w-3 h-3" /> {company.name}
-                      </span>
-                    )}
-                    {location && (
-                      <span className={cn("flex items-center gap-1 text-xs", theme === "dark" ? "text-zinc-400" : "text-gray-500")}>
-                        <MapPin className="w-3 h-3" /> {location.name}
-                      </span>
-                    )}
+                  <div className="flex items-start gap-3">
+                    {/* Foto del vehículo */}
                     {vehicle && (
-                      <span className={cn("flex items-center gap-1 text-xs", theme === "dark" ? "text-zinc-400" : "text-gray-500")}>
-                        <Car className="w-3 h-3" /> {vehicle.internal_number || vehicle.plate || `${vehicle.manufacturer} ${vehicle.model}`}
-                      </span>
+                      <div className="shrink-0">
+                        {vehicle.image_url ? (
+                          <img
+                            src={vehicle.image_url}
+                            alt={vehicle.plate}
+                            className="w-14 h-14 rounded-lg object-cover border"
+                            style={{ borderColor: theme === "dark" ? "rgb(63,63,70)" : "rgb(229,231,235)" }}
+                          />
+                        ) : (
+                          <div className={cn(
+                            "w-14 h-14 rounded-lg flex items-center justify-center border",
+                            theme === "dark" ? "bg-zinc-800 border-zinc-700" : "bg-gray-100 border-gray-200"
+                          )}>
+                            <Car className={cn("w-6 h-6", theme === "dark" ? "text-zinc-600" : "text-gray-400")} />
+                          </div>
+                        )}
+                      </div>
                     )}
-                    {n.kilometraje_reportado && (
-                      <span className={cn("text-xs", theme === "dark" ? "text-zinc-500" : "text-gray-400")}>
-                        {n.kilometraje_reportado.toLocaleString()} km
-                      </span>
-                    )}
-                    {n.horas_reportadas && (
-                      <span className={cn("text-xs", theme === "dark" ? "text-zinc-500" : "text-gray-400")}>
-                        {n.horas_reportadas} hs
-                      </span>
-                    )}
-                    <span className={cn("flex items-center gap-1 text-xs ml-auto", theme === "dark" ? "text-zinc-500" : "text-gray-400")}>
-                      <Clock className="w-3 h-3" />
-                      {n.fecha_reporte ? format(new Date(n.fecha_reporte + "T00:00:00"), "dd/MM/yyyy") : "-"}
-                    </span>
+
+                    <div className="flex-1 min-w-0">
+                      {/* Descripción y badges */}
+                      <div className="flex items-start justify-between gap-3">
+                        <p className={cn("font-medium", theme === "dark" ? "text-white" : "text-gray-900")}>
+                          {n.descripcion}
+                        </p>
+                        <div className="flex gap-2 shrink-0">
+                          {n.prioridad && <span className={cn("text-xs px-2 py-0.5 rounded-full font-medium", prioridad.cls)}>{prioridad.label}</span>}
+                          <span className={cn("text-xs px-2 py-0.5 rounded-full font-medium", estado.cls)}>{estado.label}</span>
+                        </div>
+                      </div>
+
+                      {/* Info del vehículo */}
+                      {vehicle && (
+                        <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1">
+                          <span className={cn("text-xs font-medium", theme === "dark" ? "text-zinc-300" : "text-gray-700")}>
+                            {vehicle.internal_number && `Interno ${vehicle.internal_number}`}
+                          </span>
+                          <span className={cn("text-xs", theme === "dark" ? "text-zinc-400" : "text-gray-500")}>
+                            {vehicle.manufacturer} {vehicle.model}
+                          </span>
+                          {vehicleType && (
+                            <span className={cn("text-xs", theme === "dark" ? "text-zinc-500" : "text-gray-400")}>
+                              {vehicleType.name}
+                            </span>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Metadata */}
+                      <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1.5">
+                        {company && (
+                          <span className={cn("flex items-center gap-1 text-xs", theme === "dark" ? "text-zinc-400" : "text-gray-500")}>
+                            <Building2 className="w-3 h-3" /> {company.name}
+                          </span>
+                        )}
+                        {location && (
+                          <span className={cn("flex items-center gap-1 text-xs", theme === "dark" ? "text-zinc-400" : "text-gray-500")}>
+                            <MapPin className="w-3 h-3" /> {location.name}
+                          </span>
+                        )}
+                        {n.kilometraje_reportado && (
+                          <span className={cn("text-xs", theme === "dark" ? "text-zinc-500" : "text-gray-400")}>
+                            {n.kilometraje_reportado.toLocaleString()} km
+                          </span>
+                        )}
+                        {n.horas_reportadas && (
+                          <span className={cn("text-xs", theme === "dark" ? "text-zinc-500" : "text-gray-400")}>
+                            {n.horas_reportadas} hs
+                          </span>
+                        )}
+                        <span className={cn("flex items-center gap-1 text-xs ml-auto", theme === "dark" ? "text-zinc-500" : "text-gray-400")}>
+                          <Clock className="w-3 h-3" />
+                          {n.fecha_reporte ? format(new Date(n.fecha_reporte + "T00:00:00"), "dd/MM/yyyy") : "-"}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               );
