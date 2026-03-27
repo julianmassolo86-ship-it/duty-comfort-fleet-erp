@@ -52,6 +52,7 @@ export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess }
           vehicle_id: novedad.vehicle_id || "",
           descripcion: novedad.descripcion || "",
           prioridad: novedad.prioridad || "media",
+          estado: novedad.estado || "pendiente",
           kilometraje: "",
           millas: "",
           horas: "",
@@ -232,7 +233,10 @@ export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess }
 
       if (novedad) {
         if (shouldCreateNovedad) {
-          await base44.entities.Novedad.update(novedad.id, novedadData);
+          await base44.entities.Novedad.update(novedad.id, {
+            ...novedadData,
+            estado: formData.estado,
+          });
         }
       } else {
         // Solo crear novedad si hay descripción
@@ -556,22 +560,41 @@ export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess }
               </div>
 
               {novedad && (
-                <div className="space-y-2">
-                  <Label className={theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}>Prioridad</Label>
-                  <Select
-                    value={formData.prioridad}
-                    onValueChange={(val) => setFormData({ ...formData, prioridad: val })}
-                  >
-                    <SelectTrigger className={theme === 'dark' ? 'bg-zinc-800 border-zinc-700 text-white' : ''}>
-                      <SelectValue placeholder="Sin prioridad asignada" />
-                    </SelectTrigger>
-                    <SelectContent className={theme === 'dark' ? 'bg-zinc-800 border-zinc-700' : ''}>
-                      <SelectItem value="baja" className={theme === 'dark' ? 'text-white focus:bg-zinc-700' : ''}>Baja</SelectItem>
-                      <SelectItem value="media" className={theme === 'dark' ? 'text-white focus:bg-zinc-700' : ''}>Media</SelectItem>
-                      <SelectItem value="alta" className={theme === 'dark' ? 'text-white focus:bg-zinc-700' : ''}>Alta</SelectItem>
-                      <SelectItem value="critica" className={theme === 'dark' ? 'text-white focus:bg-zinc-700' : ''}>Crítica</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label className={theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}>Prioridad</Label>
+                    <Select
+                      value={formData.prioridad}
+                      onValueChange={(val) => setFormData({ ...formData, prioridad: val })}
+                    >
+                      <SelectTrigger className={theme === 'dark' ? 'bg-zinc-800 border-zinc-700 text-white' : ''}>
+                        <SelectValue placeholder="Sin prioridad asignada" />
+                      </SelectTrigger>
+                      <SelectContent className={theme === 'dark' ? 'bg-zinc-800 border-zinc-700' : ''}>
+                        <SelectItem value="baja" className={theme === 'dark' ? 'text-white focus:bg-zinc-700' : ''}>Baja</SelectItem>
+                        <SelectItem value="media" className={theme === 'dark' ? 'text-white focus:bg-zinc-700' : ''}>Media</SelectItem>
+                        <SelectItem value="alta" className={theme === 'dark' ? 'text-white focus:bg-zinc-700' : ''}>Alta</SelectItem>
+                        <SelectItem value="critica" className={theme === 'dark' ? 'text-white focus:bg-zinc-700' : ''}>Crítica</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className={theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}>Estado</Label>
+                    <Select
+                      value={formData.estado}
+                      onValueChange={(val) => setFormData({ ...formData, estado: val })}
+                    >
+                      <SelectTrigger className={theme === 'dark' ? 'bg-zinc-800 border-zinc-700 text-white' : ''}>
+                        <SelectValue placeholder="Estado" />
+                      </SelectTrigger>
+                      <SelectContent className={theme === 'dark' ? 'bg-zinc-800 border-zinc-700' : ''}>
+                        <SelectItem value="pendiente" className={theme === 'dark' ? 'text-white focus:bg-zinc-700' : ''}>Pendiente</SelectItem>
+                        <SelectItem value="en_proceso" className={theme === 'dark' ? 'text-white focus:bg-zinc-700' : ''}>En Proceso</SelectItem>
+                        <SelectItem value="resuelto" className={theme === 'dark' ? 'text-white focus:bg-zinc-700' : ''}>Resuelto</SelectItem>
+                        <SelectItem value="cerrado" className={theme === 'dark' ? 'text-white focus:bg-zinc-700' : ''}>Cerrado</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               )}
             </div>
