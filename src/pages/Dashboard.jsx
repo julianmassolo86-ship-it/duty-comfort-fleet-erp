@@ -201,14 +201,16 @@ export default function Dashboard() {
 
       if (taskDef.interval_hours && schedule.next_due_hours && status !== 'overdue') {
         const remaining = schedule.next_due_hours - (vehicle.hours || 0);
-        const warning = taskDef.warning_hours || (taskDef.interval_hours * 0.05);
+        const warning = taskDef.warning_hours || Math.max(50, Math.floor(taskDef.interval_hours * 0.10));
         if (remaining <= 0) {
           status = 'overdue';
           dueInfo = `Vencido (${Math.abs(remaining).toLocaleString()} hs pasadas)`;
           hasAlert = true;
-        } else if (remaining <= warning && !hasAlert) {
-          status = 'due_soon';
-          dueInfo = `Faltan ${remaining.toLocaleString()} hs`;
+        } else if (remaining <= warning) {
+          if (!hasAlert) {
+            status = 'due_soon';
+            dueInfo = `Faltan ${remaining.toLocaleString()} hs`;
+          }
           hasAlert = true;
         }
       }

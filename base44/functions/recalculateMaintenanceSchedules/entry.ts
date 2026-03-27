@@ -54,7 +54,7 @@ Deno.serve(async (req) => {
       // --- Por horas (toma el estado más grave) ---
       if (taskDef.interval_hours && schedule.next_due_hours && newStatus !== 'overdue') {
         const remaining = schedule.next_due_hours - currentHours;
-        const warning = taskDef.warning_hours || Math.floor(taskDef.interval_hours * 0.05);
+        const warning = taskDef.warning_hours || Math.max(50, Math.floor(taskDef.interval_hours * 0.10));
         if (remaining <= 0) {
           newStatus = 'overdue';
         } else if (remaining <= warning && newStatus === 'on_track') {
