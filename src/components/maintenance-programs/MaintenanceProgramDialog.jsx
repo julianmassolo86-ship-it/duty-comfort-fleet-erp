@@ -198,20 +198,7 @@ export default function MaintenanceProgramDialog({
             {typeInfo && <p className="text-xs text-zinc-500">{typeInfo.description}</p>}
           </div>
 
-          {/* Empresa (solo super admin y solo para programas) */}
-          {isSuperAdmin && isProgram && (
-            <div className="space-y-2">
-              <Label>Empresa *</Label>
-              <Select value={form.company_id} onValueChange={(v) => set("company_id", v)} required>
-                <SelectTrigger className="bg-zinc-900 border-zinc-700">
-                  <SelectValue placeholder="Seleccionar empresa" />
-                </SelectTrigger>
-                <SelectContent>
-                  {companies.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
+
 
           {/* Nombre */}
           <div className="space-y-2">
