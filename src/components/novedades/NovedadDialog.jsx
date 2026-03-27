@@ -225,7 +225,7 @@ export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess }
         prioridad: formData.prioridad,
         fecha_reporte: fechaReporte,
         estado: "pendiente",
-        kilometraje_reportado: formData.kilometraje ? newKm : null,
+        kilometraje_reportado: formData.kilometraje ? newKm : (formData.millas ? Math.round(newMillas * 1.60934) : null),
         horas_reportadas: formData.horas ? newHours : null,
         report_number: generatedReportNumber
       } : null;
@@ -242,8 +242,11 @@ export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess }
         
         // Siempre actualizar kilometraje y/o horas del vehículo
         const vehicleUpdate = {};
-        if (formData.kilometraje) vehicleUpdate.mileage = newKm;
-        if (formData.millas) vehicleUpdate.mileage = Math.round(newMillas * 1.60934);
+        if (formData.kilometraje) {
+          vehicleUpdate.mileage = newKm;
+        } else if (formData.millas) {
+          vehicleUpdate.mileage = Math.round(newMillas * 1.60934);
+        }
         if (formData.horas) vehicleUpdate.hours = newHours;
         
         if (Object.keys(vehicleUpdate).length > 0) {
