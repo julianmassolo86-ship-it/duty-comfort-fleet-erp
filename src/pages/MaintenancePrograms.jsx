@@ -123,17 +123,24 @@ export default function MaintenancePrograms() {
   };
 
   const filteredPrograms = useMemo(() => {
+    const term = searchTerm.toLowerCase();
     return programs
       .filter(p => p.is_active !== false)
       .filter(p => {
         if (activeTab !== "all") return getTaskType(p) === activeTab;
         return true;
       })
-      .filter(p =>
-        p.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.description?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-  }, [programs, searchTerm, activeTab]);
+      .filter(p => {
+        if (!term) return true;
+        const manufacturerName = manufacturers.find(m => m.id === p.applies_to_manufacturer_id)?.name || "";
+        return (
+          p.name?.toLowerCase().includes(term) ||
+          p.description?.toLowerCase().includes(term) ||
+          p.part_number?.toLowerCase().includes(term) ||
+          manufacturerName.toLowerCase().includes(term)
+        );
+      });
+  }, [programs, searchTerm, activeTab, manufacturers]);
 
   const counts = useMemo(() => ({
     all: programs.filter(p => p.is_active !== false).length,
