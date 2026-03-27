@@ -178,8 +178,8 @@ export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess }
         throw new Error("Debe seleccionar un vehículo");
       }
 
-      // Validar que al menos uno de los tres campos esté completado
-      if (!formData.kilometraje && !formData.millas && !formData.horas) {
+      // Validar que al menos uno de los tres campos esté completado (solo en creación)
+      if (!novedad && !formData.kilometraje && !formData.millas && !formData.horas) {
         throw new Error("Debe ingresar al menos el kilometraje, las millas o las horas del vehículo");
       }
 
@@ -237,6 +237,14 @@ export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess }
             ...novedadData,
             estado: formData.estado,
           });
+        }
+        // Actualizar vehículo si se ingresaron nuevos valores
+        const vehicleUpdate = {};
+        if (formData.kilometraje) vehicleUpdate.mileage = newKm;
+        else if (formData.millas) vehicleUpdate.mileage = Math.round(newMillas * 1.60934);
+        if (formData.horas) vehicleUpdate.hours = newHours;
+        if (Object.keys(vehicleUpdate).length > 0) {
+          await base44.entities.Vehicle.update(formData.vehicle_id, vehicleUpdate);
         }
       } else {
         // Solo crear novedad si hay descripción
@@ -499,7 +507,6 @@ export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess }
                 onChange={(e) => setFormData({ ...formData, kilometraje: e.target.value })}
                 placeholder="Ej: 15000"
                 className={theme === 'dark' ? 'bg-zinc-800 border-zinc-700 text-white' : ''}
-                disabled={!!novedad}
               />
             </div>
 
@@ -512,7 +519,6 @@ export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess }
                 onChange={(e) => setFormData({ ...formData, millas: e.target.value })}
                 placeholder="Ej: 9320"
                 className={theme === 'dark' ? 'bg-zinc-800 border-zinc-700 text-white' : ''}
-                disabled={!!novedad}
               />
             </div>
 
@@ -525,14 +531,15 @@ export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess }
                 onChange={(e) => setFormData({ ...formData, horas: e.target.value })}
                 placeholder="Ej: 500"
                 className={theme === 'dark' ? 'bg-zinc-800 border-zinc-700 text-white' : ''}
-                disabled={!!novedad}
               />
             </div>
           </div>
 
-          <p className={cn("text-xs", theme === 'dark' ? 'text-zinc-500' : 'text-gray-500')}>
-            * Debe completar al menos uno de estos campos
-          </p>
+          {!novedad && (
+            <p className={cn("text-xs", theme === 'dark' ? 'text-zinc-500' : 'text-gray-500')}>
+              * Debe completar al menos uno de estos campos
+            </p>
+          )}
 
             <div className={cn("flex items-center gap-3 p-3 rounded-lg border", theme === 'dark' ? 'bg-zinc-800/50 border-zinc-700' : 'bg-gray-50 border-gray-200')}>
             <Checkbox
