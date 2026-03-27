@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, Loader2, Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -16,7 +17,8 @@ const initialState = {
   descripcion: "",
   prioridad: "media",
   kilometraje: "",
-  horas: ""
+  horas: "",
+  tieneNovedad: false,
 };
 
 export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess }) {
@@ -50,7 +52,8 @@ export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess }
           descripcion: novedad.descripcion || "",
           prioridad: novedad.prioridad || "media",
           kilometraje: "",
-          horas: ""
+          horas: "",
+          tieneNovedad: !!novedad.descripcion,
         });
         setGeneratedReportNumber(novedad.report_number);
       } else {
@@ -190,8 +193,13 @@ export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess }
         }
       }
 
-      // Solo crear novedad si hay descripción
-      const shouldCreateNovedad = formData.descripcion && formData.descripcion.trim() !== "";
+      // Validar que si marcó novedad, haya descripción
+      if (formData.tieneNovedad && !formData.descripcion?.trim()) {
+        throw new Error("Debe describir la novedad si marcó que hay una");
+      }
+
+      // Solo crear novedad si tildó el checkbox y hay descripción
+      const shouldCreateNovedad = formData.tieneNovedad && formData.descripcion?.trim() !== "";
 
       // Obtener fecha actual en zona horaria de Buenos Aires (UTC-3)
       const now = new Date();
@@ -253,7 +261,7 @@ export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess }
       <DialogContent className={cn("max-w-2xl max-h-[90vh] overflow-y-auto", theme === 'dark' ? 'bg-zinc-900 border-zinc-700' : 'bg-white')}>
         <DialogHeader>
           <DialogTitle className={cn("flex items-center gap-3", theme === 'dark' ? 'text-white' : 'text-gray-900')}>
-            <span>{novedad ? "Editar Novedad" : "Registrar Novedad Diaria"}</span>
+            <span>{novedad ? "Editar Reporte de Cierre" : "Reporte de Cierre"}</span>
             {generatedReportNumber && (
               <span className="text-sm font-mono px-3 py-1 rounded-full bg-yellow-500/20 text-yellow-600 border border-yellow-500/30">
                 {generatedReportNumber}
@@ -502,37 +510,30 @@ export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess }
             * Debe completar al menos uno de estos campos
             </p>
 
-            <div className="space-y-2">
-            <Label className={theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}>Descripción de la Novedad</Label>
-            <Textarea
-              value={formData.descripcion}
-              onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
-              placeholder="Opcional: Ej: Lámpara trasera derecha quemada"
-              rows={3}
-              className={theme === 'dark' ? 'bg-zinc-800 border-zinc-700 text-white' : ''}
+            <div className={cn("flex items-center gap-3 p-3 rounded-lg border", theme === 'dark' ? 'bg-zinc-800/50 border-zinc-700' : 'bg-gray-50 border-gray-200')}>
+            <Checkbox
+              id="tieneNovedad"
+              checked={formData.tieneNovedad}
+              onCheckedChange={(checked) => setFormData({ ...formData, tieneNovedad: !!checked, descripcion: checked ? formData.descripcion : "" })}
             />
-            <p className={cn("text-xs", theme === 'dark' ? 'text-zinc-500' : 'text-gray-500')}>
-              Si no hay novedades, dejar vacío
-            </p>
+            <label htmlFor="tieneNovedad" className={cn("text-sm font-medium cursor-pointer", theme === 'dark' ? 'text-zinc-200' : 'text-gray-700')}>
+              El vehículo tiene una novedad para declarar
+            </label>
           </div>
 
-          <div className="space-y-2">
-            <Label className={theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}>Prioridad</Label>
-            <Select
-              value={formData.prioridad}
-              onValueChange={(value) => setFormData({ ...formData, prioridad: value })}
-            >
-              <SelectTrigger className={theme === 'dark' ? 'bg-zinc-800 border-zinc-700 text-white' : ''}>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className={theme === 'dark' ? 'bg-zinc-800 border-zinc-700' : ''}>
-                <SelectItem value="baja" className={theme === 'dark' ? 'text-white focus:bg-zinc-700' : ''}>Baja</SelectItem>
-                <SelectItem value="media" className={theme === 'dark' ? 'text-white focus:bg-zinc-700' : ''}>Media</SelectItem>
-                <SelectItem value="alta" className={theme === 'dark' ? 'text-white focus:bg-zinc-700' : ''}>Alta</SelectItem>
-                <SelectItem value="critica" className={theme === 'dark' ? 'text-white focus:bg-zinc-700' : ''}>Crítica</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          {formData.tieneNovedad && (
+            <div className="space-y-2">
+              <Label className={theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}>Descripción de la Novedad *</Label>
+              <Textarea
+                value={formData.descripcion}
+                onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
+                placeholder="Ej: Lámpara trasera derecha quemada"
+                rows={3}
+                className={theme === 'dark' ? 'bg-zinc-800 border-zinc-700 text-white' : ''}
+                autoFocus
+              />
+            </div>
+          )}
 
           <DialogFooter>
             <Button
