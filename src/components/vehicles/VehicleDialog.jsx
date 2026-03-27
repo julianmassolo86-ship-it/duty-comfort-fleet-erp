@@ -182,6 +182,8 @@ export default function VehicleDialog({
       return;
     }
     
+    setIsSubmitting(true);
+
     const currentVehicleId = vehicle?.id || form.id;
     
     // Validar patente duplicada globalmente (solo si cambió la patente)
@@ -190,6 +192,7 @@ export default function VehicleDialog({
       const duplicatePlate = existingByPlate.find(v => v.id !== currentVehicleId);
       if (duplicatePlate) {
         alert(`La patente "${form.plate}" ya existe en el sistema (Interno: ${duplicatePlate.internal_number})`);
+        setIsSubmitting(false);
         return;
       }
     }
@@ -204,6 +207,7 @@ export default function VehicleDialog({
       const duplicateInternal = existingByInternal.find(v => v.id !== currentVehicleId);
       if (duplicateInternal) {
         alert(`El número interno "${form.internal_number}" ya existe en esta empresa (Patente: ${duplicateInternal.plate})`);
+        setIsSubmitting(false);
         return;
       }
     }
@@ -219,8 +223,6 @@ export default function VehicleDialog({
     if (vehicle?.id) {
       finalData.id = vehicle.id;
     }
-    
-    setIsSubmitting(true);
     
     try {
       await onSave(finalData);
