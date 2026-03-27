@@ -17,6 +17,7 @@ const initialState = {
   descripcion: "",
   prioridad: "media",
   kilometraje: "",
+  millas: "",
   horas: "",
   tieneNovedad: false,
 };
@@ -52,6 +53,7 @@ export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess }
           descripcion: novedad.descripcion || "",
           prioridad: novedad.prioridad || "media",
           kilometraje: "",
+          millas: "",
           horas: "",
           tieneNovedad: !!novedad.descripcion,
         });
@@ -175,13 +177,14 @@ export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess }
         throw new Error("Debe seleccionar un vehículo");
       }
 
-      // Validar que al menos uno de los dos campos (kilometraje u horas) esté completado
-      if (!formData.kilometraje && !formData.horas) {
-        throw new Error("Debe ingresar al menos el kilometraje o las horas del vehículo");
+      // Validar que al menos uno de los tres campos esté completado
+      if (!formData.kilometraje && !formData.millas && !formData.horas) {
+        throw new Error("Debe ingresar al menos el kilometraje, las millas o las horas del vehículo");
       }
 
-      // Validar kilometraje y horas
+      // Validar kilometraje, millas y horas
       const newKm = parseFloat(formData.kilometraje);
+      const newMillas = parseFloat(formData.millas);
       const newHours = parseFloat(formData.horas);
 
       if (selectedVehicle) {
@@ -240,6 +243,7 @@ export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess }
         // Siempre actualizar kilometraje y/o horas del vehículo
         const vehicleUpdate = {};
         if (formData.kilometraje) vehicleUpdate.mileage = newKm;
+        if (formData.millas) vehicleUpdate.mileage = Math.round(newMillas * 1.60934);
         if (formData.horas) vehicleUpdate.hours = newHours;
         
         if (Object.keys(vehicleUpdate).length > 0) {
@@ -478,9 +482,9 @@ export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess }
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-3">
             <div className="space-y-2">
-              <Label className={theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}>Nuevo Kilometraje *</Label>
+              <Label className={theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}>Nuevo Kilometraje</Label>
               <Input
                 type="number"
                 step="0.1"
@@ -493,7 +497,20 @@ export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess }
             </div>
 
             <div className="space-y-2">
-              <Label className={theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}>Nuevas Horas *</Label>
+              <Label className={theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}>Nuevas Millas</Label>
+              <Input
+                type="number"
+                step="0.1"
+                value={formData.millas}
+                onChange={(e) => setFormData({ ...formData, millas: e.target.value })}
+                placeholder="Ej: 9320"
+                className={theme === 'dark' ? 'bg-zinc-800 border-zinc-700 text-white' : ''}
+                disabled={!!novedad}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label className={theme === 'dark' ? 'text-zinc-300' : 'text-gray-700'}>Nuevas Horas</Label>
               <Input
                 type="number"
                 step="0.1"
@@ -504,11 +521,11 @@ export default function NovedadDialog({ open, onOpenChange, novedad, onSuccess }
                 disabled={!!novedad}
               />
             </div>
-            </div>
+          </div>
 
-            <p className={cn("text-xs", theme === 'dark' ? 'text-zinc-500' : 'text-gray-500')}>
+          <p className={cn("text-xs", theme === 'dark' ? 'text-zinc-500' : 'text-gray-500')}>
             * Debe completar al menos uno de estos campos
-            </p>
+          </p>
 
             <div className={cn("flex items-center gap-3 p-3 rounded-lg border", theme === 'dark' ? 'bg-zinc-800/50 border-zinc-700' : 'bg-gray-50 border-gray-200')}>
             <Checkbox
