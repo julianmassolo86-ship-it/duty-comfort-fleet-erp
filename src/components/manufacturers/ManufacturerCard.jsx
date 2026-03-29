@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useTheme } from "@/components/common/ThemeWrapper";
 import { cn } from "@/lib/utils";
@@ -25,11 +25,12 @@ export default function ManufacturerCard({ manufacturer, onClick }) {
             "w-20 h-20 rounded-xl flex items-center justify-center flex-shrink-0 transition-all",
             theme === 'dark' ? 'bg-zinc-800' : 'bg-gray-50'
           )}>
-            {manufacturer.logo_url ? (
+            {manufacturer.logo_url && !imgError ? (
               <img
                 src={manufacturer.logo_url}
                 alt={manufacturer.name}
                 className="w-full h-full object-contain rounded-xl p-2"
+                onError={() => setImgError(true)}
               />
             ) : (
               <Building2 className={cn(
