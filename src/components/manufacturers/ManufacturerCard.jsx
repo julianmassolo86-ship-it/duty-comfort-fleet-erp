@@ -6,6 +6,7 @@ import { Building2 } from "lucide-react";
 
 export default function ManufacturerCard({ manufacturer, onClick }) {
   const { theme } = useTheme();
+  const [imgError, setImgError] = React.useState(false);
 
   return (
     <Card
