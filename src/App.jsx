@@ -10,6 +10,7 @@ import MantenimientoForms from './pages/MantenimientoForms';
 import Novedades from './pages/Novedades';
 import Inventory from './pages/Inventory';
 import FuelUps from './pages/FuelUps';
+import VehicleModels from './pages/VehicleModels';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
 const { Pages, Layout, mainPage } = pagesConfig;
@@ -66,6 +67,7 @@ const AuthenticatedApp = () => {
       <Route path="/Novedades" element={<LayoutWrapper currentPageName="Novedades"><Novedades /></LayoutWrapper>} />
       <Route path="/Inventory" element={<LayoutWrapper currentPageName="Inventory"><Inventory /></LayoutWrapper>} />
       <Route path="/FuelUps" element={<LayoutWrapper currentPageName="FuelUps"><FuelUps /></LayoutWrapper>} />
+      <Route path="/VehicleModels" element={<LayoutWrapper currentPageName="VehicleModels"><VehicleModels /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

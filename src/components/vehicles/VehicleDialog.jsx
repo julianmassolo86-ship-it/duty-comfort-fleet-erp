@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -97,6 +97,11 @@ export default function VehicleDialog({
     queryFn: () => base44.entities.VehicleStatus.list(),
   });
 
+  const { data: vehicleModels = [] } = useQuery({
+    queryKey: ['vehicleModels'],
+    queryFn: () => base44.entities.VehicleModel.list(),
+  });
+
   // Crear mapa de categorías
   const categoriesMap = new Map(vehicleCategories.map(cat => [cat.id, cat.name]));
 
@@ -115,14 +120,17 @@ export default function VehicleDialog({
         const locationId = vehicle.location_id || "";
         
         setSelectedCompanyId(companyId);
+
+        // If manufacturer_id is not set but manufacturer name is, try to find it
+        let manufacturerId = vehicle.manufacturer_id || "";
         
-        // IMPORTANTE: Mantener TODOS los datos del vehículo, incluido location_id
         setForm(prev => ({ 
           ...vehicle,
           assigned_driver_ids: driverIds,
           company_id: companyId,
           location_id: locationId,
-          // Asegurar que campos numéricos no sean null/undefined
+          manufacturer_id: manufacturerId,
+          vehicle_model_id: vehicle.vehicle_model_id || "",
           year: vehicle.year || "",
           mileage: vehicle.mileage || 0,
           miles: vehicle.miles || 0,
@@ -156,21 +164,37 @@ export default function VehicleDialog({
     } else if (field === "location_id") {
       setForm(prev => ({ ...prev, [field]: value, assigned_driver_ids: [] }));
     } else if (field === "type_id") {
-      // Cuando se selecciona un tipo, también actualizar la categoría
       const selectedType = vehicleTypes.find(vt => vt.id === value);
       if (selectedType) {
         setForm(prev => ({ 
           ...prev, 
           type_id: value,
-          category_id: selectedType.category_id
+          category_id: selectedType.category_id,
+          vehicle_model_id: "" // reset model when type changes
         }));
       } else {
         setForm(prev => ({ ...prev, [field]: value }));
       }
+    } else if (field === "manufacturer_id") {
+      // when manufacturer changes, update manufacturer name/logo and reset model
+      const selectedMan = manufacturers.find(m => m.id === value);
+      setForm(prev => ({
+        ...prev,
+        manufacturer_id: value,
+        manufacturer: selectedMan ? selectedMan.name : "",
+        manufacturer_logo_url: selectedMan ? selectedMan.logo_url : "",
+        vehicle_model_id: "" // reset model
+      }));
     } else {
       setForm(prev => ({ ...prev, [field]: value }));
     }
   };
+
+  // Filter models by selected manufacturer_id
+  const filteredModels = useMemo(() => {
+    if (!form.manufacturer_id) return vehicleModels;
+    return vehicleModels.filter(m => m.manufacturer_id === form.manufacturer_id);
+  }, [vehicleModels, form.manufacturer_id]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -435,12 +459,8 @@ export default function VehicleDialog({
                 <div className="space-y-2">
                   <Label>Fabricante *</Label>
                   <Select 
-                    value={form.manufacturer || ""}
-                    onValueChange={(value) => {
-                      const selectedMan = manufacturers.find(m => m.name === value);
-                      handleChange("manufacturer", value);
-                      handleChange("manufacturer_logo_url", selectedMan ? selectedMan.logo_url : "");
-                    }}
+                    value={form.manufacturer_id || ""}
+                    onValueChange={(value) => handleChange("manufacturer_id", value)}
                     required
                   >
                     <SelectTrigger className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50">
@@ -448,7 +468,7 @@ export default function VehicleDialog({
                     </SelectTrigger>
                     <SelectContent>
                       {manufacturers.map(m => (
-                        <SelectItem key={m.id} value={m.name}>
+                        <SelectItem key={m.id} value={m.id}>
                           <div className="flex items-center gap-2">
                             {m.logo_url && <img src={m.logo_url} alt={m.name} className="h-5 w-auto object-contain" />}
                             {m.name}
@@ -460,13 +480,29 @@ export default function VehicleDialog({
                 </div>
                 <div className="space-y-2">
                   <Label>Modelo *</Label>
-                  <Input
-                    value={form.model}
-                    onChange={(e) => handleChange("model", e.target.value)}
-                    className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
-                    placeholder="Ej: Hilux 2.8 TDI"
-                    required
-                  />
+                  <Select
+                    value={form.vehicle_model_id || ""}
+                    onValueChange={(v) => {
+                      const selectedModel = vehicleModels.find(m => m.id === v);
+                      handleChange("vehicle_model_id", v);
+                      if (selectedModel) handleChange("model", selectedModel.name);
+                    }}
+                  >
+                    <SelectTrigger className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50">
+                      <SelectValue placeholder={form.manufacturer_id ? "Seleccionar modelo" : "Primero seleccione fabricante"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {filteredModels.length === 0 ? (
+                        <div className="px-2 py-1.5 text-sm text-zinc-500">
+                          {form.manufacturer_id ? "No hay modelos para este fabricante" : "Seleccione un fabricante"}
+                        </div>
+                      ) : (
+                        filteredModels.map(m => (
+                          <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label>Año</Label>

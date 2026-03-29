@@ -22,8 +22,12 @@
     },
     "manufacturer": {
       "type": "string",
-      "description": "Fabricante del veh\u00edculo",
+      "description": "Fabricante del veh\u00edculo (legacy texto libre)",
       "maxLength": 30
+    },
+    "manufacturer_id": {
+      "type": "string",
+      "description": "ID del fabricante (referencia a Manufacturer)"
     },
     "brand": {
       "type": "string",
@@ -31,7 +35,11 @@
     },
     "model": {
       "type": "string",
-      "description": "Modelo del veh\u00edculo"
+      "description": "Modelo del veh\u00edculo (legacy texto libre)"
+    },
+    "vehicle_model_id": {
+      "type": "string",
+      "description": "ID del modelo de veh\u00edculo (referencia a VehicleModel)"
     },
     "year": {
       "type": "number",
@@ -142,109 +150,88 @@
     },
     "last_service_date": {
       "type": "string",
-      "format": "date",
-      "description": "Fecha del \u00faltimo servicio"
+      "format": "date"
     },
     "last_service_mileage": {
-      "type": "number",
-      "description": "Kilometraje del \u00faltimo servicio"
+      "type": "number"
     },
     "last_service_hours": {
-      "type": "number",
-      "description": "Horas del \u00faltimo servicio"
+      "type": "number"
     },
     "next_service_date": {
       "type": "string",
-      "format": "date",
-      "description": "Fecha del pr\u00f3ximo servicio"
+      "format": "date"
     },
     "next_service_mileage": {
-      "type": "number",
-      "description": "Kilometraje del pr\u00f3ximo servicio"
+      "type": "number"
     },
     "next_service_hours": {
-      "type": "number",
-      "description": "Horas del pr\u00f3ximo servicio"
+      "type": "number"
     },
     "insurance_expiry": {
       "type": "string",
       "format": "date"
     },
     "insurance_url": {
-      "type": "string",
-      "description": "URL del documento de seguro"
+      "type": "string"
     },
     "technical_inspection_expiry": {
       "type": "string",
       "format": "date"
     },
     "technical_inspection_url": {
-      "type": "string",
-      "description": "URL del documento de VTV"
+      "type": "string"
     },
     "circulation_permit_expiry": {
       "type": "string",
       "format": "date"
     },
     "circulation_permit_url": {
-      "type": "string",
-      "description": "URL de credencial de circulaci\u00f3n"
+      "type": "string"
     },
     "vehicle_card_front_url": {
-      "type": "string",
-      "description": "URL de c\u00e9dula veh\u00edculo lado A"
+      "type": "string"
     },
     "vehicle_card_front_expiry": {
       "type": "string",
-      "format": "date",
-      "description": "Vencimiento c\u00e9dula"
+      "format": "date"
     },
     "vehicle_card_back_url": {
-      "type": "string",
-      "description": "URL de c\u00e9dula veh\u00edculo lado B"
+      "type": "string"
     },
     "title_url": {
-      "type": "string",
-      "description": "URL del t\u00edtulo automotor"
+      "type": "string"
     },
     "title_expiry": {
       "type": "string",
-      "format": "date",
-      "description": "Vencimiento t\u00edtulo automotor"
+      "format": "date"
     },
     "license_plate_url": {
-      "type": "string",
-      "description": "URL del documento de patente"
+      "type": "string"
     },
     "license_plate_expiry": {
       "type": "string",
-      "format": "date",
-      "description": "Vencimiento de patente"
+      "format": "date"
     },
     "parts_engraving_url": {
-      "type": "string",
-      "description": "URL del grabado de autopartes"
+      "type": "string"
     },
     "parts_engraving_expiry": {
       "type": "string",
-      "format": "date",
-      "description": "Vencimiento grabado de autopartes"
+      "format": "date"
     },
     "fire_extinguisher_url": {
-      "type": "string",
-      "description": "URL del certificado de extintor"
+      "type": "string"
     },
     "fire_extinguisher_expiry": {
       "type": "string",
-      "format": "date",
-      "description": "Vencimiento del extintor"
+      "format": "date"
     },
     "image_url": {
       "type": "string"
     },
     "manufacturer_logo_url": {
-      "type": "string",
-      "description": "Logo del fabricante"
+      "type": "string"
     },
     "notes": {
       "type": "string"

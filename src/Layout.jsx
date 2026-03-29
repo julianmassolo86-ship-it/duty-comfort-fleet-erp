@@ -128,7 +128,7 @@ function LayoutContent({ children, currentPageName }) {
   const isSuperAdmin = !user?.company_id || user?.user_role === 'super_admin';
 
   // Detect if current page is a sub-page
-  const subPages = ['Manufacturers', 'VehicleTypes', 'VehicleStatuses', 'VehicleCategories'];
+  const subPages = ['Manufacturers', 'VehicleTypes', 'VehicleStatuses', 'VehicleCategories', 'VehicleModels'];
   const isSubPage = subPages.includes(currentPageName);
 
   const handleBackClick = () => {
@@ -219,6 +219,7 @@ function LayoutContent({ children, currentPageName }) {
       { name: "Categorías", page: "VehicleCategories" },
       { name: "Tipos", page: "VehicleTypes" },
       { name: "Marcas", page: "Manufacturers" },
+      { name: "Modelos", page: "VehicleModels" },
       { name: "Estados", page: "VehicleStatuses" }]
 
     }]

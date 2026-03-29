@@ -1,0 +1,26 @@
+{
+  "name": "VehicleModel",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Nombre del modelo (ej: Berlingo 1.6 HDI AM52, Tector 6x4)"
+    },
+    "manufacturer_id": {
+      "type": "string",
+      "description": "ID del fabricante (referencia a Manufacturer)"
+    },
+    "vehicle_type_id": {
+      "type": "string",
+      "description": "ID del tipo de veh\u00edculo (referencia a VehicleType)"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Notas adicionales"
+    }
+  },
+  "required": [
+    "name",
+    "manufacturer_id"
+  ]
+}

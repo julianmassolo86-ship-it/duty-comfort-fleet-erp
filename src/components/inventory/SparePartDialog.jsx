@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
+import { useQuery } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,10 +29,27 @@ export default function SparePartDialog({ open, onClose, sparePart, companyId })
     notes: "",
     is_active: true,
     company_id: companyId || "",
+    compatible_manufacturer_id: "",
+    compatible_vehicle_model_id: "",
   };
 
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+
+  const { data: manufacturers = [] } = useQuery({
+    queryKey: ["manufacturers"],
+    queryFn: () => base44.entities.Manufacturer.list(),
+  });
+
+  const { data: vehicleModels = [] } = useQuery({
+    queryKey: ["vehicleModels"],
+    queryFn: () => base44.entities.VehicleModel.list(),
+  });
+
+  const filteredModels = useMemo(() => {
+    if (!form.compatible_manufacturer_id) return vehicleModels;
+    return vehicleModels.filter(m => m.manufacturer_id === form.compatible_manufacturer_id);
+  }, [vehicleModels, form.compatible_manufacturer_id]);
 
   useEffect(() => {
     if (sparePart) {
@@ -110,6 +128,57 @@ export default function SparePartDialog({ open, onClose, sparePart, companyId })
           <div className="md:col-span-2 space-y-1">
             <Label className={labelClass}>Especificaciones Técnicas</Label>
             <Input className={inputClass} value={form.specifications} onChange={(e) => set("specifications", e.target.value)} placeholder="ej: SAE 15W40, Capacidad 18L" />
+          </div>
+
+          {/* Compatibilidad de Vehículo */}
+          <div className="md:col-span-2">
+            <p className={cn("text-xs font-semibold uppercase tracking-wider mb-2", isDark ? "text-zinc-500" : "text-gray-400")}>
+              Vehículo Compatible
+            </p>
+          </div>
+
+          <div className="space-y-1">
+            <Label className={labelClass}>Fabricante Compatible</Label>
+            <Select
+              value={form.compatible_manufacturer_id || ""}
+              onValueChange={(v) => {
+                set("compatible_manufacturer_id", v);
+                set("compatible_vehicle_model_id", ""); // reset model
+              }}
+            >
+              <SelectTrigger className={cn("h-9", isDark ? "bg-zinc-800 border-zinc-700 text-white" : "")}>
+                <SelectValue placeholder="Cualquier fabricante" />
+              </SelectTrigger>
+              <SelectContent className={isDark ? "bg-zinc-800 border-zinc-700" : ""}>
+                <SelectItem value={null}>Cualquier fabricante</SelectItem>
+                {manufacturers.sort((a, b) => a.name.localeCompare(b.name)).map((m) => (
+                  <SelectItem key={m.id} value={m.id}>
+                    <div className="flex items-center gap-2">
+                      {m.logo_url && <img src={m.logo_url} alt={m.name} className="h-4 w-auto object-contain" />}
+                      {m.name}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-1">
+            <Label className={labelClass}>Modelo Compatible</Label>
+            <Select
+              value={form.compatible_vehicle_model_id || ""}
+              onValueChange={(v) => set("compatible_vehicle_model_id", v)}
+            >
+              <SelectTrigger className={cn("h-9", isDark ? "bg-zinc-800 border-zinc-700 text-white" : "")}>
+                <SelectValue placeholder="Cualquier modelo" />
+              </SelectTrigger>
+              <SelectContent className={isDark ? "bg-zinc-800 border-zinc-700" : ""}>
+                <SelectItem value={null}>Cualquier modelo</SelectItem>
+                {filteredModels.map((m) => (
+                  <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Unidad de Medida + Cantidad por unidad */}
