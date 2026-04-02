@@ -21,7 +21,7 @@ const CHECKLIST_ITEMS = [
     { key: "carroceria", label: "Carrocería" },
 ];
 
-const defaultChecklist = () => Object.fromEntries(CHECKLIST_ITEMS.map(i => [i.key, "ok"]));
+const defaultChecklist = () => Object.fromEntries(CHECKLIST_ITEMS.map(i => [i.key, "n/a"]));
 
 function ChecklistItem({ label, value, onChange, isDark }) {
     const options = [
