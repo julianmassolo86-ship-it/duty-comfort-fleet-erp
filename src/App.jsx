@@ -12,6 +12,7 @@ import Inventory from './pages/Inventory';
 import FuelUps from './pages/FuelUps';
 import VehicleModels from './pages/VehicleModels';
 import InspectorPanel from './pages/InspectorPanel';
+import FuelUpPanel from './pages/FuelUpPanel';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
 const { Pages, Layout, mainPage } = pagesConfig;
@@ -70,6 +71,7 @@ const AuthenticatedApp = () => {
       <Route path="/FuelUps" element={<LayoutWrapper currentPageName="FuelUps"><FuelUps /></LayoutWrapper>} />
       <Route path="/VehicleModels" element={<LayoutWrapper currentPageName="VehicleModels"><VehicleModels /></LayoutWrapper>} />
       <Route path="/InspectorPanel" element={<LayoutWrapper currentPageName="InspectorPanel"><InspectorPanel /></LayoutWrapper>} />
+      <Route path="/FuelUpPanel" element={<LayoutWrapper currentPageName="FuelUpPanel"><FuelUpPanel /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
