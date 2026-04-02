@@ -9,7 +9,7 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json();
-    const { vehicle_id, company_id, location_id, type, mileage, hours, checklist, novedades_descripcion, notes } = body;
+    const { vehicle_id, company_id, location_id, type, mileage, miles, hours, checklist, novedades_descripcion, notes } = body;
 
     // Crear la inspección
     const inspectionData = {
@@ -20,6 +20,7 @@ Deno.serve(async (req) => {
         type,
         inspection_date: new Date().toISOString(),
         mileage: mileage || null,
+        miles: miles || null,
         hours: hours || null,
         checklist: checklist || {},
         novedades_descripcion: novedades_descripcion || null,
@@ -75,10 +76,11 @@ Deno.serve(async (req) => {
     // Guardar la inspección
     const inspection = await base44.asServiceRole.entities.VehicleInspection.create(inspectionData);
 
-    // Actualizar mileage/hours del vehículo si es post_trip o si se proveyeron datos
-    if (mileage || hours) {
+    // Actualizar telemetría del vehículo
+    if (mileage || miles || hours) {
         const updateData = {};
         if (mileage) updateData.mileage = mileage;
+        if (miles) updateData.miles = miles;
         if (hours) updateData.hours = hours;
         await base44.asServiceRole.entities.Vehicle.update(vehicle_id, updateData);
     }

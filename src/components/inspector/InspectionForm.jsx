@@ -57,24 +57,46 @@ export default function InspectionForm({ vehicle, inspectionType, onBack, onSucc
     const isDark = theme === 'dark';
 
     const [checklist, setChecklist] = useState(defaultChecklist());
-    const [mileage, setMileage] = useState(vehicle.mileage || "");
+    const [km, setKm] = useState(vehicle.mileage || "");
+    const [miles, setMiles] = useState(vehicle.miles || "");
     const [hours, setHours] = useState(vehicle.hours || "");
     const [novedadesDesc, setNovedadesDesc] = useState("");
     const [notes, setNotes] = useState("");
     const [loading, setLoading] = useState(false);
     const [done, setDone] = useState(false);
     const [createdNovedad, setCreatedNovedad] = useState(false);
+    const [telemetriaError, setTelemetriaError] = useState("");
+
+    // Detectar qué tipo de distancia usa el vehículo según sus datos
+    const vehicleUsesKm = vehicle.mileage != null && vehicle.mileage > 0;
+    const vehicleUsesMiles = vehicle.miles != null && vehicle.miles > 0;
+    const vehicleUsesHours = vehicle.hours != null && vehicle.hours > 0;
 
     const hasIssues = Object.values(checklist).some(v => v === 'mal') || novedadesDesc.trim().length > 0;
 
+    const validateTelemetria = () => {
+        if (km && miles) {
+            setTelemetriaError("No se pueden cargar kilómetros y millas al mismo tiempo.");
+            return false;
+        }
+        if (!km && !miles && !hours) {
+            setTelemetriaError("Debe completar al menos un campo: kilómetros, millas u horas.");
+            return false;
+        }
+        setTelemetriaError("");
+        return true;
+    };
+
     const handleSubmit = async () => {
+        if (!validateTelemetria()) return;
         setLoading(true);
         const res = await base44.functions.invoke('submitVehicleInspection', {
             vehicle_id: vehicle.id,
             company_id: vehicle.company_id,
             location_id: vehicle.location_id,
             type: inspectionType,
-            mileage: mileage ? Number(mileage) : null,
+            mileage: km ? Number(km) : null,
+            miles: miles ? Number(miles) : null,
             hours: hours ? Number(hours) : null,
             checklist,
             novedades_descripcion: novedadesDesc,
@@ -136,31 +158,69 @@ export default function InspectionForm({ vehicle, inspectionType, onBack, onSucc
                 </span>
             </div>
 
-            {/* Kilometraje / Horas */}
+            {/* Telemetría */}
             <div className={cn("p-4 rounded-2xl border space-y-3", isDark ? "bg-zinc-900 border-zinc-700" : "bg-white border-gray-200")}>
-                <h3 className={cn("font-bold text-sm uppercase tracking-wide", isDark ? "text-zinc-400" : "text-gray-500")}>Telemetría</h3>
-                <div className="grid grid-cols-2 gap-3">
-                    <div>
-                        <label className={cn("text-xs font-medium mb-1 block", isDark ? "text-zinc-400" : "text-gray-500")}>Kilometraje</label>
+                <h3 className={cn("font-bold text-sm uppercase tracking-wide", isDark ? "text-zinc-400" : "text-gray-500")}>
+                    Telemetría <span className={cn("normal-case font-normal text-xs ml-1", isDark ? "text-zinc-500" : "text-gray-400")}>(al menos un campo obligatorio)</span>
+                </h3>
+
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                    {/* Kilómetros */}
+                    <div className={cn("p-3 rounded-xl border-2 transition-all", km ? (isDark ? "border-blue-500/50 bg-blue-500/5" : "border-blue-400 bg-blue-50") : (isDark ? "border-zinc-700" : "border-gray-200"))}>
+                        <label className={cn("text-xs font-bold mb-1 block uppercase tracking-wide", km ? (isDark ? "text-blue-400" : "text-blue-600") : (isDark ? "text-zinc-400" : "text-gray-500"))}>
+                            Kilómetros
+                        </label>
                         <Input
                             type="number"
-                            placeholder={vehicle.mileage || "0"}
-                            value={mileage}
-                            onChange={e => setMileage(e.target.value)}
-                            className={cn("h-12 text-center text-lg font-bold", isDark ? "bg-zinc-800 border-zinc-700 text-white" : "bg-gray-50 border-gray-200 text-gray-900")}
+                            placeholder={vehicleUsesKm ? String(vehicle.mileage) : "—"}
+                            value={km}
+                            onChange={e => { setKm(e.target.value); if (e.target.value) setMiles(""); setTelemetriaError(""); }}
+                            disabled={!!miles}
+                            className={cn("h-12 text-center text-lg font-bold border-0 bg-transparent p-0 focus-visible:ring-0", isDark ? "text-white placeholder:text-zinc-600" : "text-gray-900 placeholder:text-gray-300", miles ? "opacity-30 cursor-not-allowed" : "")}
                         />
                     </div>
-                    <div>
-                        <label className={cn("text-xs font-medium mb-1 block", isDark ? "text-zinc-400" : "text-gray-500")}>Horas de uso</label>
+
+                    {/* Millas */}
+                    <div className={cn("p-3 rounded-xl border-2 transition-all", miles ? (isDark ? "border-indigo-500/50 bg-indigo-500/5" : "border-indigo-400 bg-indigo-50") : (isDark ? "border-zinc-700" : "border-gray-200"))}>
+                        <label className={cn("text-xs font-bold mb-1 block uppercase tracking-wide", miles ? (isDark ? "text-indigo-400" : "text-indigo-600") : (isDark ? "text-zinc-400" : "text-gray-500"))}>
+                            Millas
+                        </label>
                         <Input
                             type="number"
-                            placeholder={vehicle.hours || "0"}
+                            placeholder={vehicleUsesMiles ? String(vehicle.miles) : "—"}
+                            value={miles}
+                            onChange={e => { setMiles(e.target.value); if (e.target.value) setKm(""); setTelemetriaError(""); }}
+                            disabled={!!km}
+                            className={cn("h-12 text-center text-lg font-bold border-0 bg-transparent p-0 focus-visible:ring-0", isDark ? "text-white placeholder:text-zinc-600" : "text-gray-900 placeholder:text-gray-300", km ? "opacity-30 cursor-not-allowed" : "")}
+                        />
+                    </div>
+
+                    {/* Horas */}
+                    <div className={cn("p-3 rounded-xl border-2 transition-all", hours ? (isDark ? "border-amber-500/50 bg-amber-500/5" : "border-amber-400 bg-amber-50") : (isDark ? "border-zinc-700" : "border-gray-200"))}>
+                        <label className={cn("text-xs font-bold mb-1 block uppercase tracking-wide", hours ? (isDark ? "text-amber-400" : "text-amber-600") : (isDark ? "text-zinc-400" : "text-gray-500"))}>
+                            Horas
+                        </label>
+                        <Input
+                            type="number"
+                            placeholder={vehicleUsesHours ? String(vehicle.hours) : "—"}
                             value={hours}
-                            onChange={e => setHours(e.target.value)}
-                            className={cn("h-12 text-center text-lg font-bold", isDark ? "bg-zinc-800 border-zinc-700 text-white" : "bg-gray-50 border-gray-200 text-gray-900")}
+                            onChange={e => { setHours(e.target.value); setTelemetriaError(""); }}
+                            className={cn("h-12 text-center text-lg font-bold border-0 bg-transparent p-0 focus-visible:ring-0", isDark ? "text-white placeholder:text-zinc-600" : "text-gray-900 placeholder:text-gray-300")}
                         />
                     </div>
                 </div>
+
+                {telemetriaError && (
+                    <p className="text-xs text-red-500 flex items-center gap-1 mt-1">
+                        <AlertTriangle className="w-3 h-3" /> {telemetriaError}
+                    </p>
+                )}
+
+                {km && miles && (
+                    <p className="text-xs text-red-500 flex items-center gap-1">
+                        <AlertTriangle className="w-3 h-3" /> No se pueden cargar kilómetros y millas al mismo tiempo.
+                    </p>
+                )}
             </div>
 
             {/* Checklist */}
