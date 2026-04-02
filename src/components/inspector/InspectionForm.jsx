@@ -65,6 +65,7 @@ export default function InspectionForm({ vehicle, inspectionType, onBack, onSucc
     const [done, setDone] = useState(false);
     const [createdNovedad, setCreatedNovedad] = useState(false);
     const [telemetriaError, setTelemetriaError] = useState("");
+    const [checklistError, setChecklistError] = useState("");
 
     // Detectar qué tipo de distancia usa el vehículo según sus datos
     const vehicleUsesKm = vehicle.mileage != null && vehicle.mileage > 0;
@@ -97,6 +98,14 @@ export default function InspectionForm({ vehicle, inspectionType, onBack, onSucc
 
     const handleSubmit = async () => {
         if (!validateTelemetria()) return;
+
+        const allNA = Object.values(checklist).every(v => v === 'n/a');
+        if (allNA) {
+            setChecklistError("Debe revisar el checklist. No puede confirmar con todos los ítems en N/A.");
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+        }
+        setChecklistError("");
         setLoading(true);
         const res = await base44.functions.invoke('submitVehicleInspection', {
             vehicle_id: vehicle.id,
@@ -232,6 +241,11 @@ export default function InspectionForm({ vehicle, inspectionType, onBack, onSucc
 
             {/* Checklist */}
             <div className={cn("p-4 rounded-2xl border space-y-3", isDark ? "bg-zinc-900 border-zinc-700" : "bg-white border-gray-200")}>
+                {checklistError && (
+                    <p className="text-xs text-red-500 flex items-center gap-1 mb-2">
+                        <AlertTriangle className="w-3 h-3 shrink-0" /> {checklistError}
+                    </p>
+                )}
                 <div className="flex items-center justify-between mb-1">
                     <h3 className={cn("font-bold text-sm uppercase tracking-wide", isDark ? "text-zinc-400" : "text-gray-500")}>Checklist</h3>
                     <div className="flex items-center gap-3 text-xs">
