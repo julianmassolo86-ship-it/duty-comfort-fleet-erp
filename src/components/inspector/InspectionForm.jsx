@@ -61,7 +61,6 @@ export default function InspectionForm({ vehicle, inspectionType, onBack, onSucc
     const [miles, setMiles] = useState(vehicle.miles || "");
     const [hours, setHours] = useState(vehicle.hours || "");
     const [novedadesDesc, setNovedadesDesc] = useState("");
-    const [notes, setNotes] = useState("");
     const [loading, setLoading] = useState(false);
     const [done, setDone] = useState(false);
     const [createdNovedad, setCreatedNovedad] = useState(false);
@@ -87,6 +86,15 @@ export default function InspectionForm({ vehicle, inspectionType, onBack, onSucc
         return true;
     };
 
+    const handleBack = () => {
+        if (!km && !miles && !hours) {
+            setTelemetriaError("Debe completar la telemetría antes de salir.");
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+        }
+        onBack();
+    };
+
     const handleSubmit = async () => {
         if (!validateTelemetria()) return;
         setLoading(true);
@@ -100,7 +108,6 @@ export default function InspectionForm({ vehicle, inspectionType, onBack, onSucc
             hours: hours ? Number(hours) : null,
             checklist,
             novedades_descripcion: novedadesDesc,
-            notes
         });
         setLoading(false);
         setCreatedNovedad(!!res.data?.novedad_id);
@@ -137,7 +144,7 @@ export default function InspectionForm({ vehicle, inspectionType, onBack, onSucc
         <div className="space-y-5">
             {/* Header vehículo */}
             <div className={cn("flex items-center gap-3 p-4 rounded-2xl border", isDark ? "bg-zinc-900 border-zinc-700" : "bg-white border-gray-200")}>
-                <button onClick={onBack} className={cn("p-2 rounded-lg", isDark ? "hover:bg-zinc-800 text-zinc-400" : "hover:bg-gray-100 text-gray-500")}>
+                <button onClick={handleBack} className={cn("p-2 rounded-lg", isDark ? "hover:bg-zinc-800 text-zinc-400" : "hover:bg-gray-100 text-gray-500")}>
                     <ArrowLeft className="w-5 h-5" />
                 </button>
                 <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center shrink-0", isDark ? "bg-zinc-800" : "bg-gray-100")}>
@@ -270,21 +277,6 @@ export default function InspectionForm({ vehicle, inspectionType, onBack, onSucc
                     )}
                 </div>
             )}
-
-            {/* Notas */}
-            <div className={cn("p-4 rounded-2xl border space-y-3", isDark ? "bg-zinc-900 border-zinc-700" : "bg-white border-gray-200")}>
-                <h3 className={cn("font-bold text-sm uppercase tracking-wide", isDark ? "text-zinc-400" : "text-gray-500")}>Notas adicionales</h3>
-                <textarea
-                    placeholder="Notas del controlador (opcional)..."
-                    value={notes}
-                    onChange={e => setNotes(e.target.value)}
-                    rows={2}
-                    className={cn(
-                        "w-full p-3 rounded-xl border text-sm resize-none outline-none",
-                        isDark ? "bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500" : "bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400"
-                    )}
-                />
-            </div>
 
             {/* Submit */}
             <Button
