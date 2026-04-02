@@ -7,14 +7,14 @@ import { ThemeContextValue } from "@/components/common/ThemeWrapper";
 import { base44 } from "@/api/base44Client";
 
 const FUEL_TYPES = [
-    { value: "diesel", label: "Diésel" },
-    { value: "gasoline", label: "Nafta" },
-    { value: "gnc", label: "GNC" },
-    { value: "gnv", label: "GNV" },
-    { value: "biodiesel", label: "Biodiesel" },
-    { value: "ethanol", label: "Etanol" },
-    { value: "electric", label: "Eléctrico" },
-    { value: "otro", label: "Otro" },
+    { value: "diesel",    label: "Diésel",    unit: "litros",  unitShort: "L",   unitLabel: "Litros cargados *",     priceLabel: "Precio / Litro" },
+    { value: "gasoline",  label: "Nafta",     unit: "litros",  unitShort: "L",   unitLabel: "Litros cargados *",     priceLabel: "Precio / Litro" },
+    { value: "gnc",       label: "GNC",       unit: "m³",      unitShort: "m³",  unitLabel: "Metros cúbicos cargados *", priceLabel: "Precio / m³" },
+    { value: "gnv",       label: "GNV",       unit: "m³",      unitShort: "m³",  unitLabel: "Metros cúbicos cargados *", priceLabel: "Precio / m³" },
+    { value: "biodiesel", label: "Biodiesel", unit: "litros",  unitShort: "L",   unitLabel: "Litros cargados *",     priceLabel: "Precio / Litro" },
+    { value: "ethanol",   label: "Etanol",    unit: "litros",  unitShort: "L",   unitLabel: "Litros cargados *",     priceLabel: "Precio / Litro" },
+    { value: "electric",  label: "Eléctrico", unit: "kWh",     unitShort: "kWh", unitLabel: "kWh cargados *",        priceLabel: "Precio / kWh" },
+    { value: "otro",      label: "Otro",      unit: "litros",  unitShort: "L",   unitLabel: "Cantidad cargada *",    priceLabel: "Precio / Unidad" },
 ];
 
 export default function FuelUpForm({ vehicle, user, onBack, onSuccess }) {
@@ -37,6 +37,8 @@ export default function FuelUpForm({ vehicle, user, onBack, onSuccess }) {
     const [consumoInfo, setConsumoInfo] = useState(null);
     const [telemetriaError, setTelemetriaError] = useState("");
     const [fuelError, setFuelError] = useState("");
+
+    const selectedFuelType = FUEL_TYPES.find(ft => ft.value === fuelType) || FUEL_TYPES[0];
 
     const vehicleUsesKm = vehicle.mileage != null && vehicle.mileage > 0;
     const vehicleUsesMiles = vehicle.miles != null && vehicle.miles > 0;
@@ -89,7 +91,7 @@ export default function FuelUpForm({ vehicle, user, onBack, onSuccess }) {
 
         // Validar combustible
         if (!fuelQuantity || parseFloat(fuelQuantity) <= 0) {
-            setFuelError("Debe ingresar la cantidad de litros cargados.");
+            setFuelError(`Debe ingresar la cantidad de ${selectedFuelType.unit} cargados.`);
             return;
         }
         setFuelError("");
@@ -134,10 +136,10 @@ export default function FuelUpForm({ vehicle, user, onBack, onSuccess }) {
                                 ⚡ Consumo calculado
                             </p>
                             <p className={cn("text-lg font-bold", isDark ? "text-white" : "text-gray-900")}>
-                                {consumoInfo.valor} L/100km
+                                {consumoInfo.valor} {consumoInfo.unidad || "L/100km"}
                             </p>
                             <p className={cn("text-xs mt-1", isDark ? "text-zinc-400" : "text-gray-500")}>
-                                {consumoInfo.litros_totales}L en {consumoInfo.distancia} km ({consumoInfo.cargas_incluidas} carga{consumoInfo.cargas_incluidas > 1 ? 's' : ''} incluida{consumoInfo.cargas_incluidas > 1 ? 's' : ''})
+                                {consumoInfo.litros_totales}{consumoInfo.unitShort || "L"} en {consumoInfo.distancia} {consumoInfo.distancia_unidad || "km"} ({consumoInfo.cargas_incluidas} carga{consumoInfo.cargas_incluidas > 1 ? 's' : ''} incluida{consumoInfo.cargas_incluidas > 1 ? 's' : ''})
                             </p>
                         </div>
                     )}
@@ -256,10 +258,10 @@ export default function FuelUpForm({ vehicle, user, onBack, onSuccess }) {
                     </div>
                 </div>
 
-                {/* Litros */}
+                {/* Cantidad según tipo de combustible */}
                 <div className={cn("p-3 rounded-xl border-2 transition-all", fuelQuantity ? (isDark ? "border-green-500/50 bg-green-500/5" : "border-green-400 bg-green-50") : (isDark ? "border-zinc-700" : "border-gray-200"))}>
                     <label className={cn("text-xs font-bold mb-1 block uppercase tracking-wide", fuelQuantity ? (isDark ? "text-green-400" : "text-green-600") : (isDark ? "text-zinc-400" : "text-gray-500"))}>
-                        Litros cargados *
+                        {selectedFuelType.unitLabel}
                     </label>
                     <Input
                         type="number"
@@ -279,7 +281,7 @@ export default function FuelUpForm({ vehicle, user, onBack, onSuccess }) {
                 <div className="grid grid-cols-2 gap-3">
                     <div className={cn("p-3 rounded-xl border-2 transition-all", isDark ? "border-zinc-700" : "border-gray-200")}>
                         <label className={cn("text-xs font-bold mb-1 block uppercase tracking-wide", isDark ? "text-zinc-400" : "text-gray-500")}>
-                            Precio / Litro
+                            {selectedFuelType.priceLabel}
                         </label>
                         <Input
                             type="number"
@@ -319,7 +321,9 @@ export default function FuelUpForm({ vehicle, user, onBack, onSuccess }) {
                             ¿Tanque lleno?
                         </p>
                         <p className={cn("text-xs mt-0.5", isDark ? "text-zinc-500" : "text-gray-400")}>
-                            {isFullTank ? "✓ Sí — se usará para calcular el consumo" : "No — carga parcial, no se calcula consumo"}
+                            {isFullTank
+                                ? `✓ Sí — se usará para calcular el consumo (${selectedFuelType.unitShort}/${fuelType === 'electric' ? 'kWh' : '100km'})`
+                                : "No — carga parcial, no se calcula consumo"}
                         </p>
                     </div>
                     <div className={cn(
