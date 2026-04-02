@@ -4,7 +4,7 @@ import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import {
   LayoutDashboard, Car, Users, Wrench, FileText,
-  BarChart3, Menu, X, LogOut, ChevronRight, ChevronDown, Building2, MapPin, UserCog, Sun, Moon, Upload, Settings, Factory, MapPinned, Cog, ArrowLeft, Wind, ClipboardList, AlertTriangle, Package, Fuel } from
+  BarChart3, Menu, X, LogOut, ChevronRight, ChevronDown, Building2, MapPin, UserCog, Sun, Moon, Upload, Settings, Factory, MapPinned, Cog, ArrowLeft, Wind, ClipboardList, AlertTriangle, Package, Fuel, ClipboardCheck } from
 "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -188,6 +188,7 @@ function LayoutContent({ children, currentPageName }) {
   {
     section: "Operaciones",
     items: [
+    { name: "Panel Inspector", icon: ClipboardCheck, page: "InspectorPanel" },
     { name: "Documentos", icon: FileText, page: "Documents" },
     { name: "Reportes", icon: BarChart3, page: "Reports" }]
 
@@ -273,6 +274,7 @@ function LayoutContent({ children, currentPageName }) {
   {
     section: "Operaciones",
     items: [
+    { name: "Panel Inspector", icon: ClipboardCheck, page: "InspectorPanel" },
     { name: "Documentos", icon: FileText, page: "Documents" },
     { name: "Reportes", icon: BarChart3, page: "Reports" }]
 

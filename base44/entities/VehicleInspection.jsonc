@@ -1,0 +1,112 @@
+{
+  "name": "VehicleInspection",
+  "type": "object",
+  "properties": {
+    "vehicle_id": {
+      "type": "string",
+      "description": "ID del veh\u00edculo inspeccionado"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "ID de la empresa"
+    },
+    "location_id": {
+      "type": "string",
+      "description": "ID de la locaci\u00f3n"
+    },
+    "inspector_name": {
+      "type": "string",
+      "description": "Nombre del controlador que realiza la inspecci\u00f3n"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "pre_trip",
+        "post_trip"
+      ],
+      "description": "Tipo de inspecci\u00f3n: salida o entrada"
+    },
+    "inspection_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Fecha y hora de la inspecci\u00f3n"
+    },
+    "mileage": {
+      "type": "number",
+      "description": "Kilometraje registrado en la inspecci\u00f3n"
+    },
+    "hours": {
+      "type": "number",
+      "description": "Horas registradas en la inspecci\u00f3n"
+    },
+    "checklist": {
+      "type": "object",
+      "description": "Resultados del checklist (campo: ok | mal | n/a)",
+      "properties": {
+        "luces_delanteras": {
+          "type": "string"
+        },
+        "luces_traseras": {
+          "type": "string"
+        },
+        "frenos": {
+          "type": "string"
+        },
+        "nivel_aceite": {
+          "type": "string"
+        },
+        "nivel_agua": {
+          "type": "string"
+        },
+        "neumaticos": {
+          "type": "string"
+        },
+        "limpieza_cabina": {
+          "type": "string"
+        },
+        "documentacion": {
+          "type": "string"
+        },
+        "extintor": {
+          "type": "string"
+        },
+        "cinturon_seguridad": {
+          "type": "string"
+        },
+        "espejos": {
+          "type": "string"
+        },
+        "carroceria": {
+          "type": "string"
+        }
+      }
+    },
+    "novedades_descripcion": {
+      "type": "string",
+      "description": "Descripci\u00f3n de novedades o problemas detectados"
+    },
+    "novedad_id": {
+      "type": "string",
+      "description": "ID de la Novedad generada si hubo problemas"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Observaciones adicionales del controlador"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "completed",
+        "with_issues"
+      ],
+      "default": "completed",
+      "description": "Estado de la inspecci\u00f3n"
+    }
+  },
+  "required": [
+    "vehicle_id",
+    "company_id",
+    "type",
+    "inspection_date"
+  ]
+}
