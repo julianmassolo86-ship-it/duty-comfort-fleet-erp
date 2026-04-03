@@ -1,5 +1,5 @@
 import { useState, useContext } from "react";
-import { Fuel, Car, Hash, ArrowLeft, Loader2, AlertTriangle, CheckCircle2, Camera } from "lucide-react";
+import { Fuel, Car, Hash, ArrowLeft, Loader2, AlertTriangle, CheckCircle2, Camera, CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -21,6 +21,9 @@ export default function FuelUpForm({ vehicle, user, onBack, onSuccess }) {
     const { theme } = useContext(ThemeContextValue) || { theme: 'light' };
     const isDark = theme === 'dark';
 
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    const [fuelDate, setFuelDate] = useState(todayStr);
     const [km, setKm] = useState(vehicle.mileage || "");
     const [miles, setMiles] = useState(vehicle.miles || "");
     const [hours, setHours] = useState(vehicle.hours || "");
@@ -101,6 +104,7 @@ export default function FuelUpForm({ vehicle, user, onBack, onSuccess }) {
             vehicle_id: vehicle.id,
             company_id: vehicle.company_id,
             location_id: vehicle.location_id,
+            fuel_date: fuelDate,
             mileage: km ? Number(km) : null,
             miles: miles ? Number(miles) : null,
             hours: hours ? Number(hours) : null,
@@ -171,6 +175,25 @@ export default function FuelUpForm({ vehicle, user, onBack, onSuccess }) {
                         {vehicle.internal_number}
                     </div>
                 )}
+            </div>
+
+            {/* Fecha de carga */}
+            <div className={cn("p-4 rounded-2xl border space-y-2", isDark ? "bg-zinc-900 border-zinc-700" : "bg-white border-gray-200")}>
+                <h3 className={cn("font-bold text-sm uppercase tracking-wide", isDark ? "text-zinc-400" : "text-gray-500")}>
+                    Fecha de carga
+                </h3>
+                <div className={cn("flex items-center gap-3 p-3 rounded-xl border-2 transition-all", fuelDate ? (isDark ? "border-yellow-500/50 bg-yellow-500/5" : "border-yellow-400 bg-yellow-50") : (isDark ? "border-zinc-700" : "border-gray-200"))}>
+                    <CalendarIcon className={cn("w-5 h-5 shrink-0", isDark ? "text-yellow-400" : "text-yellow-600")} />
+                    <input
+                        type="date"
+                        value={fuelDate}
+                        onChange={e => setFuelDate(e.target.value)}
+                        className={cn(
+                            "flex-1 bg-transparent border-0 outline-none text-base font-medium",
+                            isDark ? "text-white" : "text-gray-900"
+                        )}
+                    />
+                </div>
             </div>
 
             {/* Telemetría */}

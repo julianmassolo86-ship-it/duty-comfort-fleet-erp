@@ -10,6 +10,7 @@ Deno.serve(async (req) => {
     const payload = await req.json();
     const {
         vehicle_id, company_id, location_id,
+        fuel_date,
         mileage, miles, hours,
         fuel_quantity, price_per_unit, total_price,
         fuel_type, is_full_tank,
@@ -21,7 +22,7 @@ Deno.serve(async (req) => {
         vehicle_id,
         company_id,
         location_id,
-        date: new Date().toISOString().split('T')[0],
+        date: fuel_date || new Date().toISOString().split('T')[0],
         mileage: mileage || null,
         miles: miles || null,
         hours: hours || null,
