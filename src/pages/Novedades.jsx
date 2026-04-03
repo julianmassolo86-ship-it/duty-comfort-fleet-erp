@@ -7,9 +7,10 @@ import PageHeader from "@/components/common/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Building2, MapPin, Car, Clock, Search, AlertTriangle } from "lucide-react";
+import { Building2, MapPin, Car, Clock, Search, AlertTriangle, LayoutDashboard, List } from "lucide-react";
 import { format } from "date-fns";
 import NovedadDialog from "@/components/novedades/NovedadDialog";
+import NovedadesDashboard from "@/components/novedades/NovedadesDashboard";
 
 const PRIORIDAD_CONFIG = {
   baja: { label: "Baja", cls: "bg-blue-500/10 text-blue-400 border border-blue-500/20" },
@@ -34,6 +35,7 @@ export default function Novedades() {
   const [filterPrioridad, setFilterPrioridad] = useState("all");
   const [selectedNovedad, setSelectedNovedad] = useState(null);
   const [showDialog, setShowDialog] = useState(false);
+  const [view, setView] = useState("dashboard");
 
   useEffect(() => {
     base44.auth.me().then(setCurrentUser).catch(() => {});
@@ -107,14 +109,50 @@ export default function Novedades() {
           title="Novedades"
           description="Gestión de novedades reportadas"
           actions={
-            <Button onClick={() => { setSelectedNovedad(null); setShowDialog(true); }}>
-              + Nueva Novedad
-            </Button>
+            <div className="flex items-center gap-2">
+              <div className={cn("flex rounded-xl border p-1 gap-1", theme === "dark" ? "border-zinc-700 bg-zinc-900" : "border-gray-200 bg-gray-100")}>
+                <button
+                  onClick={() => setView("dashboard")}
+                  className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
+                    view === "dashboard"
+                      ? (theme === "dark" ? "bg-yellow-500/20 text-yellow-400" : "bg-white text-yellow-600 shadow-sm")
+                      : (theme === "dark" ? "text-zinc-400 hover:text-white" : "text-gray-500 hover:text-gray-900")
+                  )}
+                >
+                  <LayoutDashboard className="w-3.5 h-3.5" /> Dashboard
+                </button>
+                <button
+                  onClick={() => setView("list")}
+                  className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
+                    view === "list"
+                      ? (theme === "dark" ? "bg-yellow-500/20 text-yellow-400" : "bg-white text-yellow-600 shadow-sm")
+                      : (theme === "dark" ? "text-zinc-400 hover:text-white" : "text-gray-500 hover:text-gray-900")
+                  )}
+                >
+                  <List className="w-3.5 h-3.5" /> Lista
+                </button>
+              </div>
+              <Button onClick={() => { setSelectedNovedad(null); setShowDialog(true); }}>
+                + Nueva Novedad
+              </Button>
+            </div>
           }
         />
 
-        {/* Filtros */}
-        <div className="flex flex-wrap gap-3 mb-6">
+        {/* Dashboard view */}
+        {view === "dashboard" && isLoading && (
+          <div className="text-center py-12">
+            <div className="w-8 h-8 border-4 border-yellow-500/30 border-t-yellow-500 rounded-full animate-spin mx-auto" />
+          </div>
+        )}
+        {view === "dashboard" && !isLoading && (
+          <div className="mb-6">
+            <NovedadesDashboard novedades={accessibleNovedades} vehicles={vehicles} />
+          </div>
+        )}
+
+        {/* Filtros (solo lista) */}
+        {view === "list" && <div className="flex flex-wrap gap-3 mb-6">
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <Input
@@ -148,21 +186,21 @@ export default function Novedades() {
               <SelectItem value="critica">Crítica</SelectItem>
             </SelectContent>
           </Select>
-        </div>
+        </div>}
 
         {/* Lista */}
-        {isLoading ? (
+        {view === "list" && isLoading ? (
           <div className="text-center py-12">
             <div className="w-8 h-8 border-4 border-yellow-500/30 border-t-yellow-500 rounded-full animate-spin mx-auto" />
           </div>
-        ) : filtered.length === 0 ? (
+        ) : view === "list" && filtered.length === 0 ? (
           <div className="text-center py-16">
             <AlertTriangle className={cn("w-12 h-12 mx-auto mb-3", theme === "dark" ? "text-zinc-600" : "text-gray-300")} />
             <p className={cn("text-sm", theme === "dark" ? "text-zinc-500" : "text-gray-400")}>
               No se encontraron novedades
             </p>
           </div>
-        ) : (
+        ) : view === "list" ? (
           <div className="space-y-3">
             {filtered.map(n => {
               const vehicle = getVehicle(n.vehicle_id);
@@ -268,7 +306,7 @@ export default function Novedades() {
               );
             })}
           </div>
-        )}
+        ) : null}
       </div>
 
       <NovedadDialog
