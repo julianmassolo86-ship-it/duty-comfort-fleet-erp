@@ -907,7 +907,7 @@ export default function VehicleDialog({
             </TabsContent>
 
             <TabsContent value="fuel" className="space-y-4">
-              {activeTab === "fuel" && vehicle ? (
+              {(activeTab === "fuel") && vehicle ? (
                 <VehicleFuelHistory
                   vehicleId={vehicle.id}
                   companyId={vehicle.company_id}

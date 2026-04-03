@@ -22,8 +22,10 @@ export default function VehicleFuelHistory({ vehicleId, companyId, locationId, v
 
   const { data: fuelUps = [], isLoading } = useQuery({
     queryKey: ["fuelUps", vehicleId],
-    queryFn: () => base44.entities.FuelUp.filter({ vehicle_id: vehicleId }, "-date"),
+    queryFn: () => base44.entities.FuelUp.filter({ vehicle_id: vehicleId }, "-date", 200),
     enabled: !!vehicleId,
+    staleTime: 0,
+    refetchOnMount: "always",
   });
 
   const handleDelete = async (id) => {
