@@ -9,7 +9,12 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json();
-    const { vehicle_id, company_id, location_id, type, mileage, miles, hours, checklist, novedades_descripcion, notes } = body;
+    const { vehicle_id, company_id, location_id, type, inspection_date, mileage, miles, hours, checklist, novedades_descripcion, notes } = body;
+
+    // Usar la fecha enviada por el formulario (solo fecha) + hora actual del servidor
+    const dateStr = inspection_date || new Date().toISOString().split('T')[0];
+    const timeStr = new Date().toISOString().split('T')[1];
+    const finalInspectionDate = `${dateStr}T${timeStr}`;
 
     // Crear la inspección
     const inspectionData = {
@@ -18,7 +23,7 @@ Deno.serve(async (req) => {
         location_id,
         inspector_name: user.full_name || user.email,
         type,
-        inspection_date: new Date().toISOString(),
+        inspection_date: finalInspectionDate,
         mileage: mileage || null,
         miles: miles || null,
         hours: hours || null,
