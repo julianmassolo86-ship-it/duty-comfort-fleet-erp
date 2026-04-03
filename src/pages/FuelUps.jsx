@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Fuel, Search } from "lucide-react";
+import { Plus, Fuel, Search, LayoutDashboard, List, CheckCircle, Receipt } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PageHeader from "../components/common/PageHeader";
 import PageWrapper from "../components/common/PageWrapper";
 import EmptyState from "../components/common/EmptyState";
 import FuelUpDialog from "../components/fuel/FuelUpDialog";
+import FuelUpsDashboard from "../components/fuel/FuelUpsDashboard";
 import MobileSelect from "../components/common/MobileSelect";
 import { useTheme } from "../components/common/ThemeWrapper";
 import { cn } from "@/lib/utils";
-import { Fuel as FuelIcon, CheckCircle, Receipt } from "lucide-react";
+import { Fuel as FuelIcon } from "lucide-react";
 
 const fuelTypeLabels = {
   gasoline: "Gasolina", diesel: "Diésel", electric: "Eléctrico",
@@ -24,6 +25,7 @@ export default function FuelUps() {
   const [editingFuelUp, setEditingFuelUp] = useState(null);
   const [search, setSearch] = useState("");
   const [vehicleFilter, setVehicleFilter] = useState("all");
+  const [view, setView] = useState("dashboard");
   const { theme } = useTheme();
   const queryClient = useQueryClient();
 
@@ -88,14 +90,43 @@ export default function FuelUps() {
         title="Cargas de Combustible"
         description="Registra y controla las cargas de combustible de tu flota"
         actions={
-          <Button onClick={handleNew} className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold">
-            <Plus className="w-4 h-4 mr-2" /> Nueva Carga
-          </Button>
+          <div className="flex items-center gap-2">
+            <div className={cn("flex rounded-xl border p-1 gap-1", theme === "dark" ? "border-zinc-700 bg-zinc-900" : "border-gray-200 bg-gray-100")}>
+              <button
+                onClick={() => setView("dashboard")}
+                className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
+                  view === "dashboard"
+                    ? (theme === "dark" ? "bg-yellow-500/20 text-yellow-400" : "bg-white text-yellow-600 shadow-sm")
+                    : (theme === "dark" ? "text-zinc-400 hover:text-white" : "text-gray-500 hover:text-gray-900")
+                )}
+              >
+                <LayoutDashboard className="w-3.5 h-3.5" /> Dashboard
+              </button>
+              <button
+                onClick={() => setView("list")}
+                className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
+                  view === "list"
+                    ? (theme === "dark" ? "bg-yellow-500/20 text-yellow-400" : "bg-white text-yellow-600 shadow-sm")
+                    : (theme === "dark" ? "text-zinc-400 hover:text-white" : "text-gray-500 hover:text-gray-900")
+                )}
+              >
+                <List className="w-3.5 h-3.5" /> Lista
+              </button>
+            </div>
+            <Button onClick={handleNew} className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold">
+              <Plus className="w-4 h-4 mr-2" /> Nueva Carga
+            </Button>
+          </div>
         }
       />
 
-      {/* Filtros */}
-      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+      {/* Dashboard */}
+      {view === "dashboard" && (
+        <FuelUpsDashboard fuelUps={fuelUps} vehicles={vehicles} />
+      )}
+
+      {/* Filtros (solo lista) */}
+      {view === "list" && <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <div className="relative flex-1">
           <Search className={cn("absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4", theme === 'dark' ? 'text-slate-400' : 'text-gray-400')} />
           <Input
@@ -112,18 +143,18 @@ export default function FuelUps() {
           options={[{ value: "all", label: "Todos los vehículos" }, ...vehicles.map(v => ({ value: v.id, label: `${v.internal_number || ''} ${v.plate || ''} - ${v.manufacturer} ${v.model}`.trim() }))]}
           triggerClassName={cn("w-full sm:w-60", theme === 'dark' ? 'bg-slate-800/50 border-slate-700 text-white' : 'bg-white border-gray-300')}
         />
-      </div>
+      </div>}
 
-      {isLoading ? (
+      {view === "list" && isLoading ? (
         <div className="text-center py-12 text-gray-400">Cargando...</div>
-      ) : filtered.length === 0 ? (
+      ) : view === "list" && filtered.length === 0 ? (
         <EmptyState
           icon={Fuel}
           title="Sin cargas registradas"
           description="Registra la primera carga de combustible"
           action={<Button onClick={handleNew} className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"><Plus className="w-4 h-4 mr-2" />Nueva Carga</Button>}
         />
-      ) : (
+      ) : view === "list" ? (
         <div className="space-y-3">
           {filtered.map(f => {
             const vehicle = vehiclesMap[f.vehicle_id];
@@ -174,7 +205,7 @@ export default function FuelUps() {
             );
           })}
         </div>
-      )}
+      ) : null}
 
       {dialogOpen && (
         <FuelUpDialog
