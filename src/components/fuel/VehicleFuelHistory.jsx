@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
-import { Plus, Fuel, Droplets, Receipt, Trash2, Pencil, CheckCircle, DollarSign, TrendingDown } from "lucide-react";
+import { Plus, Fuel, Droplets, Receipt, Trash2, Pencil, CheckCircle, DollarSign, TrendingDown, Hash } from "lucide-react";
 import FuelUpDialog from "./FuelUpDialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useTheme } from "@/components/common/ThemeWrapper";
@@ -138,12 +138,17 @@ export default function VehicleFuelHistory({ vehicleId, companyId, locationId, v
           {fuelUps.map(f => (
             <div key={f.id} className={cn("p-3 rounded-lg border flex items-start justify-between gap-3", isDark ? "border-zinc-800 bg-zinc-900/50" : "border-gray-200 bg-gray-50")}>
               <div className="flex items-start gap-3 flex-1 min-w-0">
-                <div className={cn("p-2 rounded-lg flex-shrink-0", isDark ? "bg-zinc-800" : "bg-white border border-gray-200")}>
-                  <Fuel className="w-4 h-4 text-yellow-500" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className={cn("text-sm font-medium", isDark ? "text-white" : "text-gray-900")}>{f.date}</span>
+              <div className={cn("p-2 rounded-lg flex-shrink-0", isDark ? "bg-zinc-800" : "bg-white border border-gray-200")}>
+                 <Fuel className="w-4 h-4 text-yellow-500" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  {f.report_number && (
+                    <span className={cn("font-mono text-xs font-bold flex items-center gap-1", isDark ? "text-yellow-400" : "text-yellow-600")}>
+                      <Hash className="w-3 h-3" />{f.report_number}
+                    </span>
+                  )}
+                  <span className={cn("text-sm font-medium", isDark ? "text-white" : "text-gray-900")}>{f.date}</span>
                     {f.is_full_tank && (
                       <span className="flex items-center gap-1 text-xs text-green-500 bg-green-500/10 px-2 py-0.5 rounded-full">
                         <CheckCircle className="w-3 h-3" /> Tanque Lleno

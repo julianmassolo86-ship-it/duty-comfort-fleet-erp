@@ -38,6 +38,7 @@ export default function FuelUpForm({ vehicle, user, onBack, onSuccess }) {
     const [loading, setLoading] = useState(false);
     const [done, setDone] = useState(false);
     const [consumoInfo, setConsumoInfo] = useState(null);
+    const [reportNumber, setReportNumber] = useState(null);
     const [telemetriaError, setTelemetriaError] = useState("");
     const [fuelError, setFuelError] = useState("");
 
@@ -118,6 +119,7 @@ export default function FuelUpForm({ vehicle, user, onBack, onSuccess }) {
         });
         setLoading(false);
         setConsumoInfo(res.data?.consumo || null);
+        setReportNumber(res.data?.report_number || null);
         setDone(true);
     };
 
@@ -131,6 +133,12 @@ export default function FuelUpForm({ vehicle, user, onBack, onSuccess }) {
                     <h2 className={cn("text-2xl font-bold mb-2", isDark ? "text-white" : "text-gray-900")}>
                         Carga registrada
                     </h2>
+                    {reportNumber && (
+                        <div className={cn("inline-flex items-center gap-2 px-4 py-2 rounded-xl font-mono font-bold text-lg mb-3", isDark ? "bg-zinc-800 text-yellow-400 border border-zinc-700" : "bg-gray-100 text-gray-800 border border-gray-200")}>
+                            <Hash className="w-4 h-4" />
+                            {reportNumber}
+                        </div>
+                    )}
                     <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-gray-500")}>
                         {isFullTank ? "Se marcó como tanque lleno." : "Carga parcial registrada."}
                     </p>

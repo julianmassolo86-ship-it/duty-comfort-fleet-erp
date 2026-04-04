@@ -1,0 +1,31 @@
+{
+  "name": "ReportCounter",
+  "type": "object",
+  "properties": {
+    "report_type": {
+      "type": "string",
+      "enum": [
+        "ac_maintenance",
+        "novedad",
+        "maintenance",
+        "pre_trip",
+        "post_trip",
+        "fuel_up"
+      ],
+      "description": "Tipo de informe"
+    },
+    "last_number": {
+      "type": "number",
+      "description": "\u00daltimo n\u00famero correlativo asignado",
+      "default": 0
+    },
+    "company_id": {
+      "type": "string",
+      "description": "ID de la empresa para n\u00fameros por empresa"
+    }
+  },
+  "required": [
+    "report_type",
+    "company_id"
+  ]
+}

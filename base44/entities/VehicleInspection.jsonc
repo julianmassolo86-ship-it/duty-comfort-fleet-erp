@@ -2,6 +2,10 @@
   "name": "VehicleInspection",
   "type": "object",
   "properties": {
+    "report_number": {
+      "type": "string",
+      "description": "N\u00famero correlativo del informe (ej: 0004-000001)"
+    },
     "vehicle_id": {
       "type": "string",
       "description": "ID del veh\u00edculo inspeccionado"
@@ -34,6 +38,10 @@
     "mileage": {
       "type": "number",
       "description": "Kilometraje registrado en la inspecci\u00f3n"
+    },
+    "miles": {
+      "type": "number",
+      "description": "Millas registradas en la inspecci\u00f3n"
     },
     "hours": {
       "type": "number",

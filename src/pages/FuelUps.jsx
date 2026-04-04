@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Fuel, Search, LayoutDashboard, List, CheckCircle, Receipt } from "lucide-react";
+import { Plus, Fuel, Search, LayoutDashboard, List, CheckCircle, Receipt, Hash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PageHeader from "../components/common/PageHeader";
@@ -71,7 +71,8 @@ export default function FuelUps() {
     const matchesSearch = !searchTerm ||
       vehicle?.plate?.toLowerCase().includes(searchTerm) ||
       vehicle?.internal_number?.toLowerCase().includes(searchTerm) ||
-      f.date?.includes(searchTerm);
+      f.date?.includes(searchTerm) ||
+      f.report_number?.toLowerCase().includes(searchTerm);
     return matchesVehicle && matchesSearch;
   });
 
@@ -176,6 +177,11 @@ export default function FuelUps() {
                     </div>
                     <div>
                       <div className="flex items-center gap-2 flex-wrap">
+                        {f.report_number && (
+                          <span className={cn("font-mono text-xs font-bold flex items-center gap-1", theme === 'dark' ? 'text-yellow-400' : 'text-yellow-600')}>
+                            <Hash className="w-3 h-3" />{f.report_number}
+                          </span>
+                        )}
                         <span className={cn("font-semibold text-sm", theme === 'dark' ? 'text-white' : 'text-gray-900')}>
                           {vehicle ? `${vehicle.internal_number || ''} ${vehicle.plate || ''} - ${vehicle.manufacturer} ${vehicle.model}`.trim() : "Vehículo no encontrado"}
                         </span>

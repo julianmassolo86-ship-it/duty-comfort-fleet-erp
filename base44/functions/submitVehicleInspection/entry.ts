@@ -1,5 +1,20 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
+// Genera el siguiente número correlativo internamente
+async function getNextNumber(base44, report_type, company_id) {
+    const counters = await base44.asServiceRole.entities.ReportCounter.filter({ report_type, company_id });
+    let nextNumber;
+    if (counters.length === 0) {
+        nextNumber = 1;
+        await base44.asServiceRole.entities.ReportCounter.create({ report_type, company_id, last_number: nextNumber });
+    } else {
+        const counter = counters[0];
+        nextNumber = (counter.last_number || 0) + 1;
+        await base44.asServiceRole.entities.ReportCounter.update(counter.id, { last_number: nextNumber });
+    }
+    return nextNumber;
+}
+
 Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
 
@@ -16,8 +31,16 @@ Deno.serve(async (req) => {
     const timeStr = new Date().toISOString().split('T')[1];
     const finalInspectionDate = `${dateStr}T${timeStr}`;
 
+    // Generar número correlativo según tipo
+    const report_type = type === 'pre_trip' ? 'pre_trip' : 'post_trip';
+    const prefix = type === 'pre_trip' ? '0004' : '0005';
+    const companyKey = company_id || 'global';
+    const nextNumber = await getNextNumber(base44, report_type, companyKey);
+    const report_number = `${prefix}-${String(nextNumber).padStart(6, '0')}`;
+
     // Crear la inspección
     const inspectionData = {
+        report_number,
         vehicle_id,
         company_id,
         location_id,
@@ -90,5 +113,5 @@ Deno.serve(async (req) => {
         await base44.asServiceRole.entities.Vehicle.update(vehicle_id, updateData);
     }
 
-    return Response.json({ success: true, inspection_id: inspection.id, novedad_id });
+    return Response.json({ success: true, inspection_id: inspection.id, report_number, novedad_id });
 });

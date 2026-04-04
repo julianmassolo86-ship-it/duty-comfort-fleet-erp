@@ -1,5 +1,20 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
+// Genera el siguiente número correlativo internamente
+async function getNextNumber(base44, report_type, company_id) {
+    const counters = await base44.asServiceRole.entities.ReportCounter.filter({ report_type, company_id });
+    let nextNumber;
+    if (counters.length === 0) {
+        nextNumber = 1;
+        await base44.asServiceRole.entities.ReportCounter.create({ report_type, company_id, last_number: nextNumber });
+    } else {
+        const counter = counters[0];
+        nextNumber = (counter.last_number || 0) + 1;
+        await base44.asServiceRole.entities.ReportCounter.update(counter.id, { last_number: nextNumber });
+    }
+    return nextNumber;
+}
+
 Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
@@ -17,8 +32,14 @@ Deno.serve(async (req) => {
         ticket_photo_url, notes
     } = payload;
 
+    // Generar número correlativo
+    const companyKey = company_id || 'global';
+    const nextNumber = await getNextNumber(base44, 'fuel_up', companyKey);
+    const report_number = `0006-${String(nextNumber).padStart(6, '0')}`;
+
     // Crear el registro de carga de combustible
     const fuelUpData = {
+        report_number,
         vehicle_id,
         company_id,
         location_id,
@@ -52,30 +73,22 @@ Deno.serve(async (req) => {
         consumo = await calcularConsumo(base44, vehicle_id, created.id, mileage, miles, hours, fuel_quantity);
     }
 
-    return Response.json({ fuel_up_id: created.id, consumo });
+    return Response.json({ fuel_up_id: created.id, report_number, consumo });
 });
 
 async function calcularConsumo(base44, vehicle_id, currentFuelUpId, mileage, miles, hours, currentLiters) {
-    // Obtener todas las cargas de este vehículo, ordenadas por fecha descendente
     const allFuelUps = await base44.asServiceRole.entities.FuelUp.filter(
         { vehicle_id },
         '-created_date',
         100
     );
 
-    // Excluir la carga recién creada
     const prevFuelUps = allFuelUps.filter(f => f.id !== currentFuelUpId);
-
-    // Encontrar la última carga de tanque lleno anterior
     const lastFullTankIndex = prevFuelUps.findIndex(f => f.is_full_tank === true);
-    if (lastFullTankIndex === -1) {
-        // No hay carga de tanque lleno anterior — es la primera, no se puede calcular
-        return null;
-    }
+    if (lastFullTankIndex === -1) return null;
 
     const lastFullTank = prevFuelUps[lastFullTankIndex];
 
-    // Calcular distancia recorrida
     let distancia = null;
     let unidad = null;
 
@@ -92,16 +105,13 @@ async function calcularConsumo(base44, vehicle_id, currentFuelUpId, mileage, mil
 
     if (!distancia || distancia <= 0) return null;
 
-    // Sumar todos los litros cargados desde la última carga de tanque lleno
-    // (las cargas intermedias + la carga actual)
-    const cargasIntermedias = prevFuelUps.slice(0, lastFullTankIndex); // más recientes que lastFullTank
+    const cargasIntermedias = prevFuelUps.slice(0, lastFullTankIndex);
     const litrosIntermedios = cargasIntermedias.reduce((sum, f) => sum + (f.fuel_quantity || 0), 0);
     const litrosTotales = litrosIntermedios + currentLiters;
 
-    // Consumo: L/100km (o L/100millas, L/h)
     const consumoValor = unidad === 'h'
-        ? (litrosTotales / distancia).toFixed(2)   // L/hora
-        : ((litrosTotales / distancia) * 100).toFixed(2); // L/100
+        ? (litrosTotales / distancia).toFixed(2)
+        : ((litrosTotales / distancia) * 100).toFixed(2);
 
     return {
         valor: consumoValor,

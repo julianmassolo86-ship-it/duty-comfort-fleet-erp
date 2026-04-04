@@ -2,6 +2,10 @@
   "name": "FuelUp",
   "type": "object",
   "properties": {
+    "report_number": {
+      "type": "string",
+      "description": "N\u00famero correlativo de la carga (ej: 0006-000001)"
+    },
     "vehicle_id": {
       "type": "string",
       "description": "ID del veh\u00edculo al que se le carg\u00f3 combustible"
@@ -22,6 +26,10 @@
     "mileage": {
       "type": "number",
       "description": "Kilometraje al momento de la carga"
+    },
+    "miles": {
+      "type": "number",
+      "description": "Millas al momento de la carga"
     },
     "hours": {
       "type": "number",
