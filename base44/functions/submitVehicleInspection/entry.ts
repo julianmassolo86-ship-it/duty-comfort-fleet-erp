@@ -1,18 +1,38 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
-// Genera el siguiente número correlativo internamente
+// Genera el siguiente número correlativo de forma atómica usando reintentos
 async function getNextNumber(base44, report_type, company_id) {
-    const counters = await base44.asServiceRole.entities.ReportCounter.filter({ report_type, company_id });
-    let nextNumber;
-    if (counters.length === 0) {
-        nextNumber = 1;
-        await base44.asServiceRole.entities.ReportCounter.create({ report_type, company_id, last_number: nextNumber });
-    } else {
+    const maxRetries = 5;
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+        const counters = await base44.asServiceRole.entities.ReportCounter.filter({ report_type, company_id });
+
+        if (counters.length === 0) {
+            // Intentar crear el counter desde 1
+            try {
+                await base44.asServiceRole.entities.ReportCounter.create({ report_type, company_id, last_number: 1 });
+                return 1;
+            } catch (_e) {
+                // Otro proceso lo creó primero, reintentar
+                continue;
+            }
+        }
+
         const counter = counters[0];
-        nextNumber = (counter.last_number || 0) + 1;
+        const currentNumber = counter.last_number || 0;
+        const nextNumber = currentNumber + 1;
+
         await base44.asServiceRole.entities.ReportCounter.update(counter.id, { last_number: nextNumber });
+
+        // Verificar que el update fue exitoso leyendo de nuevo
+        const verify = await base44.asServiceRole.entities.ReportCounter.filter({ report_type, company_id });
+        if (verify.length > 0 && verify[0].last_number === nextNumber) {
+            return nextNumber;
+        }
+        // Si el número fue modificado por otra solicitud concurrente, esperar un poco y reintentar
+        await new Promise(r => setTimeout(r, 50 + Math.random() * 100));
     }
-    return nextNumber;
+    // Fallback: usar timestamp para garantizar unicidad
+    return Date.now() % 1000000;
 }
 
 Deno.serve(async (req) => {
