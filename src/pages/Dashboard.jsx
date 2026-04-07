@@ -22,6 +22,7 @@ import ExpiryListDialog from "../components/dashboard/ExpiryListDialog";
 import VehicleStatusPieChart from "../components/dashboard/VehicleStatusPieChart";
 import VehicleTypePieChart from "../components/dashboard/VehicleTypePieChart";
 import VehiclesByCompanyChart from "../components/dashboard/VehiclesByCompanyChart";
+import VehiclesByLocationChart from "../components/dashboard/VehiclesByLocationChart";
 import MaintenanceDialog from "../components/maintenance/MaintenanceDialog";
 import NovedadDialog from "../components/novedades/NovedadDialog";
 import AirConditioningMaintenanceDialog from "../components/ac-maintenance/AirConditioningMaintenanceDialog";
@@ -515,6 +516,24 @@ export default function Dashboard() {
                 </div>
               </div>
             )}
+
+            {/* Vehicles by Location Chart */}
+            <div className="mb-8">
+              <div className={cn("rounded-2xl border p-6 backdrop-blur-xl shadow-2xl", theme === 'dark' ? 'bg-zinc-900/80 border-zinc-800/50 shadow-black/20' : 'bg-white border-gray-200 shadow-gray-200/50')}>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 border border-emerald-500/20">
+                    <MapPin className="w-5 h-5 text-emerald-400" />
+                  </div>
+                  <h3 className={cn("text-lg font-bold", theme === 'dark' ? 'text-white' : 'text-gray-900')}>Vehículos por Locación</h3>
+                </div>
+                <VehiclesByLocationChart
+                  vehicles={accessibleVehicles}
+                  locations={accessibleLocations}
+                  companies={companies}
+                  isSuperAdmin={isSuperAdmin}
+                />
+              </div>
+            </div>
           </>
         )}
 
