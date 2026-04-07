@@ -530,6 +530,7 @@ export default function Dashboard() {
                   vehicles={accessibleVehicles}
                   locations={accessibleLocations}
                   companies={companies}
+                  vehicleTypes={vehicleTypes}
                   isSuperAdmin={isSuperAdmin}
                 />
               </div>

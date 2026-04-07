@@ -9,7 +9,7 @@ const COLORS = [
   '#6366f1', '#84cc16', '#a855f7', '#0ea5e9', '#d97706'
 ];
 
-export default function VehiclesByLocationChart({ vehicles, locations, companies, isSuperAdmin }) {
+export default function VehiclesByLocationChart({ vehicles, locations, companies, vehicleTypes, isSuperAdmin }) {
   const { theme } = useTheme();
   const [selectedCompanyId, setSelectedCompanyId] = useState('all');
 
@@ -28,32 +28,49 @@ export default function VehiclesByLocationChart({ vehicles, locations, companies
     filteredVehicles.forEach(v => {
       const loc = filteredLocations.find(l => l.id === v.location_id);
       const locName = loc?.name || 'Sin locación';
-      locationMap[locName] = (locationMap[locName] || 0) + 1;
+      if (!locationMap[locName]) locationMap[locName] = { value: 0, vehicles: [] };
+      locationMap[locName].value += 1;
+      locationMap[locName].vehicles.push(v);
     });
 
     return Object.entries(locationMap)
-      .map(([name, value], i) => ({ name, value, color: COLORS[i % COLORS.length] }))
+      .map(([name, data], i) => ({ name, value: data.value, vehicles: data.vehicles, color: COLORS[i % COLORS.length] }))
       .sort((a, b) => b.value - a.value);
   }, [filteredVehicles, filteredLocations]);
 
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
-      const data = payload[0];
+      const data = payload[0].payload;
       const total = filteredVehicles.length;
       return (
         <div className={cn(
-          "rounded-xl p-3 shadow-2xl border backdrop-blur-lg",
+          "rounded-xl p-3 shadow-2xl border backdrop-blur-lg max-w-xs",
           theme === 'dark' ? 'bg-zinc-900/95 border-zinc-700' : 'bg-white/95 border-gray-200'
         )}>
           <p className={cn("font-semibold mb-1", theme === 'dark' ? 'text-white' : 'text-gray-900')}>
             {data.name}
           </p>
-          <p className={cn("text-sm", theme === 'dark' ? 'text-zinc-400' : 'text-gray-600')}>
-            {data.value} vehículo{data.value !== 1 ? 's' : ''}
+          <p className={cn("text-sm mb-2", theme === 'dark' ? 'text-zinc-400' : 'text-gray-600')}>
+            {data.value} vehículo{data.value !== 1 ? 's' : ''} · {total > 0 ? ((data.value / total) * 100).toFixed(1) : 0}%
           </p>
-          <p className={cn("text-xs mt-1", theme === 'dark' ? 'text-zinc-500' : 'text-gray-500')}>
-            {total > 0 ? ((data.value / total) * 100).toFixed(1) : 0}% del total
-          </p>
+          <div className={cn("border-t pt-2 space-y-1", theme === 'dark' ? 'border-zinc-700' : 'border-gray-200')}>
+            {data.vehicles.map((v, i) => {
+              const tipo = vehicleTypes?.find(t => t.id === v.type_id);
+              return (
+                <div key={i} className="flex items-center gap-2">
+                  <span className={cn(
+                    "text-xs font-mono px-1.5 py-0.5 rounded font-semibold",
+                    theme === 'dark' ? 'bg-zinc-700 text-yellow-400' : 'bg-gray-100 text-yellow-600'
+                  )}>
+                    {v.internal_number || v.plate || '—'}
+                  </span>
+                  <span className={cn("text-xs", theme === 'dark' ? 'text-zinc-400' : 'text-gray-500')}>
+                    {tipo?.name || v.type_name || `${v.manufacturer} ${v.model}`.trim() || 'Sin tipo'}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
         </div>
       );
     }
