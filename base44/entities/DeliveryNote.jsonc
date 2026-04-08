@@ -1,0 +1,67 @@
+{
+  "name": "DeliveryNote",
+  "type": "object",
+  "properties": {
+    "delivery_number": {
+      "type": "string",
+      "description": "N\u00famero de remito del proveedor"
+    },
+    "purchase_order_id": {
+      "type": "string",
+      "description": "ID de la Orden de Compra vinculada"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "ID de la empresa"
+    },
+    "reception_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha de recepci\u00f3n"
+    },
+    "items": {
+      "type": "array",
+      "description": "\u00cdtems recibidos",
+      "items": {
+        "type": "object",
+        "properties": {
+          "spare_part_id": {
+            "type": "string"
+          },
+          "spare_part_name": {
+            "type": "string"
+          },
+          "quantity_ordered": {
+            "type": "number"
+          },
+          "quantity_received": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pendiente",
+        "completo",
+        "parcial"
+      ],
+      "default": "pendiente",
+      "description": "Estado del remito"
+    },
+    "photo_url": {
+      "type": "string",
+      "description": "Foto del remito"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Notas adicionales"
+    }
+  },
+  "required": [
+    "delivery_number",
+    "company_id",
+    "reception_date"
+  ]
+}

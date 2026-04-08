@@ -1,0 +1,53 @@
+{
+  "name": "Supplier",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Nombre del proveedor"
+    },
+    "cuit": {
+      "type": "string",
+      "description": "CUIT del proveedor"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Tel\u00e9fono de contacto"
+    },
+    "email": {
+      "type": "string",
+      "description": "Email de contacto"
+    },
+    "address": {
+      "type": "string",
+      "description": "Direcci\u00f3n"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "repuestos",
+        "servicios",
+        "ambos"
+      ],
+      "default": "repuestos",
+      "description": "Categor\u00eda del proveedor"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "ID de la empresa"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Si el proveedor est\u00e1 activo"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Notas adicionales"
+    }
+  },
+  "required": [
+    "name",
+    "company_id"
+  ]
+}

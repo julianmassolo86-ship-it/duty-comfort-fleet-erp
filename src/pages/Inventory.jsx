@@ -7,9 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Plus, Search, Package, AlertTriangle } from "lucide-react";
+import { Plus, Search, Package, AlertTriangle, History, X } from "lucide-react";
 import SparePartCard from "@/components/inventory/SparePartCard";
 import SparePartDialog from "@/components/inventory/SparePartDialog";
+import SparePartMovementsHistory from "@/components/inventory/SparePartMovementsHistory";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export default function Inventory() {
   const { theme } = useContext(ThemeContextValue);
@@ -22,6 +24,7 @@ export default function Inventory() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [deleting, setDeleting] = useState(null);
+  const [historyPart, setHistoryPart] = useState(null);
 
   const { data: user } = useQuery({
     queryKey: ["me"],
@@ -211,6 +214,7 @@ export default function Inventory() {
               sparePart={sp}
               onEdit={handleEdit}
               onDelete={setDeleting}
+              onViewHistory={setHistoryPart}
             />
           ))}
         </div>
@@ -223,6 +227,56 @@ export default function Inventory() {
         sparePart={editing}
         companyId={companyId || (isSuperAdmin ? selectedCompanyId : user?.company_id)}
       />
+
+      {/* Stock History Dialog */}
+      <Dialog open={!!historyPart} onOpenChange={() => setHistoryPart(null)}>
+        <DialogContent className={cn("max-w-2xl max-h-[85vh] overflow-y-auto", isDark ? "bg-zinc-900 border-zinc-700" : "")}>
+          <DialogHeader>
+            <DialogTitle className={cn("flex items-center gap-2", isDark ? "text-white" : "")}>
+              <History className="w-5 h-5 text-yellow-500" />
+              Historial de Stock — {historyPart?.name}
+            </DialogTitle>
+          </DialogHeader>
+          {historyPart && (
+            <div>
+              {/* Stock alert banner */}
+              {(historyPart.stock_quantity === 0) && (
+                <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 text-sm mb-4">
+                  <AlertTriangle className="w-4 h-4" />
+                  <span>Sin stock disponible</span>
+                </div>
+              )}
+              {historyPart.stock_quantity > 0 && historyPart.stock_quantity <= historyPart.minimum_stock && historyPart.minimum_stock > 0 && (
+                <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 text-sm mb-4">
+                  <AlertTriangle className="w-4 h-4" />
+                  <span>Stock bajo el mínimo — Actual: {historyPart.stock_quantity} {historyPart.unit_of_measure} / Mínimo: {historyPart.minimum_stock} {historyPart.unit_of_measure}</span>
+                </div>
+              )}
+              <div className={cn("flex gap-4 text-sm mb-4 p-3 rounded-lg", isDark ? "bg-zinc-800/50" : "bg-gray-50")}>
+                <div className="text-center">
+                  <p className={cn("text-xs", isDark ? "text-zinc-500" : "text-gray-500")}>Stock actual</p>
+                  <p className={cn("font-bold text-lg", historyPart.stock_quantity === 0 ? "text-red-400" : historyPart.stock_quantity <= historyPart.minimum_stock ? "text-yellow-400" : isDark ? "text-white" : "text-gray-900")}>
+                    {historyPart.stock_quantity ?? 0} {historyPart.unit_of_measure}
+                  </p>
+                </div>
+                {historyPart.minimum_stock > 0 && (
+                  <div className="text-center">
+                    <p className={cn("text-xs", isDark ? "text-zinc-500" : "text-gray-500")}>Stock mínimo</p>
+                    <p className={cn("font-bold text-lg", isDark ? "text-zinc-300" : "text-gray-700")}>{historyPart.minimum_stock} {historyPart.unit_of_measure}</p>
+                  </div>
+                )}
+                {historyPart.unit_cost && (
+                  <div className="text-center">
+                    <p className={cn("text-xs", isDark ? "text-zinc-500" : "text-gray-500")}>Costo unitario</p>
+                    <p className={cn("font-bold text-lg", isDark ? "text-zinc-300" : "text-gray-700")}>${historyPart.unit_cost}</p>
+                  </div>
+                )}
+              </div>
+              <SparePartMovementsHistory sparePartId={historyPart.id} />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Delete Confirm */}
       <AlertDialog open={!!deleting} onOpenChange={() => setDeleting(null)}>

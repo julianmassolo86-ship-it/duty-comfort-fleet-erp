@@ -13,6 +13,10 @@ import FuelUps from './pages/FuelUps';
 import VehicleModels from './pages/VehicleModels';
 import InspectorPanel from './pages/InspectorPanel';
 import FuelUpPanel from './pages/FuelUpPanel';
+import Suppliers from './pages/Suppliers';
+import PurchaseOrders from './pages/PurchaseOrders';
+import DeliveryNotes from './pages/DeliveryNotes';
+import StockMovements from './pages/StockMovements';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
 const { Pages, Layout, mainPage } = pagesConfig;
@@ -72,6 +76,10 @@ const AuthenticatedApp = () => {
       <Route path="/VehicleModels" element={<LayoutWrapper currentPageName="VehicleModels"><VehicleModels /></LayoutWrapper>} />
       <Route path="/InspectorPanel" element={<LayoutWrapper currentPageName="InspectorPanel"><InspectorPanel /></LayoutWrapper>} />
       <Route path="/FuelUpPanel" element={<LayoutWrapper currentPageName="FuelUpPanel"><FuelUpPanel /></LayoutWrapper>} />
+      <Route path="/Suppliers" element={<LayoutWrapper currentPageName="Suppliers"><Suppliers /></LayoutWrapper>} />
+      <Route path="/PurchaseOrders" element={<LayoutWrapper currentPageName="PurchaseOrders"><PurchaseOrders /></LayoutWrapper>} />
+      <Route path="/DeliveryNotes" element={<LayoutWrapper currentPageName="DeliveryNotes"><DeliveryNotes /></LayoutWrapper>} />
+      <Route path="/StockMovements" element={<LayoutWrapper currentPageName="StockMovements"><StockMovements /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

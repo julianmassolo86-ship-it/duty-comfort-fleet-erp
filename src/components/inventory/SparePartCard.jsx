@@ -3,9 +3,9 @@ import { ThemeContextValue } from "@/components/common/ThemeWrapper";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2, Package, AlertTriangle } from "lucide-react";
+import { Pencil, Trash2, Package, AlertTriangle, History } from "lucide-react";
 
-export default function SparePartCard({ sparePart, onEdit, onDelete }) {
+export default function SparePartCard({ sparePart, onEdit, onDelete, onViewHistory }) {
   const { theme } = useContext(ThemeContextValue);
   const isDark = theme === "dark";
 
@@ -41,6 +41,11 @@ export default function SparePartCard({ sparePart, onEdit, onDelete }) {
           </div>
         </div>
         <div className="flex gap-1 shrink-0">
+          {onViewHistory && (
+            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onViewHistory(sparePart)} title="Ver historial">
+              <History className={cn("w-3.5 h-3.5", isDark ? "text-zinc-400" : "text-gray-500")} />
+            </Button>
+          )}
           <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onEdit(sparePart)}>
             <Pencil className={cn("w-3.5 h-3.5", isDark ? "text-zinc-400" : "text-gray-500")} />
           </Button>

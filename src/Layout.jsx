@@ -4,7 +4,7 @@ import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import {
   LayoutDashboard, Car, Users, Wrench, FileText,
-  BarChart3, Menu, X, LogOut, ChevronRight, ChevronDown, Building2, MapPin, UserCog, Sun, Moon, Upload, Settings, Factory, MapPinned, Cog, ArrowLeft, Wind, ClipboardList, AlertTriangle, Package, Fuel, ClipboardCheck, GaugeCircle } from
+  BarChart3, Menu, X, LogOut, ChevronRight, ChevronDown, Building2, MapPin, UserCog, Sun, Moon, Upload, Settings, Factory, MapPinned, Cog, ArrowLeft, Wind, ClipboardList, AlertTriangle, Package, Fuel, ClipboardCheck, GaugeCircle, Truck, ShoppingCart, ArrowUpDown } from
 "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -146,73 +146,50 @@ function LayoutContent({ children, currentPageName }) {
     section: null,
     items: [
     { name: "Dashboard", icon: LayoutDashboard, page: "Dashboard" }]
-
   },
   {
-    section: "Administración",
+    section: "🚛 Flota",
     items: [
-    { name: "Empresas", icon: Building2, page: "Companies" },
-    { name: "Locaciones", icon: MapPin, page: "Locations" },
-    { name: "Vehículos", icon: Car, page: "Vehicles" }]
-
+    { name: "Vehículos", icon: Car, page: "Vehicles" },
+    { name: "Conductores", icon: Users, page: "Drivers" },
+    { name: "Documentos", icon: FileText, page: "Documents" }]
   },
   {
-    section: "Personal",
-    items: [
-    { name: "Administradores", icon: UserCog, page: "CompanyAdmins" },
-    { name: "Conductores", icon: Users, page: "Drivers" }]
-
-  },
-  {
-    section: "Mantenimiento",
+    section: "🔧 Mantenimiento",
     items: [
     { name: "Programas", icon: Wrench, page: "MaintenancePrograms" },
     { name: "Registros", icon: FileText, page: "Maintenance" },
     { name: "Formularios", icon: ClipboardList, page: "MantenimientoForms" },
     { name: "Novedades", icon: AlertTriangle, page: "Novedades" },
-    { name: "Dashboard A/C", icon: Wind, page: "ACDashboard" }]
-
+    { name: "Dashboard A/C", icon: Wind, page: "ACDashboard" },
+    { name: "Panel Inspector", icon: ClipboardCheck, page: "InspectorPanel" }]
   },
   {
-    section: "Combustible",
+    section: "⛽ Operaciones",
     items: [
-    { name: "Cargas de Combustible", icon: Fuel, page: "FuelUps" }]
-
+    { name: "Cargas de Combustible", icon: Fuel, page: "FuelUps" },
+    { name: "Panel Combustible", icon: GaugeCircle, page: "FuelUpPanel" }]
   },
   {
-    section: "Inventario",
+    section: "📦 Almacén",
     items: [
-    { name: "Repuestos", icon: Package, page: "Inventory" }]
-
+    { name: "Repuestos", icon: Package, page: "Inventory" },
+    { name: "Proveedores", icon: Truck, page: "Suppliers" },
+    { name: "Órdenes de Compra", icon: ShoppingCart, page: "PurchaseOrders" },
+    { name: "Remitos de Entrada", icon: FileText, page: "DeliveryNotes" },
+    { name: "Movimientos de Stock", icon: ArrowUpDown, page: "StockMovements" }]
   },
   {
-    section: "Operaciones",
+    section: "📊 Reportes",
     items: [
-    { name: "Panel Inspector", icon: ClipboardCheck, page: "InspectorPanel" },
-    { name: "Panel Combustible", icon: GaugeCircle, page: "FuelUpPanel" },
-    { name: "Documentos", icon: FileText, page: "Documents" },
     { name: "Reportes", icon: BarChart3, page: "Reports" }]
-
   },
   {
-    section: "Configuración",
+    section: "⚙️ Configuración",
     items: [
-    {
-      name: "Empresas",
-      icon: Factory,
-      isSubmenu: true,
-      subItems: [
-      { name: "Tipo de industria" }]
-
-    },
-    {
-      name: "Ubicación",
-      icon: MapPinned,
-      isSubmenu: true,
-      subItems: [
-      { name: "Tipo de ubicación" }]
-
-    },
+    { name: "Empresas", icon: Building2, page: "Companies" },
+    { name: "Locaciones", icon: MapPin, page: "Locations" },
+    { name: "Administradores", icon: UserCog, page: "CompanyAdmins" },
     {
       name: "Vehículos",
       icon: Cog,
@@ -223,9 +200,7 @@ function LayoutContent({ children, currentPageName }) {
       { name: "Marcas", page: "Manufacturers" },
       { name: "Modelos", page: "VehicleModels" },
       { name: "Estados", page: "VehicleStatuses" }]
-
     }]
-
   }];
 
 
@@ -235,51 +210,59 @@ function LayoutContent({ children, currentPageName }) {
     section: null,
     items: [
     { name: "Dashboard", icon: LayoutDashboard, page: "Dashboard" }]
-
   },
   {
-    section: "Administración",
+    section: "🚛 Flota",
     items: [
-    { name: "Locaciones", icon: MapPin, page: "Locations" },
-    { name: "Vehículos", icon: Car, page: "Vehicles" }]
-
+    { name: "Vehículos", icon: Car, page: "Vehicles" },
+    { name: "Conductores", icon: Users, page: "Drivers" },
+    { name: "Documentos", icon: FileText, page: "Documents" }]
   },
   {
-    section: "Personal",
-    items: [
-    { name: "Conductores", icon: Users, page: "Drivers" }]
-
-  },
-  {
-    section: "Mantenimiento",
+    section: "🔧 Mantenimiento",
     items: [
     { name: "Programas", icon: Wrench, page: "MaintenancePrograms" },
     { name: "Registros", icon: FileText, page: "Maintenance" },
     { name: "Formularios", icon: ClipboardList, page: "MantenimientoForms" },
     { name: "Novedades", icon: AlertTriangle, page: "Novedades" },
-    { name: "Dashboard A/C", icon: Wind, page: "ACDashboard" }]
-
+    { name: "Dashboard A/C", icon: Wind, page: "ACDashboard" },
+    { name: "Panel Inspector", icon: ClipboardCheck, page: "InspectorPanel" }]
   },
   {
-    section: "Combustible",
+    section: "⛽ Operaciones",
     items: [
-    { name: "Cargas de Combustible", icon: Fuel, page: "FuelUps" }]
-
+    { name: "Cargas de Combustible", icon: Fuel, page: "FuelUps" },
+    { name: "Panel Combustible", icon: GaugeCircle, page: "FuelUpPanel" }]
   },
   {
-    section: "Inventario",
+    section: "📦 Almacén",
     items: [
-    { name: "Repuestos", icon: Package, page: "Inventory" }]
-
+    { name: "Repuestos", icon: Package, page: "Inventory" },
+    { name: "Proveedores", icon: Truck, page: "Suppliers" },
+    { name: "Órdenes de Compra", icon: ShoppingCart, page: "PurchaseOrders" },
+    { name: "Remitos de Entrada", icon: FileText, page: "DeliveryNotes" },
+    { name: "Movimientos de Stock", icon: ArrowUpDown, page: "StockMovements" }]
   },
   {
-    section: "Operaciones",
+    section: "📊 Reportes",
     items: [
-    { name: "Panel Inspector", icon: ClipboardCheck, page: "InspectorPanel" },
-    { name: "Panel Combustible", icon: GaugeCircle, page: "FuelUpPanel" },
-    { name: "Documentos", icon: FileText, page: "Documents" },
     { name: "Reportes", icon: BarChart3, page: "Reports" }]
-
+  },
+  {
+    section: "⚙️ Configuración",
+    items: [
+    { name: "Locaciones", icon: MapPin, page: "Locations" },
+    {
+      name: "Vehículos",
+      icon: Cog,
+      isSubmenu: true,
+      subItems: [
+      { name: "Categorías", page: "VehicleCategories" },
+      { name: "Tipos", page: "VehicleTypes" },
+      { name: "Marcas", page: "Manufacturers" },
+      { name: "Modelos", page: "VehicleModels" },
+      { name: "Estados", page: "VehicleStatuses" }]
+    }]
   }];
 
 
