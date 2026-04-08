@@ -27,6 +27,7 @@ import MaintenanceDialog from "../components/maintenance/MaintenanceDialog";
 import NovedadDialog from "../components/novedades/NovedadDialog";
 import AirConditioningMaintenanceDialog from "../components/ac-maintenance/AirConditioningMaintenanceDialog";
 import NovedadesSummaryCard from "../components/dashboard/NovedadesSummaryCard";
+import FleetStatusBar from "../components/dashboard/FleetStatusBar";
 
 export default function Dashboard() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -474,6 +475,13 @@ export default function Dashboard() {
         </div>
 
 
+
+        {/* Fleet Status Bar */}
+        {!isLoading && accessibleVehicles.length > 0 && (
+          <div className="mb-8">
+            <FleetStatusBar vehicles={accessibleVehicles} />
+          </div>
+        )}
 
         {/* Pie Charts Section - Para todos los usuarios */}
         {!isLoading && accessibleVehicles.length > 0 && (
