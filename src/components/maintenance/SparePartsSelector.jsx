@@ -19,10 +19,8 @@ export default function SparePartsSelector({ companyId, value = [], onChange, is
     setLoading(true);
     base44.entities.SparePart.list()
       .then(all => {
-        const filtered = all.filter(p =>
-          (!companyId || p.company_id === companyId) &&
-          p.is_active !== false
-        );
+        const filtered = all.filter(p => p.is_active !== false)
+          .filter(p => !companyId || !p.company_id || p.company_id === companyId);
         setSpareParts(filtered);
       })
       .catch(() => {})

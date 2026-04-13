@@ -309,7 +309,7 @@ export default function CorrectivoDialog({ open, onOpenChange, initialNovedad, o
               </div>
 
               <SparePartsSelector
-                companyId={novedad?.company_id}
+                companyId={novedad?.company_id || vehicle?.company_id}
                 value={spareParts}
                 onChange={setSpareParts}
                 isDark={isDark}
