@@ -31,7 +31,6 @@ export default function EditNovedadDialog({ open, onOpenChange, novedad, vehicle
   const [estado, setEstado] = useState("pendiente");
   const [prioridad, setPrioridad] = useState("media");
   const [cancelacionMotivo, setCancelacionMotivo] = useState("");
-  const [vehicleStatus, setVehicleStatus] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -40,7 +39,6 @@ export default function EditNovedadDialog({ open, onOpenChange, novedad, vehicle
       setEstado(novedad.estado || "pendiente");
       setPrioridad(novedad.prioridad || "media");
       setCancelacionMotivo(novedad.cancelacion_motivo || "");
-      setVehicleStatus(vehicle?.status || "");
       setError("");
     }
   }, [novedad, open, vehicle]);
@@ -64,9 +62,9 @@ export default function EditNovedadDialog({ open, onOpenChange, novedad, vehicle
 
       await base44.entities.Novedad.update(novedad.id, updates);
 
-      // Actualizar estado del vehículo si cambió
-      if (novedad.vehicle_id && vehicleStatus && vehicleStatus !== vehicle?.status) {
-        await base44.entities.Vehicle.update(novedad.vehicle_id, { status: vehicleStatus });
+      // Auto-cambiar estado del vehículo a "maintenance" cuando pasa a en_proceso
+      if (estado === "en_proceso" && novedad.estado !== "en_proceso" && novedad.vehicle_id) {
+        await base44.entities.Vehicle.update(novedad.vehicle_id, { status: "maintenance" });
       }
 
       onSuccess?.();
@@ -173,27 +171,6 @@ export default function EditNovedadDialog({ open, onOpenChange, novedad, vehicle
               <p className="text-xs text-blue-500">El vehículo pasará automáticamente a estado "En mantenimiento".</p>
             )}
           </div>
-
-          {/* Estado del vehículo */}
-          {vehicle && (
-            <div className="space-y-1">
-              <Label>Estado del Vehículo</Label>
-              <Select value={vehicleStatus} onValueChange={setVehicleStatus}>
-                <SelectTrigger className={isDark ? "bg-zinc-800 border-zinc-700" : ""}>
-                  <SelectValue placeholder="Sin cambio" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">Activo</SelectItem>
-                  <SelectItem value="available">Disponible</SelectItem>
-                  <SelectItem value="in_use">En Uso</SelectItem>
-                  <SelectItem value="maintenance">En Mantenimiento</SelectItem>
-                  <SelectItem value="reserved">Reservado</SelectItem>
-                  <SelectItem value="in_transit">En Tránsito</SelectItem>
-                  <SelectItem value="retired">Retirado</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          )}
 
           {/* Motivo de cancelación */}
           {estado === "cerrado" && (

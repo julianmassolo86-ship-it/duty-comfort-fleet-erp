@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertCircle, Loader2, Search, Car, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/common/ThemeWrapper";
@@ -25,6 +26,7 @@ export default function CorrectivoDialog({ open, onOpenChange, initialNovedad, o
   const [searchError, setSearchError] = useState("");
   const [form, setForm] = useState({ fecha: format(new Date(), "yyyy-MM-dd"), km: "", horas: "", millas: "", descripcion_solucion: "" });
   const [spareParts, setSpareParts] = useState([]);
+  const [vehicleStatus, setVehicleStatus] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -46,6 +48,7 @@ export default function CorrectivoDialog({ open, onOpenChange, initialNovedad, o
     setError("");
     setForm({ fecha: format(new Date(), "yyyy-MM-dd"), km: "", horas: "", millas: "", descripcion_solucion: "" });
     setSpareParts([]);
+    setVehicleStatus("");
   };
 
   const loadNovedadWithVehicle = async (nov) => {
@@ -55,6 +58,7 @@ export default function CorrectivoDialog({ open, onOpenChange, initialNovedad, o
       const v = await base44.entities.Vehicle.filter({ id: nov.vehicle_id });
       if (v.length > 0) {
         setVehicle(v[0]);
+        setVehicleStatus(v[0].status || "");
         setForm(prev => ({ ...prev, km: v[0].mileage || "", horas: v[0].hours || "" }));
       }
     }
@@ -152,11 +156,12 @@ export default function CorrectivoDialog({ open, onOpenChange, initialNovedad, o
         correctivo_maintenance_id: created.id,
       });
 
-      // Actualizar km/horas/millas del vehículo
+      // Actualizar km/horas/millas y estado del vehículo
       const vehicleUpdate = {};
       if (form.km) vehicleUpdate.mileage = parseFloat(form.km);
       if (form.millas) vehicleUpdate.miles = parseFloat(form.millas);
       if (form.horas) vehicleUpdate.hours = parseFloat(form.horas);
+      if (vehicleStatus) vehicleUpdate.status = vehicleStatus;
       if (Object.keys(vehicleUpdate).length > 0) {
         await base44.entities.Vehicle.update(novedad.vehicle_id, vehicleUpdate);
       }
@@ -314,6 +319,24 @@ export default function CorrectivoDialog({ open, onOpenChange, initialNovedad, o
                   <Input type="number" value={form.millas} onChange={e => set("millas", e.target.value)}
                     className={isDark ? "bg-zinc-800 border-zinc-700" : ""} />
                 </div>
+              </div>
+
+              <div className="space-y-1 col-span-2">
+                <Label>Estado del Vehículo</Label>
+                <Select value={vehicleStatus} onValueChange={setVehicleStatus}>
+                  <SelectTrigger className={isDark ? "bg-zinc-800 border-zinc-700" : ""}>
+                    <SelectValue placeholder="Sin cambio" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Activo</SelectItem>
+                    <SelectItem value="available">Disponible</SelectItem>
+                    <SelectItem value="in_use">En Uso</SelectItem>
+                    <SelectItem value="maintenance">En Mantenimiento</SelectItem>
+                    <SelectItem value="reserved">Reservado</SelectItem>
+                    <SelectItem value="in_transit">En Tránsito</SelectItem>
+                    <SelectItem value="retired">Retirado</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <SparePartsSelector
