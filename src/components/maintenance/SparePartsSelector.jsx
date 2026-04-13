@@ -37,8 +37,10 @@ export default function SparePartsSelector({ companyId, value = [], onChange, is
   }, []);
 
   const filtered = spareParts.filter(p =>
-    !search || p.name?.toLowerCase().includes(search.toLowerCase()) ||
-    p.part_number?.toLowerCase().includes(search.toLowerCase())
+    !search ||
+    p.name?.toLowerCase().includes(search.toLowerCase()) ||
+    p.part_number?.toLowerCase().includes(search.toLowerCase()) ||
+    p.description?.toLowerCase().includes(search.toLowerCase())
   );
 
   const handleSelect = (part) => {
@@ -127,6 +129,7 @@ export default function SparePartsSelector({ companyId, value = [], onChange, is
                       <p className={cn("text-xs mt-0.5", isDark ? "text-zinc-400" : "text-gray-400")}>
                         {p.part_number ? `#${p.part_number}` : "Sin N° pieza"} · Stock: {p.stock_quantity ?? 0} {p.unit_of_measure}
                         {p.unit_cost ? ` · $${p.unit_cost.toLocaleString()}` : ""}
+                        {p.description ? ` · ${p.description}` : ""}
                       </p>
                     </div>
                   ))
