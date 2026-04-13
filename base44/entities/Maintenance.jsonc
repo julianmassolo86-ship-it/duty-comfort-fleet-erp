@@ -82,6 +82,30 @@
     "parts_replaced": {
       "type": "string"
     },
+    "spare_parts_used": {
+      "type": "array",
+      "description": "Repuestos utilizados en este mantenimiento",
+      "items": {
+        "type": "object",
+        "properties": {
+          "spare_part_id": {
+            "type": "string"
+          },
+          "spare_part_name": {
+            "type": "string"
+          },
+          "part_number": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "unit_cost": {
+            "type": "number"
+          }
+        }
+      }
+    },
     "next_service_mileage": {
       "type": "number"
     },

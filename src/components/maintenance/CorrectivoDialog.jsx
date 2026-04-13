@@ -10,6 +10,7 @@ import { AlertCircle, Loader2, Search, Car, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/common/ThemeWrapper";
 import { format } from "date-fns";
+import SparePartsSelector from "@/components/maintenance/SparePartsSelector";
 
 export default function CorrectivoDialog({ open, onOpenChange, initialNovedad, onSuccess }) {
   const { theme } = useTheme();
@@ -23,6 +24,7 @@ export default function CorrectivoDialog({ open, onOpenChange, initialNovedad, o
   const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState("");
   const [form, setForm] = useState({ fecha: format(new Date(), "yyyy-MM-dd"), km: "", horas: "", millas: "", descripcion_solucion: "" });
+  const [spareParts, setSpareParts] = useState([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -43,6 +45,7 @@ export default function CorrectivoDialog({ open, onOpenChange, initialNovedad, o
     setSearchError("");
     setError("");
     setForm({ fecha: format(new Date(), "yyyy-MM-dd"), km: "", horas: "", millas: "", descripcion_solucion: "" });
+    setSpareParts([]);
   };
 
   const loadNovedadWithVehicle = async (nov) => {
@@ -124,6 +127,7 @@ export default function CorrectivoDialog({ open, onOpenChange, initialNovedad, o
         completed_time: hora,
         novedad_id: novedad.id,
         novedad_report_number: novedad.report_number,
+        spare_parts_used: spareParts,
         notes: `Resolución de novedad #${novedad.report_number || ""}: ${novedad.descripcion}`,
       };
       if (form.km) maintenanceData.mileage_at_service = parseFloat(form.km);
@@ -303,6 +307,13 @@ export default function CorrectivoDialog({ open, onOpenChange, initialNovedad, o
                     className={isDark ? "bg-zinc-800 border-zinc-700" : ""} />
                 </div>
               </div>
+
+              <SparePartsSelector
+                companyId={novedad?.company_id}
+                value={spareParts}
+                onChange={setSpareParts}
+                isDark={isDark}
+              />
 
               <div className="space-y-1">
                 <Label>Descripción de la Solución *</Label>
