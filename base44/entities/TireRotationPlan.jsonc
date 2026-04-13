@@ -1,0 +1,57 @@
+{
+  "name": "TireRotationPlan",
+  "type": "object",
+  "properties": {
+    "vehicle_id": {
+      "type": "string",
+      "description": "ID del veh\u00edculo"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "ID de la empresa"
+    },
+    "interval_km": {
+      "type": "number",
+      "description": "Intervalo en km"
+    },
+    "interval_days": {
+      "type": "number",
+      "description": "Intervalo en d\u00edas"
+    },
+    "last_rotation_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha de \u00faltima rotaci\u00f3n"
+    },
+    "last_rotation_km": {
+      "type": "number",
+      "description": "Km en \u00faltima rotaci\u00f3n"
+    },
+    "next_rotation_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Pr\u00f3xima rotaci\u00f3n estimada (fecha)"
+    },
+    "next_rotation_km": {
+      "type": "number",
+      "description": "Pr\u00f3xima rotaci\u00f3n estimada (km)"
+    },
+    "rotation_pattern": {
+      "type": "string",
+      "description": "Patr\u00f3n de rotaci\u00f3n (descripci\u00f3n o esquema)"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Plan activo"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Notas"
+    }
+  },
+  "required": [
+    "vehicle_id",
+    "company_id"
+  ]
+}

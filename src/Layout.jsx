@@ -4,7 +4,7 @@ import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import {
   LayoutDashboard, Car, Users, Wrench, FileText,
-  BarChart3, Menu, X, LogOut, ChevronRight, ChevronDown, Building2, MapPin, UserCog, Sun, Moon, Upload, Settings, Factory, MapPinned, Cog, ArrowLeft, Wind, ClipboardList, AlertTriangle, Package, Fuel, ClipboardCheck, GaugeCircle, Truck, ShoppingCart, ArrowUpDown } from
+  BarChart3, Menu, X, LogOut, ChevronRight, ChevronDown, Building2, MapPin, UserCog, Sun, Moon, Upload, Settings, Factory, MapPinned, Cog, ArrowLeft, Wind, ClipboardList, AlertTriangle, Package, Fuel, ClipboardCheck, GaugeCircle, Truck, ShoppingCart, ArrowUpDown, CircleDot } from
 "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -180,6 +180,14 @@ function LayoutContent({ children, currentPageName }) {
     { name: "Movimientos de Stock", icon: ArrowUpDown, page: "StockMovements" }]
   },
   {
+    section: "🔵 Neumáticos",
+    items: [
+    { name: "Dashboard Neumáticos", icon: CircleDot, page: "TiresDashboard" },
+    { name: "Stock de Neumáticos", icon: Package, page: "TiresStock" },
+    { name: "Alertas", icon: AlertTriangle, page: "TireAlerts" },
+    { name: "Rotaciones", icon: ArrowUpDown, page: "TireRotations" }]
+  },
+  {
     section: "📊 Reportes",
     items: [
     { name: "Reportes", icon: BarChart3, page: "Reports" }]
@@ -242,6 +250,14 @@ function LayoutContent({ children, currentPageName }) {
     { name: "Órdenes de Compra", icon: ShoppingCart, page: "PurchaseOrders" },
     { name: "Remitos de Entrada", icon: FileText, page: "DeliveryNotes" },
     { name: "Movimientos de Stock", icon: ArrowUpDown, page: "StockMovements" }]
+  },
+  {
+    section: "🔵 Neumáticos",
+    items: [
+    { name: "Dashboard Neumáticos", icon: CircleDot, page: "TiresDashboard" },
+    { name: "Stock de Neumáticos", icon: Package, page: "TiresStock" },
+    { name: "Alertas", icon: AlertTriangle, page: "TireAlerts" },
+    { name: "Rotaciones", icon: ArrowUpDown, page: "TireRotations" }]
   },
   {
     section: "📊 Reportes",

@@ -1,0 +1,89 @@
+{
+  "name": "Tire",
+  "type": "object",
+  "properties": {
+    "serial_number": {
+      "type": "string",
+      "description": "N\u00famero de serie \u00fanico"
+    },
+    "brand": {
+      "type": "string",
+      "description": "Marca del neum\u00e1tico"
+    },
+    "model": {
+      "type": "string",
+      "description": "Modelo"
+    },
+    "size": {
+      "type": "string",
+      "description": "Medida (ej: 295/80R22.5)"
+    },
+    "tire_type": {
+      "type": "string",
+      "enum": [
+        "directriz",
+        "traccion",
+        "remolque",
+        "all_terrain"
+      ],
+      "description": "Tipo de neum\u00e1tico"
+    },
+    "dot": {
+      "type": "string",
+      "description": "C\u00f3digo DOT"
+    },
+    "manufacture_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha de fabricaci\u00f3n"
+    },
+    "purchase_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha de compra"
+    },
+    "purchase_cost": {
+      "type": "number",
+      "description": "Costo de compra"
+    },
+    "supplier": {
+      "type": "string",
+      "description": "Proveedor"
+    },
+    "estimated_lifespan_km": {
+      "type": "number",
+      "description": "Vida \u00fatil estimada en km"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "en_stock",
+        "montado",
+        "en_reparacion",
+        "recapando",
+        "de_baja"
+      ],
+      "default": "en_stock",
+      "description": "Estado actual del neum\u00e1tico"
+    },
+    "total_km": {
+      "type": "number",
+      "default": 0,
+      "description": "Km acumulados totales"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "ID de la empresa"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Notas adicionales"
+    }
+  },
+  "required": [
+    "serial_number",
+    "brand",
+    "size",
+    "company_id"
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "name": "TireAssignment",
+  "type": "object",
+  "properties": {
+    "tire_id": {
+      "type": "string",
+      "description": "ID del neum\u00e1tico"
+    },
+    "vehicle_id": {
+      "type": "string",
+      "description": "ID del veh\u00edculo"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "ID de la empresa"
+    },
+    "position": {
+      "type": "string",
+      "enum": [
+        "eje_1_izq",
+        "eje_1_der",
+        "eje_2_izq_ext",
+        "eje_2_izq_int",
+        "eje_2_der_ext",
+        "eje_2_der_int",
+        "eje_3_izq_ext",
+        "eje_3_izq_int",
+        "eje_3_der_ext",
+        "eje_3_der_int",
+        "repuesto_1",
+        "repuesto_2"
+      ],
+      "description": "Posici\u00f3n en el veh\u00edculo"
+    },
+    "km_mount": {
+      "type": "number",
+      "description": "Km del veh\u00edculo al montar"
+    },
+    "km_dismount": {
+      "type": "number",
+      "description": "Km del veh\u00edculo al desmontar"
+    },
+    "mount_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha de montaje"
+    },
+    "dismount_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha de desmontaje"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Montaje activo"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Notas"
+    }
+  },
+  "required": [
+    "tire_id",
+    "vehicle_id",
+    "company_id",
+    "position",
+    "mount_date"
+  ]
+}

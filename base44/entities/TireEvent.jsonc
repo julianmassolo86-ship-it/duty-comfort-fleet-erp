@@ -1,0 +1,58 @@
+{
+  "name": "TireEvent",
+  "type": "object",
+  "properties": {
+    "tire_id": {
+      "type": "string",
+      "description": "ID del neum\u00e1tico"
+    },
+    "vehicle_id": {
+      "type": "string",
+      "description": "ID del veh\u00edculo (si aplica)"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "ID de la empresa"
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "pinchazo",
+        "reparacion",
+        "recapado",
+        "rotacion",
+        "baja",
+        "robo",
+        "compra"
+      ],
+      "description": "Tipo de evento"
+    },
+    "event_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha del evento"
+    },
+    "vehicle_km": {
+      "type": "number",
+      "description": "Km del veh\u00edculo en el evento"
+    },
+    "cost": {
+      "type": "number",
+      "description": "Costo del evento"
+    },
+    "description": {
+      "type": "string",
+      "description": "Descripci\u00f3n del evento"
+    },
+    "work_order_id": {
+      "type": "string",
+      "description": "Referencia opcional a WorkOrder"
+    }
+  },
+  "required": [
+    "tire_id",
+    "company_id",
+    "event_type",
+    "event_date"
+  ]
+}

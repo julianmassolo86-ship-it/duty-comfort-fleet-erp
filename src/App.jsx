@@ -17,6 +17,10 @@ import Suppliers from './pages/Suppliers';
 import PurchaseOrders from './pages/PurchaseOrders';
 import DeliveryNotes from './pages/DeliveryNotes';
 import StockMovements from './pages/StockMovements';
+import TiresDashboard from './pages/TiresDashboard';
+import TiresStock from './pages/TiresStock';
+import TireAlerts from './pages/TireAlerts';
+import TireRotations from './pages/TireRotations';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
 const { Pages, Layout, mainPage } = pagesConfig;
@@ -80,6 +84,10 @@ const AuthenticatedApp = () => {
       <Route path="/PurchaseOrders" element={<LayoutWrapper currentPageName="PurchaseOrders"><PurchaseOrders /></LayoutWrapper>} />
       <Route path="/DeliveryNotes" element={<LayoutWrapper currentPageName="DeliveryNotes"><DeliveryNotes /></LayoutWrapper>} />
       <Route path="/StockMovements" element={<LayoutWrapper currentPageName="StockMovements"><StockMovements /></LayoutWrapper>} />
+      <Route path="/TiresDashboard" element={<LayoutWrapper currentPageName="TiresDashboard"><TiresDashboard /></LayoutWrapper>} />
+      <Route path="/TiresStock" element={<LayoutWrapper currentPageName="TiresStock"><TiresStock /></LayoutWrapper>} />
+      <Route path="/TireAlerts" element={<LayoutWrapper currentPageName="TireAlerts"><TireAlerts /></LayoutWrapper>} />
+      <Route path="/TireRotations" element={<LayoutWrapper currentPageName="TireRotations"><TireRotations /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

@@ -1,0 +1,77 @@
+{
+  "name": "TireInspection",
+  "type": "object",
+  "properties": {
+    "tire_assignment_id": {
+      "type": "string",
+      "description": "ID del TireAssignment activo"
+    },
+    "tire_id": {
+      "type": "string",
+      "description": "ID del neum\u00e1tico"
+    },
+    "vehicle_id": {
+      "type": "string",
+      "description": "ID del veh\u00edculo"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "ID de la empresa"
+    },
+    "inspection_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha de inspecci\u00f3n"
+    },
+    "vehicle_km": {
+      "type": "number",
+      "description": "Km del veh\u00edculo al inspeccionar"
+    },
+    "tread_depth_inner": {
+      "type": "number",
+      "description": "Profundidad labrado interior (mm)"
+    },
+    "tread_depth_center": {
+      "type": "number",
+      "description": "Profundidad labrado centro (mm)"
+    },
+    "tread_depth_outer": {
+      "type": "number",
+      "description": "Profundidad labrado exterior (mm)"
+    },
+    "pressure_psi": {
+      "type": "number",
+      "description": "Presi\u00f3n medida (PSI)"
+    },
+    "expected_pressure_psi": {
+      "type": "number",
+      "description": "Presi\u00f3n esperada (PSI)"
+    },
+    "visual_condition": {
+      "type": "string",
+      "enum": [
+        "buena",
+        "desgaste_irregular",
+        "corte",
+        "burbuja",
+        "otro"
+      ],
+      "default": "buena",
+      "description": "Condici\u00f3n visual"
+    },
+    "observations": {
+      "type": "string",
+      "description": "Observaciones"
+    },
+    "inspector_name": {
+      "type": "string",
+      "description": "Nombre del inspector"
+    }
+  },
+  "required": [
+    "tire_id",
+    "vehicle_id",
+    "company_id",
+    "inspection_date"
+  ]
+}
