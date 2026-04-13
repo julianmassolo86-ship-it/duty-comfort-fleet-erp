@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { ThemeContextValue } from "@/components/common/ThemeWrapper";
@@ -20,6 +20,84 @@ const STATUS_COLORS = {
   recibida: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
   cancelada: "bg-red-500/10 text-red-400 border-red-500/20",
 };
+
+function SparePartSearch({ value, spareParts, onChange, isDark }) {
+  const [search, setSearch] = useState("");
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  const selected = spareParts.find(s => s.id === value);
+  const filtered = spareParts.filter(s =>
+    !search || s.name?.toLowerCase().includes(search.toLowerCase()) || s.part_number?.toLowerCase().includes(search.toLowerCase())
+  ).slice(0, 50);
+
+  React.useEffect(() => {
+    const handleClick = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        type="button"
+        onClick={() => { setOpen(o => !o); setSearch(""); }}
+        className={cn(
+          "w-full h-8 text-xs px-2 text-left rounded-md border flex items-center justify-between",
+          isDark ? "bg-zinc-800 border-zinc-700 text-white" : "bg-white border-gray-300 text-gray-900"
+        )}
+      >
+        <span className={selected ? "" : (isDark ? "text-zinc-500" : "text-gray-400")}>
+          {selected ? selected.name : "Seleccionar repuesto..."}
+        </span>
+        <ChevronDown className="w-3 h-3 shrink-0 opacity-50" />
+      </button>
+      {open && (
+        <div className={cn(
+          "absolute z-50 top-full mt-1 left-0 right-0 rounded-md border shadow-lg",
+          isDark ? "bg-zinc-800 border-zinc-700" : "bg-white border-gray-200"
+        )}>
+          <div className="p-1.5 border-b" style={{ borderColor: isDark ? "#3f3f46" : "#e5e7eb" }}>
+            <input
+              autoFocus
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Buscar por nombre o N° de parte..."
+              className={cn(
+                "w-full text-xs px-2 py-1 rounded outline-none",
+                isDark ? "bg-zinc-700 text-white placeholder:text-zinc-500" : "bg-gray-100 text-gray-900 placeholder:text-gray-400"
+              )}
+            />
+          </div>
+          <div className="max-h-48 overflow-y-auto">
+            {filtered.length === 0 ? (
+              <p className={cn("text-xs text-center py-3", isDark ? "text-zinc-500" : "text-gray-400")}>
+                {spareParts.length === 0 ? "No hay repuestos cargados" : "Sin resultados"}
+              </p>
+            ) : filtered.map(s => (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => { onChange(s.id); setOpen(false); }}
+                className={cn(
+                  "w-full text-left px-3 py-2 text-xs flex items-center justify-between gap-2 hover:opacity-80 transition-colors",
+                  value === s.id ? (isDark ? "bg-yellow-500/20 text-yellow-300" : "bg-yellow-50 text-yellow-700") :
+                  (isDark ? "text-zinc-200 hover:bg-zinc-700" : "text-gray-800 hover:bg-gray-50")
+                )}
+              >
+                <span className="font-medium truncate">{s.name}</span>
+                <span className={cn("shrink-0", isDark ? "text-zinc-500" : "text-gray-400")}>
+                  {s.part_number && <span className="mr-2">{s.part_number}</span>}
+                  {s.unit_cost ? `$${s.unit_cost}` : ""}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 function PurchaseOrderDialog({ open, onClose, order, companyId, suppliers, spareParts }) {
   const { theme } = useContext(ThemeContextValue);
@@ -108,18 +186,31 @@ function PurchaseOrderDialog({ open, onClose, order, companyId, suppliers, spare
                 <Plus className="w-3 h-3 mr-1" /> Agregar ítem
               </Button>
             </div>
+            {spareParts.length === 0 && (
+              <p className={cn("text-xs mb-2 p-2 rounded border", isDark ? "text-amber-400 bg-amber-500/10 border-amber-500/20" : "text-amber-700 bg-amber-50 border-amber-200")}>
+                ⚠ No hay repuestos cargados para esta empresa. Primero creá los repuestos en el módulo de Almacén.
+              </p>
+            )}
             <div className="space-y-2">
+              {/* Header */}
+              {(form.items || []).length > 0 && (
+                <div className={cn("grid grid-cols-12 gap-2 px-2 pb-1 text-xs font-medium", isDark ? "text-zinc-500" : "text-gray-400")}>
+                  <div className="col-span-5">Repuesto</div>
+                  <div className="col-span-2">Cant.</div>
+                  <div className="col-span-2">Precio U.</div>
+                  <div className="col-span-2">Subtotal</div>
+                  <div className="col-span-1" />
+                </div>
+              )}
               {(form.items || []).map((item, idx) => (
                 <div key={idx} className={cn("grid grid-cols-12 gap-2 p-2 rounded-lg", isDark ? "bg-zinc-800/50" : "bg-gray-50")}>
                   <div className="col-span-5">
-                    <Select value={item.spare_part_id} onValueChange={v => updateItem(idx, "spare_part_id", v)}>
-                      <SelectTrigger className={cn("h-8 text-xs", isDark ? "bg-zinc-800 border-zinc-700 text-white" : "")}>
-                        <SelectValue placeholder="Repuesto" />
-                      </SelectTrigger>
-                      <SelectContent className={isDark ? "bg-zinc-800 border-zinc-700" : ""}>
-                        {spareParts.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
+                    <SparePartSearch
+                      value={item.spare_part_id}
+                      spareParts={spareParts}
+                      onChange={v => updateItem(idx, "spare_part_id", v)}
+                      isDark={isDark}
+                    />
                   </div>
                   <div className="col-span-2">
                     <Input type="number" value={item.quantity} onChange={e => updateItem(idx, "quantity", e.target.value)} className={cn("h-8 text-xs", isDark ? "bg-zinc-800 border-zinc-700 text-white" : "")} placeholder="Cant." min="1" />
