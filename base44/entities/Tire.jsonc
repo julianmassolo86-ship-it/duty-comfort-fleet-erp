@@ -28,6 +28,10 @@
       ],
       "description": "Tipo de neum\u00e1tico"
     },
+    "tread_pattern_description": {
+      "type": "string",
+      "description": "Descripci\u00f3n de la banda de rodamiento (ej: Lineal, Con tacos, Mixta)"
+    },
     "dot": {
       "type": "string",
       "description": "C\u00f3digo DOT"

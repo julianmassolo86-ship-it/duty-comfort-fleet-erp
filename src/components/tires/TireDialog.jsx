@@ -123,6 +123,11 @@ export default function TireDialog({ open, onOpenChange, tire, onSave, companyId
               className={isDark ? "bg-zinc-800 border-zinc-700" : ""} />
           </div>
           <div className="col-span-2 space-y-1">
+            <Label>Banda de Rodamiento</Label>
+            <Input value={form.tread_pattern_description || ""} onChange={e => set("tread_pattern_description", e.target.value)}
+              placeholder="ej: Lineal, Con tacos, Mixta, Ribbed..." className={isDark ? "bg-zinc-800 border-zinc-700" : ""} />
+          </div>
+          <div className="col-span-2 space-y-1">
             <Label>Notas</Label>
             <Textarea value={form.notes || ""} onChange={e => set("notes", e.target.value)}
               className={isDark ? "bg-zinc-800 border-zinc-700" : ""} rows={2} />
