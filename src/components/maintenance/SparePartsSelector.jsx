@@ -14,10 +14,16 @@ export default function SparePartsSelector({ companyId, value = [], onChange, is
   const [qty, setQty] = useState("1");
 
   useEffect(() => {
-    if (!companyId) return;
     setLoading(true);
-    base44.entities.SparePart.filter({ company_id: companyId, is_active: true })
-      .then(setSpareParts)
+    base44.entities.SparePart.list()
+      .then(all => {
+        // Filter by company if provided, exclude inactive (but include if field missing)
+        const filtered = all.filter(p =>
+          (!companyId || p.company_id === companyId) &&
+          p.is_active !== false
+        );
+        setSpareParts(filtered);
+      })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [companyId]);
