@@ -25,8 +25,9 @@ function SupplierDialog({ open, onClose, supplier, companyId }) {
   React.useEffect(() => { setForm(supplier || { name: "", cuit: "", phone: "", email: "", address: "", category: "repuestos", notes: "", is_active: true }); }, [supplier, open]);
 
   const saveMutation = useMutation({
-    mutationFn: (data) => supplier ? base44.entities.Supplier.update(supplier.id, data) : base44.entities.Supplier.create({ ...data, company_id: companyId }),
+    mutationFn: (data) => supplier ? base44.entities.Supplier.update(supplier.id, data) : base44.entities.Supplier.create({ ...data, company_id: companyId || data.company_id }),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["suppliers"] }); onClose(); },
+    onError: (e) => console.error("Error guardando proveedor:", e),
   });
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
@@ -78,9 +79,12 @@ function SupplierDialog({ open, onClose, supplier, companyId }) {
             </div>
           </div>
         </div>
+        {!companyId && !supplier && (
+          <p className="text-xs text-red-400 mb-2">Seleccioná una empresa antes de crear un proveedor.</p>
+        )}
         <div className="flex justify-end gap-2">
           <Button variant="outline" onClick={onClose} className={isDark ? "border-zinc-600 text-zinc-300" : ""}>Cancelar</Button>
-          <Button onClick={() => saveMutation.mutate(form)} disabled={!form.name || saveMutation.isPending} className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold">
+          <Button onClick={() => saveMutation.mutate(form)} disabled={!form.name || saveMutation.isPending || (!companyId && !supplier)} className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold">
             {saveMutation.isPending ? "Guardando..." : "Guardar"}
           </Button>
         </div>
