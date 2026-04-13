@@ -1,0 +1,84 @@
+{
+  "name": "Novedad",
+  "type": "object",
+  "properties": {
+    "report_number": {
+      "type": "string",
+      "description": "N\u00famero correlativo del informe"
+    },
+    "vehicle_id": {
+      "type": "string",
+      "description": "ID del veh\u00edculo"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "ID de la empresa"
+    },
+    "location_id": {
+      "type": "string",
+      "description": "ID de la locaci\u00f3n"
+    },
+    "descripcion": {
+      "type": "string",
+      "description": "Descripci\u00f3n de la novedad"
+    },
+    "fecha_reporte": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha en que se report\u00f3 la novedad"
+    },
+    "fecha_resolucion": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha en que se resolvi\u00f3 la novedad"
+    },
+    "estado": {
+      "type": "string",
+      "enum": [
+        "pendiente",
+        "en_proceso",
+        "resuelto",
+        "cerrado"
+      ],
+      "default": "pendiente",
+      "description": "Estado de la novedad"
+    },
+    "prioridad": {
+      "type": "string",
+      "enum": [
+        "baja",
+        "media",
+        "alta",
+        "critica"
+      ],
+      "default": "media",
+      "description": "Prioridad de la novedad"
+    },
+    "detalles_resolucion": {
+      "type": "string",
+      "description": "C\u00f3mo se resolvi\u00f3 la novedad"
+    },
+    "cancelacion_motivo": {
+      "type": "string",
+      "description": "Motivo de cancelaci\u00f3n/cierre de la novedad"
+    },
+    "kilometraje_reportado": {
+      "type": "number",
+      "description": "Kilometraje al momento del reporte"
+    },
+    "horas_reportadas": {
+      "type": "number",
+      "description": "Horas al momento del reporte"
+    },
+    "correctivo_maintenance_id": {
+      "type": "string",
+      "description": "ID del mantenimiento correctivo que resolvi\u00f3 esta novedad"
+    }
+  },
+  "required": [
+    "vehicle_id",
+    "company_id",
+    "descripcion",
+    "fecha_reporte"
+  ]
+}

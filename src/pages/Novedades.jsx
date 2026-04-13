@@ -7,6 +7,8 @@ import PageHeader from "@/components/common/PageHeader";
 import { Button } from "@/components/ui/button";
 import { LayoutDashboard, List } from "lucide-react";
 import NovedadDialog from "@/components/novedades/NovedadDialog";
+import EditNovedadDialog from "@/components/novedades/EditNovedadDialog";
+import CorrectivoDialog from "@/components/maintenance/CorrectivoDialog";
 import NovedadesDashboard from "@/components/novedades/NovedadesDashboard";
 import NovedadesHistorial from "@/components/novedades/NovedadesHistorial";
 
@@ -17,6 +19,9 @@ export default function Novedades() {
   const [currentUser, setCurrentUser] = useState(null);
   const [selectedNovedad, setSelectedNovedad] = useState(null);
   const [showDialog, setShowDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showCorrectivoDialog, setShowCorrectivoDialog] = useState(false);
+  const [correctivoNovedad, setCorretivoNovedad] = useState(null);
   const [view, setView] = useState("dashboard");
 
   useEffect(() => {
@@ -54,6 +59,18 @@ export default function Novedades() {
   const accessibleNovedades = isSuperAdmin
     ? novedades
     : novedades.filter(n => n.company_id === currentUser?.company_id);
+
+  const handleNovedadSuccess = () => {
+    queryClient.invalidateQueries({ queryKey: ["novedades"] });
+    queryClient.invalidateQueries({ queryKey: ["vehicles"] });
+    setShowEditDialog(false);
+    setSelectedNovedad(null);
+  };
+
+  const handleOpenCorrectivo = (novedad) => {
+    setCorretivoNovedad(novedad);
+    setShowCorrectivoDialog(true);
+  };
 
   const handleSave = async (data) => {
     if (selectedNovedad) {
@@ -96,6 +113,10 @@ export default function Novedades() {
                   <List className="w-3.5 h-3.5" /> Lista
                 </button>
               </div>
+              <Button variant="outline" onClick={() => { setCorretivoNovedad(null); setShowCorrectivoDialog(true); }}
+                className={cn(theme === "dark" ? "border-zinc-700 text-zinc-300 hover:bg-zinc-800" : "")}>
+                + Correctivo
+              </Button>
               <Button onClick={() => { setSelectedNovedad(null); setShowDialog(true); }}>
                 + Nueva Novedad
               </Button>
@@ -123,7 +144,7 @@ export default function Novedades() {
             locations={locations}
             companies={companies}
             vehicleTypes={vehicleTypes}
-            onEdit={(n) => { setSelectedNovedad(n); setShowDialog(true); }}
+            onEdit={(n) => { setSelectedNovedad(n); setShowEditDialog(true); }}
             isLoading={isLoading}
           />
         )}
@@ -134,6 +155,27 @@ export default function Novedades() {
         onOpenChange={(open) => { setShowDialog(open); if (!open) setSelectedNovedad(null); }}
         novedad={selectedNovedad}
         onSave={handleSave}
+      />
+
+      <EditNovedadDialog
+        open={showEditDialog}
+        onOpenChange={(open) => { setShowEditDialog(open); if (!open) setSelectedNovedad(null); }}
+        novedad={selectedNovedad}
+        vehicle={selectedNovedad ? vehicles.find(v => v.id === selectedNovedad.vehicle_id) : null}
+        onSuccess={handleNovedadSuccess}
+        onOpenCorrectivo={handleOpenCorrectivo}
+      />
+
+      <CorrectivoDialog
+        open={showCorrectivoDialog}
+        onOpenChange={(open) => { setShowCorrectivoDialog(open); if (!open) setCorretivoNovedad(null); }}
+        initialNovedad={correctivoNovedad}
+        onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ["novedades"] });
+          queryClient.invalidateQueries({ queryKey: ["vehicles"] });
+          setShowCorrectivoDialog(false);
+          setCorretivoNovedad(null);
+        }}
       />
     </div>
   );

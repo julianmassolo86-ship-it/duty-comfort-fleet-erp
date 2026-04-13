@@ -1,0 +1,108 @@
+{
+  "name": "Maintenance",
+  "type": "object",
+  "properties": {
+    "report_number": {
+      "type": "string",
+      "description": "N\u00famero correlativo del informe"
+    },
+    "vehicle_id": {
+      "type": "string",
+      "description": "ID del veh\u00edculo"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "ID de la empresa"
+    },
+    "location_id": {
+      "type": "string",
+      "description": "ID de la locaci\u00f3n"
+    },
+    "novedad_id": {
+      "type": "string",
+      "description": "ID de la novedad asociada (para correctivos)"
+    },
+    "novedad_report_number": {
+      "type": "string",
+      "description": "N\u00famero de la novedad asociada"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "preventive",
+        "corrective",
+        "inspection"
+      ],
+      "description": "Tipo de mantenimiento"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "scheduled",
+        "in_progress",
+        "completed",
+        "cancelled"
+      ],
+      "default": "scheduled"
+    },
+    "description": {
+      "type": "string"
+    },
+    "scheduled_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "completed_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "completed_time": {
+      "type": "string",
+      "description": "Hora de registro (HH:MM)"
+    },
+    "mileage_at_service": {
+      "type": "number"
+    },
+    "miles_at_service": {
+      "type": "number"
+    },
+    "hours_at_service": {
+      "type": "number"
+    },
+    "cost": {
+      "type": "number"
+    },
+    "provider": {
+      "type": "string",
+      "description": "Taller o proveedor"
+    },
+    "invoice_number": {
+      "type": "string"
+    },
+    "parts_replaced": {
+      "type": "string"
+    },
+    "next_service_mileage": {
+      "type": "number"
+    },
+    "next_service_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "attachments": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "vehicle_id",
+    "type",
+    "description",
+    "company_id"
+  ]
+}
