@@ -115,8 +115,16 @@ export default function CorrectivoDialog({ open, onOpenChange, initialNovedad, o
       const now = new Date();
       const hora = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
+      // Obtener número correlativo
+      const numRes = await base44.functions.invoke("getNextReportNumber", {
+        report_type: "corrective",
+        company_id: novedad.company_id || vehicle?.company_id || "global"
+      });
+      const report_number = numRes?.data?.report_number || null;
+
       // Crear registro de mantenimiento correctivo
       const maintenanceData = {
+        report_number,
         vehicle_id: novedad.vehicle_id,
         company_id: novedad.company_id,
         location_id: novedad.location_id,

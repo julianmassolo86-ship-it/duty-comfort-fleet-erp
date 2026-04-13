@@ -10,7 +10,8 @@
         "maintenance",
         "pre_trip",
         "post_trip",
-        "fuel_up"
+        "fuel_up",
+        "corrective"
       ],
       "description": "Tipo de informe"
     },

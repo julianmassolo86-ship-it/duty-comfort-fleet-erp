@@ -8,6 +8,7 @@ const REPORT_TYPE_CONFIG = {
   'pre_trip':       { prefix: '0004', label: 'PRE' },
   'post_trip':      { prefix: '0005', label: 'POST' },
   'fuel_up':        { prefix: '0006', label: 'COMB' },
+  'corrective':     { prefix: '0007', label: 'CORR' },
 };
 
 Deno.serve(async (req) => {
