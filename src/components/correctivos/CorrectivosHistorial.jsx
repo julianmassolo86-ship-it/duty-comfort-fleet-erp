@@ -276,7 +276,7 @@ export default function CorrectivosHistorial({ correctivos, vehicles, locations,
                       </span>
                     </div>
 
-                    {/* Detalle de repuestos */}
+                    {/* Detalle de repuestos estructurados */}
                     {c.spare_parts_used?.length > 0 && (
                       <div className="flex flex-wrap gap-1.5 mt-2">
                         {c.spare_parts_used.map((part, idx) => (
@@ -299,6 +299,21 @@ export default function CorrectivosHistorial({ correctivos, vehicles, locations,
                             )}
                           </span>
                         ))}
+                      </div>
+                    )}
+
+                    {/* Fallback: campo parts_replaced (texto libre, registros viejos) */}
+                    {!c.spare_parts_used?.length && c.parts_replaced && (
+                      <div className="mt-2">
+                        <span className={cn(
+                          "inline-flex items-center gap-1.5 text-xs px-2 py-0.5 rounded-full border",
+                          isDark
+                            ? "bg-orange-500/10 border-orange-500/20 text-orange-300"
+                            : "bg-orange-50 border-orange-200 text-orange-700"
+                        )}>
+                          <Package className="w-2.5 h-2.5" />
+                          {c.parts_replaced}
+                        </span>
                       </div>
                     )}
                   </div>
