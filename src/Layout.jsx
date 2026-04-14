@@ -161,7 +161,6 @@ function LayoutContent({ children, currentPageName }) {
     section: "🔧 Mantenimiento",
     items: [
     { name: "Programas", icon: Wrench, page: "MaintenancePrograms" },
-    { name: "Registros", icon: FileText, page: "Maintenance" },
     { name: "Correctivos", icon: Hammer, page: "Correctivos" },
     { name: "Novedades", icon: AlertTriangle, page: "Novedades" },
     { name: "Panel Inspector", icon: ClipboardCheck, page: "InspectorPanel" }]
@@ -231,7 +230,6 @@ function LayoutContent({ children, currentPageName }) {
     section: "🔧 Mantenimiento",
     items: [
     { name: "Programas", icon: Wrench, page: "MaintenancePrograms" },
-    { name: "Registros", icon: FileText, page: "Maintenance" },
     { name: "Correctivos", icon: Hammer, page: "Correctivos" },
     { name: "Novedades", icon: AlertTriangle, page: "Novedades" },
     { name: "Panel Inspector", icon: ClipboardCheck, page: "InspectorPanel" }]
