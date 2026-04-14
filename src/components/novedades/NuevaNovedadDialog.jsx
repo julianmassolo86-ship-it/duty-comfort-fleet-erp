@@ -60,19 +60,19 @@ export default function NuevaNovedadDialog({ open, onOpenChange, onSuccess }) {
   }, [open, user]);
 
   const loadData = async () => {
-    const [v, c, l] = await Promise.all([
-      user?.company_id
-        ? base44.entities.Vehicle.filter({ company_id: user.company_id })
-        : base44.entities.Vehicle.list(),
-      user?.company_id
-        ? base44.entities.Company.filter({ id: user.company_id })
-        : base44.entities.Company.list(),
-      user?.company_id
-        ? base44.entities.Location.filter({ company_id: user.company_id })
-        : base44.entities.Location.list(),
-    ]);
+    const v = user?.company_id
+      ? await base44.entities.Vehicle.filter({ company_id: user.company_id })
+      : await base44.entities.Vehicle.list();
     setVehicles(v);
+
+    const c = user?.company_id
+      ? await base44.entities.Company.filter({ id: user.company_id })
+      : await base44.entities.Company.list();
     setCompanies(c);
+
+    const l = user?.company_id
+      ? await base44.entities.Location.filter({ company_id: user.company_id })
+      : await base44.entities.Location.list();
     setLocations(l);
   };
 
