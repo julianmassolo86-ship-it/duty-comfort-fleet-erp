@@ -21,14 +21,17 @@ const STATUS_COLORS = {
   cancelada: "bg-red-500/10 text-red-400 border-red-500/20",
 };
 
-function SparePartSearch({ value, spareParts, onChange, isDark }) {
+function SparePartSearch({ value, spareParts, categories, subcategories, onChange, isDark }) {
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
   const selected = spareParts.find(s => s.id === value);
   const filtered = spareParts.filter(s =>
-    !search || s.name?.toLowerCase().includes(search.toLowerCase()) || s.part_number?.toLowerCase().includes(search.toLowerCase())
+    !search ||
+    s.name?.toLowerCase().includes(search.toLowerCase()) ||
+    s.part_number?.toLowerCase().includes(search.toLowerCase()) ||
+    s.specifications?.toLowerCase().includes(search.toLowerCase())
   ).slice(0, 50);
 
   React.useEffect(() => {
@@ -37,24 +40,44 @@ function SparePartSearch({ value, spareParts, onChange, isDark }) {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
+  const getCategoryName = (id) => categories.find(c => c.id === id)?.name || "";
+  const getSubcategoryName = (id) => subcategories.find(c => c.id === id)?.name || "";
+
+  const selectedCategory = selected ? getCategoryName(selected.category_id) : "";
+  const selectedSubcategory = selected ? getSubcategoryName(selected.subcategory_id) : "";
+
   return (
     <div className="relative" ref={ref}>
       <button
         type="button"
         onClick={() => { setOpen(o => !o); setSearch(""); }}
         className={cn(
-          "w-full h-8 text-xs px-2 text-left rounded-md border flex items-center justify-between",
+          "w-full min-h-8 text-xs px-2 py-1.5 text-left rounded-md border flex items-start justify-between gap-1",
           isDark ? "bg-zinc-800 border-zinc-700 text-white" : "bg-white border-gray-300 text-gray-900"
         )}
       >
-        <span className={selected ? "" : (isDark ? "text-zinc-500" : "text-gray-400")}>
-          {selected ? selected.name : "Seleccionar repuesto..."}
-        </span>
-        <ChevronDown className="w-3 h-3 shrink-0 opacity-50" />
+        {selected ? (
+          <div className="flex-1 min-w-0">
+            <div className="font-medium truncate">{selected.name}</div>
+            {(selectedCategory || selectedSubcategory) && (
+              <div className={cn("text-[10px] truncate", isDark ? "text-zinc-500" : "text-gray-400")}>
+                {[selectedCategory, selectedSubcategory].filter(Boolean).join(" › ")}
+              </div>
+            )}
+            {selected.specifications && (
+              <div className={cn("text-[10px] truncate italic", isDark ? "text-zinc-500" : "text-gray-400")}>
+                {selected.specifications}
+              </div>
+            )}
+          </div>
+        ) : (
+          <span className={isDark ? "text-zinc-500" : "text-gray-400"}>Seleccionar repuesto...</span>
+        )}
+        <ChevronDown className="w-3 h-3 shrink-0 opacity-50 mt-0.5" />
       </button>
       {open && (
         <div className={cn(
-          "absolute z-50 top-full mt-1 left-0 right-0 rounded-md border shadow-lg",
+          "absolute z-50 top-full mt-1 left-0 w-96 rounded-md border shadow-lg",
           isDark ? "bg-zinc-800 border-zinc-700" : "bg-white border-gray-200"
         )}>
           <div className="p-1.5 border-b" style={{ borderColor: isDark ? "#3f3f46" : "#e5e7eb" }}>
@@ -62,36 +85,59 @@ function SparePartSearch({ value, spareParts, onChange, isDark }) {
               autoFocus
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder="Buscar por nombre o N° de parte..."
+              placeholder="Buscar por nombre, N° de parte o especificación..."
               className={cn(
                 "w-full text-xs px-2 py-1 rounded outline-none",
                 isDark ? "bg-zinc-700 text-white placeholder:text-zinc-500" : "bg-gray-100 text-gray-900 placeholder:text-gray-400"
               )}
             />
           </div>
-          <div className="max-h-48 overflow-y-auto">
+          <div className="max-h-64 overflow-y-auto">
             {filtered.length === 0 ? (
               <p className={cn("text-xs text-center py-3", isDark ? "text-zinc-500" : "text-gray-400")}>
                 {spareParts.length === 0 ? "No hay repuestos cargados" : "Sin resultados"}
               </p>
-            ) : filtered.map(s => (
-              <button
-                key={s.id}
-                type="button"
-                onClick={() => { onChange(s.id); setOpen(false); }}
-                className={cn(
-                  "w-full text-left px-3 py-2 text-xs flex items-center justify-between gap-2 hover:opacity-80 transition-colors",
-                  value === s.id ? (isDark ? "bg-yellow-500/20 text-yellow-300" : "bg-yellow-50 text-yellow-700") :
-                  (isDark ? "text-zinc-200 hover:bg-zinc-700" : "text-gray-800 hover:bg-gray-50")
-                )}
-              >
-                <span className="font-medium truncate">{s.name}</span>
-                <span className={cn("shrink-0", isDark ? "text-zinc-500" : "text-gray-400")}>
-                  {s.part_number && <span className="mr-2">{s.part_number}</span>}
-                  {s.unit_cost ? `$${s.unit_cost}` : ""}
-                </span>
-              </button>
-            ))}
+            ) : filtered.map(s => {
+              const cat = getCategoryName(s.category_id);
+              const sub = getSubcategoryName(s.subcategory_id);
+              return (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => { onChange(s.id); setOpen(false); }}
+                  className={cn(
+                    "w-full text-left px-3 py-2 text-xs transition-colors border-b last:border-b-0",
+                    isDark ? "border-zinc-700/50" : "border-gray-100",
+                    value === s.id ? (isDark ? "bg-yellow-500/20" : "bg-yellow-50") :
+                    (isDark ? "hover:bg-zinc-700" : "hover:bg-gray-50")
+                  )}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <span className={cn("font-medium", value === s.id ? (isDark ? "text-yellow-300" : "text-yellow-700") : (isDark ? "text-zinc-200" : "text-gray-800"))}>
+                      {s.name}
+                    </span>
+                    {s.unit_cost > 0 && (
+                      <span className={cn("shrink-0 font-medium", isDark ? "text-zinc-400" : "text-gray-500")}>${s.unit_cost}</span>
+                    )}
+                  </div>
+                  {(cat || sub) && (
+                    <div className={cn("text-[10px] mt-0.5", isDark ? "text-zinc-500" : "text-gray-400")}>
+                      {[cat, sub].filter(Boolean).join(" › ")}
+                    </div>
+                  )}
+                  {s.specifications && (
+                    <div className={cn("text-[10px] italic mt-0.5", isDark ? "text-zinc-500" : "text-gray-400")}>
+                      {s.specifications}
+                    </div>
+                  )}
+                  {s.part_number && (
+                    <div className={cn("text-[10px] mt-0.5 font-mono", isDark ? "text-zinc-600" : "text-gray-400")}>
+                      OEM: {s.part_number}
+                    </div>
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
@@ -99,7 +145,7 @@ function SparePartSearch({ value, spareParts, onChange, isDark }) {
   );
 }
 
-function PurchaseOrderDialog({ open, onClose, order, companyId, suppliers, spareParts }) {
+function PurchaseOrderDialog({ open, onClose, order, companyId, suppliers, spareParts, categories, subcategories }) {
   const { theme } = useContext(ThemeContextValue);
   const isDark = theme === "dark";
   const queryClient = useQueryClient();
@@ -205,12 +251,14 @@ function PurchaseOrderDialog({ open, onClose, order, companyId, suppliers, spare
               {(form.items || []).map((item, idx) => (
                 <div key={idx} className={cn("grid grid-cols-12 gap-2 p-2 rounded-lg", isDark ? "bg-zinc-800/50" : "bg-gray-50")}>
                   <div className="col-span-5">
-                    <SparePartSearch
-                      value={item.spare_part_id}
-                      spareParts={spareParts}
-                      onChange={v => updateItem(idx, "spare_part_id", v)}
-                      isDark={isDark}
-                    />
+                   <SparePartSearch
+                     value={item.spare_part_id}
+                     spareParts={spareParts}
+                     categories={categories}
+                     subcategories={subcategories}
+                     onChange={v => updateItem(idx, "spare_part_id", v)}
+                     isDark={isDark}
+                   />
                   </div>
                   <div className="col-span-2">
                     <Input type="number" value={item.quantity} onChange={e => updateItem(idx, "quantity", e.target.value)} className={cn("h-8 text-xs", isDark ? "bg-zinc-800 border-zinc-700 text-white" : "")} placeholder="Cant." min="1" />
@@ -272,6 +320,8 @@ export default function PurchaseOrders() {
   const { data: companies = [] } = useQuery({ queryKey: ["companies"], queryFn: () => base44.entities.Company.list(), enabled: isSuperAdmin });
   const { data: suppliers = [] } = useQuery({ queryKey: ["suppliers", companyId], queryFn: () => companyId ? base44.entities.Supplier.filter({ company_id: companyId, is_active: true }) : base44.entities.Supplier.filter({ is_active: true }), enabled: !!user });
   const { data: spareParts = [] } = useQuery({ queryKey: ["spare-parts", companyId], queryFn: () => companyId ? base44.entities.SparePart.filter({ company_id: companyId, is_active: true }) : base44.entities.SparePart.filter({ is_active: true }), enabled: !!user });
+  const { data: sparePartCategories = [] } = useQuery({ queryKey: ["spare-part-categories"], queryFn: () => base44.entities.SparePartCategory.list() });
+  const { data: sparePartSubcategories = [] } = useQuery({ queryKey: ["spare-part-subcategories"], queryFn: () => base44.entities.SparePartSubcategory.list() });
   const { data: orders = [], isLoading } = useQuery({
     queryKey: ["purchase-orders", companyId],
     queryFn: () => companyId ? base44.entities.PurchaseOrder.filter({ company_id: companyId }, "-created_date") : base44.entities.PurchaseOrder.list("-created_date"),
@@ -402,7 +452,7 @@ export default function PurchaseOrders() {
         </div>
       )}
 
-      <PurchaseOrderDialog open={dialogOpen} onClose={() => { setDialogOpen(false); setEditing(null); }} order={editing} companyId={companyId || user?.company_id} suppliers={suppliers} spareParts={spareParts} />
+      <PurchaseOrderDialog open={dialogOpen} onClose={() => { setDialogOpen(false); setEditing(null); }} order={editing} companyId={companyId || user?.company_id} suppliers={suppliers} spareParts={spareParts} categories={sparePartCategories} subcategories={sparePartSubcategories} />
 
       <AlertDialog open={!!deleting} onOpenChange={() => setDeleting(null)}>
         <AlertDialogContent className={isDark ? "bg-zinc-900 border-zinc-700" : ""}>
