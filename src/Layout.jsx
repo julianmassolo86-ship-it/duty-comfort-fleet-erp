@@ -148,8 +148,10 @@ function LayoutContent({ children, currentPageName }) {
     { name: "Dashboard", icon: LayoutDashboard, page: "Dashboard" }]
   },
   {
-    section: "🚛 Flota",
+    section: "🚛 Administración",
     items: [
+    { name: "Empresas", icon: Building2, page: "Companies" },
+    { name: "Locaciones", icon: MapPin, page: "Locations" },
     { name: "Vehículos", icon: Car, page: "Vehicles" },
     { name: "Conductores", icon: Users, page: "Drivers" },
     { name: "Documentos", icon: FileText, page: "Documents" }]
@@ -194,8 +196,6 @@ function LayoutContent({ children, currentPageName }) {
   {
     section: "⚙️ Configuración",
     items: [
-    { name: "Empresas", icon: Building2, page: "Companies" },
-    { name: "Locaciones", icon: MapPin, page: "Locations" },
     { name: "Administradores", icon: UserCog, page: "CompanyAdmins" },
     {
       name: "Vehículos",
@@ -220,8 +220,9 @@ function LayoutContent({ children, currentPageName }) {
     { name: "Dashboard", icon: LayoutDashboard, page: "Dashboard" }]
   },
   {
-    section: "🚛 Flota",
+    section: "🚛 Administración",
     items: [
+    { name: "Locaciones", icon: MapPin, page: "Locations" },
     { name: "Vehículos", icon: Car, page: "Vehicles" },
     { name: "Conductores", icon: Users, page: "Drivers" },
     { name: "Documentos", icon: FileText, page: "Documents" }]
@@ -266,7 +267,6 @@ function LayoutContent({ children, currentPageName }) {
   {
     section: "⚙️ Configuración",
     items: [
-    { name: "Locaciones", icon: MapPin, page: "Locations" },
     {
       name: "Vehículos",
       icon: Cog,
