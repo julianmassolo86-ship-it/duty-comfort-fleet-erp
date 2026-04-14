@@ -370,9 +370,23 @@ export default function PurchaseOrders() {
           <p className={cn("text-sm mt-1", isDark ? "text-zinc-400" : "text-gray-500")}>{orders.length} orden{orders.length !== 1 ? "es" : ""} registrada{orders.length !== 1 ? "s" : ""}</p>
         </div>
         {canEdit && (
-          <Button onClick={() => { setEditing(null); setDialogOpen(true); }} className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold">
+          <Button
+            onClick={() => {
+              if (isSuperAdmin && !selectedCompanyId) return;
+              setEditing(null);
+              setDialogOpen(true);
+            }}
+            disabled={isSuperAdmin && !selectedCompanyId}
+            title={isSuperAdmin && !selectedCompanyId ? "Seleccioná una empresa primero" : ""}
+            className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold disabled:opacity-50"
+          >
             <Plus className="w-4 h-4 mr-2" /> Nueva OC
           </Button>
+        )}
+        {isSuperAdmin && !selectedCompanyId && (
+          <p className={cn("text-xs mt-1 sm:mt-0", isDark ? "text-amber-400" : "text-amber-600")}>
+            ⚠ Seleccioná una empresa para crear una OC
+          </p>
         )}
       </div>
 
