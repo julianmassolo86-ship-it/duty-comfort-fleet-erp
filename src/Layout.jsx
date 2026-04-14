@@ -208,7 +208,8 @@ function LayoutContent({ children, currentPageName }) {
       { name: "Marcas", page: "Manufacturers" },
       { name: "Modelos", page: "VehicleModels" },
       { name: "Estados", page: "VehicleStatuses" }]
-    }]
+    },
+    { name: "Cat. Repuestos", icon: Package, page: "SparePartCategories" }]
   }];
 
 
@@ -278,7 +279,8 @@ function LayoutContent({ children, currentPageName }) {
       { name: "Marcas", page: "Manufacturers" },
       { name: "Modelos", page: "VehicleModels" },
       { name: "Estados", page: "VehicleStatuses" }]
-    }]
+    },
+    { name: "Cat. Repuestos", icon: Package, page: "SparePartCategories" }]
   }];
 
 

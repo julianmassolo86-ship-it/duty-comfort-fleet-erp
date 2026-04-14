@@ -1,0 +1,30 @@
+{
+  "name": "SparePartSubcategory",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Nombre de la subcategor\u00eda (ej: L\u00e1mparas, Motor de arranque)"
+    },
+    "category_id": {
+      "type": "string",
+      "description": "ID de la categor\u00eda padre"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "URL de imagen representativa"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Notas adicionales"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "name",
+    "category_id"
+  ]
+}
