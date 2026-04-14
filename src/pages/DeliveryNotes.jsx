@@ -60,14 +60,18 @@ function DeliveryNoteDialog({ open, onClose, deliveryNote, companyId, purchaseOr
     setUploading(false);
   };
 
+  // Resolve company_id: use prop, or fall back to the linked PO's company_id
+  const resolvedCompanyId = companyId ||
+    purchaseOrders.find(p => p.id === form.purchase_order_id)?.company_id;
+
   const saveMutation = useMutation({
-    mutationFn: (data) => deliveryNote ? base44.entities.DeliveryNote.update(deliveryNote.id, data) : base44.entities.DeliveryNote.create({ ...data, company_id: companyId }),
+    mutationFn: (data) => deliveryNote ? base44.entities.DeliveryNote.update(deliveryNote.id, data) : base44.entities.DeliveryNote.create({ ...data, company_id: resolvedCompanyId }),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["delivery-notes"] }); onClose(); },
   });
 
   const confirmMutation = useMutation({
     mutationFn: async (data) => {
-      const created = await base44.entities.DeliveryNote.create({ ...data, company_id: companyId });
+      const created = await base44.entities.DeliveryNote.create({ ...data, company_id: resolvedCompanyId });
       return base44.functions.invoke("confirmDeliveryNote", { delivery_note_id: created.id });
     },
     onSuccess: () => {
