@@ -160,7 +160,6 @@ function LayoutContent({ children, currentPageName }) {
     { name: "Programas", icon: Wrench, page: "MaintenancePrograms" },
     { name: "Registros", icon: FileText, page: "Maintenance" },
     { name: "Correctivos", icon: Hammer, page: "Correctivos" },
-    { name: "Formularios", icon: ClipboardList, page: "MantenimientoForms" },
     { name: "Novedades", icon: AlertTriangle, page: "Novedades" },
     { name: "Dashboard A/C", icon: Wind, page: "ACDashboard" },
     { name: "Panel Inspector", icon: ClipboardCheck, page: "InspectorPanel" }]
@@ -234,7 +233,6 @@ function LayoutContent({ children, currentPageName }) {
     { name: "Programas", icon: Wrench, page: "MaintenancePrograms" },
     { name: "Registros", icon: FileText, page: "Maintenance" },
     { name: "Correctivos", icon: Hammer, page: "Correctivos" },
-    { name: "Formularios", icon: ClipboardList, page: "MantenimientoForms" },
     { name: "Novedades", icon: AlertTriangle, page: "Novedades" },
     { name: "Dashboard A/C", icon: Wind, page: "ACDashboard" },
     { name: "Panel Inspector", icon: ClipboardCheck, page: "InspectorPanel" }]
