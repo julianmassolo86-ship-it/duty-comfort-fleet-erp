@@ -160,10 +160,10 @@ function LayoutContent({ children, currentPageName }) {
   {
     section: "🔧 Mantenimiento",
     items: [
-    { name: "Programas", icon: Wrench, page: "MaintenancePrograms" },
-    { name: "Correctivos", icon: Hammer, page: "Correctivos" },
+    { name: "Panel Inspector", icon: ClipboardCheck, page: "InspectorPanel" },
     { name: "Novedades", icon: AlertTriangle, page: "Novedades" },
-    { name: "Panel Inspector", icon: ClipboardCheck, page: "InspectorPanel" }]
+    { name: "Correctivos", icon: Hammer, page: "Correctivos" },
+    { name: "Programas", icon: Wrench, page: "MaintenancePrograms" }]
   },
   {
     section: "⛽ Operaciones",
@@ -229,10 +229,10 @@ function LayoutContent({ children, currentPageName }) {
   {
     section: "🔧 Mantenimiento",
     items: [
-    { name: "Programas", icon: Wrench, page: "MaintenancePrograms" },
-    { name: "Correctivos", icon: Hammer, page: "Correctivos" },
+    { name: "Panel Inspector", icon: ClipboardCheck, page: "InspectorPanel" },
     { name: "Novedades", icon: AlertTriangle, page: "Novedades" },
-    { name: "Panel Inspector", icon: ClipboardCheck, page: "InspectorPanel" }]
+    { name: "Correctivos", icon: Hammer, page: "Correctivos" },
+    { name: "Programas", icon: Wrench, page: "MaintenancePrograms" }]
   },
   {
     section: "⛽ Operaciones",
