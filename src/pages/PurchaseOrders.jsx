@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Plus, Search, ShoppingCart, Trash2, Edit2, X, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, Search, ShoppingCart, Trash2, Edit2, X, ChevronDown, ChevronUp, CheckCircle } from "lucide-react";
 import { format } from "date-fns";
 
 const STATUS_COLORS = {
@@ -349,6 +349,11 @@ export default function PurchaseOrders() {
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["purchase-orders"] }); setDeleting(null); },
   });
 
+  const approveMutation = useMutation({
+    mutationFn: (id) => base44.entities.PurchaseOrder.update(id, { status: "aprobada" }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["purchase-orders"] }),
+  });
+
   const canEdit = user?.role === "admin" || user?.user_role === "super_admin" || user?.user_role === "almacen_admin";
 
   const filtered = orders.filter(o => {
@@ -430,6 +435,11 @@ export default function PurchaseOrders() {
                     </div>
                   </div>
                   <div className="flex items-center gap-1 ml-3">
+                    {canEdit && o.status === "borrador" && (
+                      <Button size="sm" variant="outline" onClick={() => approveMutation.mutate(o.id)} disabled={approveMutation.isPending} className={cn("h-7 text-xs gap-1", isDark ? "border-blue-500/40 text-blue-400 hover:bg-blue-500/10" : "border-blue-500/40 text-blue-600 hover:bg-blue-50")}>
+                        <CheckCircle className="w-3.5 h-3.5" /> Aprobar
+                      </Button>
+                    )}
                     {canEdit && <Button size="icon" variant="ghost" onClick={() => { setEditing(o); setDialogOpen(true); }} className={cn("w-8 h-8", isDark ? "text-zinc-400 hover:text-white hover:bg-zinc-800" : "text-gray-500 hover:text-gray-900")}><Edit2 className="w-4 h-4" /></Button>}
                     {canEdit && <Button size="icon" variant="ghost" onClick={() => setDeleting(o)} className="w-8 h-8 text-red-500 hover:bg-red-500/10"><Trash2 className="w-4 h-4" /></Button>}
                     <Button size="icon" variant="ghost" onClick={() => setExpanded(isExpanded ? null : o.id)} className={cn("w-8 h-8", isDark ? "text-zinc-400 hover:text-white" : "text-gray-500")}>
