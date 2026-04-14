@@ -181,7 +181,23 @@ function PurchaseOrderDialog({ open, onClose, order, companyId, suppliers, spare
   });
 
   const saveMutation = useMutation({
-    mutationFn: (data) => order ? base44.entities.PurchaseOrder.update(order.id, data) : base44.entities.PurchaseOrder.create({ ...data, company_id: companyId }),
+    mutationFn: async (data) => {
+      if (order) {
+        return base44.entities.PurchaseOrder.update(order.id, data);
+      }
+      // Generate correlative order_number
+      const cid = companyId;
+      const counters = await base44.entities.ReportCounter.filter({ report_type: "purchase_order", company_id: cid });
+      let nextNumber = 1;
+      if (counters.length > 0) {
+        nextNumber = (counters[0].last_number || 0) + 1;
+        await base44.entities.ReportCounter.update(counters[0].id, { last_number: nextNumber });
+      } else {
+        await base44.entities.ReportCounter.create({ report_type: "purchase_order", company_id: cid, last_number: 1 });
+      }
+      const order_number = `OC-${String(nextNumber).padStart(6, "0")}`;
+      return base44.entities.PurchaseOrder.create({ ...data, company_id: cid, order_number });
+    },
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["purchase-orders"] }); onClose(); },
   });
 

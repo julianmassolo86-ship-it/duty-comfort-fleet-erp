@@ -11,7 +11,8 @@
         "pre_trip",
         "post_trip",
         "fuel_up",
-        "corrective"
+        "corrective",
+        "purchase_order"
       ],
       "description": "Tipo de informe"
     },
