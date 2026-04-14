@@ -22,6 +22,7 @@ import TiresStock from './pages/TiresStock';
 import TireAlerts from './pages/TireAlerts';
 import TireRotations from './pages/TireRotations';
 import SparePartCategories from './pages/SparePartCategories';
+import Correctivos from './pages/Correctivos';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
 const { Pages, Layout, mainPage } = pagesConfig;
@@ -90,6 +91,7 @@ const AuthenticatedApp = () => {
       <Route path="/TireAlerts" element={<LayoutWrapper currentPageName="TireAlerts"><TireAlerts /></LayoutWrapper>} />
       <Route path="/TireRotations" element={<LayoutWrapper currentPageName="TireRotations"><TireRotations /></LayoutWrapper>} />
       <Route path="/SparePartCategories" element={<LayoutWrapper currentPageName="SparePartCategories"><SparePartCategories /></LayoutWrapper>} />
+      <Route path="/Correctivos" element={<LayoutWrapper currentPageName="Correctivos"><Correctivos /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
