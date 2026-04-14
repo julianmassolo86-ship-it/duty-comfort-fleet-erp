@@ -7,6 +7,7 @@ import PageHeader from "@/components/common/PageHeader";
 import { Button } from "@/components/ui/button";
 import { LayoutDashboard, List } from "lucide-react";
 import NovedadDialog from "@/components/novedades/NovedadDialog";
+import NuevaNovedadDialog from "@/components/novedades/NuevaNovedadDialog";
 import EditNovedadDialog from "@/components/novedades/EditNovedadDialog";
 import CorrectivoDialog from "@/components/maintenance/CorrectivoDialog";
 import NovedadesDashboard from "@/components/novedades/NovedadesDashboard";
@@ -19,6 +20,7 @@ export default function Novedades() {
   const [currentUser, setCurrentUser] = useState(null);
   const [selectedNovedad, setSelectedNovedad] = useState(null);
   const [showDialog, setShowDialog] = useState(false);
+  const [showNuevaNovedadDialog, setShowNuevaNovedadDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showCorrectivoDialog, setShowCorrectivoDialog] = useState(false);
   const [correctivoNovedad, setCorretivoNovedad] = useState(null);
@@ -117,7 +119,7 @@ export default function Novedades() {
                 className={cn(theme === "dark" ? "border-zinc-700 text-zinc-300 hover:bg-zinc-800" : "")}>
                 + Correctivo
               </Button>
-              <Button onClick={() => { setSelectedNovedad(null); setShowDialog(true); }}>
+              <Button onClick={() => setShowNuevaNovedadDialog(true)}>
                 + Nueva Novedad
               </Button>
             </div>
@@ -155,6 +157,15 @@ export default function Novedades() {
         onOpenChange={(open) => { setShowDialog(open); if (!open) setSelectedNovedad(null); }}
         novedad={selectedNovedad}
         onSave={handleSave}
+      />
+
+      <NuevaNovedadDialog
+        open={showNuevaNovedadDialog}
+        onOpenChange={setShowNuevaNovedadDialog}
+        onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ["novedades"] });
+          setShowNuevaNovedadDialog(false);
+        }}
       />
 
       <EditNovedadDialog
