@@ -262,7 +262,7 @@ export default function CorrectivosHistorial({ correctivos, vehicles, locations,
                       {c.provider && <span className={cn("text-xs", isDark ? "text-zinc-400" : "text-gray-500")}>{c.provider}</span>}
                       {c.cost > 0 && <span className={cn("text-xs font-medium text-green-500")}>${c.cost.toLocaleString()}</span>}
                       {c.spare_parts_used?.length > 0 && (
-                        <span className={cn("flex items-center gap-1 text-xs", isDark ? "text-orange-400" : "text-orange-600")}>
+                        <span className={cn("flex items-center gap-1 text-xs font-medium", isDark ? "text-orange-400" : "text-orange-600")}>
                           <Package className="w-3 h-3" />{c.spare_parts_used.length} repuesto{c.spare_parts_used.length !== 1 ? "s" : ""}
                         </span>
                       )}
@@ -275,6 +275,32 @@ export default function CorrectivosHistorial({ correctivos, vehicles, locations,
                           : "-"}
                       </span>
                     </div>
+
+                    {/* Detalle de repuestos */}
+                    {c.spare_parts_used?.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mt-2">
+                        {c.spare_parts_used.map((part, idx) => (
+                          <span
+                            key={idx}
+                            className={cn(
+                              "inline-flex items-center gap-1.5 text-xs px-2 py-0.5 rounded-full border",
+                              isDark
+                                ? "bg-orange-500/10 border-orange-500/20 text-orange-300"
+                                : "bg-orange-50 border-orange-200 text-orange-700"
+                            )}
+                          >
+                            <Package className="w-2.5 h-2.5" />
+                            {part.spare_part_name}
+                            {part.quantity > 1 && <span className="font-medium">×{part.quantity}</span>}
+                            {part.unit_cost > 0 && (
+                              <span className={cn("font-medium", isDark ? "text-green-400" : "text-green-600")}>
+                                ${(part.unit_cost * part.quantity).toLocaleString()}
+                              </span>
+                            )}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
