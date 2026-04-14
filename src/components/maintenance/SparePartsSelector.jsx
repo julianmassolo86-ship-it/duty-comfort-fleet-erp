@@ -8,6 +8,7 @@ import { Plus, Trash2, Package, Search, ChevronDown } from "lucide-react";
 
 export default function SparePartsSelector({ companyId, value = [], onChange, isDark }) {
   const [spareParts, setSpareParts] = useState([]);
+  const [lastPrices, setLastPrices] = useState({}); // { spare_part_id: unit_price }
   const [loading, setLoading] = useState(false);
   const [qty, setQty] = useState("1");
   const [search, setSearch] = useState("");
@@ -17,11 +18,30 @@ export default function SparePartsSelector({ companyId, value = [], onChange, is
 
   useEffect(() => {
     setLoading(true);
-    base44.entities.SparePart.list()
-      .then(all => {
-        const filtered = all.filter(p => p.is_active !== false)
+    Promise.all([
+      base44.entities.SparePart.list(),
+      base44.entities.PurchaseOrder.list("-date"),
+    ])
+      .then(([allParts, allOrders]) => {
+        const filtered = allParts
+          .filter(p => p.is_active !== false)
           .filter(p => !companyId || !p.company_id || p.company_id === companyId);
         setSpareParts(filtered);
+
+        // Construir mapa de último precio por spare_part_id
+        const prices = {};
+        // Órdenes ya vienen ordenadas por fecha desc, la primera que tenga el repuesto es la más reciente
+        const ordersFiltered = companyId
+          ? allOrders.filter(o => o.company_id === companyId)
+          : allOrders;
+        for (const order of ordersFiltered) {
+          for (const item of (order.items || [])) {
+            if (item.spare_part_id && item.unit_price > 0 && !prices[item.spare_part_id]) {
+              prices[item.spare_part_id] = item.unit_price;
+            }
+          }
+        }
+        setLastPrices(prices);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -53,6 +73,8 @@ export default function SparePartsSelector({ companyId, value = [], onChange, is
   const handleAdd = () => {
     if (!selected) return;
     const quantity = parseFloat(qty) || 1;
+    // Prioridad: último precio de OC > unit_cost del repuesto
+    const unit_cost = lastPrices[selected.id] ?? selected.unit_cost ?? 0;
     if (value.find(v => v.spare_part_id === selected.id)) {
       onChange(value.map(v => v.spare_part_id === selected.id ? { ...v, quantity: v.quantity + quantity } : v));
     } else {
@@ -61,7 +83,7 @@ export default function SparePartsSelector({ companyId, value = [], onChange, is
         spare_part_name: selected.name,
         part_number: selected.part_number || "",
         quantity,
-        unit_cost: selected.unit_cost || 0,
+        unit_cost,
       }]);
     }
     setSelected(null);
@@ -128,11 +150,12 @@ export default function SparePartsSelector({ companyId, value = [], onChange, is
                     >
                       <p className={cn("text-sm font-medium", isDark ? "text-white" : "text-gray-900")}>{p.name}</p>
                       <p className={cn("text-xs mt-0.5", isDark ? "text-zinc-400" : "text-gray-400")}>
-                        {p.part_number ? `#${p.part_number}` : "Sin N° pieza"} · Stock: {p.stock_quantity ?? 0} {p.unit_of_measure}
-                        {p.unit_cost ? ` · $${p.unit_cost.toLocaleString()}` : ""}
-                        {p.description ? ` · ${p.description}` : ""}
-                        {p.specifications ? ` · ${p.specifications}` : ""}
-                      </p>
+                          {p.part_number ? `#${p.part_number}` : "Sin N° pieza"} · Stock: {p.stock_quantity ?? 0} {p.unit_of_measure}
+                          {lastPrices[p.id]
+                            ? ` · $${lastPrices[p.id].toLocaleString()} (última OC)`
+                            : p.unit_cost ? ` · $${p.unit_cost.toLocaleString()}` : ""}
+                          {p.description ? ` · ${p.description}` : ""}
+                        </p>
                     </div>
                   ))
                 )}
