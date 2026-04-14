@@ -17,6 +17,8 @@ export default function SparePartDialog({ open, onClose, sparePart, companyId })
   const emptyForm = {
     name: "",
     description: "",
+    category_id: "",
+    subcategory_id: "",
     part_number: "",
     alternative_part_number: "",
     manufacturer: "",
@@ -35,6 +37,21 @@ export default function SparePartDialog({ open, onClose, sparePart, companyId })
 
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+
+  const { data: sparePartCategories = [] } = useQuery({
+    queryKey: ["spare-part-categories"],
+    queryFn: () => base44.entities.SparePartCategory.list(),
+  });
+
+  const { data: sparePartSubcategories = [] } = useQuery({
+    queryKey: ["spare-part-subcategories"],
+    queryFn: () => base44.entities.SparePartSubcategory.list(),
+  });
+
+  const filteredSubcategories = useMemo(() => {
+    if (!form.category_id) return [];
+    return sparePartSubcategories.filter(s => s.category_id === form.category_id && s.is_active !== false);
+  }, [sparePartSubcategories, form.category_id]);
 
   const { data: manufacturers = [] } = useQuery({
     queryKey: ["manufacturers"],
@@ -88,6 +105,44 @@ export default function SparePartDialog({ open, onClose, sparePart, companyId })
         </DialogHeader>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-2">
+
+          {/* Categoría */}
+          <div className="space-y-1">
+            <Label className={labelClass}>Categoría</Label>
+            <Select
+              value={form.category_id || ""}
+              onValueChange={(v) => { set("category_id", v); set("subcategory_id", ""); }}
+            >
+              <SelectTrigger className={cn("h-9", isDark ? "bg-zinc-800 border-zinc-700 text-white" : "")}>
+                <SelectValue placeholder="Seleccionar categoría" />
+              </SelectTrigger>
+              <SelectContent className={isDark ? "bg-zinc-800 border-zinc-700" : ""}>
+                {sparePartCategories.filter(c => c.is_active !== false).sort((a, b) => a.name.localeCompare(b.name)).map((c) => (
+                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Subcategoría */}
+          <div className="space-y-1">
+            <Label className={labelClass}>Subcategoría</Label>
+            <Select
+              value={form.subcategory_id || ""}
+              onValueChange={(v) => set("subcategory_id", v)}
+              disabled={!form.category_id || filteredSubcategories.length === 0}
+            >
+              <SelectTrigger className={cn("h-9", isDark ? "bg-zinc-800 border-zinc-700 text-white" : "")}>
+                <SelectValue placeholder={!form.category_id ? "Primero seleccioná una categoría" : filteredSubcategories.length === 0 ? "Sin subcategorías" : "Seleccionar subcategoría"} />
+              </SelectTrigger>
+              <SelectContent className={isDark ? "bg-zinc-800 border-zinc-700" : ""}>
+                {filteredSubcategories.sort((a, b) => a.name.localeCompare(b.name)).map((s) => (
+                  <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           {/* Nombre */}
           <div className="md:col-span-2 space-y-1">
             <Label className={labelClass}>Nombre *</Label>

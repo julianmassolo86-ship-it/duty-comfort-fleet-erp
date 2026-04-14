@@ -10,6 +10,14 @@
       "type": "string",
       "description": "Descripci\u00f3n detallada del repuesto"
     },
+    "category_id": {
+      "type": "string",
+      "description": "ID de la categor\u00eda del repuesto"
+    },
+    "subcategory_id": {
+      "type": "string",
+      "description": "ID de la subcategor\u00eda del repuesto"
+    },
     "part_number": {
       "type": "string",
       "description": "N\u00famero de pieza OEM"
@@ -60,11 +68,11 @@
     },
     "compatible_manufacturer_id": {
       "type": "string",
-      "description": "ID del fabricante de veh\u00edculo compatible (referencia a Manufacturer)"
+      "description": "ID del fabricante de veh\u00edculo compatible"
     },
     "compatible_vehicle_model_id": {
       "type": "string",
-      "description": "ID del modelo de veh\u00edculo compatible (referencia a VehicleModel)"
+      "description": "ID del modelo de veh\u00edculo compatible"
     },
     "company_id": {
       "type": "string",
