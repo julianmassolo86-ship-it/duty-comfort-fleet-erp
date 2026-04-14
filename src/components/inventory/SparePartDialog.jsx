@@ -149,24 +149,6 @@ export default function SparePartDialog({ open, onClose, sparePart, companyId })
             <Input className={inputClass} value={form.name} onChange={(e) => set("name", e.target.value)} placeholder="Nombre del repuesto" />
           </div>
 
-          {/* Descripción */}
-          <div className="md:col-span-2 space-y-1">
-            <Label className={labelClass}>Descripción</Label>
-            <Textarea className={cn(isDark ? "bg-zinc-800 border-zinc-700 text-white" : "")} value={form.description} onChange={(e) => set("description", e.target.value)} rows={2} placeholder="Descripción del repuesto" />
-          </div>
-
-          {/* Fabricante */}
-          <div className="space-y-1">
-            <Label className={labelClass}>Fabricante</Label>
-            <Input className={inputClass} value={form.manufacturer} onChange={(e) => set("manufacturer", e.target.value)} placeholder="ej: Bosch, Mann" />
-          </div>
-
-          {/* Proveedor */}
-          <div className="space-y-1">
-            <Label className={labelClass}>Proveedor</Label>
-            <Input className={inputClass} value={form.supplier} onChange={(e) => set("supplier", e.target.value)} placeholder="Nombre del proveedor" />
-          </div>
-
           {/* N° Pieza */}
           <div className="space-y-1">
             <Label className={labelClass}>N° Pieza OEM</Label>
@@ -188,24 +170,23 @@ export default function SparePartDialog({ open, onClose, sparePart, companyId })
           {/* Compatibilidad de Vehículo */}
           <div className="md:col-span-2">
             <p className={cn("text-xs font-semibold uppercase tracking-wider mb-2", isDark ? "text-zinc-500" : "text-gray-400")}>
-              Vehículo Compatible
+              Vehículo Compatible (opcional)
             </p>
           </div>
 
           <div className="space-y-1">
-            <Label className={labelClass}>Fabricante Compatible</Label>
+            <Label className={labelClass}>Marca</Label>
             <Select
               value={form.compatible_manufacturer_id || ""}
               onValueChange={(v) => {
                 set("compatible_manufacturer_id", v);
-                set("compatible_vehicle_model_id", ""); // reset model
+                set("compatible_vehicle_model_id", "");
               }}
             >
               <SelectTrigger className={cn("h-9", isDark ? "bg-zinc-800 border-zinc-700 text-white" : "")}>
-                <SelectValue placeholder="Cualquier fabricante" />
+                <SelectValue placeholder="Apto para todo" />
               </SelectTrigger>
               <SelectContent className={isDark ? "bg-zinc-800 border-zinc-700" : ""}>
-                <SelectItem value={null}>Cualquier fabricante</SelectItem>
                 {manufacturers.sort((a, b) => a.name.localeCompare(b.name)).map((m) => (
                   <SelectItem key={m.id} value={m.id}>
                     <div className="flex items-center gap-2">
@@ -219,16 +200,16 @@ export default function SparePartDialog({ open, onClose, sparePart, companyId })
           </div>
 
           <div className="space-y-1">
-            <Label className={labelClass}>Modelo Compatible</Label>
+            <Label className={labelClass}>Modelo</Label>
             <Select
               value={form.compatible_vehicle_model_id || ""}
               onValueChange={(v) => set("compatible_vehicle_model_id", v)}
+              disabled={!form.compatible_manufacturer_id}
             >
               <SelectTrigger className={cn("h-9", isDark ? "bg-zinc-800 border-zinc-700 text-white" : "")}>
-                <SelectValue placeholder="Cualquier modelo" />
+                <SelectValue placeholder={!form.compatible_manufacturer_id ? "Seleccioná una marca" : "Todos los modelos"} />
               </SelectTrigger>
               <SelectContent className={isDark ? "bg-zinc-800 border-zinc-700" : ""}>
-                <SelectItem value={null}>Cualquier modelo</SelectItem>
                 {filteredModels.map((m) => (
                   <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>
                 ))}
@@ -236,46 +217,19 @@ export default function SparePartDialog({ open, onClose, sparePart, companyId })
             </Select>
           </div>
 
-          {/* Unidad de Medida + Cantidad por unidad */}
+          {/* Unidad de Medida */}
           <div className="space-y-1">
             <Label className={labelClass}>Unidad de Medida *</Label>
-            <div className="flex gap-2">
-              <Select value={form.unit_of_measure} onValueChange={(v) => set("unit_of_measure", v)}>
-                <SelectTrigger className={cn("h-9 flex-1", isDark ? "bg-zinc-800 border-zinc-700 text-white" : "")}>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className={isDark ? "bg-zinc-800 border-zinc-700" : ""}>
-                  <SelectItem value="UNID">UNID</SelectItem>
-                  <SelectItem value="LITROS">LITROS</SelectItem>
-                  <SelectItem value="METROS">METROS</SelectItem>
-                </SelectContent>
-              </Select>
-              <Input
-                className={cn("h-9 w-24", isDark ? "bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500" : "")}
-                type="number"
-                value={form.quantity_per_unit}
-                onChange={(e) => set("quantity_per_unit", parseFloat(e.target.value) || "")}
-                placeholder="Cant."
-              />
-            </div>
-          </div>
-
-          {/* Costo Unitario */}
-          <div className="space-y-1">
-            <Label className={labelClass}>Costo Unitario</Label>
-            <Input className={inputClass} type="number" value={form.unit_cost} onChange={(e) => set("unit_cost", parseFloat(e.target.value) || "")} placeholder="0.00" />
-          </div>
-
-          {/* Stock Actual */}
-          <div className="space-y-1">
-            <Label className={labelClass}>Stock Actual</Label>
-            <Input className={inputClass} type="number" value={form.stock_quantity} onChange={(e) => set("stock_quantity", parseFloat(e.target.value) || 0)} placeholder="0" />
-          </div>
-
-          {/* Stock Mínimo */}
-          <div className="space-y-1">
-            <Label className={labelClass}>Stock Mínimo (Alerta)</Label>
-            <Input className={inputClass} type="number" value={form.minimum_stock} onChange={(e) => set("minimum_stock", parseFloat(e.target.value) || 0)} placeholder="0" />
+            <Select value={form.unit_of_measure} onValueChange={(v) => set("unit_of_measure", v)}>
+              <SelectTrigger className={cn("h-9", isDark ? "bg-zinc-800 border-zinc-700 text-white" : "")}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className={isDark ? "bg-zinc-800 border-zinc-700" : ""}>
+                <SelectItem value="UNID">UNID</SelectItem>
+                <SelectItem value="LITROS">LITROS</SelectItem>
+                <SelectItem value="METROS">METROS</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Notas */}
