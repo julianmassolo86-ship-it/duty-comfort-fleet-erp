@@ -9,6 +9,7 @@ import { LayoutDashboard, List } from "lucide-react";
 import CorrectivoDialog from "@/components/maintenance/CorrectivoDialog";
 import CorrectivosDashboard from "@/components/correctivos/CorrectivosDashboard";
 import CorrectivosHistorial from "@/components/correctivos/CorrectivosHistorial";
+import EditCorrectivoSparePartsDialog from "@/components/correctivos/EditCorrectivoSparePartsDialog";
 
 export default function Correctivos() {
   const { theme } = useTheme();
@@ -125,9 +126,16 @@ export default function Correctivos() {
       </div>
 
       <CorrectivoDialog
-        open={showDialog}
+        open={showDialog && !selectedCorrectivo}
         onOpenChange={(open) => { setShowDialog(open); if (!open) setSelectedCorrectivo(null); }}
         initialNovedad={null}
+        onSuccess={handleSuccess}
+      />
+
+      <EditCorrectivoSparePartsDialog
+        open={showDialog && !!selectedCorrectivo}
+        onOpenChange={(open) => { setShowDialog(open); if (!open) setSelectedCorrectivo(null); }}
+        correctivo={selectedCorrectivo}
         onSuccess={handleSuccess}
       />
     </div>
