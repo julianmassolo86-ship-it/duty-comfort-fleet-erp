@@ -9,27 +9,18 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Plus, Trash2, Edit2, ChevronRight, ChevronDown, Upload, Tag, FolderOpen, Loader2 } from "lucide-react";
+import { Plus, Trash2, Edit2, ChevronRight, ChevronDown, Tag, FolderOpen } from "lucide-react";
 
 // ── Dialog genérico para categoría o subcategoría ──────────────────────────────
 function CategoryDialog({ open, onClose, item, parentId, isDark }) {
   const queryClient = useQueryClient();
   const isSubcat = !!parentId;
-  const emptyForm = { name: "", image_url: "", notes: "", is_active: true };
+  const emptyForm = { name: "", notes: "", is_active: true };
   const [form, setForm] = useState(item || emptyForm);
-  const [uploading, setUploading] = useState(false);
 
   React.useEffect(() => { setForm(item || emptyForm); }, [item, open]);
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
-
-  const handleImageUpload = async (file) => {
-    if (!file) return;
-    setUploading(true);
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
-    set("image_url", file_url);
-    setUploading(false);
-  };
 
   const Entity = isSubcat ? base44.entities.SparePartSubcategory : base44.entities.SparePartCategory;
   const qKey = isSubcat ? "spare-part-subcategories" : "spare-part-categories";
@@ -60,21 +51,6 @@ function CategoryDialog({ open, onClose, item, parentId, isDark }) {
             <Input value={form.name} onChange={e => set("name", e.target.value)} className={inputClass} placeholder={isSubcat ? "ej: Lámparas, Motor de arranque" : "ej: Sistema Eléctrico, Motor"} />
           </div>
 
-          {/* Imagen */}
-          <div>
-            <Label className={isDark ? "text-zinc-300" : ""}>Imagen</Label>
-            <div className="mt-1 flex gap-2 items-start">
-              {form.image_url && (
-                <img src={form.image_url} alt="preview" className="w-16 h-16 object-cover rounded-lg border" style={{ borderColor: isDark ? "#3f3f46" : "#e5e7eb" }} />
-              )}
-              <label className={cn("flex items-center gap-2 cursor-pointer px-3 py-2 rounded-lg border text-xs transition-colors", isDark ? "border-zinc-600 text-zinc-300 hover:bg-zinc-800" : "border-gray-300 text-gray-600 hover:bg-gray-50")}>
-                <input type="file" accept="image/*" className="hidden" onChange={e => handleImageUpload(e.target.files[0])} disabled={uploading} />
-                {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
-                {uploading ? "Subiendo..." : "Subir imagen"}
-              </label>
-            </div>
-          </div>
-
           <div>
             <Label className={isDark ? "text-zinc-300" : ""}>Notas</Label>
             <Textarea value={form.notes} onChange={e => set("notes", e.target.value)} className={cn("mt-1", isDark ? "bg-zinc-800 border-zinc-700 text-white" : "")} rows={2} />
@@ -95,10 +71,7 @@ function CategoryDialog({ open, onClose, item, parentId, isDark }) {
 function SubcategoryRow({ sub, isDark, onEdit, onDelete }) {
   return (
     <div className={cn("flex items-center gap-3 px-4 py-2.5 rounded-lg ml-8 group", isDark ? "hover:bg-zinc-800/50" : "hover:bg-gray-50")}>
-      {sub.image_url
-        ? <img src={sub.image_url} alt={sub.name} className="w-7 h-7 rounded object-cover shrink-0" />
-        : <Tag className={cn("w-4 h-4 shrink-0", isDark ? "text-zinc-600" : "text-gray-300")} />
-      }
+      <Tag className={cn("w-4 h-4 shrink-0", isDark ? "text-zinc-600" : "text-gray-300")} />
       <span className={cn("flex-1 text-sm", isDark ? "text-zinc-300" : "text-gray-700")}>{sub.name}</span>
       <div className="opacity-0 group-hover:opacity-100 flex gap-1 transition-opacity">
         <Button size="icon" variant="ghost" onClick={() => onEdit(sub)} className={cn("w-7 h-7", isDark ? "text-zinc-400 hover:text-white hover:bg-zinc-700" : "text-gray-400 hover:text-gray-700")}>
@@ -124,12 +97,9 @@ function CategoryRow({ cat, subcategories, isDark, onEditCat, onDeleteCat, onAdd
         <button type="button" className={cn("w-5 h-5 flex items-center justify-center shrink-0", isDark ? "text-zinc-500" : "text-gray-400")}>
           {expanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
         </button>
-        {cat.image_url
-          ? <img src={cat.image_url} alt={cat.name} className="w-9 h-9 rounded-lg object-cover shrink-0" />
-          : <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center shrink-0", isDark ? "bg-zinc-800" : "bg-gray-100")}>
-              <FolderOpen className={cn("w-5 h-5", isDark ? "text-zinc-500" : "text-gray-400")} />
-            </div>
-        }
+        <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center shrink-0", isDark ? "bg-zinc-800" : "bg-gray-100")}>
+          <FolderOpen className={cn("w-5 h-5", isDark ? "text-zinc-500" : "text-gray-400")} />
+        </div>
         <div className="flex-1 min-w-0">
           <p className={cn("font-semibold text-sm", isDark ? "text-white" : "text-gray-900")}>{cat.name}</p>
           <p className={cn("text-xs", isDark ? "text-zinc-500" : "text-gray-400")}>{subs.length} subcategoría{subs.length !== 1 ? "s" : ""}</p>
