@@ -55,7 +55,7 @@ export default function CorrectivoDialog({ open, onOpenChange, initialNovedad, o
     setNovedad(nov);
     setSelectedNovedadId(nov.id);
     if (nov.vehicle_id) {
-      const v = await base44.entities.Vehicle.filter({ id: nov.vehicle_id });
+      const v = await base44.entities.Vehicle.filter({ id: nov.vehicle_id }, undefined, 1);
       if (v.length > 0) {
         setVehicle(v[0]);
         setVehicleStatus(v[0].status || "");
@@ -69,11 +69,8 @@ export default function CorrectivoDialog({ open, onOpenChange, initialNovedad, o
     setSearching(true);
     try {
       if (searchMode === "novedad") {
-        const results = await base44.entities.Novedad.list();
-        const found = results.find(n =>
-          n.report_number?.toLowerCase() === searchTerm.toLowerCase().trim() ||
-          n.report_number?.toLowerCase().includes(searchTerm.toLowerCase().trim())
-        );
+        const results = await base44.entities.Novedad.filter({ report_number: searchTerm.trim() });
+        const found = results.length > 0 ? results[0] : null;
         if (!found) { setSearchError("No se encontró ninguna novedad con ese número."); setSearching(false); return; }
         if (found.estado === "resuelto" || found.estado === "cerrado") {
           setSearchError(`Esta novedad ya está ${found.estado === "resuelto" ? "resuelta" : "cerrada"}.`);
@@ -82,11 +79,8 @@ export default function CorrectivoDialog({ open, onOpenChange, initialNovedad, o
         await loadNovedadWithVehicle(found);
         setVehicleNovedades([]);
       } else {
-        const vehicles = await base44.entities.Vehicle.list();
-        const v = vehicles.find(veh =>
-          veh.internal_number?.toLowerCase() === searchTerm.toLowerCase().trim() ||
-          veh.internal_number?.toLowerCase().includes(searchTerm.toLowerCase().trim())
-        );
+        const vehicles = await base44.entities.Vehicle.filter({ internal_number: searchTerm.trim() });
+        const v = vehicles.length > 0 ? vehicles[0] : null;
         if (!v) { setSearchError("No se encontró ningún vehículo con ese número interno."); setSearching(false); return; }
         setVehicle(v);
         setForm(prev => ({ ...prev, km: v.mileage || "", horas: v.hours || "" }));
