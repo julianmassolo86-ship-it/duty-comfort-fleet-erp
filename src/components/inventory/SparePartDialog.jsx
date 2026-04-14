@@ -26,7 +26,7 @@ export default function SparePartDialog({ open, onClose, sparePart, companyId })
     unit_of_measure: "UNID",
     stock_quantity: 0,
     minimum_stock: 0,
-    unit_cost: "",
+    unit_cost: null,
     specifications: "",
     notes: "",
     is_active: true,
@@ -80,10 +80,13 @@ export default function SparePartDialog({ open, onClose, sparePart, companyId })
 
   const handleSave = async () => {
     setSaving(true);
+    const data = { ...form };
+    if (data.unit_cost === "" || data.unit_cost === null || isNaN(data.unit_cost)) delete data.unit_cost;
+    if (data.quantity_per_unit === "" || data.quantity_per_unit === null || isNaN(data.quantity_per_unit)) delete data.quantity_per_unit;
     if (sparePart?.id) {
-      await base44.entities.SparePart.update(sparePart.id, form);
+      await base44.entities.SparePart.update(sparePart.id, data);
     } else {
-      await base44.entities.SparePart.create(form);
+      await base44.entities.SparePart.create(data);
     }
     setSaving(false);
     onClose(true);
