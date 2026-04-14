@@ -152,6 +152,7 @@ function LayoutContent({ children, currentPageName }) {
     items: [
     { name: "Empresas", icon: Building2, page: "Companies" },
     { name: "Locaciones", icon: MapPin, page: "Locations" },
+    { name: "Administradores", icon: UserCog, page: "CompanyAdmins" },
     { name: "Vehículos", icon: Car, page: "Vehicles" },
     { name: "Conductores", icon: Users, page: "Drivers" },
     { name: "Documentos", icon: FileText, page: "Documents" }]
@@ -196,7 +197,6 @@ function LayoutContent({ children, currentPageName }) {
   {
     section: "⚙️ Configuración",
     items: [
-    { name: "Administradores", icon: UserCog, page: "CompanyAdmins" },
     {
       name: "Vehículos",
       icon: Cog,
