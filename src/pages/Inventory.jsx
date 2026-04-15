@@ -40,8 +40,8 @@ export default function Inventory() {
     enabled: !!user,
   });
 
-  // Garantizar que spareParts siempre sea un array válido
-  const spareParts = Array.isArray(sparePartsData) ? sparePartsData.filter(p => p?.id) : [];
+  // Garantizar que spareParts siempre sea un array válido de items con ID
+  const spareParts = (Array.isArray(sparePartsData) ? sparePartsData : []).filter(p => p && p.id);
 
   const handleDialogClose = (saved) => {
     setDialogOpen(false);
@@ -67,26 +67,28 @@ export default function Inventory() {
   ).length;
   const outOfStockCount = spareParts.filter((p) => p.stock_quantity === 0).length;
 
-  // Filtrar repuestos
-  const filtered = spareParts.filter((p) => {
-    const matchSearch =
-      !search ||
-      p.name?.toLowerCase().includes(search.toLowerCase()) ||
-      p.part_number?.toLowerCase().includes(search.toLowerCase()) ||
-      p.alternative_part_number?.toLowerCase().includes(search.toLowerCase()) ||
-      p.manufacturer?.toLowerCase().includes(search.toLowerCase());
+  // Filtrar repuestos (garantizando items válidos)
+  const filtered = spareParts
+    .filter(p => p && p.id) // Double-check de validez
+    .filter((p) => {
+      const matchSearch =
+        !search ||
+        p.name?.toLowerCase().includes(search.toLowerCase()) ||
+        p.part_number?.toLowerCase().includes(search.toLowerCase()) ||
+        p.alternative_part_number?.toLowerCase().includes(search.toLowerCase()) ||
+        p.manufacturer?.toLowerCase().includes(search.toLowerCase());
 
-    const isLow = p.stock_quantity <= p.minimum_stock && p.minimum_stock > 0;
-    const isOut = p.stock_quantity === 0;
+      const isLow = p.stock_quantity <= p.minimum_stock && p.minimum_stock > 0;
+      const isOut = p.stock_quantity === 0;
 
-    const matchStatus =
-      filterStatus === "all" ||
-      (filterStatus === "low" && isLow && !isOut) ||
-      (filterStatus === "out" && isOut) ||
-      (filterStatus === "ok" && !isLow && !isOut);
+      const matchStatus =
+        filterStatus === "all" ||
+        (filterStatus === "low" && isLow && !isOut) ||
+        (filterStatus === "out" && isOut) ||
+        (filterStatus === "ok" && !isLow && !isOut);
 
-    return matchSearch && matchStatus;
-  });
+      return matchSearch && matchStatus;
+    });
 
   const filterBtns = [
     { key: "all", label: "Todos" },
