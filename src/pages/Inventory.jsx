@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Plus, Search, Package, AlertTriangle } from "lucide-react";
-import { useState, useContext, useEffect } from "react";
 import SparePartCard from "@/components/inventory/SparePartCard";
 import SparePartDialog from "@/components/inventory/SparePartDialog";
 import SparePartMovementsHistory from "@/components/inventory/SparePartMovementsHistory";
