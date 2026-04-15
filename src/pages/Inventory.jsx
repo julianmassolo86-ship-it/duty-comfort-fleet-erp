@@ -41,7 +41,7 @@ export default function Inventory() {
 
   const [selectedCompanyId, setSelectedCompanyId] = useState("");
 
-  const companyId = isSuperAdmin ? selectedCompanyId : user?.company_id;
+  const companyId = isSuperAdmin ? (selectedCompanyId === "all" ? "" : selectedCompanyId) : user?.company_id;
 
   const { data: rawSpareParts = [], isLoading } = useQuery({
     queryKey: ["spare-parts", companyId],
@@ -149,7 +149,7 @@ export default function Inventory() {
               <SelectValue placeholder="Todas las empresas" />
             </SelectTrigger>
             <SelectContent className={isDark ? "bg-zinc-800 border-zinc-700" : ""}>
-              <SelectItem value={null}>Todas las empresas</SelectItem>
+              <SelectItem value="all">Todas las empresas</SelectItem>
               {companies.map((c) => (
                 <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
               ))}
