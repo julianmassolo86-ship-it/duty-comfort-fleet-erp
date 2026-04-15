@@ -71,7 +71,8 @@ export default function Inventory() {
     setDialogOpen(true);
   };
 
-  const filtered = spareParts.filter(Boolean).filter((sp) => {
+  const filtered = (spareParts || []).filter(Boolean).filter((sp) => {
+    if (!sp || typeof sp !== "object") return false;
     const matchSearch =
       !search ||
       sp.name?.toLowerCase().includes(search.toLowerCase()) ||
@@ -146,8 +147,8 @@ export default function Inventory() {
             </SelectTrigger>
             <SelectContent className={isDark ? "bg-zinc-800 border-zinc-700" : ""}>
               <SelectItem value="__all__">Todas las empresas</SelectItem>
-              {(companies || []).filter(c => c != null && c.id != null && String(c.id).trim() !== "").map((c) => (
-                <SelectItem key={String(c.id)} value={String(c.id)}>{c.name}</SelectItem>
+              {(companies || []).filter(c => c != null && c.id != null && String(c.id).trim() !== "" && c.name).map((c) => (
+                <SelectItem key={String(c.id)} value={String(c.id)}>{c.name || String(c.id)}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -208,7 +209,7 @@ export default function Inventory() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {filtered.map((sp) => (
+          {filtered.filter(sp => sp?.id).map((sp) => (
             <SparePartCard
               key={sp.id}
               sparePart={sp}
