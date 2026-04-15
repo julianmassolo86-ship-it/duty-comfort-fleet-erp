@@ -18,7 +18,7 @@ export default function SparePartSearch({ onSelectPart, selectedParts = [], comp
   });
 
   const filteredParts = spareParts.filter(part => {
-    if (!searchTerm.trim()) return false;
+    if (!searchTerm.trim()) return true;
     const search = searchTerm.toLowerCase();
     return (
       part.name?.toLowerCase().includes(search) ||
