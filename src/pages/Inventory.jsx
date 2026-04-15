@@ -146,8 +146,8 @@ export default function Inventory() {
             </SelectTrigger>
             <SelectContent className={isDark ? "bg-zinc-800 border-zinc-700" : ""}>
               <SelectItem value="__all__">Todas las empresas</SelectItem>
-              {companies.filter(c => c?.id).map((c) => (
-                <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>
+              {(companies || []).filter(c => c != null && c.id != null && String(c.id).trim() !== "").map((c) => (
+                <SelectItem key={String(c.id)} value={String(c.id)}>{c.name}</SelectItem>
               ))}
             </SelectContent>
           </Select>
