@@ -140,14 +140,14 @@ export default function Inventory() {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         {isSuperAdmin && (
-          <Select value={selectedCompanyId || "__all__"} onValueChange={v => setSelectedCompanyId(v === "__all__" ? "" : v)}>
+          <Select value={selectedCompanyId || "__all__"} onValueChange={v => setSelectedCompanyId(v === "__all__" ? "" : String(v))}>
             <SelectTrigger className={cn("w-full sm:w-48", isDark ? "bg-zinc-900 border-zinc-700 text-white" : "")}>
               <SelectValue placeholder="Todas las empresas" />
             </SelectTrigger>
             <SelectContent className={isDark ? "bg-zinc-800 border-zinc-700" : ""}>
               <SelectItem value="__all__">Todas las empresas</SelectItem>
-              {companies.map((c) => (
-                <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+              {companies.filter(c => c?.id).map((c) => (
+                <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>
               ))}
             </SelectContent>
           </Select>
