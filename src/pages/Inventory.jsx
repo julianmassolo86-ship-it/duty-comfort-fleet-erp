@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Plus, Search, Package, AlertTriangle } from "lucide-react";
+import { useState, useContext, useEffect } from "react";
 import SparePartCard from "@/components/inventory/SparePartCard";
 import SparePartDialog from "@/components/inventory/SparePartDialog";
 import SparePartMovementsHistory from "@/components/inventory/SparePartMovementsHistory";
@@ -59,6 +60,8 @@ export default function Inventory() {
   };
 
   const filtered = spareParts.filter((p) => {
+    if (!p || !p.id) return false;
+
     const matchSearch =
       !search ||
       p.name?.toLowerCase().includes(search.toLowerCase()) ||
@@ -180,7 +183,7 @@ export default function Inventory() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {filtered.filter((p) => p && p.id).map((part) => (
+          {filtered.map((part) => (
             <SparePartCard
               key={part.id}
               sparePart={part}
