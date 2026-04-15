@@ -8,7 +8,7 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import MantenimientoForms from './pages/MantenimientoForms';
 import Novedades from './pages/Novedades';
-import Inventory from './pages/Inventory';
+import Inventory from './pages/Inventory.jsx';
 import FuelUps from './pages/FuelUps';
 import VehicleModels from './pages/VehicleModels';
 import InspectorPanel from './pages/InspectorPanel';
