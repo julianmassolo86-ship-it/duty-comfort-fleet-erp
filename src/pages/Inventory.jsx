@@ -205,7 +205,7 @@ export default function Inventory() {
       )}
 
       {/* Delete Confirmation */}
-      {deleting && (
+      {deleting ? (
         <AlertDialog open={true} onOpenChange={(o) => { if (!o) setDeleting(null); }}>
           <AlertDialogContent className={isDark ? "bg-zinc-900 border-zinc-700" : ""}>
             <AlertDialogHeader>
@@ -224,10 +224,10 @@ export default function Inventory() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-      )}
+      ) : null}
 
       {/* History Dialog */}
-      {historyPart && (
+      {historyPart ? (
         <Dialog open={true} onOpenChange={(o) => { if (!o) setHistoryPart(null); }}>
           <DialogContent className={cn("max-w-3xl max-h-[90vh] overflow-y-auto", isDark ? "bg-zinc-900 border-zinc-700" : "")}>
             <DialogHeader>
@@ -238,7 +238,7 @@ export default function Inventory() {
             <SparePartMovementsHistory sparePartId={historyPart.id} />
           </DialogContent>
         </Dialog>
-      )}
+      ) : null}
     </div>
   );
 }
