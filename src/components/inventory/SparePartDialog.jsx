@@ -70,16 +70,20 @@ export default function SparePartDialog({ open, onClose, sparePart, companyId })
   }, [vehicleModels, form.compatible_manufacturer_id]);
 
   useEffect(() => {
-    if (sparePart) {
-      const normalized = { ...emptyForm, ...sparePart };
-      // Normalize null/undefined values to empty strings for Radix Select compatibility
-      const strFields = ["category_id", "subcategory_id", "compatible_manufacturer_id", "compatible_vehicle_model_id"];
-      strFields.forEach(f => { if (!normalized[f]) normalized[f] = ""; });
-      // Ensure unit_of_measure always has a valid value
-      if (!normalized.unit_of_measure) normalized.unit_of_measure = "UNID";
-      setForm(normalized);
-    } else {
-      setForm({ ...emptyForm, company_id: companyId || "" });
+    if (open) {
+      if (sparePart) {
+        const normalized = { ...emptyForm, ...sparePart };
+        // Normalize null/undefined values to empty strings for Radix Select compatibility
+        const strFields = ["category_id", "subcategory_id", "compatible_manufacturer_id", "compatible_vehicle_model_id", "unit_of_measure"];
+        strFields.forEach(f => { 
+          if (normalized[f] === null || normalized[f] === undefined) {
+            normalized[f] = f === "unit_of_measure" ? "UNID" : "";
+          }
+        });
+        setForm(normalized);
+      } else {
+        setForm({ ...emptyForm, company_id: companyId || "" });
+      }
     }
   }, [sparePart, open, companyId]);
 
@@ -120,8 +124,8 @@ export default function SparePartDialog({ open, onClose, sparePart, companyId })
           <div className="space-y-1">
             <Label className={labelClass}>Categoría</Label>
             <Select
-              value={form.category_id ?? "__none__"}
-              onValueChange={(v) => { set("category_id", v === "__none__" ? "" : v); set("subcategory_id", ""); }}
+              value={form.category_id || ""}
+              onValueChange={(v) => { set("category_id", v); set("subcategory_id", ""); }}
             >
               <SelectTrigger className={cn("h-9", isDark ? "bg-zinc-800 border-zinc-700 text-white" : "")}>
                 <SelectValue placeholder="Seleccionar categoría" />
@@ -139,8 +143,8 @@ export default function SparePartDialog({ open, onClose, sparePart, companyId })
           <div className="space-y-1">
             <Label className={labelClass}>Subcategoría</Label>
             <Select
-              value={form.subcategory_id ?? "__none__"}
-              onValueChange={(v) => set("subcategory_id", v === "__none__" ? "" : v)}
+              value={form.subcategory_id || ""}
+              onValueChange={(v) => set("subcategory_id", v)}
               disabled={!form.category_id || filteredSubcategories.length === 0}
             >
               <SelectTrigger className={cn("h-9", isDark ? "bg-zinc-800 border-zinc-700 text-white" : "")}>
@@ -189,9 +193,9 @@ export default function SparePartDialog({ open, onClose, sparePart, companyId })
           <div className="space-y-1">
             <Label className={labelClass}>Marca</Label>
             <Select
-              value={form.compatible_manufacturer_id ?? "__none__"}
+              value={form.compatible_manufacturer_id || ""}
               onValueChange={(v) => {
-                set("compatible_manufacturer_id", v === "__none__" ? "" : v);
+                set("compatible_manufacturer_id", v);
                 set("compatible_vehicle_model_id", "");
               }}
             >
@@ -215,8 +219,8 @@ export default function SparePartDialog({ open, onClose, sparePart, companyId })
           <div className="space-y-1">
             <Label className={labelClass}>Modelo</Label>
             <Select
-              value={form.compatible_vehicle_model_id ?? "__none__"}
-              onValueChange={(v) => set("compatible_vehicle_model_id", v === "__none__" ? "" : v)}
+              value={form.compatible_vehicle_model_id || ""}
+              onValueChange={(v) => set("compatible_vehicle_model_id", v)}
               disabled={!form.compatible_manufacturer_id}
             >
               <SelectTrigger className={cn("h-9", isDark ? "bg-zinc-800 border-zinc-700 text-white" : "")}>
@@ -234,7 +238,7 @@ export default function SparePartDialog({ open, onClose, sparePart, companyId })
           {/* Unidad de Medida */}
           <div className="space-y-1">
             <Label className={labelClass}>Unidad de Medida *</Label>
-            <Select value={form.unit_of_measure ?? "UNID"} onValueChange={(v) => set("unit_of_measure", v)}>
+            <Select value={form.unit_of_measure || "UNID"} onValueChange={(v) => set("unit_of_measure", v)}>
               <SelectTrigger className={cn("h-9", isDark ? "bg-zinc-800 border-zinc-700 text-white" : "")}>
                 <SelectValue />
               </SelectTrigger>
