@@ -41,7 +41,7 @@ export default function Inventory() {
   });
 
   // Garantizar que spareParts siempre sea un array válido de items con ID
-  const spareParts = (Array.isArray(sparePartsData) ? sparePartsData : []).filter(p => p && p.id);
+  const spareParts = (Array.isArray(sparePartsData) ? sparePartsData : []).filter(Boolean).filter(p => p && p.id);
 
   const handleDialogClose = (saved) => {
     setDialogOpen(false);
