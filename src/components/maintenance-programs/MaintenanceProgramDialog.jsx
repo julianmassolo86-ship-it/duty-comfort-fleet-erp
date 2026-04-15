@@ -315,7 +315,10 @@ export default function MaintenanceProgramDialog({
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <Label className="text-xs text-zinc-400">Fabricante / Marca</Label>
-                  <Select value={form.applies_to_manufacturer_id || "__none__"} onValueChange={(v) => set("applies_to_manufacturer_id", v === "__none__" ? "" : v)}>
+                  <Select value={form.applies_to_manufacturer_id || "__none__"} onValueChange={(v) => {
+                    set("applies_to_manufacturer_id", v === "__none__" ? "" : v);
+                    set("applies_to_vehicle_model_id", ""); // Reset modelo
+                  }}>
                     <SelectTrigger className="bg-zinc-900 border-zinc-700 focus:border-green-500/50">
                       <SelectValue placeholder="Seleccionar fabricante (opcional)" />
                     </SelectTrigger>
@@ -327,13 +330,13 @@ export default function MaintenanceProgramDialog({
                 </div>
                 <div className="space-y-1">
                   <Label className="text-xs text-zinc-400">Modelo de Vehículo</Label>
-                  <Select value={form.applies_to_vehicle_model_id || "__none__"} onValueChange={(v) => set("applies_to_vehicle_model_id", v === "__none__" ? "" : v)}>
+                  <Select value={form.applies_to_vehicle_model_id || "__none__"} onValueChange={(v) => set("applies_to_vehicle_model_id", v === "__none__" ? "" : v)} disabled={!form.applies_to_manufacturer_id}>
                     <SelectTrigger className="bg-zinc-900 border-zinc-700 focus:border-green-500/50">
-                      <SelectValue placeholder="Sin especificar" />
+                      <SelectValue placeholder={form.applies_to_manufacturer_id ? "Seleccionar modelo" : "Primero selecciona un fabricante"} />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="__none__">Sin especificar</SelectItem>
-                      {vehicleModels.filter(m => m?.id).map(m => <SelectItem key={m.id} value={String(m.id)}>{m.name}</SelectItem>)}
+                      {vehicleModels.filter(m => m?.id && m.manufacturer_id === form.applies_to_manufacturer_id).map(m => <SelectItem key={m.id} value={String(m.id)}>{m.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
