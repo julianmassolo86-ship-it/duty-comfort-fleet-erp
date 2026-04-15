@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Trash2, Plus, X, Wrench, Zap, Package, Hash } from "lucide-react";
+import { Loader2, Trash2, Plus, X, Wrench, Zap, Package, Hash, AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -175,6 +175,32 @@ export default function MaintenanceProgramDialog({
     p.id !== program?.id
   );
 
+  // Detectar marcas en repuestos y acciones seleccionadas
+  const getSelectedManufacturers = () => {
+    const mfgIds = new Set();
+    
+    // Desde required_spare_parts (repuestos almacén - cuando tipo es item)
+    form.required_spare_parts.forEach(part => {
+      if (part.compatible_manufacturer_id) {
+        mfgIds.add(part.compatible_manufacturer_id);
+      }
+    });
+
+    // Desde linked_task_ids (acciones/ítems - cuando tipo es program)
+    form.linked_task_ids.forEach(taskId => {
+      const task = allPrograms.find(t => t.id === taskId);
+      if (task?.applies_to_manufacturer_id) {
+        mfgIds.add(task.applies_to_manufacturer_id);
+      }
+    });
+
+    return Array.from(mfgIds);
+  };
+
+  const selectedMfgs = isProgram ? getSelectedManufacturers() : [];
+  const hasConflictingManufacturers = selectedMfgs.length > 1;
+  const suggestedManufacturerId = selectedMfgs.length === 1 ? selectedMfgs[0] : null;
+
   const typeInfo = TASK_TYPES.find(t => t.key === form.task_type);
   const isProgram = form.task_type === "program";
 
@@ -298,6 +324,36 @@ export default function MaintenanceProgramDialog({
           {/* === CAMPOS SOLO PARA PROGRAMAS === */}
           {isProgram && (
             <>
+              {/* Advertencia de conflicto de marcas */}
+              {hasConflictingManufacturers && (
+                <div className="p-3 rounded-lg bg-orange-500/10 border border-orange-500/30 flex gap-2">
+                  <AlertTriangle className="w-4 h-4 text-orange-400 shrink-0 mt-0.5" />
+                  <div className="text-xs text-orange-300">
+                    <p className="font-semibold">⚠️ Marcas conflictivas detectadas</p>
+                    <p>Los repuestos/acciones seleccionados tienen marcas diferentes. Verifica la compatibilidad.</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Sugerencia automática de marca */}
+              {suggestedManufacturerId && !form.applies_to_manufacturer_id && (
+                <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/30 flex gap-2">
+                  <div className="text-xs text-blue-300 flex-1">
+                    <p className="font-semibold">💡 Marca detectada</p>
+                    <p>Se sugiere asignar la marca <strong>{manufacturers.find(m => m.id === suggestedManufacturerId)?.name}</strong></p>
+                  </div>
+                  <Button 
+                    type="button" 
+                    size="sm" 
+                    variant="outline" 
+                    className="border-blue-500/30 text-blue-300 hover:bg-blue-500/20 shrink-0"
+                    onClick={() => set("applies_to_manufacturer_id", suggestedManufacturerId)}
+                  >
+                    Aplicar
+                  </Button>
+                </div>
+              )}
+
               {/* Fabricante y Tipo de Vehículo — solo programas */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
