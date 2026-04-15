@@ -416,7 +416,7 @@ export default function MaintenanceProgramDialog({
               <SparePartSearch 
                 onSelectPart={handleSelectSparePart}
                 selectedParts={form.required_spare_parts}
-                companyId={form.company_id || currentUser?.company_id}
+                companyId={isSuperAdmin ? (form.company_id || program?.company_id) : currentUser?.company_id}
               />
 
               {/* Buscador de Acciones */}
