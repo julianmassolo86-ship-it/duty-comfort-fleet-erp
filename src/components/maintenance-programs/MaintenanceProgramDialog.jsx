@@ -109,13 +109,26 @@ export default function MaintenanceProgramDialog({
   const handleSelectSparePart = (sp) => {
     setForm(prev => ({
       ...prev,
-      name: sp.name || prev.name,
-      part_number: sp.part_number || prev.part_number,
-      alternative_part_number: sp.alternative_part_number || prev.alternative_part_number,
+      name: sp.name || "",
+      description: sp.description || prev.description,
+      part_number: sp.part_number || "",
+      alternative_part_number: sp.alternative_part_number || "",
       linked_spare_part_id: sp.id,
     }));
     setSpareSearch(sp.name || "");
     setSpareDropdownOpen(false);
+  };
+
+  const handleClearSparePart = () => {
+    setSpareSearch("");
+    setSpareDropdownOpen(false);
+    setForm(prev => ({
+      ...prev,
+      name: "",
+      part_number: "",
+      alternative_part_number: "",
+      linked_spare_part_id: null,
+    }));
   };
 
   useEffect(() => {
@@ -159,6 +172,10 @@ export default function MaintenanceProgramDialog({
   const handleSubmit = (e) => {
     e.preventDefault();
     const isProgram = form.task_type === "program";
+    if (form.task_type === "item" && !form.linked_spare_part_id) {
+      alert("Debés vincular un repuesto del inventario antes de guardar.");
+      return;
+    }
     onSave({
       ...form,
       is_program_group: isProgram,
@@ -248,9 +265,9 @@ export default function MaintenanceProgramDialog({
             <div className="space-y-2">
               <Label className="flex items-center gap-2 text-blue-400">
                 <Link2 className="w-4 h-4" />
-                Vincular con Repuesto del Inventario
-                <span className="text-zinc-500 font-normal text-xs">(opcional)</span>
+                Vincular con Repuesto del Inventario *
               </Label>
+              <p className="text-xs text-zinc-500">El ítem debe estar vinculado a un repuesto existente en el inventario.</p>
               <div className="relative">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
@@ -263,7 +280,7 @@ export default function MaintenanceProgramDialog({
                     placeholder="Buscar repuesto por nombre o N° de pieza..."
                   />
                   {spareSearch && (
-                    <button type="button" onClick={() => { setSpareSearch(""); setSpareDropdownOpen(false); set("linked_spare_part_id", null); }}
+                    <button type="button" onClick={handleClearSparePart}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300">
                       <X className="w-4 h-4" />
                     </button>
@@ -308,13 +325,14 @@ export default function MaintenanceProgramDialog({
             <Input
               value={form.name}
               onChange={(e) => set("name", e.target.value)}
-              className="bg-zinc-900 border-zinc-700 focus:border-yellow-500/50"
+              className={cn("bg-zinc-900 border-zinc-700 focus:border-yellow-500/50", form.task_type === "item" && form.linked_spare_part_id && "opacity-70 cursor-not-allowed")}
               placeholder={
                 isProgram ? "Ej: Inspección S, PM2, Servicio Scania A"
                 : form.task_type === "action" ? "Ej: Engrase de chasis, Purga de tanques de aire"
                 : "Ej: Filtro de aceite motor, Aceite SAE 15W40"
               }
               required
+              readOnly={form.task_type === "item" && !!form.linked_spare_part_id}
             />
           </div>
 
@@ -354,8 +372,9 @@ export default function MaintenanceProgramDialog({
                   <Input
                     value={form.part_number}
                     onChange={(e) => set("part_number", e.target.value)}
-                    className="bg-zinc-900 border-zinc-700 focus:border-blue-500/50"
+                    className={cn("bg-zinc-900 border-zinc-700 focus:border-blue-500/50", form.linked_spare_part_id && "opacity-70 cursor-not-allowed")}
                     placeholder="Ej: 7420543688"
+                    readOnly={!!form.linked_spare_part_id}
                   />
                 </div>
                 <div className="space-y-1">
@@ -363,8 +382,9 @@ export default function MaintenanceProgramDialog({
                   <Input
                     value={form.alternative_part_number}
                     onChange={(e) => set("alternative_part_number", e.target.value)}
-                    className="bg-zinc-900 border-zinc-700 focus:border-blue-500/50"
+                    className={cn("bg-zinc-900 border-zinc-700 focus:border-blue-500/50", form.linked_spare_part_id && "opacity-70 cursor-not-allowed")}
                     placeholder="Ej: SH8019L, LF16015"
+                    readOnly={!!form.linked_spare_part_id}
                   />
                 </div>
               </div>
