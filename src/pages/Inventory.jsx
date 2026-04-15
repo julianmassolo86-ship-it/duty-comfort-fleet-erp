@@ -43,14 +43,18 @@ export default function Inventory() {
 
   const companyId = isSuperAdmin ? selectedCompanyId : user?.company_id;
 
-  const { data: spareParts = [], isLoading } = useQuery({
+  const { data: rawSpareParts = [], isLoading } = useQuery({
     queryKey: ["spare-parts", companyId],
-    queryFn: () =>
-      companyId
-        ? base44.entities.SparePart.filter({ company_id: companyId, is_active: true })
-        : base44.entities.SparePart.filter({ is_active: true }),
+    queryFn: async () => {
+      const result = companyId
+        ? await base44.entities.SparePart.filter({ company_id: companyId, is_active: true })
+        : await base44.entities.SparePart.filter({ is_active: true });
+      return Array.isArray(result) ? result.filter(Boolean) : [];
+    },
     enabled: !!user,
   });
+
+  const spareParts = Array.isArray(rawSpareParts) ? rawSpareParts.filter(Boolean) : [];
 
   const deleteMutation = useMutation({
     mutationFn: (id) => base44.entities.SparePart.update(id, { is_active: false }),
@@ -71,7 +75,7 @@ export default function Inventory() {
     setDialogOpen(true);
   };
 
-  const filtered = spareParts.filter(Boolean).filter((sp) => {
+  const filtered = spareParts.filter((sp) => {
     const matchSearch =
       !search ||
       sp.name?.toLowerCase().includes(search.toLowerCase()) ||
