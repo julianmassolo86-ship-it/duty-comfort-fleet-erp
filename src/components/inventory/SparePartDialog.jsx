@@ -24,9 +24,10 @@ export default function SparePartDialog({ open, onClose, sparePart, companyId })
     manufacturer: "",
     supplier: "",
     unit_of_measure: "UNID",
+    quantity_per_unit: "",
     stock_quantity: 0,
     minimum_stock: 0,
-    unit_cost: null,
+    unit_cost: "",
     specifications: "",
     notes: "",
     is_active: true,
@@ -71,9 +72,11 @@ export default function SparePartDialog({ open, onClose, sparePart, companyId })
   useEffect(() => {
     if (sparePart) {
       const normalized = { ...emptyForm, ...sparePart };
-      // Normalize null values to empty strings for Radix Select compatibility
+      // Normalize null/undefined values to empty strings for Radix Select compatibility
       const strFields = ["category_id", "subcategory_id", "compatible_manufacturer_id", "compatible_vehicle_model_id"];
       strFields.forEach(f => { if (!normalized[f]) normalized[f] = ""; });
+      // Ensure unit_of_measure always has a valid value
+      if (!normalized.unit_of_measure) normalized.unit_of_measure = "UNID";
       setForm(normalized);
     } else {
       setForm({ ...emptyForm, company_id: companyId || "" });
@@ -231,7 +234,7 @@ export default function SparePartDialog({ open, onClose, sparePart, companyId })
           {/* Unidad de Medida */}
           <div className="space-y-1">
             <Label className={labelClass}>Unidad de Medida *</Label>
-            <Select value={form.unit_of_measure} onValueChange={(v) => set("unit_of_measure", v)}>
+            <Select value={form.unit_of_measure || "UNID"} onValueChange={(v) => set("unit_of_measure", v)}>
               <SelectTrigger className={cn("h-9", isDark ? "bg-zinc-800 border-zinc-700 text-white" : "")}>
                 <SelectValue />
               </SelectTrigger>
