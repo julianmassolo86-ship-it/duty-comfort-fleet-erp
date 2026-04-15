@@ -57,6 +57,11 @@ export default function MaintenancePrograms() {
     queryFn: () => base44.entities.VehicleType.list(),
   });
 
+  const { data: vehicleModels = [] } = useQuery({
+    queryKey: ['vehicleModels'],
+    queryFn: () => base44.entities.VehicleModel.list(),
+  });
+
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.MaintenanceTaskDefinition.create(data),
     onSuccess: () => {
@@ -279,20 +284,21 @@ export default function MaintenancePrograms() {
         </div>
 
         <MaintenanceProgramDialog
-          open={dialogOpen}
-          onOpenChange={setDialogOpen}
-          program={selectedProgram}
-          manufacturers={manufacturers}
-          vehicleTypes={vehicleTypes}
-          allPrograms={programs}
-          isSuperAdmin={isSuperAdmin}
-          currentUser={user}
-          defaultType={defaultType}
-          onSave={handleSave}
-          onDelete={handleDelete}
-          isLoading={createMutation.isPending || updateMutation.isPending}
-          isDeleting={deleteMutation.isPending}
-        />
+           open={dialogOpen}
+           onOpenChange={setDialogOpen}
+           program={selectedProgram}
+           manufacturers={manufacturers}
+           vehicleTypes={vehicleTypes}
+           vehicleModels={vehicleModels}
+           allPrograms={programs}
+           isSuperAdmin={isSuperAdmin}
+           currentUser={user}
+           defaultType={defaultType}
+           onSave={handleSave}
+           onDelete={handleDelete}
+           isLoading={createMutation.isPending || updateMutation.isPending}
+           isDeleting={deleteMutation.isPending}
+         />
 
         <BulkAssignDialog
           open={bulkAssignOpen}

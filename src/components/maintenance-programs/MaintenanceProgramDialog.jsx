@@ -64,13 +64,14 @@ const initialState = {
   warning_days: "",
   linked_task_ids: [],
   applies_to_vehicle_type_id: "",
+  applies_to_vehicle_model_id: "",
   applies_to_manufacturer_id: "",
   company_id: "",
   is_active: true,
 };
 
 export default function MaintenanceProgramDialog({
-  open, onOpenChange, program, manufacturers, vehicleTypes, allPrograms,
+  open, onOpenChange, program, manufacturers, vehicleTypes, vehicleModels = [], allPrograms,
   isSuperAdmin, currentUser, defaultType = "item",
   onSave, onDelete, isLoading, isDeleting,
 }) {
@@ -102,8 +103,9 @@ export default function MaintenanceProgramDialog({
           component_names: program.component_names || [],
           linked_task_ids: program.linked_task_ids || [],
           required_spare_parts: program.required_spare_parts || [],
+          applies_to_vehicle_model_id: program.applies_to_vehicle_model_id || "",
           });
-      } else {
+          } else {
         setForm({
           ...initialState,
           task_type: defaultType,
@@ -338,14 +340,14 @@ export default function MaintenanceProgramDialog({
                   </Select>
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs text-zinc-400">Tipo de Vehículo</Label>
-                  <Select value={form.applies_to_vehicle_type_id || "__none__"} onValueChange={(v) => set("applies_to_vehicle_type_id", v === "__none__" ? "" : v)}>
+                  <Label className="text-xs text-zinc-400">Modelo de Vehículo</Label>
+                  <Select value={form.applies_to_vehicle_model_id || "__none__"} onValueChange={(v) => set("applies_to_vehicle_model_id", v === "__none__" ? "" : v)}>
                     <SelectTrigger className="bg-zinc-900 border-zinc-700 focus:border-green-500/50">
-                      <SelectValue placeholder="Seleccionar tipo (opcional)" />
+                      <SelectValue placeholder="Sin especificar" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="__none__">Sin especificar</SelectItem>
-                      {vehicleTypes.filter(vt => vt?.id).map(vt => <SelectItem key={vt.id} value={String(vt.id)}>{vt.name}</SelectItem>)}
+                      {vehicleModels.filter(m => m?.id).map(m => <SelectItem key={m.id} value={String(m.id)}>{m.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
