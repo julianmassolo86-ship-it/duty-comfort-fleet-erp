@@ -18,7 +18,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { cn } from "@/lib/utils";
-import SparePartSearch from "./SparePartSearch";
+import SparePartsSelector from "@/components/maintenance/SparePartsSelector";
 
 const TASK_TYPES = [
   {
@@ -147,22 +147,8 @@ export default function MaintenanceProgramDialog({
     set("component_names", form.component_names.filter((_, i) => i !== index));
   };
 
-  const handleSelectSparePart = (part, partIdToRemove) => {
-    if (partIdToRemove) {
-      // Remove
-      set("required_spare_parts", form.required_spare_parts.filter(p => p.id !== partIdToRemove));
-    } else if (part) {
-      // Add
-      const exists = form.required_spare_parts.some(p => p.id === part.id);
-      if (!exists) {
-        set("required_spare_parts", [...form.required_spare_parts, {
-          spare_part_id: part.id,
-          spare_part_name: part.name,
-          part_number: part.part_number,
-          quantity: 1
-        }]);
-      }
-    }
+  const handleSelectSparePartsList = (parts) => {
+    set("required_spare_parts", parts);
   };
 
   const toggleLinkedTask = (taskId) => {
@@ -412,11 +398,12 @@ export default function MaintenanceProgramDialog({
                 </div>
               </div>
 
-              {/* Buscador de Repuestos */}
-              <SparePartSearch 
-                onSelectPart={handleSelectSparePart}
-                selectedParts={form.required_spare_parts}
+              {/* Selector de Repuestos */}
+              <SparePartsSelector
                 companyId={isSuperAdmin ? (form.company_id || program?.company_id) : currentUser?.company_id}
+                value={form.required_spare_parts}
+                onChange={handleSelectSparePartsList}
+                isDark={true}
               />
 
               {/* Buscador de Acciones */}
