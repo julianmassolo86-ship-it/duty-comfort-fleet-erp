@@ -33,12 +33,13 @@ function DeliveryNoteDialog({ open, onClose, deliveryNote, companyId, purchaseOr
 
   // When PO is selected, prefill items from the PO
   const handlePOSelect = (poId) => {
-    set("purchase_order_id", poId);
-    const po = purchaseOrders.find(p => p.id === poId);
+    const realId = poId === "__none__" ? "" : poId;
+    set("purchase_order_id", realId);
+    const po = purchaseOrders.find(p => p.id === realId);
     if (po?.items) {
       setForm(f => ({
         ...f,
-        purchase_order_id: poId,
+        purchase_order_id: realId,
         items: po.items.map(item => ({ ...item, quantity_ordered: item.quantity, quantity_received: item.quantity })),
       }));
     }
@@ -106,7 +107,7 @@ function DeliveryNoteDialog({ open, onClose, deliveryNote, companyId, purchaseOr
                   <SelectValue placeholder="Seleccionar OC (opcional)" />
                 </SelectTrigger>
                 <SelectContent className={isDark ? "bg-zinc-800 border-zinc-700" : ""}>
-                  <SelectItem value={null}>Sin OC vinculada</SelectItem>
+                  <SelectItem value="__none__">Sin OC vinculada</SelectItem>
                   {purchaseOrders.filter(p => p.status === "aprobada").map(p => (
                     <SelectItem key={p.id} value={p.id}>{p.order_number} – {p.date}</SelectItem>
                   ))}
@@ -263,12 +264,12 @@ export default function DeliveryNotes() {
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         {isSuperAdmin && (
-          <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
+          <Select value={selectedCompanyId || "__all__"} onValueChange={v => setSelectedCompanyId(v === "__all__" ? "" : v)}>
             <SelectTrigger className={cn("w-full sm:w-48", isDark ? "bg-zinc-900 border-zinc-700 text-white" : "")}>
               <SelectValue placeholder="Todas las empresas" />
             </SelectTrigger>
             <SelectContent className={isDark ? "bg-zinc-800 border-zinc-700" : ""}>
-              <SelectItem value={null}>Todas las empresas</SelectItem>
+              <SelectItem value="__all__">Todas las empresas</SelectItem>
               {companies.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
             </SelectContent>
           </Select>
