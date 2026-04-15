@@ -377,11 +377,14 @@ export default function MaintenanceProgramDialog({
                 </div>
               )}
 
-              {/* Fabricante y Tipo de Vehículo — solo programas */}
+              {/* Fabricante y Modelo de Vehículo — solo programas */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <Label className="text-xs">Fabricante</Label>
-                  <Select value={form.applies_to_manufacturer_id || "__none__"} onValueChange={(v) => set("applies_to_manufacturer_id", v === "__none__" ? "" : v)}>
+                  <Select value={form.applies_to_manufacturer_id || "__none__"} onValueChange={(v) => {
+                    set("applies_to_manufacturer_id", v === "__none__" ? "" : v);
+                    set("applies_to_vehicle_model_id", ""); // Reset modelo
+                  }}>
                     <SelectTrigger className="bg-zinc-900 border-zinc-700"><SelectValue placeholder="Todos" /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="__none__">Todos los fabricantes</SelectItem>
@@ -390,12 +393,12 @@ export default function MaintenanceProgramDialog({
                   </Select>
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs">Tipo de Vehículo</Label>
-                  <Select value={form.applies_to_vehicle_type_id || "__none__"} onValueChange={(v) => set("applies_to_vehicle_type_id", v === "__none__" ? "" : v)}>
-                    <SelectTrigger className="bg-zinc-900 border-zinc-700"><SelectValue placeholder="Todos" /></SelectTrigger>
+                  <Label className="text-xs">Modelo de Vehículo</Label>
+                  <Select value={form.applies_to_vehicle_model_id || "__none__"} onValueChange={(v) => set("applies_to_vehicle_model_id", v === "__none__" ? "" : v)} disabled={!form.applies_to_manufacturer_id}>
+                    <SelectTrigger className="bg-zinc-900 border-zinc-700"><SelectValue placeholder={form.applies_to_manufacturer_id ? "Seleccionar modelo" : "Primero selecciona fabricante"} /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="__none__">Todos los tipos</SelectItem>
-                      {vehicleTypes.filter(vt => vt?.id).map(vt => <SelectItem key={vt.id} value={String(vt.id)}>{vt.name}</SelectItem>)}
+                      <SelectItem value="__none__">Todos los modelos</SelectItem>
+                      {vehicleModels.filter(m => m?.id && m.manufacturer_id === form.applies_to_manufacturer_id).map(m => <SelectItem key={m.id} value={String(m.id)}>{m.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
