@@ -1,7 +1,6 @@
 import React, { useContext } from "react";
 import { ThemeContextValue } from "@/components/common/ThemeWrapper";
 import { cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2, Package, AlertTriangle, History } from "lucide-react";
 
@@ -104,9 +103,9 @@ export default function SparePartCard({ sparePart, onEdit, onDelete, onViewHisto
             )}
           </div>
         </div>
-        <Badge variant="outline" className={cn("text-xs border", stockStatus.color)}>
+        <span className={cn("text-xs border px-2 py-0.5 rounded-full font-medium", stockStatus.color)}>
           {stockStatus.label}
-        </Badge>
+        </span>
       </div>
     </div>
   );
