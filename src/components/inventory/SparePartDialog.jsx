@@ -70,7 +70,14 @@ export default function SparePartDialog({ open, onClose, sparePart, companyId })
 
   useEffect(() => {
     if (sparePart) {
-      setForm({ ...emptyForm, ...sparePart });
+      setForm({
+        ...emptyForm,
+        ...sparePart,
+        category_id: sparePart.category_id ? String(sparePart.category_id) : "",
+        subcategory_id: sparePart.subcategory_id ? String(sparePart.subcategory_id) : "",
+        compatible_manufacturer_id: sparePart.compatible_manufacturer_id ? String(sparePart.compatible_manufacturer_id) : "",
+        compatible_vehicle_model_id: sparePart.compatible_vehicle_model_id ? String(sparePart.compatible_vehicle_model_id) : "",
+      });
     } else {
       setForm({ ...emptyForm, company_id: companyId || "" });
     }
@@ -120,8 +127,8 @@ export default function SparePartDialog({ open, onClose, sparePart, companyId })
                 <SelectValue placeholder="Seleccionar categoría" />
               </SelectTrigger>
               <SelectContent className={isDark ? "bg-zinc-800 border-zinc-700" : ""}>
-                {sparePartCategories.filter(c => c.is_active !== false).sort((a, b) => a.name.localeCompare(b.name)).map((c) => (
-                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                {sparePartCategories.filter(c => c?.id && c.is_active !== false).sort((a, b) => (a.name || "").localeCompare(b.name || "")).map((c) => (
+                  <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -139,8 +146,8 @@ export default function SparePartDialog({ open, onClose, sparePart, companyId })
                 <SelectValue placeholder={!form.category_id ? "Primero seleccioná una categoría" : filteredSubcategories.length === 0 ? "Sin subcategorías" : "Seleccionar subcategoría"} />
               </SelectTrigger>
               <SelectContent className={isDark ? "bg-zinc-800 border-zinc-700" : ""}>
-                {filteredSubcategories.sort((a, b) => a.name.localeCompare(b.name)).map((s) => (
-                  <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                {filteredSubcategories.filter(s => s?.id).sort((a, b) => (a.name || "").localeCompare(b.name || "")).map((s) => (
+                  <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -190,8 +197,8 @@ export default function SparePartDialog({ open, onClose, sparePart, companyId })
                 <SelectValue placeholder="Apto para todo" />
               </SelectTrigger>
               <SelectContent className={isDark ? "bg-zinc-800 border-zinc-700" : ""}>
-                {manufacturers.sort((a, b) => a.name.localeCompare(b.name)).map((m) => (
-                  <SelectItem key={m.id} value={m.id}>
+                {manufacturers.filter(m => m?.id).sort((a, b) => (a.name || "").localeCompare(b.name || "")).map((m) => (
+                  <SelectItem key={m.id} value={String(m.id)}>
                     <div className="flex items-center gap-2">
                       {m.logo_url && <img src={m.logo_url} alt={m.name} className="h-4 w-auto object-contain" />}
                       {m.name}
@@ -213,8 +220,8 @@ export default function SparePartDialog({ open, onClose, sparePart, companyId })
                 <SelectValue placeholder={!form.compatible_manufacturer_id ? "Seleccioná una marca" : "Todos los modelos"} />
               </SelectTrigger>
               <SelectContent className={isDark ? "bg-zinc-800 border-zinc-700" : ""}>
-                {filteredModels.map((m) => (
-                  <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>
+                {filteredModels.filter(m => m?.id).map((m) => (
+                  <SelectItem key={m.id} value={String(m.id)}>{m.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
