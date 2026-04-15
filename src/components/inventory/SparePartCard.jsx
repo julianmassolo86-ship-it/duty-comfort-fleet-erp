@@ -9,12 +9,8 @@ export default function SparePartCard({ sparePart, onEdit, onDelete, onViewHisto
   const { theme } = useContext(ThemeContextValue);
   const isDark = theme === "dark";
 
-  if (!sparePart) return null;
-
-  const stockQty = sparePart.stock_quantity ?? 0;
-  const minStock = sparePart.minimum_stock ?? 0;
-  const isLowStock = stockQty <= minStock && minStock > 0;
-  const isOutOfStock = stockQty === 0;
+  const isLowStock = sparePart.stock_quantity <= sparePart.minimum_stock && sparePart.minimum_stock > 0;
+  const isOutOfStock = sparePart.stock_quantity === 0;
 
   const stockStatus = isOutOfStock
     ? { label: "Sin Stock", color: "bg-red-500/10 text-red-500 border-red-500/20" }
@@ -88,7 +84,7 @@ export default function SparePartCard({ sparePart, onEdit, onDelete, onViewHisto
           <div>
             <div className="flex items-baseline gap-1">
               <span className={cn("text-lg font-bold", isOutOfStock ? "text-red-500" : isLowStock ? "text-yellow-500" : isDark ? "text-white" : "text-gray-900")}>
-                {stockQty}
+                {sparePart.stock_quantity ?? 0}
               </span>
               <span className={cn("text-xs", isDark ? "text-zinc-500" : "text-gray-400")}>
                 stock

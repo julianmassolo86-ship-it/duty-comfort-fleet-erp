@@ -41,20 +41,16 @@ export default function Inventory() {
 
   const [selectedCompanyId, setSelectedCompanyId] = useState("");
 
-  const companyId = isSuperAdmin ? (selectedCompanyId === "all" ? "" : selectedCompanyId) : user?.company_id;
+  const companyId = isSuperAdmin ? selectedCompanyId : user?.company_id;
 
-  const { data: rawSpareParts = [], isLoading } = useQuery({
+  const { data: spareParts = [], isLoading } = useQuery({
     queryKey: ["spare-parts", companyId],
-    queryFn: async () => {
-      const result = companyId
-        ? await base44.entities.SparePart.filter({ company_id: companyId, is_active: true })
-        : await base44.entities.SparePart.filter({ is_active: true });
-      return Array.isArray(result) ? result.filter(Boolean) : [];
-    },
+    queryFn: () =>
+      companyId
+        ? base44.entities.SparePart.filter({ company_id: companyId, is_active: true })
+        : base44.entities.SparePart.filter({ is_active: true }),
     enabled: !!user,
   });
-
-  const spareParts = Array.isArray(rawSpareParts) ? rawSpareParts.filter(Boolean) : [];
 
   const deleteMutation = useMutation({
     mutationFn: (id) => base44.entities.SparePart.update(id, { is_active: false }),
@@ -149,9 +145,9 @@ export default function Inventory() {
               <SelectValue placeholder="Todas las empresas" />
             </SelectTrigger>
             <SelectContent className={isDark ? "bg-zinc-800 border-zinc-700" : ""}>
-              <SelectItem value="all">Todas las empresas</SelectItem>
-              {companies.filter((c) => c?.id != null && c.id !== "").map((c) => (
-                <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>
+              <SelectItem value={null}>Todas las empresas</SelectItem>
+              {companies.map((c) => (
+                <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
               ))}
             </SelectContent>
           </Select>
