@@ -378,47 +378,44 @@ export default function MaintenanceProgramDialog({
                 </div>
               </div>
 
-              {/* Selector de ítems y acciones */}
-              <div className="p-4 rounded-xl bg-zinc-900/50 border border-yellow-500/20 space-y-2">
-                <Label className="text-yellow-400">Ítems y Acciones del Programa</Label>
-                <p className="text-xs text-zinc-500">Seleccioná qué ítems y acciones se realizan durante este programa.</p>
-                {availableItemsAndActions.length === 0 ? (
-                  <p className="text-sm text-zinc-500 italic">No hay ítems ni acciones disponibles. Créalos primero.</p>
-                ) : (
-                  <div className="space-y-1 max-h-48 overflow-y-auto pr-1">
-                    {availableItemsAndActions.map(task => {
-                      const ttype = task.task_type || "item";
+              {/* Buscador de Repuestos */}
+              <SparePartSearch 
+                onSelectPart={handleSelectSparePart}
+                selectedParts={form.required_spare_parts}
+                companyId={form.company_id || currentUser?.company_id}
+              />
+
+              {/* Buscador de Acciones */}
+              <div className="p-4 rounded-xl bg-green-500/5 border border-green-500/20 space-y-2">
+                <Label className="text-green-400">Acciones del Programa</Label>
+                <p className="text-xs text-zinc-500">Seleccioná las acciones de mantenimiento que incluye este programa.</p>
+                <div className="space-y-1 max-h-48 overflow-y-auto pr-1">
+                  {availableItemsAndActions.filter(t => t.task_type === "action").length === 0 ? (
+                    <p className="text-sm text-zinc-500 italic">No hay acciones disponibles. Créalas primero.</p>
+                  ) : (
+                    availableItemsAndActions.filter(t => t.task_type === "action").map(task => {
                       const manufacturerName = manufacturers.find(m => m.id === task.applies_to_manufacturer_id)?.name;
-                      const typeLabel = ttype === "action" ? "Acción" : ttype === "program" ? "Programa" : "Ítem";
-                      const typeColor = ttype === "action" ? "border-green-500/40 text-green-400" : ttype === "program" ? "border-yellow-500/40 text-yellow-400" : "border-blue-500/40 text-blue-400";
                       return (
                         <label key={task.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-zinc-800 cursor-pointer">
                           <input
                             type="checkbox"
                             checked={form.linked_task_ids.includes(task.id)}
                             onChange={() => toggleLinkedTask(task.id)}
-                            className="w-4 h-4 accent-yellow-500 shrink-0"
+                            className="w-4 h-4 accent-green-500 shrink-0"
                           />
-                          <span className={cn("text-xs px-2 py-0.5 rounded-full border shrink-0", typeColor)}>
-                            {typeLabel}
-                          </span>
-                          <div className="flex flex-col min-w-0">
+                          <div className="flex flex-col min-w-0 flex-1">
                             <span className="text-sm text-white truncate">{task.name}</span>
-                            {(task.part_number || manufacturerName) && (
-                              <span className="text-xs text-zinc-500">
-                                {task.part_number && `N/P: ${task.part_number}`}
-                                {task.part_number && manufacturerName && " · "}
-                                {manufacturerName && `Fab: ${manufacturerName}`}
-                              </span>
+                            {manufacturerName && (
+                              <span className="text-xs text-zinc-500">Fab: {manufacturerName}</span>
                             )}
                           </div>
                         </label>
                       );
-                    })}
-                  </div>
-                )}
-                {form.linked_task_ids.length > 0 && (
-                  <p className="text-xs text-yellow-500 font-medium">{form.linked_task_ids.length} elemento(s) seleccionado(s)</p>
+                    })
+                  )}
+                </div>
+                {form.linked_task_ids.filter(id => availableItemsAndActions.find(t => t.id === id && t.task_type === "action")).length > 0 && (
+                  <p className="text-xs text-green-500 font-medium">{form.linked_task_ids.filter(id => availableItemsAndActions.find(t => t.id === id && t.task_type === "action")).length} acción(es) seleccionada(s)</p>
                 )}
               </div>
 
@@ -502,14 +499,7 @@ export default function MaintenanceProgramDialog({
             </>
           )}
 
-          {/* Repuestos requeridos (solo para ítems) */}
-          {form.task_type === "item" && (
-            <SparePartSearch 
-              onSelectPart={handleSelectSparePart}
-              selectedParts={form.required_spare_parts}
-              companyId={form.company_id || currentUser?.company_id}
-            />
-          )}
+
 
           {/* Especificaciones / insumos (para ítems y acciones) */}
           <div className="space-y-2">
