@@ -5,7 +5,6 @@ import { ThemeContextValue } from "@/components/common/ThemeWrapper";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Plus, Search, Package, AlertTriangle, History } from "lucide-react";
 import SparePartCard from "@/components/inventory/SparePartCard";
@@ -25,23 +24,22 @@ export default function Inventory() {
   const [editing, setEditing] = useState(null);
   const [deleting, setDeleting] = useState(null);
   const [historyPart, setHistoryPart] = useState(null);
+  const [selectedCompanyId, setSelectedCompanyId] = useState("");
 
   const { data: user } = useQuery({
     queryKey: ["me"],
     queryFn: () => base44.auth.me(),
   });
 
-  const isSuperAdmin = !user?.company_id || user?.user_role === "super_admin";
+  const isSuperAdmin = user ? (!user.company_id || user.user_role === "super_admin") : false;
 
   const { data: companies = [] } = useQuery({
     queryKey: ["companies"],
     queryFn: () => base44.entities.Company.list(),
-    enabled: isSuperAdmin,
+    enabled: !!user && isSuperAdmin,
   });
 
-  const [selectedCompanyId, setSelectedCompanyId] = useState("");
-
-  const companyId = isSuperAdmin ? selectedCompanyId : user?.company_id;
+  const companyId = isSuperAdmin ? selectedCompanyId : (user?.company_id || "");
 
   const { data: spareParts = [], isLoading } = useQuery({
     queryKey: ["spare-parts", companyId],
@@ -71,33 +69,34 @@ export default function Inventory() {
     setDialogOpen(true);
   };
 
-  const filtered = (spareParts || []).filter(Boolean).filter((sp) => {
-    if (!sp || typeof sp !== "object") return false;
+  const filtered = (spareParts || []).filter((sp) => {
+    if (!sp || typeof sp !== "object" || !sp.id) return false;
     const matchSearch =
       !search ||
       sp.name?.toLowerCase().includes(search.toLowerCase()) ||
       sp.part_number?.toLowerCase().includes(search.toLowerCase()) ||
       sp.manufacturer?.toLowerCase().includes(search.toLowerCase());
-
     const matchUnit = filterUnit === "all" || sp.unit_of_measure === filterUnit;
-
     const matchStock =
-      filterStock === "all"
-        ? true
-        : filterStock === "low"
-        ? sp.stock_quantity <= sp.minimum_stock && sp.minimum_stock > 0
-        : filterStock === "out"
-        ? sp.stock_quantity === 0
-        : true;
-
+      filterStock === "all" ? true
+      : filterStock === "low" ? (sp.stock_quantity <= sp.minimum_stock && sp.minimum_stock > 0)
+      : filterStock === "out" ? sp.stock_quantity === 0
+      : true;
     return matchSearch && matchUnit && matchStock;
   });
 
   const lowStockCount = spareParts.filter(
-    (sp) => sp.stock_quantity <= sp.minimum_stock && sp.minimum_stock > 0
+    (sp) => sp && sp.stock_quantity <= sp.minimum_stock && sp.minimum_stock > 0
   ).length;
 
-  const outOfStockCount = spareParts.filter((sp) => sp.stock_quantity === 0).length;
+  const outOfStockCount = spareParts.filter((sp) => sp && sp.stock_quantity === 0).length;
+
+  const selectClass = cn(
+    "h-9 rounded-md border px-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500",
+    isDark
+      ? "bg-zinc-900 border-zinc-700 text-white"
+      : "bg-white border-gray-200 text-gray-900"
+  );
 
   return (
     <div className={cn("min-h-screen p-4 md:p-6", isDark ? "bg-black" : "bg-gray-50")}>
@@ -138,20 +137,19 @@ export default function Inventory() {
         </div>
       )}
 
-      {/* Filters */}
+      {/* Filters — usando <select> nativo para evitar crashes de Radix */}
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         {isSuperAdmin && (
-          <Select value={selectedCompanyId || "__all__"} onValueChange={v => setSelectedCompanyId(v === "__all__" ? "" : String(v))}>
-            <SelectTrigger className={cn("w-full sm:w-48", isDark ? "bg-zinc-900 border-zinc-700 text-white" : "")}>
-              <SelectValue placeholder="Todas las empresas" />
-            </SelectTrigger>
-            <SelectContent className={isDark ? "bg-zinc-800 border-zinc-700" : ""}>
-              <SelectItem value="__all__">Todas las empresas</SelectItem>
-              {(companies || []).filter(c => c != null && c.id != null && String(c.id).trim() !== "" && c.name).map((c) => (
-                <SelectItem key={String(c.id)} value={String(c.id)}>{c.name || String(c.id)}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <select
+            value={selectedCompanyId}
+            onChange={(e) => setSelectedCompanyId(e.target.value)}
+            className={cn(selectClass, "w-full sm:w-48")}
+          >
+            <option value="">Todas las empresas</option>
+            {companies.filter(c => c?.id && c.name).map((c) => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </select>
         )}
 
         <div className="relative flex-1">
@@ -164,28 +162,26 @@ export default function Inventory() {
           />
         </div>
 
-        <Select value={filterUnit} onValueChange={setFilterUnit}>
-          <SelectTrigger className={cn("w-full sm:w-36", isDark ? "bg-zinc-900 border-zinc-700 text-white" : "")}>
-            <SelectValue placeholder="Unidad" />
-          </SelectTrigger>
-          <SelectContent className={isDark ? "bg-zinc-800 border-zinc-700" : ""}>
-            <SelectItem value="all">Todas las UDM</SelectItem>
-            <SelectItem value="UNID">UNID</SelectItem>
-            <SelectItem value="LITROS">LITROS</SelectItem>
-            <SelectItem value="METROS">METROS</SelectItem>
-          </SelectContent>
-        </Select>
+        <select
+          value={filterUnit}
+          onChange={(e) => setFilterUnit(e.target.value)}
+          className={cn(selectClass, "w-full sm:w-36")}
+        >
+          <option value="all">Todas las UDM</option>
+          <option value="UNID">UNID</option>
+          <option value="LITROS">LITROS</option>
+          <option value="METROS">METROS</option>
+        </select>
 
-        <Select value={filterStock} onValueChange={setFilterStock}>
-          <SelectTrigger className={cn("w-full sm:w-40", isDark ? "bg-zinc-900 border-zinc-700 text-white" : "")}>
-            <SelectValue placeholder="Stock" />
-          </SelectTrigger>
-          <SelectContent className={isDark ? "bg-zinc-800 border-zinc-700" : ""}>
-            <SelectItem value="all">Todo el stock</SelectItem>
-            <SelectItem value="out">Sin stock</SelectItem>
-            <SelectItem value="low">Stock bajo</SelectItem>
-          </SelectContent>
-        </Select>
+        <select
+          value={filterStock}
+          onChange={(e) => setFilterStock(e.target.value)}
+          className={cn(selectClass, "w-full sm:w-40")}
+        >
+          <option value="all">Todo el stock</option>
+          <option value="out">Sin stock</option>
+          <option value="low">Stock bajo</option>
+        </select>
       </div>
 
       {/* Grid */}
@@ -209,7 +205,7 @@ export default function Inventory() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {filtered.filter(sp => sp?.id).map((sp) => (
+          {filtered.map((sp) => (
             <SparePartCard
               key={sp.id}
               sparePart={sp}
@@ -227,7 +223,7 @@ export default function Inventory() {
           open={dialogOpen}
           onClose={handleDialogClose}
           sparePart={editing}
-          companyId={companyId || (isSuperAdmin ? selectedCompanyId : user?.company_id)}
+          companyId={companyId || user?.company_id || ""}
         />
       )}
 
@@ -242,8 +238,7 @@ export default function Inventory() {
           </DialogHeader>
           {historyPart && (
             <div>
-              {/* Stock alert banner */}
-              {(historyPart.stock_quantity === 0) && (
+              {historyPart.stock_quantity === 0 && (
                 <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 text-sm mb-4">
                   <AlertTriangle className="w-4 h-4" />
                   <span>Sin stock disponible</span>
