@@ -82,6 +82,7 @@ export default function SparePartsSelector({ companyId, value = [], onChange, is
         spare_part_id: selected.id,
         spare_part_name: selected.name,
         part_number: selected.part_number || "",
+        specifications: selected.specifications || "",
         quantity,
         unit_cost,
       }]);
@@ -154,8 +155,17 @@ export default function SparePartsSelector({ companyId, value = [], onChange, is
                           {lastPrices[p.id]
                             ? ` · $${lastPrices[p.id].toLocaleString()} (última OC)`
                             : p.unit_cost ? ` · $${p.unit_cost.toLocaleString()}` : ""}
-                          {p.description ? ` · ${p.description}` : ""}
                         </p>
+                        {p.specifications && (
+                          <p className={cn("text-xs mt-1", isDark ? "text-zinc-500" : "text-gray-500")}>
+                            Especificación: {p.specifications}
+                          </p>
+                        )}
+                        {p.description && (
+                          <p className={cn("text-xs", isDark ? "text-zinc-500" : "text-gray-500")}>
+                            {p.description}
+                          </p>
+                        )}
                     </div>
                   ))
                 )}
@@ -205,6 +215,11 @@ export default function SparePartsSelector({ companyId, value = [], onChange, is
                   {item.part_number ? `#${item.part_number}` : "Sin N° pieza"}
                   {item.unit_cost ? ` · $${item.unit_cost.toLocaleString()}` : ""}
                 </p>
+                {item.specifications && (
+                  <p className={cn("text-xs mt-1", isDark ? "text-zinc-500" : "text-gray-500")}>
+                    {item.specifications}
+                  </p>
+                )}
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <Input
