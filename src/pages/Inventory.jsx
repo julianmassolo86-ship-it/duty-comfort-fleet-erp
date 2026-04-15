@@ -187,7 +187,7 @@ export default function Inventory() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {filtered.map((part) => part && part.id ? (
+          {filtered.filter(Boolean).map((part) => (
             <SparePartCard
               key={part.id}
               sparePart={part}
@@ -195,7 +195,7 @@ export default function Inventory() {
               onDelete={(p) => setDeleting(p)}
               onViewHistory={(p) => setHistoryPart(p)}
             />
-          ) : null)}
+          ))}
         </div>
       )}
 
