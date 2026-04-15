@@ -18,6 +18,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { cn } from "@/lib/utils";
+import SparePartSearch from "./SparePartSearch";
 
 const TASK_TYPES = [
   {
@@ -53,6 +54,7 @@ const initialState = {
   part_number: "",
   alternative_part_number: "",
   component_names: [],
+  required_spare_parts: [],
   // Solo para programas:
   interval_mileage: "",
   interval_hours: "",
@@ -99,7 +101,8 @@ export default function MaintenanceProgramDialog({
           warning_days: program.warning_days || "",
           component_names: program.component_names || [],
           linked_task_ids: program.linked_task_ids || [],
-        });
+          required_spare_parts: program.required_spare_parts || [],
+          });
       } else {
         setForm({
           ...initialState,
@@ -140,6 +143,24 @@ export default function MaintenanceProgramDialog({
 
   const removeComponent = (index) => {
     set("component_names", form.component_names.filter((_, i) => i !== index));
+  };
+
+  const handleSelectSparePart = (part, partIdToRemove) => {
+    if (partIdToRemove) {
+      // Remove
+      set("required_spare_parts", form.required_spare_parts.filter(p => p.id !== partIdToRemove));
+    } else if (part) {
+      // Add
+      const exists = form.required_spare_parts.some(p => p.id === part.id);
+      if (!exists) {
+        set("required_spare_parts", [...form.required_spare_parts, {
+          spare_part_id: part.id,
+          spare_part_name: part.name,
+          part_number: part.part_number,
+          quantity: 1
+        }]);
+      }
+    }
   };
 
   const toggleLinkedTask = (taskId) => {
@@ -423,6 +444,15 @@ export default function MaintenanceProgramDialog({
                 </div>
               </div>
             </>
+          )}
+
+          {/* Repuestos requeridos (solo para ítems) */}
+          {form.task_type === "item" && (
+            <SparePartSearch 
+              onSelectPart={handleSelectSparePart}
+              selectedParts={form.required_spare_parts}
+              companyId={form.company_id || currentUser?.company_id}
+            />
           )}
 
           {/* Especificaciones / insumos (para ítems y acciones) */}
