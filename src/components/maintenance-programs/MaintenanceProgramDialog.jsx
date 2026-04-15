@@ -404,6 +404,8 @@ export default function MaintenanceProgramDialog({
                 value={form.required_spare_parts}
                 onChange={handleSelectSparePartsList}
                 isDark={true}
+                manufacturerId={form.applies_to_manufacturer_id}
+                vehicleModelId={form.applies_to_vehicle_model_id}
               />
 
               {/* Buscador de Acciones */}

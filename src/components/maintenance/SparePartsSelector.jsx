@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { Plus, Trash2, Package, Search, ChevronDown } from "lucide-react";
 
-export default function SparePartsSelector({ companyId, value = [], onChange, isDark }) {
+export default function SparePartsSelector({ companyId, value = [], onChange, isDark, manufacturerId, vehicleModelId }) {
   const [spareParts, setSpareParts] = useState([]);
   const [lastPrices, setLastPrices] = useState({}); // { spare_part_id: unit_price }
   const [loading, setLoading] = useState(false);
@@ -56,13 +56,22 @@ export default function SparePartsSelector({ companyId, value = [], onChange, is
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const filtered = spareParts.filter(p =>
-    !search ||
-    p.name?.toLowerCase().includes(search.toLowerCase()) ||
-    p.part_number?.toLowerCase().includes(search.toLowerCase()) ||
-    p.description?.toLowerCase().includes(search.toLowerCase()) ||
-    p.specifications?.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = spareParts.filter(p => {
+    // Filtrar por búsqueda
+    const matchSearch = !search ||
+      p.name?.toLowerCase().includes(search.toLowerCase()) ||
+      p.part_number?.toLowerCase().includes(search.toLowerCase()) ||
+      p.description?.toLowerCase().includes(search.toLowerCase()) ||
+      p.specifications?.toLowerCase().includes(search.toLowerCase());
+    
+    // Filtrar por fabricante
+    const matchMfg = !manufacturerId || p.compatible_manufacturer_id === manufacturerId;
+    
+    // Filtrar por modelo de vehículo
+    const matchModel = !vehicleModelId || p.compatible_vehicle_model_id === vehicleModelId;
+    
+    return matchSearch && matchMfg && matchModel;
+  });
 
   const handleSelect = (part) => {
     setSelected(part);
