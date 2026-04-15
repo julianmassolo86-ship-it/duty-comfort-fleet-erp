@@ -70,7 +70,11 @@ export default function SparePartDialog({ open, onClose, sparePart, companyId })
 
   useEffect(() => {
     if (sparePart) {
-      setForm({ ...emptyForm, ...sparePart });
+      const normalized = { ...emptyForm, ...sparePart };
+      // Normalize null values to empty strings for Radix Select compatibility
+      const strFields = ["category_id", "subcategory_id", "compatible_manufacturer_id", "compatible_vehicle_model_id"];
+      strFields.forEach(f => { if (!normalized[f]) normalized[f] = ""; });
+      setForm(normalized);
     } else {
       setForm({ ...emptyForm, company_id: companyId || "" });
     }
