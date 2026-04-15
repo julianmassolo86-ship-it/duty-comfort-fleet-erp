@@ -175,6 +175,9 @@ export default function MaintenanceProgramDialog({
     p.id !== program?.id
   );
 
+  const typeInfo = TASK_TYPES.find(t => t.key === form.task_type);
+  const isProgram = form.task_type === "program";
+
   // Detectar marcas en repuestos y acciones seleccionadas
   const getSelectedManufacturers = () => {
     const mfgIds = new Set();
@@ -200,9 +203,6 @@ export default function MaintenanceProgramDialog({
   const selectedMfgs = isProgram ? getSelectedManufacturers() : [];
   const hasConflictingManufacturers = selectedMfgs.length > 1;
   const suggestedManufacturerId = selectedMfgs.length === 1 ? selectedMfgs[0] : null;
-
-  const typeInfo = TASK_TYPES.find(t => t.key === form.task_type);
-  const isProgram = form.task_type === "program";
 
   const dialogTitle = program
     ? `Editar: ${program.name}`
