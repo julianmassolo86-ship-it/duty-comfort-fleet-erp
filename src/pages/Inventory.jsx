@@ -71,7 +71,7 @@ export default function Inventory() {
     setDialogOpen(true);
   };
 
-  const filtered = spareParts.filter((sp) => {
+  const filtered = spareParts.filter(Boolean).filter((sp) => {
     const matchSearch =
       !search ||
       sp.name?.toLowerCase().includes(search.toLowerCase()) ||
