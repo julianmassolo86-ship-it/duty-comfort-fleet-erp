@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Trash2, Plus, X, Wrench, Zap, Package, Hash } from "lucide-react";
+import { Loader2, Trash2, Plus, X, Wrench, Zap, Package, Hash, Search, Link2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -63,6 +63,7 @@ const initialState = {
   linked_task_ids: [],
   applies_to_vehicle_type_id: "",
   applies_to_manufacturer_id: "",
+  linked_spare_part_id: null,
   company_id: "",
   is_active: true,
 };
@@ -74,12 +75,48 @@ export default function MaintenanceProgramDialog({
 }) {
   const [form, setForm] = useState(initialState);
   const [componentInput, setComponentInput] = useState("");
+  const [spareSearch, setSpareSearch] = useState("");
+  const [spareDropdownOpen, setSpareDropdownOpen] = useState(false);
+  const spareSearchRef = useRef(null);
 
   const { data: companies = [] } = useQuery({
     queryKey: ['companies'],
     queryFn: () => base44.entities.Company.list(),
     enabled: isSuperAdmin,
   });
+
+  const companyIdForQuery = isSuperAdmin
+    ? (form.company_id || null)
+    : currentUser?.company_id;
+
+  const { data: spareParts = [] } = useQuery({
+    queryKey: ['spareParts', companyIdForQuery],
+    queryFn: () => companyIdForQuery
+      ? base44.entities.SparePart.filter({ company_id: companyIdForQuery, is_active: true })
+      : base44.entities.SparePart.list(),
+    enabled: form.task_type === "item",
+  });
+
+  const filteredSpareParts = spareParts.filter(sp =>
+    sp && (
+      !spareSearch ||
+      sp.name?.toLowerCase().includes(spareSearch.toLowerCase()) ||
+      sp.part_number?.toLowerCase().includes(spareSearch.toLowerCase()) ||
+      sp.alternative_part_number?.toLowerCase().includes(spareSearch.toLowerCase())
+    )
+  ).slice(0, 20);
+
+  const handleSelectSparePart = (sp) => {
+    setForm(prev => ({
+      ...prev,
+      name: sp.name || prev.name,
+      part_number: sp.part_number || prev.part_number,
+      alternative_part_number: sp.alternative_part_number || prev.alternative_part_number,
+      linked_spare_part_id: sp.id,
+    }));
+    setSpareSearch(sp.name || "");
+    setSpareDropdownOpen(false);
+  };
 
   useEffect(() => {
     if (open) {
@@ -99,7 +136,11 @@ export default function MaintenanceProgramDialog({
           warning_days: program.warning_days || "",
           component_names: program.component_names || [],
           linked_task_ids: program.linked_task_ids || [],
+          linked_spare_part_id: program.linked_spare_part_id || null,
         });
+        if (program.linked_spare_part_id && program.task_type === "item") {
+          setSpareSearch(program.name || "");
+        }
       } else {
         setForm({
           ...initialState,
@@ -108,6 +149,8 @@ export default function MaintenanceProgramDialog({
         });
       }
       setComponentInput("");
+      setSpareSearch("");
+      setSpareDropdownOpen(false);
     }
   }, [program, open, isSuperAdmin, currentUser, defaultType]);
 
@@ -199,6 +242,65 @@ export default function MaintenanceProgramDialog({
           </div>
 
 
+
+          {/* Vinculación con repuesto del inventario (solo ítems) */}
+          {form.task_type === "item" && (
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2 text-blue-400">
+                <Link2 className="w-4 h-4" />
+                Vincular con Repuesto del Inventario
+                <span className="text-zinc-500 font-normal text-xs">(opcional)</span>
+              </Label>
+              <div className="relative">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                  <Input
+                    ref={spareSearchRef}
+                    value={spareSearch}
+                    onChange={(e) => { setSpareSearch(e.target.value); setSpareDropdownOpen(true); }}
+                    onFocus={() => setSpareDropdownOpen(true)}
+                    className="bg-zinc-900 border-zinc-700 focus:border-blue-500/50 pl-9"
+                    placeholder="Buscar repuesto por nombre o N° de pieza..."
+                  />
+                  {spareSearch && (
+                    <button type="button" onClick={() => { setSpareSearch(""); setSpareDropdownOpen(false); set("linked_spare_part_id", null); }}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300">
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+                {spareDropdownOpen && filteredSpareParts.length > 0 && (
+                  <div className="absolute z-50 w-full mt-1 bg-zinc-900 border border-zinc-700 rounded-lg shadow-xl max-h-52 overflow-y-auto">
+                    {filteredSpareParts.map(sp => (
+                      <button
+                        key={sp.id}
+                        type="button"
+                        onClick={() => handleSelectSparePart(sp)}
+                        className="w-full text-left px-3 py-2.5 hover:bg-zinc-800 border-b border-zinc-800 last:border-0"
+                      >
+                        <div className="text-sm text-white font-medium">{sp.name}</div>
+                        <div className="text-xs text-zinc-500 flex gap-3 mt-0.5">
+                          {sp.part_number && <span>OEM: {sp.part_number}</span>}
+                          {sp.alternative_part_number && <span>Alt: {sp.alternative_part_number}</span>}
+                          {sp.manufacturer && <span>{sp.manufacturer}</span>}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {spareDropdownOpen && spareSearch && filteredSpareParts.length === 0 && (
+                  <div className="absolute z-50 w-full mt-1 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-3 text-sm text-zinc-500">
+                    No se encontraron repuestos
+                  </div>
+                )}
+              </div>
+              {form.linked_spare_part_id && (
+                <p className="text-xs text-blue-400 flex items-center gap-1">
+                  <Link2 className="w-3 h-3" /> Repuesto vinculado del inventario
+                </p>
+              )}
+            </div>
+          )}
 
           {/* Nombre */}
           <div className="space-y-2">
