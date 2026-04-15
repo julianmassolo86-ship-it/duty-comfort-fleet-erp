@@ -231,18 +231,23 @@ export default function MaintenanceProgramDialog({
           {/* === CAMPOS SOLO PARA ÍTEMS === */}
           {form.task_type === "item" && (
             <div className="p-4 rounded-xl bg-blue-500/5 border border-blue-500/20 space-y-3">
-              <Label className="text-blue-400 flex items-center gap-2">
-                <Hash className="w-4 h-4" /> Identificación del Componente
-              </Label>
+              <div>
+                <Label className="text-blue-400 flex items-center gap-2">
+                  <Hash className="w-4 h-4" /> Identificación del Componente
+                </Label>
+                <p className="text-xs text-zinc-500 mt-1">
+                  💡 Esto es una <strong className="text-zinc-400">definición de mantenimiento</strong> — no es un repuesto del Almacén. Para gestionar stock físico, usá el módulo <strong className="text-zinc-400">Almacén → Repuestos</strong>.
+                </p>
+              </div>
               <div className="space-y-1">
                 <Label className="text-xs text-zinc-400">Fabricante / Marca</Label>
-                <Select value={form.applies_to_manufacturer_id || ""} onValueChange={(v) => set("applies_to_manufacturer_id", v)}>
+                <Select value={form.applies_to_manufacturer_id || "__none__"} onValueChange={(v) => set("applies_to_manufacturer_id", v === "__none__" ? "" : v)}>
                   <SelectTrigger className="bg-zinc-900 border-zinc-700 focus:border-blue-500/50">
                     <SelectValue placeholder="Seleccionar fabricante (opcional)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value={null}>Sin especificar</SelectItem>
-                    {manufacturers.map(m => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}
+                    <SelectItem value="__none__">Sin especificar</SelectItem>
+                    {manufacturers.filter(m => m?.id).map(m => <SelectItem key={m.id} value={String(m.id)}>{m.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
@@ -276,21 +281,21 @@ export default function MaintenanceProgramDialog({
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <Label className="text-xs">Fabricante</Label>
-                  <Select value={form.applies_to_manufacturer_id || ""} onValueChange={(v) => set("applies_to_manufacturer_id", v)}>
+                  <Select value={form.applies_to_manufacturer_id || "__none__"} onValueChange={(v) => set("applies_to_manufacturer_id", v === "__none__" ? "" : v)}>
                     <SelectTrigger className="bg-zinc-900 border-zinc-700"><SelectValue placeholder="Todos" /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value={null}>Todos los fabricantes</SelectItem>
-                      {manufacturers.map(m => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}
+                      <SelectItem value="__none__">Todos los fabricantes</SelectItem>
+                      {manufacturers.filter(m => m?.id).map(m => <SelectItem key={m.id} value={String(m.id)}>{m.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-1">
                   <Label className="text-xs">Tipo de Vehículo</Label>
-                  <Select value={form.applies_to_vehicle_type_id || ""} onValueChange={(v) => set("applies_to_vehicle_type_id", v)}>
+                  <Select value={form.applies_to_vehicle_type_id || "__none__"} onValueChange={(v) => set("applies_to_vehicle_type_id", v === "__none__" ? "" : v)}>
                     <SelectTrigger className="bg-zinc-900 border-zinc-700"><SelectValue placeholder="Todos" /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value={null}>Todos los tipos</SelectItem>
-                      {vehicleTypes.map(vt => <SelectItem key={vt.id} value={vt.id}>{vt.name}</SelectItem>)}
+                      <SelectItem value="__none__">Todos los tipos</SelectItem>
+                      {vehicleTypes.filter(vt => vt?.id).map(vt => <SelectItem key={vt.id} value={String(vt.id)}>{vt.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
