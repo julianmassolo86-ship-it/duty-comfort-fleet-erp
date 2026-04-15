@@ -9,6 +9,8 @@ export default function SparePartCard({ sparePart, onEdit, onDelete, onViewHisto
   const { theme } = useContext(ThemeContextValue);
   const isDark = theme === "dark";
 
+  if (!sparePart) return null;
+
   const isLowStock = sparePart.stock_quantity <= sparePart.minimum_stock && sparePart.minimum_stock > 0;
   const isOutOfStock = sparePart.stock_quantity === 0;
 
