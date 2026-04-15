@@ -146,8 +146,8 @@ export default function Inventory() {
             className={cn(selectClass, "w-full sm:w-48")}
           >
             <option value="">Todas las empresas</option>
-            {companies.filter(c => c?.id && c.name).map((c) => (
-              <option key={c.id} value={c.id}>{c.name}</option>
+            {(companies || []).filter(c => c != null && c.id != null && c.name != null).map((c) => (
+              <option key={String(c.id)} value={String(c.id)}>{String(c.name)}</option>
             ))}
           </select>
         )}
