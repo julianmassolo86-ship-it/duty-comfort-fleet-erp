@@ -222,12 +222,14 @@ export default function Inventory() {
       )}
 
       {/* Dialog */}
-      <SparePartDialog
-        open={dialogOpen}
-        onClose={handleDialogClose}
-        sparePart={editing}
-        companyId={companyId || (isSuperAdmin ? selectedCompanyId : user?.company_id)}
-      />
+      {dialogOpen && (
+        <SparePartDialog
+          open={dialogOpen}
+          onClose={handleDialogClose}
+          sparePart={editing}
+          companyId={companyId || (isSuperAdmin ? selectedCompanyId : user?.company_id)}
+        />
+      )}
 
       {/* Stock History Dialog */}
       <Dialog open={!!historyPart} onOpenChange={() => setHistoryPart(null)}>
