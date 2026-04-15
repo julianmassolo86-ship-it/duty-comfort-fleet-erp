@@ -203,36 +203,40 @@ export default function Inventory() {
       )}
 
       {/* Delete Confirmation */}
-      <AlertDialog open={!!deleting} onOpenChange={(o) => { if (!o) setDeleting(null); }}>
-        <AlertDialogContent className={isDark ? "bg-zinc-900 border-zinc-700" : ""}>
-          <AlertDialogHeader>
-            <AlertDialogTitle className={isDark ? "text-white" : ""}>¿Eliminar repuesto?</AlertDialogTitle>
-            <AlertDialogDescription className={isDark ? "text-zinc-400" : ""}>
-              Se desactivará <strong>{deleting?.name}</strong>. Esta acción se puede revertir.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className={isDark ? "border-zinc-600 text-zinc-300 hover:bg-zinc-800" : ""}>
-              Cancelar
-            </AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700 text-white">
-              Eliminar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {!!deleting && (
+        <AlertDialog open={true} onOpenChange={(o) => { if (!o) setDeleting(null); }}>
+          <AlertDialogContent className={isDark ? "bg-zinc-900 border-zinc-700" : ""}>
+            <AlertDialogHeader>
+              <AlertDialogTitle className={isDark ? "text-white" : ""}>¿Eliminar repuesto?</AlertDialogTitle>
+              <AlertDialogDescription className={isDark ? "text-zinc-400" : ""}>
+                Se desactivará <strong>{deleting.name}</strong>. Esta acción se puede revertir.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel className={isDark ? "border-zinc-600 text-zinc-300 hover:bg-zinc-800" : ""}>
+                Cancelar
+              </AlertDialogCancel>
+              <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700 text-white">
+                Eliminar
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
 
       {/* History Dialog */}
-      <Dialog open={!!historyPart} onOpenChange={(o) => { if (!o) setHistoryPart(null); }}>
-        <DialogContent className={cn("max-w-3xl max-h-[90vh] overflow-y-auto", isDark ? "bg-zinc-900 border-zinc-700" : "")}>
-          <DialogHeader>
-            <DialogTitle className={isDark ? "text-white" : ""}>
-              Historial de Movimientos — {historyPart?.name}
-            </DialogTitle>
-          </DialogHeader>
-          {historyPart && <SparePartMovementsHistory sparePartId={historyPart.id} />}
-        </DialogContent>
-      </Dialog>
+      {!!historyPart && (
+        <Dialog open={true} onOpenChange={(o) => { if (!o) setHistoryPart(null); }}>
+          <DialogContent className={cn("max-w-3xl max-h-[90vh] overflow-y-auto", isDark ? "bg-zinc-900 border-zinc-700" : "")}>
+            <DialogHeader>
+              <DialogTitle className={isDark ? "text-white" : ""}>
+                Historial de Movimientos — {historyPart.name}
+              </DialogTitle>
+            </DialogHeader>
+            <SparePartMovementsHistory sparePartId={historyPart.id} />
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
