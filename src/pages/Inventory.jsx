@@ -31,7 +31,7 @@ export default function Inventory() {
 
   const companyId = user?.company_id || "";
 
-  const { data: spareParts = [], isLoading } = useQuery({
+  const { data: sparePartsRaw = [] } = useQuery({
     queryKey: ["spare-parts", companyId],
     queryFn: () =>
       companyId
@@ -39,6 +39,9 @@ export default function Inventory() {
         : base44.entities.SparePart.list(),
     enabled: !!user,
   });
+
+  const spareParts = Array.isArray(sparePartsRaw) ? sparePartsRaw : [];
+  const isLoading = !user;
 
   const handleDialogClose = (saved) => {
     setDialogOpen(false);
