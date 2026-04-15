@@ -31,7 +31,7 @@ export default function Inventory() {
 
   const companyId = user?.company_id || "";
 
-  const { data: sparePartsRaw = [] } = useQuery({
+  const { data: sparePartsData = [], isLoading, isFetched } = useQuery({
     queryKey: ["spare-parts", companyId],
     queryFn: () =>
       companyId
@@ -40,8 +40,8 @@ export default function Inventory() {
     enabled: !!user,
   });
 
-  const spareParts = Array.isArray(sparePartsRaw) ? sparePartsRaw : [];
-  const isLoading = !user;
+  // Garantizar que spareParts siempre sea un array válido
+  const spareParts = Array.isArray(sparePartsData) ? sparePartsData.filter(p => p?.id) : [];
 
   const handleDialogClose = (saved) => {
     setDialogOpen(false);
@@ -61,9 +61,14 @@ export default function Inventory() {
     setDeleting(null);
   };
 
-  const filtered = spareParts.filter((p) => {
-    if (!p || !p.id) return false;
+  // Calcular conteos antes de filtrar
+  const lowStockCount = spareParts.filter(
+    (p) => p.stock_quantity <= p.minimum_stock && p.minimum_stock > 0 && p.stock_quantity > 0
+  ).length;
+  const outOfStockCount = spareParts.filter((p) => p.stock_quantity === 0).length;
 
+  // Filtrar repuestos
+  const filtered = spareParts.filter((p) => {
     const matchSearch =
       !search ||
       p.name?.toLowerCase().includes(search.toLowerCase()) ||
@@ -82,11 +87,6 @@ export default function Inventory() {
 
     return matchSearch && matchStatus;
   });
-
-  const lowStockCount = spareParts.filter(
-    (p) => p.stock_quantity <= p.minimum_stock && p.minimum_stock > 0 && p.stock_quantity > 0
-  ).length;
-  const outOfStockCount = spareParts.filter((p) => p.stock_quantity === 0).length;
 
   const filterBtns = [
     { key: "all", label: "Todos" },
@@ -185,7 +185,7 @@ export default function Inventory() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {filtered.filter(part => part?.id).map((part) => (
+          {filtered.map((part) => (
             <SparePartCard
               key={part.id}
               sparePart={part}
@@ -208,40 +208,36 @@ export default function Inventory() {
       )}
 
       {/* Delete Confirmation */}
-      {deleting ? (
-        <AlertDialog open={true} onOpenChange={(o) => { if (!o) setDeleting(null); }}>
-          <AlertDialogContent className={isDark ? "bg-zinc-900 border-zinc-700" : ""}>
-            <AlertDialogHeader>
-              <AlertDialogTitle className={isDark ? "text-white" : ""}>¿Eliminar repuesto?</AlertDialogTitle>
-              <AlertDialogDescription className={isDark ? "text-zinc-400" : ""}>
-                Se desactivará <strong>{deleting.name}</strong>. Esta acción se puede revertir.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel className={isDark ? "border-zinc-600 text-zinc-300 hover:bg-zinc-800" : ""}>
-                Cancelar
-              </AlertDialogCancel>
-              <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700 text-white">
-                Eliminar
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      ) : null}
+      <AlertDialog open={!!deleting} onOpenChange={(o) => { if (!o) setDeleting(null); }}>
+        <AlertDialogContent className={isDark ? "bg-zinc-900 border-zinc-700" : ""}>
+          <AlertDialogHeader>
+            <AlertDialogTitle className={isDark ? "text-white" : ""}>¿Eliminar repuesto?</AlertDialogTitle>
+            <AlertDialogDescription className={isDark ? "text-zinc-400" : ""}>
+              Se desactivará <strong>{deleting?.name}</strong>. Esta acción se puede revertir.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className={isDark ? "border-zinc-600 text-zinc-300 hover:bg-zinc-800" : ""}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700 text-white">
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* History Dialog */}
-      {historyPart ? (
-        <Dialog open={true} onOpenChange={(o) => { if (!o) setHistoryPart(null); }}>
-          <DialogContent className={cn("max-w-3xl max-h-[90vh] overflow-y-auto", isDark ? "bg-zinc-900 border-zinc-700" : "")}>
-            <DialogHeader>
-              <DialogTitle className={isDark ? "text-white" : ""}>
-                Historial de Movimientos — {historyPart.name}
-              </DialogTitle>
-            </DialogHeader>
-            <SparePartMovementsHistory sparePartId={historyPart.id} />
-          </DialogContent>
-        </Dialog>
-      ) : null}
+      <Dialog open={!!historyPart} onOpenChange={(o) => { if (!o) setHistoryPart(null); }}>
+        <DialogContent className={cn("max-w-3xl max-h-[90vh] overflow-y-auto", isDark ? "bg-zinc-900 border-zinc-700" : "")}>
+          <DialogHeader>
+            <DialogTitle className={isDark ? "text-white" : ""}>
+              Historial de Movimientos — {historyPart?.name}
+            </DialogTitle>
+          </DialogHeader>
+          {historyPart && <SparePartMovementsHistory sparePartId={historyPart.id} />}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
