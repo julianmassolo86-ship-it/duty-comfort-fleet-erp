@@ -17,16 +17,18 @@ export default function SparePartSearch({ onSelectPart, selectedParts = [], comp
     enabled: !!companyId,
   });
 
-  const filteredParts = spareParts.filter(part => {
-    if (!searchTerm.trim()) return true;
-    const search = searchTerm.toLowerCase();
-    return (
-      part.name?.toLowerCase().includes(search) ||
-      part.part_number?.toLowerCase().includes(search) ||
-      part.alternative_part_number?.toLowerCase().includes(search) ||
-      part.description?.toLowerCase().includes(search)
-    );
-  });
+  const filteredParts = spareParts
+    .filter(part => !selectedParts.some(sp => sp.id === part.id)) // Excluir ya seleccionados
+    .filter(part => {
+      if (!searchTerm.trim()) return true;
+      const search = searchTerm.toLowerCase();
+      return (
+        part.name?.toLowerCase().includes(search) ||
+        part.part_number?.toLowerCase().includes(search) ||
+        part.alternative_part_number?.toLowerCase().includes(search) ||
+        part.description?.toLowerCase().includes(search)
+      );
+    });
 
   const handleSelectPart = (part) => {
     onSelectPart(part);
@@ -61,7 +63,7 @@ export default function SparePartSearch({ onSelectPart, selectedParts = [], comp
           </div>
 
           {/* Dropdown de resultados */}
-          {showDropdown && filteredParts.length > 0 && (
+          {showDropdown && (filteredParts.length > 0 ? (
             <div className="absolute top-full left-0 right-0 mt-1 bg-zinc-900 border border-zinc-700 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto">
               {filteredParts.map(part => (
                 <button
@@ -85,8 +87,12 @@ export default function SparePartSearch({ onSelectPart, selectedParts = [], comp
                   </div>
                 </button>
               ))}
-            </div>
-          )}
+              </div>
+              ) : searchTerm.trim() ? (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-zinc-900 border border-zinc-700 rounded-lg shadow-lg z-50 p-3 text-center text-sm text-zinc-500">
+              No se encontraron repuestos
+              </div>
+              ) : null)}
         </div>
       </div>
 
