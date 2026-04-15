@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Plus, Search, Package, AlertTriangle, History, X } from "lucide-react";
+import { Plus, Search, Package, AlertTriangle, History } from "lucide-react";
 import SparePartCard from "@/components/inventory/SparePartCard";
 import SparePartDialog from "@/components/inventory/SparePartDialog";
 import SparePartMovementsHistory from "@/components/inventory/SparePartMovementsHistory";
