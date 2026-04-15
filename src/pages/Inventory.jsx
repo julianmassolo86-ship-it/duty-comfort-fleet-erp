@@ -150,7 +150,7 @@ export default function Inventory() {
             </SelectTrigger>
             <SelectContent className={isDark ? "bg-zinc-800 border-zinc-700" : ""}>
               <SelectItem value="all">Todas las empresas</SelectItem>
-              {companies.filter((c) => c?.id).map((c) => (
+              {companies.filter((c) => c?.id != null && c.id !== "").map((c) => (
                 <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>
               ))}
             </SelectContent>
