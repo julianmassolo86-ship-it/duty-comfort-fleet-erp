@@ -117,13 +117,14 @@ export default function SparePartDialog({ open, onClose, sparePart, companyId })
           <div className="space-y-1">
             <Label className={labelClass}>Categoría</Label>
             <Select
-              value={form.category_id || ""}
-              onValueChange={(v) => { set("category_id", v); set("subcategory_id", ""); }}
+              value={form.category_id || "__none__"}
+              onValueChange={(v) => { set("category_id", v === "__none__" ? "" : v); set("subcategory_id", ""); }}
             >
               <SelectTrigger className={cn("h-9", isDark ? "bg-zinc-800 border-zinc-700 text-white" : "")}>
                 <SelectValue placeholder="Seleccionar categoría" />
               </SelectTrigger>
               <SelectContent className={isDark ? "bg-zinc-800 border-zinc-700" : ""}>
+                <SelectItem value="__none__">Sin categoría</SelectItem>
                 {sparePartCategories.filter(c => c?.id && c.is_active !== false).sort((a, b) => a.name.localeCompare(b.name)).map((c) => (
                   <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>
                 ))}
@@ -135,14 +136,15 @@ export default function SparePartDialog({ open, onClose, sparePart, companyId })
           <div className="space-y-1">
             <Label className={labelClass}>Subcategoría</Label>
             <Select
-              value={form.subcategory_id || ""}
-              onValueChange={(v) => set("subcategory_id", v)}
+              value={form.subcategory_id || "__none__"}
+              onValueChange={(v) => set("subcategory_id", v === "__none__" ? "" : v)}
               disabled={!form.category_id || filteredSubcategories.length === 0}
             >
               <SelectTrigger className={cn("h-9", isDark ? "bg-zinc-800 border-zinc-700 text-white" : "")}>
                 <SelectValue placeholder={!form.category_id ? "Primero seleccioná una categoría" : filteredSubcategories.length === 0 ? "Sin subcategorías" : "Seleccionar subcategoría"} />
               </SelectTrigger>
               <SelectContent className={isDark ? "bg-zinc-800 border-zinc-700" : ""}>
+                <SelectItem value="__none__">Sin subcategoría</SelectItem>
                 {filteredSubcategories.filter(s => s?.id).sort((a, b) => a.name.localeCompare(b.name)).map((s) => (
                   <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>
                 ))}
@@ -184,9 +186,9 @@ export default function SparePartDialog({ open, onClose, sparePart, companyId })
           <div className="space-y-1">
             <Label className={labelClass}>Marca</Label>
             <Select
-              value={form.compatible_manufacturer_id || ""}
+              value={form.compatible_manufacturer_id || "__none__"}
               onValueChange={(v) => {
-                set("compatible_manufacturer_id", v);
+                set("compatible_manufacturer_id", v === "__none__" ? "" : v);
                 set("compatible_vehicle_model_id", "");
               }}
             >
@@ -194,6 +196,7 @@ export default function SparePartDialog({ open, onClose, sparePart, companyId })
                 <SelectValue placeholder="Apto para todo" />
               </SelectTrigger>
               <SelectContent className={isDark ? "bg-zinc-800 border-zinc-700" : ""}>
+                <SelectItem value="__none__">Apto para todo</SelectItem>
                 {manufacturers.filter(m => m?.id).sort((a, b) => a.name.localeCompare(b.name)).map((m) => (
                   <SelectItem key={m.id} value={String(m.id)}>
                     <div className="flex items-center gap-2">
@@ -209,14 +212,15 @@ export default function SparePartDialog({ open, onClose, sparePart, companyId })
           <div className="space-y-1">
             <Label className={labelClass}>Modelo</Label>
             <Select
-              value={form.compatible_vehicle_model_id || ""}
-              onValueChange={(v) => set("compatible_vehicle_model_id", v)}
+              value={form.compatible_vehicle_model_id || "__none__"}
+              onValueChange={(v) => set("compatible_vehicle_model_id", v === "__none__" ? "" : v)}
               disabled={!form.compatible_manufacturer_id}
             >
               <SelectTrigger className={cn("h-9", isDark ? "bg-zinc-800 border-zinc-700 text-white" : "")}>
                 <SelectValue placeholder={!form.compatible_manufacturer_id ? "Seleccioná una marca" : "Todos los modelos"} />
               </SelectTrigger>
               <SelectContent className={isDark ? "bg-zinc-800 border-zinc-700" : ""}>
+                <SelectItem value="__none__">Todos los modelos</SelectItem>
                 {filteredModels.filter(m => m?.id).map((m) => (
                   <SelectItem key={m.id} value={String(m.id)}>{m.name}</SelectItem>
                 ))}
