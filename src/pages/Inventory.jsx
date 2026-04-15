@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ThemeContextValue } from "@/components/common/ThemeWrapper";
@@ -25,7 +25,7 @@ export default function Inventory() {
   const [historyPart, setHistoryPart] = useState(null);
 
   const [user, setUser] = useState(null);
-  React.useEffect(() => {
+  useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
 
@@ -180,7 +180,7 @@ export default function Inventory() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {filtered.map((part) => (
+          {filtered.filter(Boolean).map((part) => (
             <SparePartCard
               key={part.id}
               sparePart={part}
