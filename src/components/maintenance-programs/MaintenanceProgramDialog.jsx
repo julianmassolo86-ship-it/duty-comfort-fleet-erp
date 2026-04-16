@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Trash2, Plus, X, Wrench, Zap, Package, Hash, AlertTriangle } from "lucide-react";
+import { Loader2, Trash2, Plus, X, Zap, Package, AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -22,14 +22,6 @@ import SparePartsSelector from "@/components/maintenance/SparePartsSelector";
 
 const TASK_TYPES = [
   {
-    key: "item",
-    label: "Ítem",
-    sublabel: "Componente / Insumo",
-    description: "Un repuesto o insumo físico (Filtro de aceite, Aceite motor, Filtro de cabina...)",
-    icon: Wrench,
-    activeColor: "border-blue-500 bg-blue-500/20 text-blue-300",
-  },
-  {
     key: "action",
     label: "Acción",
     sublabel: "Procedimiento",
@@ -41,7 +33,7 @@ const TASK_TYPES = [
     key: "program",
     label: "Programa",
     sublabel: "Agrupador con intervalo",
-    description: "Agrupa ítems y acciones y define los intervalos y avisos del conjunto (Servicio A, PM2, Inspección S...)",
+    description: "Agrupa acciones y define los intervalos y avisos del conjunto (Servicio A, PM2, Inspección S...)",
     icon: Package,
     activeColor: "border-yellow-500 bg-yellow-500/20 text-yellow-300",
   },
@@ -50,7 +42,7 @@ const TASK_TYPES = [
 const initialState = {
   name: "",
   description: "",
-  task_type: "item",
+  task_type: "action",
   part_number: "",
   alternative_part_number: "",
   component_names: [],
@@ -195,8 +187,7 @@ export default function MaintenanceProgramDialog({
   const dialogTitle = program
     ? `Editar: ${program.name}`
     : isProgram ? "Nuevo Programa de Servicio"
-    : form.task_type === "action" ? "Nueva Acción"
-    : "Nuevo Ítem / Componente";
+    : "Nueva Acción";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -277,52 +268,6 @@ export default function MaintenanceProgramDialog({
               rows={2}
             />
           </div>
-
-          {/* === CAMPOS SOLO PARA ÍTEMS === */}
-          {form.task_type === "item" && (
-            <div className="p-4 rounded-xl bg-blue-500/5 border border-blue-500/20 space-y-3">
-              <div>
-                <Label className="text-blue-400 flex items-center gap-2">
-                  <Hash className="w-4 h-4" /> Identificación del Componente
-                </Label>
-                <p className="text-xs text-zinc-500 mt-1">
-                  💡 Esto es una <strong className="text-zinc-400">definición de mantenimiento</strong> — no es un repuesto del Almacén. Para gestionar stock físico, usá el módulo <strong className="text-zinc-400">Almacén → Repuestos</strong>.
-                </p>
-              </div>
-              <div className="space-y-1">
-                <Label className="text-xs text-zinc-400">Fabricante / Marca</Label>
-                <Select value={form.applies_to_manufacturer_id || "__none__"} onValueChange={(v) => set("applies_to_manufacturer_id", v === "__none__" ? "" : v)}>
-                  <SelectTrigger className="bg-zinc-900 border-zinc-700 focus:border-blue-500/50">
-                    <SelectValue placeholder="Seleccionar fabricante (opcional)" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="__none__">Sin especificar</SelectItem>
-                    {manufacturers.filter(m => m?.id).map(m => <SelectItem key={m.id} value={String(m.id)}>{m.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <Label className="text-xs text-zinc-400">Número de Pieza (OEM)</Label>
-                  <Input
-                    value={form.part_number}
-                    onChange={(e) => set("part_number", e.target.value)}
-                    className="bg-zinc-900 border-zinc-700 focus:border-blue-500/50"
-                    placeholder="Ej: 7420543688"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs text-zinc-400">N° de Pieza Alternativo</Label>
-                  <Input
-                    value={form.alternative_part_number}
-                    onChange={(e) => set("alternative_part_number", e.target.value)}
-                    className="bg-zinc-900 border-zinc-700 focus:border-blue-500/50"
-                    placeholder="Ej: SH8019L, LF16015"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* === CAMPOS SOLO PARA ACCIONES === */}
           {form.task_type === "action" && (
