@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Trash2, Plus, X, Zap, Package, AlertTriangle } from "lucide-react";
+import { Loader2, Trash2, Plus, X, Zap, Package, AlertTriangle, Copy } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -157,6 +157,25 @@ export default function MaintenanceProgramDialog({
   const availableItemsAndActions = allPrograms.filter(p =>
     p.id !== program?.id
   );
+
+  // Programas existentes (para "Basado en...")
+  const availableBasePrograms = allPrograms.filter(p =>
+    p.task_type === "program" && p.id !== program?.id
+  );
+
+  const handleBasedOnProgram = (baseProgramId) => {
+    if (!baseProgramId || baseProgramId === "__none__") return;
+    const base = allPrograms.find(p => p.id === baseProgramId);
+    if (!base) return;
+    // Hereda linked_task_ids del programa base, fusionando con los actuales
+    const baseIds = base.linked_task_ids || [];
+    const merged = Array.from(new Set([...baseIds, ...form.linked_task_ids]));
+    set("linked_task_ids", merged);
+    // Sugiere fabricante si no está seteado
+    if (!form.applies_to_manufacturer_id && base.applies_to_manufacturer_id) {
+      set("applies_to_manufacturer_id", base.applies_to_manufacturer_id);
+    }
+  };
 
   const typeInfo = TASK_TYPES.find(t => t.key === form.task_type);
   const isProgram = form.task_type === "program";
@@ -355,6 +374,30 @@ export default function MaintenanceProgramDialog({
                 manufacturerId={form.applies_to_manufacturer_id}
                 vehicleModelId={form.applies_to_vehicle_model_id}
               />
+
+              {/* Basado en programa existente */}
+              {!program && availableBasePrograms.length > 0 && (
+                <div className="p-4 rounded-xl bg-blue-500/5 border border-blue-500/20 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Copy className="w-4 h-4 text-blue-400" />
+                    <Label className="text-blue-400">Basado en programa existente</Label>
+                  </div>
+                  <p className="text-xs text-zinc-500">Seleccioná un programa base para heredar todas sus acciones. Podrás agregar más después.</p>
+                  <Select onValueChange={handleBasedOnProgram} defaultValue="__none__">
+                    <SelectTrigger className="bg-zinc-900 border-zinc-700 focus:border-blue-500/50">
+                      <SelectValue placeholder="Seleccionar programa base (opcional)..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__none__">Sin base — programa desde cero</SelectItem>
+                      {availableBasePrograms.map(p => {
+                        const mfgName = manufacturers.find(m => m.id === p.applies_to_manufacturer_id)?.name;
+                        const label = mfgName ? `${p.name} (${mfgName})` : p.name;
+                        return <SelectItem key={p.id} value={p.id}>{label}</SelectItem>;
+                      })}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
               {/* Buscador de Acciones */}
               <div className="p-4 rounded-xl bg-green-500/5 border border-green-500/20 space-y-2">
