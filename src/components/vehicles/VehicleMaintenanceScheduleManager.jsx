@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Gauge, Clock, Calendar, CheckCircle2, AlertCircle, Loader2, Printer, GitMerge, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -59,6 +60,7 @@ export default function VehicleMaintenanceScheduleManager({ vehicleId, vehicle, 
   const [recordDialogOpen, setRecordDialogOpen] = useState(false);
   const [selectedSchedule, setSelectedSchedule] = useState(null);
   const [printingScheduleId, setPrintingScheduleId] = useState(null);
+  const [deleteConfirm, setDeleteConfirm] = useState(null); // { schedule, taskDef }
   const [recordForm, setRecordForm] = useState({
     date: new Date().toISOString().split('T')[0],
     mileage: currentMileage || 0,
@@ -109,8 +111,7 @@ export default function VehicleMaintenanceScheduleManager({ vehicleId, vehicle, 
   });
 
   const handleDeleteSchedule = (schedule, taskDef) => {
-    if (!confirm(`¿Eliminar el programa "${taskDef?.name}" de este vehículo?`)) return;
-    deleteScheduleMutation.mutate(schedule.id);
+    setDeleteConfirm({ schedule, taskDef });
   };
 
   const recordMaintenanceMutation = useMutation({
@@ -407,6 +408,27 @@ export default function VehicleMaintenanceScheduleManager({ vehicleId, vehicle, 
           </div>
         );
       })}
+
+      {/* Confirmación de eliminación */}
+      <AlertDialog open={!!deleteConfirm} onOpenChange={(open) => { if (!open) setDeleteConfirm(null); }}>
+        <AlertDialogContent className="bg-zinc-950 border-zinc-800 text-white">
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar programa?</AlertDialogTitle>
+            <AlertDialogDescription className="text-zinc-400">
+              Se eliminará el programa <span className="text-white font-semibold">"{deleteConfirm?.taskDef?.name}"</span> de este vehículo. Esta acción no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="border-zinc-700 text-zinc-300 bg-transparent hover:bg-zinc-800">Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => { deleteScheduleMutation.mutate(deleteConfirm.schedule.id); setDeleteConfirm(null); }}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Dialog para registrar mantenimiento completado */}
       <Dialog open={recordDialogOpen} onOpenChange={setRecordDialogOpen}>
