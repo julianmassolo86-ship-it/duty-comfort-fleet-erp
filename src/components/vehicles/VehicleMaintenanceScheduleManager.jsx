@@ -220,32 +220,18 @@ export default function VehicleMaintenanceScheduleManager({ vehicleId, vehicle, 
     return { status: 'on_track', color: 'bg-green-500', text: 'Al día', detail: '' };
   };
 
-  // Filtrar y mostrar solo el programa de mayor jerarquía por grupo jerárquico
+  // Mostrar todos los programas asignados al vehículo
   const getVisibleSchedules = () => {
-    const programSchedules = schedules.filter(s => {
-      const def = taskDefinitions.find(t => t.id === s.maintenance_task_definition_id);
-      return def?.task_type === 'program';
-    });
-
-    // Para cada programa, calcular su nivel (mayor = mejor)
-    const withLevel = programSchedules.map(s => {
-      const def = taskDefinitions.find(t => t.id === s.maintenance_task_definition_id);
-      const level = resolveLevel(def?.id, taskDefinitions);
-      return { schedule: s, def, level };
-    });
-
-    // Para cada programa, verificar si algún programa de mayor nivel ya lo "absorbe"
-    // Un programa A absorbe a B si en la cadena de A (resolveChainDown) aparece el id de B
-    const absorbedIds = new Set();
-    withLevel.forEach(({ def }) => {
-      if (!def) return;
-      const chain = resolveChainDown(def.id, taskDefinitions);
-      // Los de mayor nivel absorben a los de menor nivel en su cadena
-      chain.slice(1).forEach(ancestor => absorbedIds.add(ancestor.id));
-    });
-
-    // Mostrar solo los no absorbidos
-    return withLevel.filter(({ def }) => def && !absorbedIds.has(def.id));
+    return schedules
+      .filter(s => {
+        const def = taskDefinitions.find(t => t.id === s.maintenance_task_definition_id);
+        return def?.task_type === 'program';
+      })
+      .map(s => {
+        const def = taskDefinitions.find(t => t.id === s.maintenance_task_definition_id);
+        const level = resolveLevel(def?.id, taskDefinitions);
+        return { schedule: s, def, level };
+      });
   };
 
   const visibleSchedules = getVisibleSchedules();
