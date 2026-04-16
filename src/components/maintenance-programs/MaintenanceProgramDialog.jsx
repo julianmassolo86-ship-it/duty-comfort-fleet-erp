@@ -216,28 +216,7 @@ export default function MaintenanceProgramDialog({
 
         <form onSubmit={handleSubmit} className="space-y-5">
 
-          {/* Tipo */}
-          <div className="space-y-2">
-            <Label>Tipo *</Label>
-            <div className="grid grid-cols-3 gap-2">
-              {TASK_TYPES.map(type => (
-                <button key={type.key} type="button"
-                  onClick={() => set("task_type", type.key)}
-                  className={cn(
-                    "flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all text-center",
-                    form.task_type === type.key
-                      ? type.activeColor
-                      : "border-zinc-800 bg-zinc-900 text-zinc-500 hover:border-zinc-700"
-                  )}
-                >
-                  <type.icon className="w-5 h-5" />
-                  <span className="text-xs font-bold">{type.label}</span>
-                  <span className="text-[10px] opacity-70 leading-tight">{type.sublabel}</span>
-                </button>
-              ))}
-            </div>
-            {typeInfo && <p className="text-xs text-zinc-500">{typeInfo.description}</p>}
-          </div>
+
 
 
 
