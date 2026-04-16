@@ -1,0 +1,113 @@
+{
+  "name": "MaintenanceTaskDefinition",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Nombre del programa, tarea, \u00edtem o acci\u00f3n"
+    },
+    "description": {
+      "type": "string",
+      "description": "Descripci\u00f3n detallada"
+    },
+    "task_type": {
+      "type": "string",
+      "enum": [
+        "item",
+        "action",
+        "program"
+      ],
+      "default": "item",
+      "description": "Tipo: item (componente/insumo), action (procedimiento/acci\u00f3n), program (programa agrupador)"
+    },
+    "part_number": {
+      "type": "string",
+      "description": "N\u00famero de pieza OEM del componente"
+    },
+    "alternative_part_number": {
+      "type": "string",
+      "description": "N\u00famero de pieza alternativo del componente"
+    },
+    "interval_mileage": {
+      "type": "number",
+      "description": "Intervalo en kil\u00f3metros"
+    },
+    "interval_hours": {
+      "type": "number",
+      "description": "Intervalo en horas de uso"
+    },
+    "interval_months": {
+      "type": "number",
+      "description": "Intervalo en meses (por envejecimiento/quietud)"
+    },
+    "warning_mileage": {
+      "type": "number",
+      "description": "Aviso previo en kil\u00f3metros antes del vencimiento"
+    },
+    "warning_hours": {
+      "type": "number",
+      "description": "Aviso previo en horas antes del vencimiento"
+    },
+    "warning_days": {
+      "type": "number",
+      "description": "Aviso previo en d\u00edas antes del vencimiento"
+    },
+    "linked_task_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs de \u00edtems y acciones que componen este programa (solo si task_type=program)"
+    },
+    "parent_program_id": {
+      "type": "string",
+      "description": "ID del programa de menor jerarqu\u00eda que este programa incluye/absorbe (ej: M incluye a S, parent_program_id = id de S). Nullable."
+    },
+    "required_spare_parts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "spare_part_id": {
+            "type": "string",
+            "description": "ID del repuesto"
+          },
+          "quantity": {
+            "type": "number",
+            "description": "Cantidad requerida"
+          }
+        }
+      },
+      "description": "Repuestos requeridos para ejecutar esta tarea"
+    },
+    "applies_to_vehicle_type_id": {
+      "type": "string",
+      "description": "ID del tipo de veh\u00edculo espec\u00edfico (opcional)"
+    },
+    "applies_to_manufacturer_id": {
+      "type": "string",
+      "description": "ID del fabricante espec\u00edfico (opcional)"
+    },
+    "component_names": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Especificaciones o insumos relacionados (ej: SAE 15W40, Capacidad 18L)"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "ID de la empresa"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Si est\u00e1 activo"
+    }
+  },
+  "required": [
+    "name",
+    "task_type",
+    "company_id"
+  ]
+}

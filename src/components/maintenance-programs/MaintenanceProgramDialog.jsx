@@ -69,6 +69,7 @@ export default function MaintenanceProgramDialog({
 }) {
   const [form, setForm] = useState(initialState);
   const [componentInput, setComponentInput] = useState("");
+  const [selectedBaseId, setSelectedBaseId] = useState("__none__");
 
   const { data: companies = [] } = useQuery({
     queryKey: ['companies'],
@@ -106,6 +107,7 @@ export default function MaintenanceProgramDialog({
         });
       }
       setComponentInput("");
+      setSelectedBaseId(program?.parent_program_id || "__none__");
     }
   }, [program, open, isSuperAdmin, currentUser, defaultType]);
 
@@ -128,6 +130,7 @@ export default function MaintenanceProgramDialog({
       part_number: !isProgram ? form.part_number : null,
       alternative_part_number: !isProgram ? form.alternative_part_number : null,
       linked_task_ids: isProgram ? form.linked_task_ids : [],
+      parent_program_id: isProgram ? (form.parent_program_id || null) : null,
     });
   };
 
@@ -158,28 +161,21 @@ export default function MaintenanceProgramDialog({
     p.id !== program?.id
   );
 
-  // Programas existentes (para "Basado en...")
+  // Programas existentes (para jerarquía)
   const availableBasePrograms = allPrograms.filter(p =>
     p.task_type === "program" && p.id !== program?.id
   );
 
   const handleBasedOnProgram = (baseProgramId) => {
-    if (!baseProgramId || baseProgramId === "__none__") return;
+    setSelectedBaseId(baseProgramId);
+    if (!baseProgramId || baseProgramId === "__none__") {
+      set("parent_program_id", null);
+      return;
+    }
     const base = allPrograms.find(p => p.id === baseProgramId);
     if (!base) return;
-    // Hereda linked_task_ids fusionando con los actuales
-    const baseIds = base.linked_task_ids || [];
-    const merged = Array.from(new Set([...baseIds, ...form.linked_task_ids]));
-    set("linked_task_ids", merged);
-    // Hereda required_spare_parts fusionando (por spare_part_id)
-    const baseParts = base.required_spare_parts || [];
-    const currentParts = form.required_spare_parts || [];
-    const mergedParts = [...currentParts];
-    baseParts.forEach(bp => {
-      const exists = mergedParts.find(cp => cp.spare_part_id === bp.spare_part_id);
-      if (!exists) mergedParts.push({ ...bp });
-    });
-    set("required_spare_parts", mergedParts);
+    // Guarda el parent_program_id en lugar de copiar ítems
+    set("parent_program_id", baseProgramId);
     // Sugiere fabricante si no está seteado
     if (!form.applies_to_manufacturer_id && base.applies_to_manufacturer_id) {
       set("applies_to_manufacturer_id", base.applies_to_manufacturer_id);
@@ -375,28 +371,44 @@ export default function MaintenanceProgramDialog({
               </div>
 
               {/* Basado en programa existente */}
-              {!program && availableBasePrograms.length > 0 && (
+              {availableBasePrograms.length > 0 && (
                 <div className="p-4 rounded-xl bg-blue-500/5 border border-blue-500/20 space-y-2">
                   <div className="flex items-center gap-2">
                     <Copy className="w-4 h-4 text-blue-400" />
-                    <Label className="text-blue-400">Basado en programa existente</Label>
+                    <Label className="text-blue-400">{program ? "Programa incluido (jerarquía)" : "Incluye / Basado en programa existente"}</Label>
                   </div>
-                  <p className="text-xs text-zinc-500">Seleccioná un programa base para heredar sus acciones <strong className="text-zinc-300">y repuestos</strong>. Podrás agregar o quitar después.</p>
-                  <Select onValueChange={handleBasedOnProgram} defaultValue="__none__">
+                  <p className="text-xs text-zinc-500">
+                    {program
+                      ? "Seleccioná el programa de menor nivel que este contiene (ej: M incluye S)."
+                      : "Seleccioná el programa de menor nivel que este nuevo programa incluye. Esto establece la jerarquía compositiva."}
+                  </p>
+                  <Select
+                    value={program ? (form.parent_program_id || "__none__") : selectedBaseId}
+                    onValueChange={handleBasedOnProgram}
+                  >
                     <SelectTrigger className="bg-zinc-900 border-zinc-700 focus:border-blue-500/50">
-                      <SelectValue placeholder="Seleccionar programa base (opcional)..." />
+                      <SelectValue placeholder="Sin programa incluido" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="__none__">Sin base — programa desde cero</SelectItem>
+                      <SelectItem value="__none__">Sin jerarquía — programa independiente</SelectItem>
                       {availableBasePrograms.map(p => {
                         const mfgName = manufacturers.find(m => m.id === p.applies_to_manufacturer_id)?.name;
-                        const actionCount = (p.linked_task_ids || []).length;
-                        const partCount = (p.required_spare_parts || []).length;
-                        const label = `${p.name}${mfgName ? ` (${mfgName})` : ''} — ${actionCount} acciones, ${partCount} repuestos`;
+                        const label = `${p.name}${mfgName ? ` (${mfgName})` : ''}`;
                         return <SelectItem key={p.id} value={p.id}>{label}</SelectItem>;
                       })}
                     </SelectContent>
                   </Select>
+                  {form.parent_program_id && form.parent_program_id !== "__none__" && (() => {
+                    const baseP = allPrograms.find(p => p.id === form.parent_program_id);
+                    return baseP ? (
+                      <div className="flex items-center gap-2 p-2 rounded-lg bg-blue-500/10 border border-blue-500/20">
+                        <Copy className="w-3 h-3 text-blue-400 shrink-0" />
+                        <span className="text-xs text-blue-300">
+                          Este programa <strong>incluye</strong> a <strong>{baseP.name}</strong>. Al marcarlo como realizado, también se actualizará {baseP.name}.
+                        </span>
+                      </div>
+                    ) : null;
+                  })()}
                 </div>
               )}
 

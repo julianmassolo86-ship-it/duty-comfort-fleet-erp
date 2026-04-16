@@ -6,10 +6,56 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Gauge, Clock, Calendar, CheckCircle2, AlertCircle, Loader2, Printer } from "lucide-react";
+import { Gauge, Clock, Calendar, CheckCircle2, AlertCircle, Loader2, Printer, GitMerge } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export default function VehicleMaintenanceScheduleManager({ vehicleId, currentMileage, currentHours }) {
+// Resuelve recursivamente toda la cadena hacia abajo (incluyendo al programa dado y sus parent_program_id anidados)
+function resolveChainDown(programId, allDefs, visited = new Set()) {
+  if (!programId || visited.has(programId)) return [];
+  visited.add(programId);
+  const def = allDefs.find(d => d.id === programId);
+  if (!def) return [];
+  const chain = [def];
+  if (def.parent_program_id) {
+    chain.push(...resolveChainDown(def.parent_program_id, allDefs, visited));
+  }
+  return chain;
+}
+
+// Resuelve nivel jerárquico: cuántos ancestros tiene (nivel 1 = sin parent, nivel 2 = tiene parent, etc.)
+function resolveLevel(programId, allDefs, visited = new Set()) {
+  if (!programId || visited.has(programId)) return 1;
+  visited.add(programId);
+  const def = allDefs.find(d => d.id === programId);
+  if (!def || !def.parent_program_id) return 1;
+  return 1 + resolveLevel(def.parent_program_id, allDefs, visited);
+}
+
+// Calcula urgencia numérica para ordenar cuál es "más próximo"
+function getUrgencyScore(schedule, taskDef, currentMileage, currentHours) {
+  let minScore = Infinity;
+  if (taskDef.interval_mileage && schedule.next_due_mileage) {
+    const remaining = schedule.next_due_mileage - (currentMileage || 0);
+    const pct = remaining / taskDef.interval_mileage;
+    minScore = Math.min(minScore, pct);
+  }
+  if (taskDef.interval_hours && schedule.next_due_hours) {
+    const remaining = schedule.next_due_hours - (currentHours || 0);
+    const pct = remaining / taskDef.interval_hours;
+    minScore = Math.min(minScore, pct);
+  }
+  if (taskDef.interval_months && schedule.next_due_date) {
+    const today = new Date();
+    const due = new Date(schedule.next_due_date);
+    const diffDays = (due - today) / (1000 * 60 * 60 * 24);
+    const intervalDays = taskDef.interval_months * 30;
+    const pct = diffDays / intervalDays;
+    minScore = Math.min(minScore, pct);
+  }
+  return minScore;
+}
+
+export default function VehicleMaintenanceScheduleManager({ vehicleId, vehicle, currentMileage, currentHours }) {
   const [recordDialogOpen, setRecordDialogOpen] = useState(false);
   const [selectedSchedule, setSelectedSchedule] = useState(null);
   const [printingScheduleId, setPrintingScheduleId] = useState(null);
@@ -31,39 +77,72 @@ export default function VehicleMaintenanceScheduleManager({ vehicleId, currentMi
     queryFn: () => base44.entities.MaintenanceTaskDefinition.list(),
   });
 
+  // Función que actualiza un schedule dado un taskDef y datos del form
+  const updateSchedule = async (scheduleId, taskDef, data) => {
+    const updateData = {
+      last_completed_date: data.date,
+      last_completed_mileage: data.mileage,
+      last_completed_hours: data.hours,
+      status: 'on_track',
+      next_due_mileage: null,
+      next_due_hours: null,
+      next_due_date: null,
+    };
+    if (taskDef.interval_mileage) updateData.next_due_mileage = (data.mileage || 0) + taskDef.interval_mileage;
+    if (taskDef.interval_hours) updateData.next_due_hours = (data.hours || 0) + taskDef.interval_hours;
+    if (taskDef.interval_months) {
+      const date = new Date(data.date);
+      date.setMonth(date.getMonth() + taskDef.interval_months);
+      updateData.next_due_date = date.toISOString().split('T')[0];
+    }
+    return base44.entities.VehicleMaintenanceSchedule.update(scheduleId, updateData);
+  };
+
   const recordMaintenanceMutation = useMutation({
     mutationFn: async ({ scheduleId, data }) => {
       const schedule = schedules.find(s => s.id === scheduleId);
       const taskDef = taskDefinitions.find(t => t.id === schedule.maintenance_task_definition_id);
-      
-      // Calcular próximos vencimientos según los intervalos definidos
-      const updateData = {
-        last_completed_date: data.date,
-        last_completed_mileage: data.mileage,
-        last_completed_hours: data.hours,
-        status: 'on_track',
-        next_due_mileage: null,
-        next_due_hours: null,
-        next_due_date: null,
-      };
 
-      if (taskDef.interval_mileage) {
-        updateData.next_due_mileage = (data.mileage || 0) + taskDef.interval_mileage;
-      }
-      if (taskDef.interval_hours) {
-        updateData.next_due_hours = (data.hours || 0) + taskDef.interval_hours;
-      }
-      if (taskDef.interval_months) {
-        const date = new Date(data.date);
-        date.setMonth(date.getMonth() + taskDef.interval_months);
-        updateData.next_due_date = date.toISOString().split('T')[0];
-      }
+      // Resolver toda la cadena de programas que este incluye
+      const chain = resolveChainDown(taskDef.id, taskDefinitions);
 
-      return await base44.entities.VehicleMaintenanceSchedule.update(scheduleId, updateData);
+      // Para cada programa en la cadena, actualizar su VehicleMaintenanceSchedule
+      const chainScheduleUpdates = [];
+      for (const chainDef of chain) {
+        const chainSchedule = schedules.find(s => s.maintenance_task_definition_id === chainDef.id);
+        if (chainSchedule) {
+          chainScheduleUpdates.push(updateSchedule(chainSchedule.id, chainDef, data));
+        }
+      }
+      await Promise.all(chainScheduleUpdates);
+
+      // Unificar repuestos de toda la cadena
+      const allParts = chain.flatMap(d => (d.required_spare_parts || []).map(p => p.spare_part_name || p.spare_part_id).filter(Boolean));
+      const partsDescription = allParts.length > 0 ? `\nRepuestos: ${[...new Set(allParts)].join(', ')}` : '';
+
+      const chainNames = chain.map(d => d.name).join(' + ');
+      const description = chain.length > 1
+        ? `${taskDef.name} (incluye ${chain.slice(1).map(d => d.name).join(', ')})${partsDescription}`
+        : `${taskDef.name}${partsDescription}`;
+
+      // Crear registro en Maintenance
+      const companyId = schedule.company_id || vehicle?.company_id;
+      await base44.entities.Maintenance.create({
+        vehicle_id: vehicleId,
+        company_id: companyId,
+        type: 'preventive',
+        status: 'completed',
+        description,
+        completed_date: data.date,
+        mileage_at_service: data.mileage || null,
+        hours_at_service: data.hours || null,
+        notes: chain.length > 1 ? `Programas ejecutados: ${chainNames}` : undefined,
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vehicleMaintenanceSchedules', vehicleId] });
       queryClient.invalidateQueries({ queryKey: ['vehicleMaintenanceSchedules'] });
+      queryClient.invalidateQueries({ queryKey: ['maintenances'] });
       setRecordDialogOpen(false);
       setSelectedSchedule(null);
       setRecordForm({
@@ -77,7 +156,6 @@ export default function VehicleMaintenanceScheduleManager({ vehicleId, currentMi
   const handlePrintPdf = async (schedule) => {
     setPrintingScheduleId(schedule.id);
     try {
-      // Invoke via SDK with arraybuffer responseType to handle binary PDF
       const response = await base44.functions.invoke(
         'generateMaintenanceOrderPdf',
         { vehicle_id: vehicleId, schedule_id: schedule.id },
@@ -142,9 +220,43 @@ export default function VehicleMaintenanceScheduleManager({ vehicleId, currentMi
     return { status: 'on_track', color: 'bg-green-500', text: 'Al día', detail: '' };
   };
 
+  // Filtrar y mostrar solo el programa de mayor jerarquía por grupo jerárquico
+  const getVisibleSchedules = () => {
+    const programSchedules = schedules.filter(s => {
+      const def = taskDefinitions.find(t => t.id === s.maintenance_task_definition_id);
+      return def?.task_type === 'program';
+    });
+
+    // Para cada programa, calcular su nivel (mayor = mejor)
+    const withLevel = programSchedules.map(s => {
+      const def = taskDefinitions.find(t => t.id === s.maintenance_task_definition_id);
+      const level = resolveLevel(def?.id, taskDefinitions);
+      return { schedule: s, def, level };
+    });
+
+    // Para cada programa, verificar si algún programa de mayor nivel ya lo "absorbe"
+    // Un programa A absorbe a B si en la cadena de A (resolveChainDown) aparece el id de B
+    const absorbedIds = new Set();
+    withLevel.forEach(({ def }) => {
+      if (!def) return;
+      const chain = resolveChainDown(def.id, taskDefinitions);
+      // Los de mayor nivel absorben a los de menor nivel en su cadena
+      chain.slice(1).forEach(ancestor => absorbedIds.add(ancestor.id));
+    });
+
+    // Mostrar solo los no absorbidos
+    return withLevel.filter(({ def }) => def && !absorbedIds.has(def.id));
+  };
+
+  const visibleSchedules = getVisibleSchedules();
+
   const selectedTaskDef = selectedSchedule
     ? taskDefinitions.find(t => t.id === selectedSchedule.maintenance_task_definition_id)
     : null;
+
+  const selectedChain = selectedTaskDef
+    ? resolveChainDown(selectedTaskDef.id, taskDefinitions)
+    : [];
 
   if (!vehicleId) {
     return <div className="p-8 text-center"><p className="text-zinc-500">Guarde el vehículo para gestionar programas de mantenimiento.</p></div>;
@@ -166,11 +278,11 @@ export default function VehicleMaintenanceScheduleManager({ vehicleId, currentMi
 
   return (
     <div className="space-y-4">
-      {schedules.map((schedule) => {
-        const taskDef = taskDefinitions.find(t => t.id === schedule.maintenance_task_definition_id);
+      {visibleSchedules.map(({ schedule, def: taskDef, level }) => {
         if (!taskDef) return null;
-
         const statusInfo = getStatusInfo(schedule, taskDef);
+        const chain = resolveChainDown(taskDef.id, taskDefinitions);
+        const includedPrograms = chain.slice(1); // todos excepto el primero (el propio)
 
         return (
           <div key={schedule.id} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 hover:border-zinc-700 transition-colors">
@@ -185,6 +297,11 @@ export default function VehicleMaintenanceScheduleManager({ vehicleId, currentMi
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1 flex-wrap">
                       <h4 className="font-semibold text-white">{taskDef.name}</h4>
+                      {level > 1 && (
+                        <Badge className="text-xs bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                          Nivel {level}
+                        </Badge>
+                      )}
                       <Badge className={cn("text-xs text-white border-0", statusInfo.color)}>
                         {statusInfo.text}
                       </Badge>
@@ -193,6 +310,18 @@ export default function VehicleMaintenanceScheduleManager({ vehicleId, currentMi
                       <p className={cn("text-xs font-medium", statusInfo.status === 'overdue' ? 'text-red-400' : statusInfo.status === 'due_soon' ? 'text-yellow-400' : 'text-zinc-400')}>
                         {statusInfo.detail}
                       </p>
+                    )}
+                    {/* Programas incluidos en cascada */}
+                    {includedPrograms.length > 0 && (
+                      <div className="flex items-center gap-1 mt-1 flex-wrap">
+                        <GitMerge className="w-3 h-3 text-blue-400 shrink-0" />
+                        <span className="text-xs text-blue-400">Incluye:</span>
+                        {includedPrograms.map(p => (
+                          <Badge key={p.id} className="text-xs bg-blue-500/10 text-blue-300 border border-blue-500/20 py-0">
+                            {p.name}
+                          </Badge>
+                        ))}
+                      </div>
                     )}
                     {taskDef.description && <p className="text-sm text-zinc-400 mt-1">{taskDef.description}</p>}
                   </div>
@@ -275,12 +404,28 @@ export default function VehicleMaintenanceScheduleManager({ vehicleId, currentMi
           </DialogHeader>
           {selectedTaskDef && (
             <form onSubmit={(e) => { e.preventDefault(); e.stopPropagation(); recordMaintenanceMutation.mutate({ scheduleId: selectedSchedule.id, data: recordForm }); }} className="space-y-4">
-              <div className="p-3 bg-zinc-900 rounded-lg border border-zinc-800">
+              <div className="p-3 bg-zinc-900 rounded-lg border border-zinc-800 space-y-1">
                 <p className="text-xs text-zinc-400 mb-1">Programa</p>
                 <p className="font-semibold text-white">{selectedTaskDef.name}</p>
-                {selectedTaskDef.interval_mileage && <p className="text-xs text-zinc-400 mt-1">Intervalo: cada {selectedTaskDef.interval_mileage.toLocaleString()} km</p>}
+                {selectedTaskDef.interval_mileage && <p className="text-xs text-zinc-400">Intervalo: cada {selectedTaskDef.interval_mileage.toLocaleString()} km</p>}
                 {selectedTaskDef.interval_hours && <p className="text-xs text-zinc-400">Intervalo: cada {selectedTaskDef.interval_hours.toLocaleString()} hs</p>}
                 {selectedTaskDef.interval_months && <p className="text-xs text-zinc-400">Intervalo: cada {selectedTaskDef.interval_months} meses</p>}
+                {/* Mostrar programas incluidos en la cadena */}
+                {selectedChain.length > 1 && (
+                  <div className="mt-2 pt-2 border-t border-zinc-800">
+                    <p className="text-xs text-blue-400 font-medium flex items-center gap-1">
+                      <GitMerge className="w-3 h-3" />
+                      También se actualizará:
+                    </p>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {selectedChain.slice(1).map(p => (
+                        <Badge key={p.id} className="text-xs bg-blue-500/10 text-blue-300 border border-blue-500/20">
+                          {p.name}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <p className="text-xs text-zinc-400">

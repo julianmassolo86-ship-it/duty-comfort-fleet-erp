@@ -1,7 +1,7 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { Loader2, ExternalLink, Wrench, Wind } from "lucide-react";
+import { Loader2, ExternalLink, Wrench, Wind, GitMerge } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
@@ -152,8 +152,23 @@ export default function VehicleMaintenanceHistory({ vehicleId }) {
                       ? `${record.ambient_temperature}°C` 
                       : "—"}
                   </td>
-                  <td className="px-4 py-3 text-sm text-zinc-400 max-w-xs truncate">
-                    {record.description || record.observaciones_finales || "Sin descripción"}
+                  <td className="px-4 py-3 text-sm text-zinc-400 max-w-xs">
+                    {/* Mostrar badges de programas si hay notas de cadena */}
+                    {record.recordType === 'maintenance' && record.type === 'preventive' && record.notes && record.notes.startsWith('Programas ejecutados:') ? (
+                      <div className="space-y-1">
+                        <p className="truncate">{record.description}</p>
+                        <div className="flex items-center gap-1 flex-wrap">
+                          <GitMerge className="w-3 h-3 text-blue-400 shrink-0" />
+                          {record.notes.replace('Programas ejecutados: ', '').split(' + ').map((name, i) => (
+                            <Badge key={i} className="text-xs bg-blue-500/10 text-blue-300 border border-blue-500/20 py-0">
+                              {name}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <span className="truncate block">{record.description || record.observaciones_finales || "Sin descripción"}</span>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-sm text-center">
                     <Button
