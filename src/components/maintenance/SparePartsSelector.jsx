@@ -219,16 +219,16 @@ export default function SparePartsSelector({ companyId, value = [], onChange, is
               <div className="flex-1 min-w-0">
                 <p className={cn("text-sm font-medium truncate", isDark ? "text-white" : "text-gray-900")}>
                   {item.spare_part_name}
+                  {item.specifications && (
+                    <span className={cn("ml-2 text-xs font-normal", isDark ? "text-zinc-400" : "text-gray-500")}>
+                      — {item.specifications}
+                    </span>
+                  )}
                 </p>
-                <p className={cn("text-xs", isDark ? "text-zinc-400" : "text-gray-400")}>
+                <p className={cn("text-xs", isDark ? "text-zinc-500" : "text-gray-400")}>
                   {item.part_number ? `#${item.part_number}` : "Sin N° pieza"}
                   {item.unit_cost ? ` · $${item.unit_cost.toLocaleString()}` : ""}
                 </p>
-                {item.specifications && (
-                  <p className={cn("text-xs mt-1", isDark ? "text-zinc-500" : "text-gray-500")}>
-                    {item.specifications}
-                  </p>
-                )}
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <Input
