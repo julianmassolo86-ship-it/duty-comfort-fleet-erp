@@ -168,9 +168,21 @@ export default function MaintenancePrograms() {
       <div className="min-h-screen bg-black pb-20 lg:pb-8">
         <PageHeader
           title="Programas de Mantenimiento"
-          subtitle="Gestiona ítems, acciones y programas de mantenimiento"
+          subtitle="Gestiona acciones y programas de mantenimiento"
           icon={Settings2}
         />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+          <div className="p-4 rounded-xl bg-zinc-900 border border-zinc-800 text-xs text-zinc-400 space-y-1">
+            <p className="text-white font-semibold text-sm">¿Cómo funciona?</p>
+            <ol className="list-decimal list-inside space-y-1.5">
+              <li>Cargá los <span className="text-blue-400 font-medium">repuestos</span> que necesitás en <span className="text-blue-400 font-medium">Almacén → Repuestos</span> (filtros, aceites, etc.).</li>
+              <li>Creá las <span className="text-green-400 font-medium">Acciones</span> de mantenimiento (ej: Engrase de chasis, Purga de tanques).</li>
+              <li>Creá el <span className="text-yellow-400 font-medium">Programa</span>, vinculá las acciones, los repuestos del almacén y definí los intervalos de ejecución.</li>
+              <li>Finalmente <span className="text-white font-medium">asigná el programa</span> a los vehículos correspondientes.</li>
+            </ol>
+          </div>
+        </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
