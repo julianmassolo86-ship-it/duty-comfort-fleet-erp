@@ -1,17 +1,19 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { appParams } from "@/lib/app-params";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Gauge, Clock, Calendar, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import { Gauge, Clock, Calendar, CheckCircle2, AlertCircle, Loader2, Printer } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function VehicleMaintenanceScheduleManager({ vehicleId, currentMileage, currentHours }) {
   const [recordDialogOpen, setRecordDialogOpen] = useState(false);
   const [selectedSchedule, setSelectedSchedule] = useState(null);
+  const [printingScheduleId, setPrintingScheduleId] = useState(null);
   const [recordForm, setRecordForm] = useState({
     date: new Date().toISOString().split('T')[0],
     mileage: currentMileage || 0,
@@ -72,6 +74,38 @@ export default function VehicleMaintenanceScheduleManager({ vehicleId, currentMi
       });
     },
   });
+
+  const handlePrintPdf = async (schedule) => {
+    setPrintingScheduleId(schedule.id);
+    try {
+      // Use fetch directly to handle binary PDF response
+      const appBaseUrl = appParams.appBaseUrl || 'https://api.base44.com';
+      const appId = appParams.appId;
+      const accessToken = appParams.token;
+      const apiBase = `${appBaseUrl}/api/apps/${appId}/functions/generateMaintenanceOrderPdf`;
+      
+      const res = await fetch(apiBase, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {}),
+        },
+        credentials: 'include',
+        body: JSON.stringify({ vehicle_id: vehicleId, schedule_id: schedule.id }),
+      });
+
+      if (!res.ok) throw new Error('Error del servidor al generar PDF');
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+      setTimeout(() => URL.revokeObjectURL(url), 15000);
+    } catch (error) {
+      console.error('Error generando PDF:', error);
+      alert('Error al generar el PDF. Intente nuevamente.');
+    } finally {
+      setPrintingScheduleId(null);
+    }
+  };
 
   const handleRecordClick = (schedule) => {
     setSelectedSchedule(schedule);
@@ -216,15 +250,30 @@ export default function VehicleMaintenanceScheduleManager({ vehicleId, currentMi
                 </div>
               </div>
 
-              <Button
-                size="sm"
-                onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleRecordClick(schedule); }}
-                type="button"
-                className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold shrink-0"
-              >
-                <CheckCircle2 className="w-4 h-4 mr-1" />
-                Realizado
-              </Button>
+              <div className="flex flex-col gap-2 shrink-0">
+                <Button
+                  size="sm"
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleRecordClick(schedule); }}
+                  type="button"
+                  className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
+                >
+                  <CheckCircle2 className="w-4 h-4 mr-1" />
+                  Realizado
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); handlePrintPdf(schedule); }}
+                  type="button"
+                  disabled={printingScheduleId === schedule.id}
+                  className="border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-white"
+                >
+                  {printingScheduleId === schedule.id
+                    ? <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                    : <Printer className="w-4 h-4 mr-1" />}
+                  {printingScheduleId === schedule.id ? 'Generando...' : 'Imprimir'}
+                </Button>
+              </div>
             </div>
           </div>
         );
