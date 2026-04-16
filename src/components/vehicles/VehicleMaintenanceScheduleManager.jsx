@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Gauge, Clock, Calendar, CheckCircle2, AlertCircle, Loader2, Printer, GitMerge } from "lucide-react";
+import { Gauge, Clock, Calendar, CheckCircle2, AlertCircle, Loader2, Printer, GitMerge, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // Resuelve recursivamente toda la cadena hacia abajo (incluyendo al programa dado y sus parent_program_id anidados)
@@ -96,6 +96,21 @@ export default function VehicleMaintenanceScheduleManager({ vehicleId, vehicle, 
       updateData.next_due_date = date.toISOString().split('T')[0];
     }
     return base44.entities.VehicleMaintenanceSchedule.update(scheduleId, updateData);
+  };
+
+  const deleteScheduleMutation = useMutation({
+    mutationFn: async (scheduleId) => {
+      await base44.entities.VehicleMaintenanceSchedule.delete(scheduleId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['vehicleMaintenanceSchedules', vehicleId] });
+      queryClient.invalidateQueries({ queryKey: ['vehicleMaintenanceSchedules'] });
+    },
+  });
+
+  const handleDeleteSchedule = (schedule, taskDef) => {
+    if (!confirm(`¿Eliminar el programa "${taskDef?.name}" de este vehículo?`)) return;
+    deleteScheduleMutation.mutate(schedule.id);
   };
 
   const recordMaintenanceMutation = useMutation({
@@ -375,6 +390,17 @@ export default function VehicleMaintenanceScheduleManager({ vehicleId, vehicle, 
                     ? <Loader2 className="w-4 h-4 mr-1 animate-spin" />
                     : <Printer className="w-4 h-4 mr-1" />}
                   {printingScheduleId === schedule.id ? 'Generando...' : 'Imprimir'}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDeleteSchedule(schedule, taskDef); }}
+                  type="button"
+                  disabled={deleteScheduleMutation.isPending}
+                  className="border-red-800 text-red-400 hover:bg-red-900/30 hover:text-red-300"
+                >
+                  <Trash2 className="w-4 h-4 mr-1" />
+                  Eliminar
                 </Button>
               </div>
             </div>
