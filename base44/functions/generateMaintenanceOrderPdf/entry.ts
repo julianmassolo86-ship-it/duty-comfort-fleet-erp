@@ -1,9 +1,25 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 import { jsPDF } from 'npm:jspdf@4.0.0';
 
+// Encode text to Latin-1 compatible for jsPDF helvetica font
+function encodeText(str) {
+  if (!str) return '';
+  return str
+    .replace(/á/g, '\u00e1').replace(/Á/g, '\u00c1')
+    .replace(/é/g, '\u00e9').replace(/É/g, '\u00c9')
+    .replace(/í/g, '\u00ed').replace(/Í/g, '\u00cd')
+    .replace(/ó/g, '\u00f3').replace(/Ó/g, '\u00d3')
+    .replace(/ú/g, '\u00fa').replace(/Ú/g, '\u00da')
+    .replace(/ñ/g, '\u00f1').replace(/Ñ/g, '\u00d1')
+    .replace(/ü/g, '\u00fc').replace(/Ü/g, '\u00dc')
+    .replace(/¿/g, '\u00bf').replace(/¡/g, '\u00a1')
+    .replace(/°/g, '\u00b0');
+}
+
 async function imageUrlToBase64(url) {
   try {
     const response = await fetch(url);
+    if (!response.ok) return null;
     const buffer = await response.arrayBuffer();
     const bytes = new Uint8Array(buffer);
     let binary = '';
@@ -12,7 +28,8 @@ async function imageUrlToBase64(url) {
     }
     const base64 = btoa(binary);
     const contentType = response.headers.get('content-type') || 'image/png';
-    return { base64, format: contentType.includes('png') ? 'PNG' : 'JPEG' };
+    const format = contentType.includes('png') ? 'PNG' : contentType.includes('gif') ? 'GIF' : 'JPEG';
+    return { base64, format };
   } catch {
     return null;
   }
@@ -29,7 +46,6 @@ Deno.serve(async (req) => {
     const body = await req.json();
     const { vehicle_id, schedule_id } = body;
 
-    // Fetch all needed data in parallel
     const [vehicles, schedules, taskDefs, spareParts, companies, manufacturers] = await Promise.all([
       base44.asServiceRole.entities.Vehicle.filter({ id: vehicle_id }),
       base44.asServiceRole.entities.VehicleMaintenanceSchedule.filter({ id: schedule_id }),
@@ -53,19 +69,24 @@ Deno.serve(async (req) => {
     const company = companies.find(c => c.id === vehicle.company_id);
     const manufacturer = manufacturers.find(m => m.id === vehicle.manufacturer_id);
 
-    // Resolve linked tasks (actions/items that make up this program)
     const linkedTasks = (taskDef.linked_task_ids || [])
       .map(id => taskDefs.find(t => t.id === id))
       .filter(Boolean);
 
-    // Resolve required spare parts from the program definition
     const requiredParts = (taskDef.required_spare_parts || []).map(rp => {
       const part = spareParts.find(sp => sp.id === rp.spare_part_id);
       return { ...rp, part };
     }).filter(rp => rp.part);
 
+    // Load logos in parallel
+    const [companyLogoData, manufacturerLogoData] = await Promise.all([
+      company?.logo_url ? imageUrlToBase64(company.logo_url) : Promise.resolve(null),
+      manufacturer?.logo_url ? imageUrlToBase64(manufacturer.logo_url) : Promise.resolve(null),
+    ]);
+
     // Generate PDF
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    doc.setLanguage('es');
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
     const margin = 15;
@@ -73,38 +94,45 @@ Deno.serve(async (req) => {
 
     // ── HEADER BACKGROUND ──────────────────────────────────────────────
     doc.setFillColor(20, 20, 20);
-    doc.rect(0, 0, pageWidth, 50, 'F');
+    doc.rect(0, 0, pageWidth, 52, 'F');
 
-    // Company logo (left)
-    if (company?.logo_url) {
-      const img = await imageUrlToBase64(company.logo_url);
-      if (img) {
-        try { doc.addImage(img.base64, img.format, margin, 8, 40, 18, '', 'FAST'); } catch {}
+    // Company logo LEFT
+    if (companyLogoData) {
+      try {
+        doc.addImage(companyLogoData.base64, companyLogoData.format, margin, 7, 45, 20, '', 'FAST');
+      } catch (e) {
+        // logo failed silently
       }
     }
 
-    // Manufacturer logo (right)
-    if (manufacturer?.logo_url) {
-      const img = await imageUrlToBase64(manufacturer.logo_url);
-      if (img) {
-        try { doc.addImage(img.base64, img.format, pageWidth - margin - 35, 10, 35, 14, '', 'FAST'); } catch {}
+    // Manufacturer logo RIGHT
+    if (manufacturerLogoData) {
+      try {
+        doc.addImage(manufacturerLogoData.base64, manufacturerLogoData.format, pageWidth - margin - 40, 9, 40, 16, '', 'FAST');
+      } catch (e) {
+        // logo failed silently
       }
     }
 
-    // Title in header
-    doc.setFontSize(9);
-    doc.setTextColor(250, 204, 21); // yellow-400
-    doc.setFont('helvetica', 'bold');
-    doc.text('ORDEN DE SERVICIO', pageWidth / 2, 16, { align: 'center' });
-    doc.setFontSize(14);
-    doc.setTextColor(255, 255, 255);
-    doc.text('PROGRAMA DE MANTENIMIENTO', pageWidth / 2, 25, { align: 'center' });
+    // Title in header (center)
     doc.setFontSize(8);
+    doc.setTextColor(250, 204, 21);
+    doc.setFont('helvetica', 'bold');
+    doc.text('ORDEN DE SERVICIO', pageWidth / 2, 17, { align: 'center' });
+    doc.setFontSize(13);
+    doc.setTextColor(255, 255, 255);
+    doc.text('PROGRAMA DE MANTENIMIENTO', pageWidth / 2, 26, { align: 'center' });
+    doc.setFontSize(7.5);
     doc.setTextColor(180, 180, 180);
-    doc.text(`Fecha de emisión: ${new Date().toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' })}`, pageWidth / 2, 33, { align: 'center' });
+    doc.setFont('helvetica', 'normal');
+    const today = new Date();
+    doc.text(
+      `Fecha de emision: ${today.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' })}`,
+      pageWidth / 2, 34, { align: 'center' }
+    );
 
     // ── VEHICLE INFO BOX ──────────────────────────────────────────────
-    let y = 58;
+    let y = 60;
 
     doc.setFillColor(245, 245, 245);
     doc.roundedRect(margin, y, contentWidth, 38, 3, 3, 'F');
@@ -114,16 +142,16 @@ Deno.serve(async (req) => {
     doc.setFontSize(8);
     doc.setTextColor(100, 100, 100);
     doc.setFont('helvetica', 'bold');
-    doc.text('DATOS DEL VEHÍCULO', margin + 4, y + 6);
+    doc.text('DATOS DEL VEHICULO', margin + 4, y + 6);
 
     doc.setFont('helvetica', 'normal');
     const vehicleFields = [
-      ['Empresa:', company?.name || '-'],
-      ['Interno N°:', vehicle.internal_number || '-'],
+      ['Empresa:', encodeText(company?.name || '-')],
+      ['Interno N:', vehicle.internal_number || '-'],
       ['Patente:', vehicle.plate || '-'],
-      ['Marca:', manufacturer?.name || vehicle.manufacturer || '-'],
-      ['Modelo:', vehicle.model || '-'],
-      ['Año:', vehicle.year ? String(vehicle.year) : '-'],
+      ['Marca:', encodeText(manufacturer?.name || vehicle.manufacturer || '-')],
+      ['Modelo:', encodeText(vehicle.model || '-')],
+      ['Ano:', vehicle.year ? String(vehicle.year) : '-'],
       ['Km actuales:', vehicle.mileage ? `${vehicle.mileage.toLocaleString('es-AR')} km` : '-'],
       ['Horas actuales:', vehicle.hours ? `${vehicle.hours.toLocaleString('es-AR')} hs` : '-'],
       ['Chasis:', vehicle.chassis_number || '-'],
@@ -139,7 +167,7 @@ Deno.serve(async (req) => {
       doc.text(f[0], margin + 4, y + 14 + i * 5.5);
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(20, 20, 20);
-      doc.text(f[1], margin + 28, y + 14 + i * 5.5);
+      doc.text(f[1], margin + 26, y + 14 + i * 5.5);
     });
 
     col2Fields.forEach((f, i) => {
@@ -149,7 +177,7 @@ Deno.serve(async (req) => {
       doc.text(f[0], pageWidth / 2 + 2, y + 14 + i * 5.5);
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(20, 20, 20);
-      doc.text(f[1], pageWidth / 2 + 28, y + 14 + i * 5.5);
+      doc.text(f[1], pageWidth / 2 + 24, y + 14 + i * 5.5);
     });
 
     y += 44;
@@ -160,16 +188,32 @@ Deno.serve(async (req) => {
     doc.setFontSize(9);
     doc.setTextColor(20, 20, 20);
     doc.setFont('helvetica', 'bold');
-    doc.text(`PROGRAMA: ${taskDef.name.toUpperCase()}`, margin + 4, y + 5.5);
+    doc.text(`PROGRAMA: ${encodeText(taskDef.name).toUpperCase()}`, margin + 4, y + 5.5);
 
     y += 12;
 
     // Intervals row
     const intervals = [];
-    if (taskDef.interval_mileage) intervals.push({ label: 'Intervalo Km', value: `Cada ${taskDef.interval_mileage.toLocaleString('es-AR')} km`, next: schedule.next_due_mileage ? `Próximo: ${schedule.next_due_mileage.toLocaleString('es-AR')} km` : '' });
-    if (taskDef.interval_hours) intervals.push({ label: 'Intervalo Horas', value: `Cada ${taskDef.interval_hours.toLocaleString('es-AR')} hs`, next: schedule.next_due_hours ? `Próximo: ${schedule.next_due_hours.toLocaleString('es-AR')} hs` : '' });
-    if (taskDef.interval_months) intervals.push({ label: 'Intervalo Tiempo', value: `Cada ${taskDef.interval_months} meses`, next: schedule.next_due_date ? `Próximo: ${new Date(schedule.next_due_date).toLocaleDateString('es-AR')}` : '' });
-    if (schedule.last_completed_date) intervals.push({ label: 'Último Servicio', value: new Date(schedule.last_completed_date).toLocaleDateString('es-AR'), next: schedule.last_completed_mileage ? `${schedule.last_completed_mileage.toLocaleString('es-AR')} km` : '' });
+    if (taskDef.interval_mileage) intervals.push({
+      label: 'Intervalo Km',
+      value: `Cada ${taskDef.interval_mileage.toLocaleString('es-AR')} km`,
+      next: schedule.next_due_mileage ? `Proximo: ${schedule.next_due_mileage.toLocaleString('es-AR')} km` : ''
+    });
+    if (taskDef.interval_hours) intervals.push({
+      label: 'Intervalo Horas',
+      value: `Cada ${taskDef.interval_hours.toLocaleString('es-AR')} hs`,
+      next: schedule.next_due_hours ? `Proximo: ${schedule.next_due_hours.toLocaleString('es-AR')} hs` : ''
+    });
+    if (taskDef.interval_months) intervals.push({
+      label: 'Intervalo Tiempo',
+      value: `Cada ${taskDef.interval_months} meses`,
+      next: schedule.next_due_date ? `Proximo: ${new Date(schedule.next_due_date).toLocaleDateString('es-AR')}` : ''
+    });
+    if (schedule.last_completed_date) intervals.push({
+      label: 'Ultimo Servicio',
+      value: new Date(schedule.last_completed_date).toLocaleDateString('es-AR'),
+      next: schedule.last_completed_mileage ? `${schedule.last_completed_mileage.toLocaleString('es-AR')} km` : ''
+    });
 
     if (intervals.length > 0) {
       const colW = contentWidth / intervals.length;
@@ -203,10 +247,9 @@ Deno.serve(async (req) => {
       y += 22;
     }
 
-    // ── LINKED TASKS (acciones/pasos) ──────────────────────────────────
+    // ── LINKED TASKS ──────────────────────────────────────────────
     if (linkedTasks.length > 0) {
       y += 4;
-      // Section header
       doc.setFillColor(30, 30, 30);
       doc.roundedRect(margin, y, contentWidth, 7, 2, 2, 'F');
       doc.setFontSize(8);
@@ -225,19 +268,16 @@ Deno.serve(async (req) => {
         doc.setFillColor(isEven ? 248 : 255, isEven ? 248 : 255, isEven ? 248 : 255);
         doc.rect(margin, y, contentWidth, 9, 'F');
 
-        // Checkbox circle
         doc.setDrawColor(180, 180, 180);
         doc.setFillColor(255, 255, 255);
         doc.circle(margin + 4, y + 4.5, 2.5, 'FD');
 
-        // Task name
         doc.setFontSize(8.5);
         doc.setTextColor(20, 20, 20);
         doc.setFont('helvetica', 'bold');
-        doc.text(`${idx + 1}. ${task.name}`, margin + 10, y + 5);
+        doc.text(`${idx + 1}. ${encodeText(task.name)}`, margin + 10, y + 5);
 
-        // Task type badge
-        const typeLabel = task.task_type === 'action' ? 'Acción' : 'Ítem';
+        const typeLabel = task.task_type === 'action' ? 'Accion' : 'Item';
         const typeColor = task.task_type === 'action' ? [59, 130, 246] : [16, 185, 129];
         doc.setFillColor(...typeColor);
         doc.roundedRect(pageWidth - margin - 18, y + 1.5, 16, 5.5, 1, 1, 'F');
@@ -246,20 +286,19 @@ Deno.serve(async (req) => {
         doc.setFont('helvetica', 'bold');
         doc.text(typeLabel, pageWidth - margin - 10, y + 5.2, { align: 'center' });
 
-        // Component names / specs
         if (task.component_names && task.component_names.length > 0) {
           y += 9;
+          doc.setFillColor(isEven ? 248 : 255, isEven ? 248 : 255, isEven ? 248 : 255);
+          doc.rect(margin, y, contentWidth, 6, 'F');
           doc.setFontSize(7);
           doc.setTextColor(100, 100, 100);
           doc.setFont('helvetica', 'italic');
-          doc.text(`   Especificación: ${task.component_names.join(', ')}`, margin + 10, y + 3);
-          doc.rect(margin, y, contentWidth, 6, 'F');
+          doc.text(`   Especificacion: ${encodeText(task.component_names.join(', '))}`, margin + 10, y + 3.5);
           y += 6;
         } else {
           y += 9;
         }
 
-        // Divider
         doc.setDrawColor(230, 230, 230);
         doc.line(margin + 8, y, pageWidth - margin, y);
       });
@@ -283,15 +322,14 @@ Deno.serve(async (req) => {
       doc.text('REPUESTOS E INSUMOS REQUERIDOS', margin + 4, y + 5);
       y += 10;
 
-      // Table header
       doc.setFillColor(60, 60, 60);
       doc.rect(margin, y, contentWidth, 7, 'F');
       doc.setFontSize(7.5);
       doc.setTextColor(255, 255, 255);
       doc.setFont('helvetica', 'bold');
       const cols = { item: margin + 4, partNum: margin + 75, qty: margin + 125, unit: margin + 148 };
-      doc.text('Descripción', cols.item, y + 5);
-      doc.text('N° de Parte', cols.partNum, y + 5);
+      doc.text('Descripcion', cols.item, y + 5);
+      doc.text('N de Parte', cols.partNum, y + 5);
       doc.text('Cantidad', cols.qty, y + 5);
       doc.text('Unidad', cols.unit, y + 5);
       y += 7;
@@ -309,10 +347,8 @@ Deno.serve(async (req) => {
         doc.setFontSize(8);
         doc.setTextColor(20, 20, 20);
         doc.setFont('helvetica', 'normal');
-        const partName = doc.splitTextToSize(rp.part.name, 68);
-        doc.text(partName[0], cols.item, y + 5.5);
+        doc.text(encodeText(rp.part.name), cols.item, y + 5.5);
 
-        doc.setFont('helvetica', 'normal');
         doc.setFontSize(7.5);
         doc.setTextColor(80, 80, 80);
         doc.text(rp.part.part_number || '-', cols.partNum, y + 5.5);
@@ -339,14 +375,14 @@ Deno.serve(async (req) => {
       y = 20;
     }
 
-    y += 12;
+    y += 14;
     doc.setDrawColor(180, 180, 180);
     doc.line(margin, y, margin + 70, y);
     doc.line(pageWidth - margin - 70, y, pageWidth - margin, y);
     doc.setFontSize(7.5);
     doc.setTextColor(120, 120, 120);
     doc.setFont('helvetica', 'normal');
-    doc.text('Firma del Mecánico', margin, y + 5);
+    doc.text('Firma del Mecanico', margin, y + 5);
     doc.text('Firma del Supervisor', pageWidth - margin - 70, y + 5);
 
     // ── FOOTER ──────────────────────────────────────────────
@@ -355,10 +391,12 @@ Deno.serve(async (req) => {
     doc.rect(0, footerY - 6, pageWidth, 16, 'F');
     doc.setFontSize(6.5);
     doc.setTextColor(150, 150, 150);
-    doc.text(`${company?.name || 'Mass Soluciones'} · Sistema de Gestión de Flotas`, pageWidth / 2, footerY, { align: 'center' });
+    doc.text(
+      `${encodeText(company?.name || 'Mass Soluciones')} - Sistema de Gestion de Flotas`,
+      pageWidth / 2, footerY, { align: 'center' }
+    );
 
     const pdfBytes = doc.output('arraybuffer');
-
     const fileName = `OT-${vehicle.plate || vehicle.internal_number || 'vehiculo'}-${taskDef.name.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 30)}.pdf`;
 
     return new Response(pdfBytes, {
