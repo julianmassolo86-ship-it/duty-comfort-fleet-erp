@@ -95,7 +95,8 @@ export default function MaintenanceProgramDialog({
           component_names: program.component_names || [],
           linked_task_ids: program.linked_task_ids || [],
           required_spare_parts: program.required_spare_parts || [],
-          applies_to_vehicle_model_id: program.applies_to_vehicle_model_id || "",
+          applies_to_vehicle_model_id: program.applies_to_vehicle_model_id ? String(program.applies_to_vehicle_model_id) : "",
+          applies_to_manufacturer_id: program.applies_to_manufacturer_id ? String(program.applies_to_manufacturer_id) : "",
           });
           } else {
         setForm({
