@@ -206,6 +206,21 @@ export default function MaintenanceProgramDialog({
             {typeInfo && <typeInfo.icon className="w-5 h-5" />}
             {dialogTitle}
           </DialogTitle>
+          {isProgram && !program && (
+            <div className="mt-2 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-xs text-zinc-400 space-y-1">
+              <p className="text-yellow-400 font-semibold">¿Cómo configurar un programa?</p>
+              <ol className="list-decimal list-inside space-y-1">
+                <li>Primero creá las <span className="text-green-400 font-medium">Acciones</span> que lo componen (ej: Purga de frenos, Engrase de chasis).</li>
+                <li>Luego creá el <span className="text-yellow-400 font-medium">Programa</span>, seleccioná el fabricante y modelo, vinculá las acciones y definí los intervalos de ejecución y avisos.</li>
+                <li>Finalmente, <span className="text-white font-medium">asigná el programa</span> a los vehículos correspondientes desde el botón "Asignar a Vehículos".</li>
+              </ol>
+            </div>
+          )}
+          {form.task_type === "action" && !program && (
+            <p className="mt-1 text-xs text-zinc-500">
+              Definí un procedimiento de mantenimiento (ej: Engrase de chasis, Purga de tanques). Luego podrás incluirlo en uno o más programas.
+            </p>
+          )}
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-5">
