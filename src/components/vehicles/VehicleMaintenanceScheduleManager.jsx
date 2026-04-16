@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { appParams } from "@/lib/app-params";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -78,24 +77,13 @@ export default function VehicleMaintenanceScheduleManager({ vehicleId, currentMi
   const handlePrintPdf = async (schedule) => {
     setPrintingScheduleId(schedule.id);
     try {
-      // Use fetch directly to handle binary PDF response
-      const appBaseUrl = appParams.appBaseUrl || 'https://api.base44.com';
-      const appId = appParams.appId;
-      const accessToken = appParams.token;
-      const apiBase = `${appBaseUrl}/api/apps/${appId}/functions/generateMaintenanceOrderPdf`;
-      
-      const res = await fetch(apiBase, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {}),
-        },
-        credentials: 'include',
-        body: JSON.stringify({ vehicle_id: vehicleId, schedule_id: schedule.id }),
-      });
-
-      if (!res.ok) throw new Error('Error del servidor al generar PDF');
-      const blob = await res.blob();
+      // Invoke via SDK with arraybuffer responseType to handle binary PDF
+      const response = await base44.functions.invoke(
+        'generateMaintenanceOrderPdf',
+        { vehicle_id: vehicleId, schedule_id: schedule.id },
+        { responseType: 'arraybuffer' }
+      );
+      const blob = new Blob([response.data], { type: 'application/pdf' });
       const url = URL.createObjectURL(blob);
       window.open(url, '_blank');
       setTimeout(() => URL.revokeObjectURL(url), 15000);
