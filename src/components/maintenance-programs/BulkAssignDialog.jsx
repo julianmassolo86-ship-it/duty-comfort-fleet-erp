@@ -35,6 +35,19 @@ export default function BulkAssignDialog({ open, onOpenChange, programs, isSuper
     enabled: (isSuperAdmin && !!selectedCompanyId) || !isSuperAdmin,
   });
 
+  // Resolver recursivamente todos los programas incluidos (cadena parent_program_id)
+  const resolveChain = (programId, allPrograms, visited = new Set()) => {
+    if (!programId || visited.has(programId)) return [];
+    visited.add(programId);
+    const prog = allPrograms.find(p => p.id === programId);
+    if (!prog) return [];
+    const chain = [prog];
+    if (prog.parent_program_id) {
+      chain.push(...resolveChain(prog.parent_program_id, allPrograms, visited));
+    }
+    return chain;
+  };
+
   const { data: companies = [] } = useQuery({
     queryKey: ['companies'],
     queryFn: () => base44.entities.Company.list(),
@@ -43,40 +56,45 @@ export default function BulkAssignDialog({ open, onOpenChange, programs, isSuper
 
   const assignMutation = useMutation({
     mutationFn: async ({ programId, vehicleIds }) => {
-      const program = programs.find(p => p.id === programId);
-      const results = [];
-      
+      // Resolver toda la cadena de programas incluidos
+      const chain = resolveChain(programId, programs);
+
       for (const vehicleId of vehicleIds) {
         const vehicle = vehicles.find(v => v.id === vehicleId);
-        
-        const scheduleData = {
-          vehicle_id: vehicleId,
-          maintenance_task_definition_id: programId,
-          company_id: vehicle.company_id,
-          status: "on_track",
-        };
 
-        // Calcular próximo vencimiento según los intervalos definidos en el programa
-        if (program.interval_mileage) {
-          scheduleData.next_due_mileage = (vehicle.mileage || 0) + program.interval_mileage;
-        }
-        if (program.interval_hours) {
-          scheduleData.next_due_hours = (vehicle.hours || 0) + program.interval_hours;
-        }
-        if (program.interval_months) {
-          const nextDate = new Date();
-          nextDate.setMonth(nextDate.getMonth() + program.interval_months);
-          scheduleData.next_due_date = nextDate.toISOString().split('T')[0];
-        }
+        // Obtener schedules ya existentes para este vehículo (evitar duplicados)
+        const existingSchedules = await base44.entities.VehicleMaintenanceSchedule.filter({ vehicle_id: vehicleId });
+        const existingDefIds = new Set(existingSchedules.map(s => s.maintenance_task_definition_id));
 
-        const result = await base44.entities.VehicleMaintenanceSchedule.create(scheduleData);
-        results.push(result);
+        // Crear un schedule por cada programa en la cadena (si no existe ya)
+        for (const prog of chain) {
+          if (existingDefIds.has(prog.id)) continue;
+
+          const scheduleData = {
+            vehicle_id: vehicleId,
+            maintenance_task_definition_id: prog.id,
+            company_id: vehicle.company_id,
+            status: "on_track",
+          };
+
+          if (prog.interval_mileage) {
+            scheduleData.next_due_mileage = (vehicle.mileage || 0) + prog.interval_mileage;
+          }
+          if (prog.interval_hours) {
+            scheduleData.next_due_hours = (vehicle.hours || 0) + prog.interval_hours;
+          }
+          if (prog.interval_months) {
+            const nextDate = new Date();
+            nextDate.setMonth(nextDate.getMonth() + prog.interval_months);
+            scheduleData.next_due_date = nextDate.toISOString().split('T')[0];
+          }
+
+          await base44.entities.VehicleMaintenanceSchedule.create(scheduleData);
+        }
       }
-      
-      return results;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['vehicleMaintenanceSchedules']);
+      queryClient.invalidateQueries({ queryKey: ['vehicleMaintenanceSchedules'] });
       setSelectedVehicleIds([]);
       setSelectedProgramId("");
       onOpenChange(false);
