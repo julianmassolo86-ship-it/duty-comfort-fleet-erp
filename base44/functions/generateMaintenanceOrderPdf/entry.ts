@@ -78,10 +78,13 @@ Deno.serve(async (req) => {
       return { ...rp, part };
     }).filter(rp => rp.part);
 
+    // Manufacturer logo: prefer vehicle's own field, fallback to Manufacturer entity
+    const manufacturerLogoUrl = vehicle.manufacturer_logo_url || manufacturer?.logo_url || null;
+
     // Load logos in parallel
     const [companyLogoData, manufacturerLogoData] = await Promise.all([
       company?.logo_url ? imageUrlToBase64(company.logo_url) : Promise.resolve(null),
-      manufacturer?.logo_url ? imageUrlToBase64(manufacturer.logo_url) : Promise.resolve(null),
+      manufacturerLogoUrl ? imageUrlToBase64(manufacturerLogoUrl) : Promise.resolve(null),
     ]);
 
     // Generate PDF
