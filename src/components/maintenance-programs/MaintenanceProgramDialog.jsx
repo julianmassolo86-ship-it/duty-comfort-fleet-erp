@@ -117,6 +117,8 @@ export default function MaintenanceProgramDialog({
     onSave({
       ...form,
       is_program_group: isProgram,
+      applies_to_manufacturer_id: form.applies_to_manufacturer_id || "",
+      applies_to_vehicle_model_id: form.applies_to_vehicle_model_id || "",
       interval_mileage: form.interval_mileage ? Number(form.interval_mileage) : null,
       interval_hours: form.interval_hours ? Number(form.interval_hours) : null,
       interval_months: form.interval_months ? Number(form.interval_months) : null,
